@@ -1,2 +1,0 @@
-- Adjuntar a la carta el CV del candidato para hacer evidente el match entre proyecto y candidato.
-- Explicar en la carta que dada la experiencia e interés en la aplicación del machine learning y AI para la resolución de problemas en el campo de la química y/o la bioquímica, el proyecto propuesto ubica al alumno en un campo idoneo para el futuro comienzo de un proyecto de investigación de tesis de maestría o doctorado con la inclusión de estas técnicas.
