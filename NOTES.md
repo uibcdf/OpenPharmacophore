@@ -11,4 +11,5 @@ https://www.3ds.com/products-services/biovia/products/molecular-modeling-simulat
 https://www.vlifesciences.com/products/VLifeMDS/Molsign.php     
 https://www.researchgate.net/post/Can-you-recommend-any-free-software-for-pharmacophore-modelling     
 https://www.researchgate.net/post/What_is_the_best_free_software_for_Pharmacophore_mapping2     
+https://github.com/pharmai/plip    
 
