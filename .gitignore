@@ -9,7 +9,5 @@ record.txt
 /docs/api/_autosummary
 *.mod
 dist/*
-*/build/
-build/
 *.swp
 
