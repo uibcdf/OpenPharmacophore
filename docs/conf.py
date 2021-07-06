@@ -8,8 +8,6 @@
 
 import os
 import sys
-import sphinx_rtd_theme
-from recommonmark.parser import CommonMarkParser
 
 # -- Path setup --------------------------------------------------------------
 
@@ -22,21 +20,18 @@ from recommonmark.parser import CommonMarkParser
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('./../openpharmacophore'))
-
-print(sys.path)
-
 # -- Project information -----------------------------------------------------
 
 project = 'OpenPharmacophore'
-copyright = '2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors'
+copyright = ('2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors.'
+        'Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5')
+
 author = 'UIBCDF Lab and contributors'
 
 # The short X.Y version
-version = '0.0.1'
+version = openpharmacophore.__version__.split('+')[0]
 # The full version, including alpha/beta/rc tags
-release = '0.1.1'
+release = openpharmacophore.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,17 +51,19 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'numpydoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.githubpages',
     'sphinxcontrib.bibtex',
     'nbsphinx',
     'recommonmark',
-    'sphinx_markdown_tables'
+    'sphinx_markdown_tables',
+    'sphinx.ext.extlinks'
 ]
 
 autosummary_generate = True
-autodoc_default_options = {'members':True, 'inherited-members':True}
-numpydoc_class_members_toctree = False
+napoleon_google_docstring = False
+napoleon_use_param = False
+napoleon_use_ivar = True
 
 # sphinxcontrib-bibtex
 bibtex_bibfiles = ['bibliography.bib'] # list of *.bib files
@@ -74,13 +71,12 @@ bibtex_default_style = 'alpha'
 bibtex_encoding = 'utf-8-sig'
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['templates']
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 
 source_parsers={
-#  '.md': CommonMarkParser
 }
 
 source_suffix = ['.rst', '.md']
@@ -94,18 +90,15 @@ master_doc = 'index'
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 # language was edited to use sphinx-intl
-language = 'en'
-# These next two variables were incluede to use sphinx-intl
-locale_dirs =  ['locale/']
-gettext_compact = False
+language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'default'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -136,12 +129,18 @@ html_theme_options = {
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_path = []
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['static']
+html_static_path = ['_static']
+
+# Custom css
+
+html_css_files = [
+    'custom.css',
+]
 
 #### I should check
 #### https://github.com/lotharschulz/sphinx-pages/blob/master/conf.py for more
@@ -161,8 +160,7 @@ html_static_path = ['static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-#htmlhelp_basename = ''
-
+htmlhelp_basename = 'openpharmacophore_librarydoc'
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -214,9 +212,6 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'https://docs.python.org/': None}
-
-# stackoverflow.com/questions/12206334
-numpydoc_show_class_members = False
 
 # -- Options for todo extension ----------------------------------------------
 

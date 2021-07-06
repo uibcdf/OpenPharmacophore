@@ -1,0 +1,36 @@
+name: Build and upload conda packages
+
+on:
+  release:
+    types: ['released', 'prereleased']
+
+  workflow_dispatch:
+
+jobs:
+  conda_deployment_with_new_tag:
+    name: Conda deployment of package with Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Conda environment creation and activation
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          environment-file: devtools/conda-envs/build_env.yaml
+          auto-update-conda: false
+          auto-activate-base: false
+          show-channel-urls: true
+      - name: Build and upload the conda packages
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.1-beta.1
+        with:
+          meta_yaml_dir: devtools/conda-build
+          python-version: ${{ matrix.python-version }}
+          platform_linux-64: true
+          platform_osx-64: true
+          user: uibcdf
+          label: auto
+          token: ${{ secrets.ANACONDA_UIBCDF_TOKEN }}
+

@@ -1,0 +1,28 @@
+package:
+  name: openpharmacophore
+  version: "{{ environ['GIT_DESCRIBE_TAG'] }}"
+
+source:
+  path: ../../
+
+build:
+  number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy 
+    - versioneer
+
+  run:
+    - python
+
+about:
+  home: https://uibcdf.org
+  license: MIT License
+  summary: ""
+  description: |
+    This library provides some useful methods and classes to...
+  dev_url: https://github.com/uibcdf/OpenPharmacophore
+  doc_url: https://uibcdf.org/OpenPharmacophore
