@@ -1,7 +1,7 @@
 from .point import Point
 
 
-class HydrophobicPoint(Point):
+class InclusionVolumePoint(Point):
 
     def __init__(self, position=None):
 

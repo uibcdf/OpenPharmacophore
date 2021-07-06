@@ -1,7 +1,7 @@
 from .point import Point
 
 
-class HydrophobicPoint(Point):
+class HBDonorPoint(Point):
 
     def __init__(self, position=None):
 
