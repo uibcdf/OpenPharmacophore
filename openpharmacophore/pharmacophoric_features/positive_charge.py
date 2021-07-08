@@ -1,15 +1,7 @@
-from ._point import Point
-from ._sphere import Sphere
 
-class PositiveChargePoint(Point):
+class PositiveCharge():
 
-    def __init__(self, position):
+    def __init__(self):
 
-        super().__init__(position, 'positive charge')
-
-class PositiveChargeSphere(Sphere):
-
-    def __init__(self, center, radius):
-
-        super().__init__(center, radius, 'positive charge')
+        self.feature_name = 'positive charge'
 

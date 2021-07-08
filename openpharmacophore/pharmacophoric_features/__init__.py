@@ -1,9 +1,9 @@
-from .positive_charge import PositiveChargePoint
-from .negative_charge import NegativeChargePoint
-from .hb_acceptor import HBAcceptorPoint
-from .hb_donor import HBDonorPoint
-from .inclusion_volume import InclusionVolumePoint
-from .exclusion_volume import ExclusionVolumePoint
-from .hydrophobic import HydrophobicPoint
-from .aromatic_ring import AromaticRingPoint
-
+from .positive_charge import PositiveCharge
+from .negative_charge import NegativeCharge
+from .hb_acceptor import HBAcceptor
+from .hb_donor import HBDonor
+from .included_volume import IncludedVolume
+from .excluded_volume import ExcludedVolume
+from .hydrophobicity import Hydrophobicity
+from .aromatic_ring import AromaticRing
+from . import color_palettes as color_palettes

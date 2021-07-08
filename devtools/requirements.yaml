@@ -1,24 +1,46 @@
 production:
   channels:
+    - uibcdf/label/dev
+    - uibcdf
     - conda-forge
     - default
   dependencies:
-    - python
+    - uibcdf_stdlib
+    - pyunitwizard
+    - openmm
 
 development:
   channels:
+    - uibcdf/label/dev
+    - uibcdf
     - conda-forge
     - default
   dependencies:
-    - python
+    - uibcdf_stdlib
+    - pyunitwizard
+    - openmm
     - jupyterlab
+    - pytest
+    - pip
+    - pytest-cov
+    - codecov
+    - sphinx
+    - sphinx_rtd_theme
+    - sphinxcontrib-bibtex
+    - nbsphinx
+    - recommonmark
+    - sphinx-markdown-tables
 
 test:
   channels:
+    - uibcdf/label/dev
+    - uibcdf
     - conda-forge
     - default
   dependencies:
-    - python
+    - uibcdf_stdlib
+    - pyunitwizard
+    - openmm
     - pytest
     - pip
     - pytest-cov
@@ -26,10 +48,14 @@ test:
 
 docs:
   channels:
+    - uibcdf/label/dev
+    - uibcdf
     - conda-forge
     - default
   dependencies:
-    - python
+    - uibcdf_stdlib
+    - pyunitwizard
+    - openmm
     - sphinx
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
@@ -42,7 +68,6 @@ setup:
   channels:
     - default
   dependencies:
-    - python
     - setuptools
     - numpy
     - versioneer

@@ -1,9 +1,7 @@
-from .point import Point
 
+class HBDonor():
 
-class HBDonorPoint(Point):
+    def __init__(self):
 
-    def __init__(self, position=None):
-
-        super().__init__(position=position)
+        self.feature_name = 'hb donor'
 

@@ -1,15 +1,15 @@
 openpharmacophore={
-    'positive_charge': '#5D3A00',
-    'negative_charge': '#F98948',
-    'hb_acceptor': '#D64933',
-    'hb_donor': '#2B303A',
-    'inclusion_volume': '#0C7C59',
-    'exclusion_volume': '#58A4B0',
-    'hydrophobic': '#BAC1B8',
-    'aromatic': '#684E32',
+    'positive charge': '#5D3A00',
+    'negative charge': '#F98948',
+    'hb acceptor': '#D64933',
+    'hb donor': '#2B303A',
+    'included volume': '#0C7C59',
+    'excluded volume': '#58A4B0',
+    'hydrophobicity': '#BAC1B8',
+    'aromatic ring': '#684E32',
 }
 
-def get_color_from_palette_for_feature(feature, color_palette):
+def get_color_from_palette_for_feature(feature_name, color_palette):
 
     if type(color_palette)==str:
         try:
@@ -18,9 +18,9 @@ def get_color_from_palette_for_feature(feature, color_palette):
             raise InputArgumentError('color_palette')
 
     try:
-        color = color_palette[feature]
+        color = color_palette[feature_name]
     except:
-        raise InputArgumentError('feature')
+        raise InputArgumentError('feature_name')
 
     return color
 

@@ -8,4 +8,5 @@ futuro para shape-lets.
   - https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html    
   - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html#example-numpy    
   - https://sphinxcontrib-napoleon.readthedocs.io/en/latest/    
-
+- decirle a Daniel que no se case con las cosas implementadas o con mis desarrollos o sus
+  desarrollos

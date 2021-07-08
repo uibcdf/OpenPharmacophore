@@ -10,6 +10,13 @@ __version__ = versions['version']
 __git_revision__ = versions['full-revisionid']
 del get_versions, versions
 
+__documentation_web__ = 'https://www.uibcdf.org/OpenPharmacophore'
+__github_web__ = 'https://github.com/uibcdf/OpenPharmacophore'
+__github_issues_web__ = __github_web__ + '/issues'
+
 # Add imports here
-from .test import greetings
+from ._pyunitwizard import puw as _puw
+from . import pharmacophoric_shapes
+from . import pharmacophoric_features
+from . import pharmacophoric_elements
 
