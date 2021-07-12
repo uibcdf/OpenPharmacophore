@@ -19,4 +19,5 @@ from ._pyunitwizard import puw as _puw
 from . import pharmacophoric_shapes
 from . import pharmacophoric_features
 from . import pharmacophoric_elements
+from .pharmacophore import Pharmacophore
 

@@ -3,6 +3,7 @@ from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
 from uibcdf_stdlib.input_arguments import check_input_argument
 from uibcdf_stdlib.exceptions import InputArgumentError
+from uibcdf_stdlib.colors import convert as convert_color_code
 from openpharmacophore._private_tools.exceptions import ShapeWithNoColorError
 from openpharmacophore.pharmacophoric_features.color_palettes import get_color_from_palette_for_feature
 
@@ -15,16 +16,16 @@ class Sphere():
 
     Parameters
     ----------
-    center : Quantity (dimensionality:[L]; value_type:list,tuple,numpy.ndarray; shape:[3,])
+    center : Quantity (dimensionality:{'[L]':1}; value_type:list,tuple,numpy.ndarray; shape:(3,))
         Coordinates of the sphere center.
-    radius : Quantity (dimensionality:[L]; value:float)
+        radius : Quantity (dimensionality:{'[L]':1}; value:float)
         Radius of the pharmacophoric sphere.
 
     Attributes
     ----------
-    center : Quantity (dimensionality:[L]; value:ndarray; shape:[3,]) or None
+    center : Quantity (dimensionality:{'[L]':1}; value:ndarray; shape:(3,)) or None
         Coordinates of the sphere center.
-    radius : Quantity (dimensionality:[L]; value:float)
+    radius : Quantity (dimensionality:{'[L]':1}; value:float)
         Radius of the pharmacophoric sphere.
 
     """
@@ -33,9 +34,9 @@ class Sphere():
 
         #: The arguments checking should be included with decorators in the future
         #: InputArgumentError shouldn't need arguments
-        if not check_input_argument(center, 'quantity', dimensionality=['L'], value_type=[list, tuple, np.ndarray]):
+        if not check_input_argument(center, 'quantity', dimensionality={'[L]':1}, value_type=[list, tuple, np.ndarray]):
             raise InputArgumentError('center', 'Sphere', __documentation_web___)
-        if not check_input_argument(radius, 'quantity', dimensionality=['L'], value_type=float):
+        if not check_input_argument(radius, 'quantity', dimensionality={'[L]':1}, value_type=float):
             raise InputArgumentError('radius', 'Sphere', __documentation_web__)
 
         self.center = _puw.standardize(center)
@@ -71,12 +72,14 @@ class Sphere():
             else:
                 raise ShapeWithNoColorError(__documentation_web__)
 
-        radius = _puw.get_value(self.radius, unit='nm')
-        center = _puw.get_value(self.position, unit='nm').to_list()
+        color = convert_color_code(color, to_form='rgb')
 
+        center = _puw.get_value(self.center, to_unit='nm').tolist()
+        radius = _puw.get_value(self.radius, to_unit='nm')
+
+        n_components = len(view._ngl_component_ids)
         view.shape.add_sphere(center, color, radius, feature_name)
-        component_index = view.n_components-1
-        view.update_representation(component=component_index, repr_index=0, opacity=opacity)
+        view.update_representation(component=n_components, repr_index=0, opacity=opacity)
 
         pass
 

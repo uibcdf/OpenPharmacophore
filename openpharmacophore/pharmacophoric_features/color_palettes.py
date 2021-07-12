@@ -1,12 +1,12 @@
 openpharmacophore={
-    'positive charge': '#5D3A00',
-    'negative charge': '#F98948',
-    'hb acceptor': '#D64933',
-    'hb donor': '#2B303A',
-    'included volume': '#0C7C59',
-    'excluded volume': '#58A4B0',
-    'hydrophobicity': '#BAC1B8',
-    'aromatic ring': '#684E32',
+    'positive charge': '#E1B07E',
+    'negative charge': '#A5F8D3',
+    'hb acceptor': '#F13030',
+    'hb donor': '#5B618A',
+    'included volume': '#109648',
+    'excluded volume': '#14110F',
+    'hydrophobicity': '#9EADC8',
+    'aromatic ring': '#D6D84F',
 }
 
 def get_color_from_palette_for_feature(feature_name, color_palette):

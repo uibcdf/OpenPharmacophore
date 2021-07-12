@@ -3,6 +3,7 @@ from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
 from uibcdf_stdlib.input_arguments import check_input_argument
 from uibcdf_stdlib.exceptions import InputArgumentError
+from uibcdf_stdlib.colors import convert as convert_color_code
 from openpharmacophore._private_tools.exceptions import ShapeWithNoColorError
 from openpharmacophore.pharmacophoric_features.color_palettes import get_color_from_palette_for_feature
 
@@ -56,6 +57,8 @@ class Shapelet():
                 color = get_color_from_palette_for_feature(feature_name, color_palette)
             else:
                 raise ShapeWithNoColorError(__documentation_web__)
+
+        color = convert_color_code(color, to_form='rgb')
 
         #A shapelet may be represented as a mesh object
         #view.shape.add_mesh(center, color, radius, name)

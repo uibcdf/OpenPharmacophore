@@ -8,6 +8,7 @@ production:
     - uibcdf_stdlib
     - pyunitwizard
     - openmm
+    - nglview
 
 development:
   channels:
@@ -20,6 +21,7 @@ development:
     - pyunitwizard
     - openmm
     - jupyterlab
+    - nglview
     - pytest
     - pip
     - pytest-cov
@@ -41,6 +43,7 @@ test:
     - uibcdf_stdlib
     - pyunitwizard
     - openmm
+    - nglview
     - pytest
     - pip
     - pytest-cov
@@ -56,6 +59,7 @@ docs:
     - uibcdf_stdlib
     - pyunitwizard
     - openmm
+    - nglview
     - sphinx
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex

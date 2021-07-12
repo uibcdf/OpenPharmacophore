@@ -20,7 +20,7 @@ class HBAcceptorSphereAndVector(HBAcceptor, SphereAndVector):
     def __init__(self, center, radius, direction):
 
         HBAcceptor.__init__(self)
-        SphereAndVector.__init__(self, radius, direction)
+        SphereAndVector.__init__(self, center, radius, direction)
 
 class HBAcceptorGaussianKernel(HBAcceptor, GaussianKernel):
 

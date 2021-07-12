@@ -1,0 +1,6 @@
+channels:
+- default
+dependencies:
+- setuptools
+- numpy
+- versioneer
