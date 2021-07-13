@@ -21,4 +21,3 @@ dependencies:
 - nbsphinx
 - recommonmark
 - sphinx-markdown-tables
-- matplotlib
