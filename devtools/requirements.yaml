@@ -3,7 +3,8 @@ production:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - ambermd
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -17,7 +18,8 @@ development:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - ambermd
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -36,14 +38,14 @@ development:
     - nbsphinx
     - recommonmark
     - sphinx-markdown-tables
-    - matplotlib
 
 test:
   channels:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - ambermd
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -61,7 +63,8 @@ docs:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - ambermd
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -79,7 +82,7 @@ docs:
 
 setup:
   channels:
-    - default
+    - defaults
   dependencies:
     - setuptools
     - numpy
@@ -88,7 +91,7 @@ setup:
 conda-build:
   channels:
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - anaconda-client
     - conda-build

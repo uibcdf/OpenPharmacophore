@@ -2,7 +2,8 @@ channels:
 - uibcdf/label/dev
 - uibcdf
 - conda-forge
-- default
+- ambermd
+- defaults
 dependencies:
 - uibcdf_stdlib
 - pyunitwizard
