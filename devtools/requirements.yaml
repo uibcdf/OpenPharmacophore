@@ -36,7 +36,6 @@ development:
     - nbsphinx
     - recommonmark
     - sphinx-markdown-tables
-    - matplotlib
 
 test:
   channels:
