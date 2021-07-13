@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest] #[macOS-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest] #[macOS-latest, ubuntu-latest] #[macOS-latest, ubuntu-latest, windows-latest]
         python-version: [3.7] #[3.7, 3.8, 3.9]
 
     steps:
@@ -40,9 +40,17 @@ jobs:
         python-version: ${{ matrix.python-version }}
         environment-file: devtools/conda-envs/test_env.yaml
         activate-environment: test
-        auto-update-conda: false
+        auto-update-conda: true
         auto-activate-base: false
         show-channel-urls: true
+
+    - name: Info conda
+      shell: bash -l {0}
+      run: |
+        conda info
+        conda list
+        conda config --show-sources
+        conda config --show
 
     - name: Install package
 
