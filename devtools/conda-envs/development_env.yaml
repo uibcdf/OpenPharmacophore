@@ -6,9 +6,11 @@ channels:
 dependencies:
 - uibcdf_stdlib
 - pyunitwizard
+- molsysmt
 - openmm
 - jupyterlab
 - nglview
+- matplotlib
 - pytest
 - pip
 - pytest-cov

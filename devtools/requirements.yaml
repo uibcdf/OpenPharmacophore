@@ -7,8 +7,10 @@ production:
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
+    - molsysmt
     - openmm
     - nglview
+    - matplotlib
 
 development:
   channels:
@@ -19,9 +21,11 @@ development:
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
+    - molsysmt
     - openmm
     - jupyterlab
     - nglview
+    - matplotlib
     - pytest
     - pip
     - pytest-cov
@@ -32,6 +36,7 @@ development:
     - nbsphinx
     - recommonmark
     - sphinx-markdown-tables
+    - matplotlib
 
 test:
   channels:
@@ -42,8 +47,10 @@ test:
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
+    - molsysmt
     - openmm
     - nglview
+    - matplotlib
     - pytest
     - pip
     - pytest-cov
@@ -58,8 +65,10 @@ docs:
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
+    - molsysmt
     - openmm
     - nglview
+    - matplotlib
     - sphinx
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
