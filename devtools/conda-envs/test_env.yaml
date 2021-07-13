@@ -4,5 +4,4 @@ channels:
 - conda-forge
 - defaults
 dependencies:
-- openmm
-- biopython
+- molsysmt
