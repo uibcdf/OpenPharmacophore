@@ -1,0 +1,9 @@
+channels:
+- uibcdf/label/dev
+- uibcdf
+- conda-forge
+- default
+dependencies:
+- uibcdf_stdlib
+- pyunitwizard
+- openmm

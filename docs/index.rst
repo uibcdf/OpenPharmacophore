@@ -17,17 +17,22 @@ OpenPharmacophore
 
 .. toctree::
    :name: installation
-   :caption: Installation
+   :caption: Installation and Quick Guide
    :maxdepth: 1
 
    contents/Installation.md
 
 .. toctree::
-   :name: user_guide
-   :caption: User guide
+   :name: pharmacophore
+   :caption: Pharmacophore
    :maxdepth: 2
 
-   contents/Hello.ipynb
+   contents/Pharmacophore/Pharmacophoric_features.ipynb
+   contents/Pharmacophore/Pharmacophoric_shapes.ipynb
+   contents/Pharmacophore/Pharmacophoric_elements.ipynb
+   contents/Pharmacophore/Pharmacophore.ipynb
+   contents/Pharmacophore/Import_export.ipynb
+   contents/Pharmacophore/Visualization.ipynb
 
 .. toctree::
    :caption: API Documentation

@@ -4,26 +4,18 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = test_uibcdf_library
 SOURCEDIR     = .
-BUILDDIR      = build
+BUILDDIR      = _build
 
-
-.PHONY: help builddir html clean
-
+# Put it first so that "make" without argument is like "make help".
 help:
-	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  html      to make standalone HTML files"
-	@echo "  clean     to clean the directory starting a new compilation from scratch"
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-builddir:
-	mkdir -p $(BUILDDIR)
+.PHONY: help Makefile
 
-html: builddir
-	$(SPHINXBUILD) -b html $(SOURCEDIR) $(BUILDDIR)
-	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)"
-
-clean:
-	rm -rf $(BUILDDIR)
-	rm -rf api/_autosummary/*.rst
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 

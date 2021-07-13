@@ -1,23 +1,47 @@
-from setuptools import find_packages
-from numpy.distutils.core import setup
-from numpy.distutils.extension import Extension
+"""
+OpenPharmacophore
+A short description of the project.
+"""
+import sys
+from setuptools import setup, find_packages
+import versioneer
 
-extensions_list=[]
+short_description = __doc__.split("\n")
+
+# from https://github.com/pytest-dev/pytest-runner#conditional-requirement
+needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
+pytest_runner = ['pytest-runner'] if needs_pytest else []
+
+try:
+    with open("README.md", "r") as handle:
+        long_description = handle.read()
+except:
+    long_description = "\n".join(short_description[2:])
+
 
 setup(
     name='openpharmacophore',
-    version='0.0.1',
-    author='UIBCDF Lab and contributors',
+    author='UIBCDF Lab',
     author_email='uibcdf@gmail.com',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     package_dir={'openpharmacophore': 'openpharmacophore'},
     packages=find_packages(),
-    ext_modules=extensions_list,
-    package_data={'openpharmacophore': []},
+    include_package_data=True,
+    package_data={'opehpharmacophore': ['data']},
     scripts=[],
-    url='http://uibcdf.org',
+    setup_requires=[] + pytest_runner,
+    platforms=['Linux',
+               'Mac OS-X',
+               'Unix',
+               'Windows',
+    ],
+    python_requires=">=3.7",
+    url='http://uibcdf.org/OpenPharmacophore',
     download_url ='https://github.com/uibcdf/OpenPharmacophore',
     license='MIT',
-    description="---",
-    long_description="---",
+    description=short_description[0],
+    long_description=long_description,
+    long_description_content_type="text/markdown",
 )
 
