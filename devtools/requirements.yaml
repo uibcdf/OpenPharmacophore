@@ -3,6 +3,7 @@ production:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
+    - ambermd
     - defaults
   dependencies:
     - uibcdf_stdlib
@@ -17,6 +18,7 @@ development:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
+    - ambermd
     - defaults
   dependencies:
     - uibcdf_stdlib
@@ -42,6 +44,7 @@ test:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
+    - ambermd
     - defaults
   dependencies:
     - uibcdf_stdlib
@@ -60,6 +63,7 @@ docs:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
+    - ambermd
     - defaults
   dependencies:
     - uibcdf_stdlib

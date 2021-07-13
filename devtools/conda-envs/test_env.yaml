@@ -2,6 +2,16 @@ channels:
 - uibcdf/label/dev
 - uibcdf
 - conda-forge
+- ambermd
 - defaults
 dependencies:
+- uibcdf_stdlib
+- pyunitwizard
 - molsysmt
+- openmm
+- nglview
+- matplotlib
+- pytest
+- pip
+- pytest-cov
+- codecov
