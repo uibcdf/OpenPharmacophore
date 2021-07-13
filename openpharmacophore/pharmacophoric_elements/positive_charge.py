@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import PositiveCharge
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, GaussianKernel
+from .features import PositiveCharge
+from .shapes import Point, Sphere, GaussianKernel
 
 class PositiveChargePoint(PositiveCharge, Point):
 

@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import AromaticRing
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, SphereAndVector, Shapelet
+from .features import AromaticRing
+from .shapes import Point, Sphere, SphereAndVector, Shapelet
 
 class AromaticRingPoint(AromaticRing, Point):
 
@@ -20,7 +20,7 @@ class AromaticRingSphereAndVector(AromaticRing, SphereAndVector):
     def __init__(self, center, radius, direction):
 
         AromaticRing.__init__(self)
-        SphereAndVector.__init__(self, radius, direction)
+        SphereAndVector.__init__(self, center, radius, direction)
 
 class AromaticRingShapelet(AromaticRing, Shapelet):
 

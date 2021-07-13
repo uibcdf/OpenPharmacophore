@@ -5,38 +5,34 @@ from uibcdf_stdlib.input_arguments import check_input_argument
 from uibcdf_stdlib.exceptions import InputArgumentError
 from uibcdf_stdlib.colors import convert as convert_color_code
 from openpharmacophore._private_tools.exceptions import ShapeWithNoColorError
-from openpharmacophore.pharmacophoric_features.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
-class Point():
+class Shapelet():
 
-    """ Parent class of pharmacophoric point.
+    """ Parent class of pharmacophoric shapelet.
 
     Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    points classes.
+    shapelets classes.
 
     Parameters
     ----------
-    position : Quantity (shape:(3,), dimensionality:{'[L]':1}, value:list, tuple, numpy.ndarray)
-        Coordinates to set the point position in the three dimensional space.
 
     Attributes
     ----------
-    position : Quantity (shape:(3,), dimensionality:{'[L]':1}, value:numpy.ndarray) or None
-        Coordinates of the point in the three dimensional space.
 
     """
 
-    def __init__(self, position):
+    def __init__(self):
 
         #: The arguments checking should be included with decorators in the future
         #: InputArgumentError shouldn't need arguments
-        if not check_input_argument(position, 'quantity', dimensionality={'[L]':1}, value_type=[list, tuple, np.ndarray]):
-            raise InputArgumentError('position', 'Point', __documentation_web__)
 
-        self.position = _puw.standardize(position)
+        self.shape_name = 'shapelet'
 
-    def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the point representation to a NGLview view
+        pass
+
+    def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None):
+        """Adding the sphapelet representation to a NGLview view
 
         Note
         ----
@@ -67,13 +63,8 @@ class Point():
 
         color = convert_color_code(color, to_form='rgb')
 
-        radius = 0.05
-        center = _puw.get_value(self.position, to_unit='nm').tolist()
+        #A shapelet may be represented as a mesh object
+        #view.shape.add_mesh(center, color, radius, name)
 
-        n_components = len(view._ngl_components_ids)
-
-        view.shape.add_sphere(center, color, radius, feature_name)
-        view.update_representation(component=n_components, repr_index=0, opacity=opacity)
-
-        pass
+        raise NotImplementedError()
 

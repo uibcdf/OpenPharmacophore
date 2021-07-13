@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import ExcludedVolume
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, GaussianKernel, Shapelet
+from .features import ExcludedVolume
+from .shapes import Point, Sphere, GaussianKernel, Shapelet
 
 class ExcludedVolumePoint(ExcludedVolume, Point):
 

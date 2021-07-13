@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import HBAcceptor
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, SphereAndVector, GaussianKernel
+from .features import HBAcceptor
+from .shapes import Point, Sphere, SphereAndVector, GaussianKernel
 
 class HBAcceptorPoint(HBAcceptor, Point):
 

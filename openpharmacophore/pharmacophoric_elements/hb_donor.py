@@ -1,6 +1,5 @@
-
-from openpharmacophore.pharmacophoric_features import HBDonor
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, SphereAndVector, GaussianKernel
+from .features import HBDonor
+from .shapes import Point, Sphere, SphereAndVector, GaussianKernel
 
 class HBDonorPoint(HBDonor, Point):
 

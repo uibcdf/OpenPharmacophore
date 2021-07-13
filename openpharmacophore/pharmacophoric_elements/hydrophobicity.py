@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import Hydrophobicity
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, GaussianKernel, Shapelet
+from .features import Hydrophobicity
+from .shapes import Point, Sphere, GaussianKernel, Shapelet
 
 class HydrophobicPoint(Hydrophobicity, Point):
 

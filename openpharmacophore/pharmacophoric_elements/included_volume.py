@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_features import IncludedVolume
-from openpharmacophore.pharmacophoric_shapes import Point, Sphere, GaussianKernel, Shapelet
+from .features import IncludedVolume
+from .shapes import Point, Sphere, GaussianKernel, Shapelet
 
 class IncludedVolumePoint(IncludedVolume, Point):
 

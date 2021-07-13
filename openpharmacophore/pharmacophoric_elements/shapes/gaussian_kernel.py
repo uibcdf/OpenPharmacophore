@@ -5,7 +5,7 @@ from uibcdf_stdlib.input_arguments import check_input_argument
 from uibcdf_stdlib.exceptions import InputArgumentError
 from uibcdf_stdlib.colors import convert as convert_color_code
 from openpharmacophore._private_tools.exceptions import ShapeWithNoColorError
-from openpharmacophore.pharmacophoric_features.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
 class GaussianKernel():
 
@@ -38,6 +38,8 @@ class GaussianKernel():
             raise InputArgumentError('center', 'GaussianKernel', __documentation_doc__)
         if not check_input_argument(sigma, 'quantity', dimensionality={'[L]':1}, value_type=float):
             raise InputArgumentError('sigma', 'GaussianKernel', __documentation_doc__)
+
+        self.shape_name = 'gaussian kernel'
 
         self.center = _puw.standardize(center)
         self.sigma = _puw.standardize(sigma)
@@ -79,7 +81,10 @@ class GaussianKernel():
 
         #A Gaussian kernel may be represented as three concentric transparent spheres with radius 0.5 sigma, 1 sigma and 2 sigma
 
-        n_components = len(view._ngl_component_ids)
+        try:
+            n_components = len(view._ngl_component_ids)
+        except:
+            n_components = 0
 
         view.shape.add_sphere(center, color, 0.5*sigma)
         view.update_representation(component=n_components, repr_index=0, opacity=opacity)

@@ -8,6 +8,7 @@
 
 import os
 import sys
+import openpharmacophore
 
 # -- Path setup --------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 
 class IncludedVolume():
 
-    def __init__(self, position):
+    def __init__(self):
 
         self.feature_name = 'included volume'
 
