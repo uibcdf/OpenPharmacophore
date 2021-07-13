@@ -8,6 +8,7 @@ dependencies:
 - pyunitwizard
 - openmm
 - jupyterlab
+- nglview
 - pytest
 - pip
 - pytest-cov
