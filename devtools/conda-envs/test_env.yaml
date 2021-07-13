@@ -5,7 +5,3 @@ channels:
 - defaults
 dependencies:
 - molsysmt
-- pytest
-- pip
-- pytest-cov
-- codecov
