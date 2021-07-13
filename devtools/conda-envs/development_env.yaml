@@ -8,6 +8,8 @@ dependencies:
 - pyunitwizard
 - openmm
 - jupyterlab
+- nglview
+- matplotlib
 - pytest
 - pip
 - pytest-cov
@@ -18,3 +20,4 @@ dependencies:
 - nbsphinx
 - recommonmark
 - sphinx-markdown-tables
+- matplotlib

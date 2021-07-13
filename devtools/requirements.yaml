@@ -9,6 +9,7 @@ production:
     - pyunitwizard
     - openmm
     - nglview
+    - matplotlib
 
 development:
   channels:
@@ -22,6 +23,7 @@ development:
     - openmm
     - jupyterlab
     - nglview
+    - matplotlib
     - pytest
     - pip
     - pytest-cov
@@ -32,6 +34,7 @@ development:
     - nbsphinx
     - recommonmark
     - sphinx-markdown-tables
+    - matplotlib
 
 test:
   channels:
@@ -44,6 +47,7 @@ test:
     - pyunitwizard
     - openmm
     - nglview
+    - matplotlib
     - pytest
     - pip
     - pytest-cov
@@ -60,6 +64,7 @@ docs:
     - pyunitwizard
     - openmm
     - nglview
+    - matplotlib
     - sphinx
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
