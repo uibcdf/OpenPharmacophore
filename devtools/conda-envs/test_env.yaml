@@ -2,8 +2,9 @@ channels:
 - uibcdf/label/dev
 - uibcdf
 - conda-forge
-- default
+- defaults
 dependencies:
+- pyunitwizard
 - pytest
 - pip
 - pytest-cov

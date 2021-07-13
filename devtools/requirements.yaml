@@ -3,7 +3,7 @@ production:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -17,7 +17,7 @@ development:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -42,7 +42,7 @@ test:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -60,7 +60,7 @@ docs:
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - uibcdf_stdlib
     - pyunitwizard
@@ -78,7 +78,7 @@ docs:
 
 setup:
   channels:
-    - default
+    - defaults
   dependencies:
     - setuptools
     - numpy
@@ -87,7 +87,7 @@ setup:
 conda-build:
   channels:
     - conda-forge
-    - default
+    - defaults
   dependencies:
     - anaconda-client
     - conda-build
