@@ -76,8 +76,8 @@ class Sphere():
 
         color = convert_color_code(color, to_form='rgb')
 
-        center = _puw.get_value(self.center, to_unit='nm').tolist()
-        radius = _puw.get_value(self.radius, to_unit='nm')
+        center = _puw.get_value(self.center, to_unit='angstroms').tolist()
+        radius = _puw.get_value(self.radius, to_unit='angstroms')
 
         try:
             n_components = len(view._ngl_component_ids)

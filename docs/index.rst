@@ -27,18 +27,15 @@ OpenPharmacophore
    :caption: Pharmacophore
    :maxdepth: 2
 
-   contents/Pharmacophore/Pharmacophoric_features.ipynb
-   contents/Pharmacophore/Pharmacophoric_shapes.ipynb
-   contents/Pharmacophore/Pharmacophoric_elements.ipynb
+   contents/Pharmacophore/Elements/index.rst
    contents/Pharmacophore/Pharmacophore.ipynb
-   contents/Pharmacophore/Import_export.ipynb
    contents/Pharmacophore/Visualization.ipynb
 
 .. toctree::
    :caption: API Documentation
    :maxdepth: 1
 
-   api/index
+   api.rst
 
 Glossary, indices and tables
 ============================

@@ -76,8 +76,8 @@ class GaussianKernel():
 
         color = convert_color_code(color, to_form='rgb')
 
-        center = _puw.get_value(self.center, to_unit='nm').tolist()
-        sigma = _puw.get_value(self.sigma, to_unit='nm')
+        center = _puw.get_value(self.center, to_unit='angstroms').tolist()
+        sigma = _puw.get_value(self.sigma, to_unit='angstroms')
 
         #A Gaussian kernel may be represented as three concentric transparent spheres with radius 0.5 sigma, 1 sigma and 2 sigma
 

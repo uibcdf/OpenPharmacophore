@@ -62,9 +62,13 @@ extensions = [
 ]
 
 autosummary_generate = True
-napoleon_google_docstring = False
-napoleon_use_param = False
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_use_param = True
 napoleon_use_ivar = True
+numpydoc_show_class_members= True
+numpydoc_show_inherited_class_members= True
+numpydoc_class_members_toctree= True
 
 # sphinxcontrib-bibtex
 bibtex_bibfiles = ['bibliography.bib'] # list of *.bib files

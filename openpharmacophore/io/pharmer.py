@@ -42,8 +42,10 @@ def from_pharmer(pharmacophore):
             raise NotImplementedError
 
     ligand = msm.convert(pharmacophore["ligand"], to_form="molsysmt.MolSys")
-    receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
-    tmp_pharmacophore.molecular_system = msm.merge([ligand, receptor])
+    #receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
+    #tmp_pharmacophore.molecular_system = msm.merge([ligand, receptor])
+
+    tmp_pharmacophore.molecular_system = ligand
 
     return tmp_pharmacophore
 

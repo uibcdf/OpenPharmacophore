@@ -85,9 +85,9 @@ class SphereAndVector():
 
         arrow_radius = 0.2
 
-        radius = _puw.get_value(self.radius, to_unit='nm')
-        center = _puw.get_value(self.center, to_unit='nm').tolist()
-        end_arrow = _puw.get_value(self.center+self.radius*self.direction, to_unit='nm').tolist()
+        radius = _puw.get_value(self.radius, to_unit='angstroms')
+        center = _puw.get_value(self.center, to_unit='angstroms').tolist()
+        end_arrow = _puw.get_value(self.center+self.radius*self.direction, to_unit='angstroms').tolist()
 
         try:
             n_components = len(view._ngl_component_ids)

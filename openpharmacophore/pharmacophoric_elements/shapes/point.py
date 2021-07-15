@@ -69,7 +69,7 @@ class Point():
         color = convert_color_code(color, to_form='rgb')
 
         radius = 0.05
-        center = _puw.get_value(self.position, to_unit='nm').tolist()
+        center = _puw.get_value(self.position, to_unit='angstroms').tolist()
 
         try:
             n_components = len(view._ngl_components_ids)
