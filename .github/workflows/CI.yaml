@@ -12,6 +12,7 @@ on:
     #   Scheduled workflows run on the latest commit on the default or base branch.
     #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
     - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   test:
@@ -38,13 +39,18 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         environment-file: devtools/conda-envs/test_env.yaml
-
-        channels: conda-forge, defaults
-
         activate-environment: test
-        auto-update-conda: false
+        auto-update-conda: true
         auto-activate-base: false
         show-channel-urls: true
+
+    - name: Info conda
+      shell: bash -l {0}
+      run: |
+        conda info
+        conda list
+        conda config --show-sources
+        conda config --show
 
     - name: Install package
 
@@ -61,7 +67,7 @@ jobs:
       shell: bash -l {0}
 
       run: |
-        pytest -v --cov=test_uibcdf_library --cov-report=xml --color=yes openpharmacophore/tests/
+        pytest -v --cov=openpharmacophore --cov-report=xml --color=yes openpharmacophore/tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
@@ -69,3 +75,4 @@ jobs:
         file: ./coverage.xml
         flags: unittests
         name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+
