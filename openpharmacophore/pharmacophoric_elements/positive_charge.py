@@ -1,3 +1,14 @@
+"""Pharmacophoric elements for the feature: positive charge.
+
+This module contains all available classes to create pharmacophoric elements for the feature
+'positive charge' with different shapes.
+
+Notes
+-----
+This classes need to be reviewed. Some of them may be removed in the future if they are useless.
+
+"""
+
 from .features import PositiveCharge
 from .shapes import Point, Sphere, GaussianKernel
 

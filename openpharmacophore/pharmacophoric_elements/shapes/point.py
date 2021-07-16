@@ -1,3 +1,10 @@
+"""Parent class for pharmacophoric elements with the shape: point.
+
+This module contains a parent class to be inherited with attributes and methods for pharamacophoric
+elements with the 'point' shape.
+
+"""
+
 import numpy as np
 from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
@@ -9,7 +16,7 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class Point():
 
-    """ Parent class of pharmacophoric point.
+    """Parent class of pharmacophoric point.
 
     Common attributes and methods will be included here to be inherited by the specific pharmacophoric
     points classes.

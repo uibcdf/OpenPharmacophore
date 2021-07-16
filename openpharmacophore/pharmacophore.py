@@ -53,8 +53,6 @@ class Pharmacophore():
 
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
 
-        Note
-        ----
         Each pharmacophoric element is added to the NGLWidget as a new component.
 
         Parameters
@@ -65,10 +63,10 @@ class Pharmacophore():
         color_palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
-        Returns
-        -------
+        Note
+        ----
 
-            The `view` object is modified in place. Nothing is returned.
+        Nothing is returned. The `view` object is modified in place.
 
         Example
         -------
@@ -160,10 +158,10 @@ class Pharmacophore():
 
         """Private method to reset all attributes to default values.
 
-        Returns
-        -------
+        Note
+        ----
 
-            All attributes are set to default values.
+           Nothing is returned. All attributes are set to default values.
 
         Example
         -------
@@ -188,10 +186,10 @@ class Pharmacophore():
         pharmacophore: :obj: str
             File or object with the pharmer pharmacophoric model.
 
-        Returns
-        -------
+        Note
+        ----
 
-            All attributes are updated with those coming from the input pharmacophore.
+            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
 
         Example
         -------
@@ -221,10 +219,10 @@ class Pharmacophore():
         file_name: str
             Name of file to be written with the pharmer format of the pharmacophore.
 
-        Returns
-        -------
+        Note
+        ----
 
-            A new file is written. Nothing is returned.
+            Nothing is returned. A new file is written.
 
         Example
         -------
@@ -247,10 +245,10 @@ class Pharmacophore():
         pharmacophore: :obj: str
             File or object with the ligandscout pharmacophoric model.
 
-        Returns
-        -------
+        Note
+        ----
 
-            All attributes are updated with those coming from the input pharmacophore.
+            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
 
         Example
         -------
@@ -276,10 +274,10 @@ class Pharmacophore():
         file_name: str
             Name of file to be written with the ligandscout format of the pharmacophore.
 
-        Returns
-        -------
+        Note
+        ----
 
-            A new file is written. Nothing is returned.
+            Nothing is returned. A new file is written.
 
         Example
         -------

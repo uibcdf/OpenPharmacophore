@@ -94,3 +94,11 @@ Pharmacophoric shapes
    openpharmacophore.pharmacophoric_elements.shapes.GaussianKernel
    openpharmacophore.pharmacophoric_elements.shapes.Shapelet
 
+Demonstration
+-------------
+
+.. autosummary::
+   :toctree: autosummary
+
+   openpharmacophore.demo
+
