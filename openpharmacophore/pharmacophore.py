@@ -43,9 +43,9 @@ class Pharmacophore():
         if pharmacophore is not None:
 
             if form=='pharmer':
-                self.from_pharmer(pharmacophore)
+                self.__from_pharmer(pharmacophore)
             elif form=='ligandscout':
-                self.from_ligandscout(pharmacophore)
+                self.__from_ligandscout(pharmacophore)
             else:
                 raise NotImplementedError
 
@@ -156,7 +156,7 @@ class Pharmacophore():
 
         pass
 
-    def _reset(self):
+    def __reset(self):
 
         """Private method to reset all attributes to default values.
 
@@ -179,7 +179,7 @@ class Pharmacophore():
         self.extractor=None
         self.molecular_system=None
 
-    def _from_pharmer(self, pharmacophore):
+    def __from_pharmer(self, pharmacophore):
 
         """Private method to update the attributes with those from an imported pharmer pharmacophore.
 
@@ -205,7 +205,7 @@ class Pharmacophore():
 
         from openpharmacophore.io import from_pharmer as _from_pharmer
         tmp_pharmacophore = _from_pharmer(pharmacophore)
-        self._reset()
+        self.__reset()
         self.elements = tmp_pharmacophore.elements
         self.n_elements = tmp_pharmacophore.n_elements
         self.molecular_system = tmp_pharmacophore.molecular_system
@@ -238,7 +238,7 @@ class Pharmacophore():
         from openpharmacophore.io import to_pharmer as _to_pharmer
         return _to_pharmer(self, file_name=file_name)
 
-    def _from_ligandscout(self, pharmacophore):
+    def __from_ligandscout(self, pharmacophore):
 
         """Private method to update the attributes with those from an imported ligandscout pharmacophore.
 
