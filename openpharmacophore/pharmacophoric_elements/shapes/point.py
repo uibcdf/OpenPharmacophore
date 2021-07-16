@@ -16,10 +16,10 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class Point():
 
-    """Parent class of pharmacophoric point.
+    """Parent class for the pharmacophoric shape point.
 
-    Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    points classes.
+    Common attributes and methods will be included here to be inherited by specific pharmacophoric
+    elements with shape point.
 
     Parameters
     ----------
@@ -44,11 +44,7 @@ class Point():
         self.position = _puw.standardize(position)
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the point representation to a NGLview view
-
-        Note
-        ----
-        This method does not return a new view but modifies the input object.
+        """Adding the point representation to an NGLview view
 
         Parameters
         ----------
@@ -58,6 +54,10 @@ class Point():
             Color palette to show the point representation.
         color : str or list
             Color to show the point representation as HEX or RGB code.
+
+        Note
+        ----
+        This method does not return a new view but modifies in place the input one.
 
         """
 

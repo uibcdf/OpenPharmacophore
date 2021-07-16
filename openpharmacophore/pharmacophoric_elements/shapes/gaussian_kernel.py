@@ -1,3 +1,10 @@
+"""Parent class for pharmacophoric elements with the shape: Gaussian kernel.
+
+This module contains a parent class to be inherited with attributes and methods for pharamacophoric
+elements with the 'gaussian kernel' shape.
+
+"""
+
 import numpy as np
 from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
@@ -9,10 +16,10 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class GaussianKernel():
 
-    """ Parent class of pharmacophoric Gaussian kernel.
+    """ Parent class for the pharmacophoric shape Gaussian kernel.
 
     Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    Gaussian kernels classes.
+    elements with shape Gaussian kernel.
 
     Parameters
     ----------
@@ -45,11 +52,7 @@ class GaussianKernel():
         self.sigma = _puw.standardize(sigma)
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the Gaussian kernel representation to a NGLview view
-
-        Note
-        ----
-        This method does not return a new view but modifies the input object.
+        """Adding the Gaussian kernel representation to an NGLview view
 
         Parameters
         ----------
@@ -59,6 +62,10 @@ class GaussianKernel():
             Color palette to show the Gaussian kernel representation.
         color : str or list
             Color to show the Gaussian kernel representation as HEX or RGB code.
+
+        Note
+        ----
+        This method does not return a new view but modifies the input object.
 
         """
 
