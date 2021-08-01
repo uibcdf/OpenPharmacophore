@@ -1,5 +1,5 @@
 from .features import AromaticRing
-from .shapes import Point, Sphere, SphereAndVector, Shapelet
+from .shapes import Point, Sphere, SphereAndVector, Shapelet, GaussianKernel
 
 class AromaticRingPoint(AromaticRing, Point):
 
@@ -21,6 +21,12 @@ class AromaticRingSphereAndVector(AromaticRing, SphereAndVector):
 
         AromaticRing.__init__(self)
         SphereAndVector.__init__(self, center, radius, direction)
+
+class AromaticRingGaussianKernel(AromaticRing, GaussianKernel):
+
+    def __init__(self, center, sigma):
+        AromaticRing.__init__(self)
+        GaussianKernel.__init__(self, center, sigma)
 
 class AromaticRingShapelet(AromaticRing, Shapelet):
 

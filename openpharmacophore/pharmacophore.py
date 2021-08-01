@@ -33,21 +33,12 @@ class Pharmacophore():
     """
 
 
-    def __init__(self, pharmacophore=None, form=None):
+    def __init__(self, elements=[], molecular_system=None):
 
-        self.elements = []
-        self.n_elements = 0
+        self.elements = elements
+        self.n_elements = len(elements)
+        self.molecular_system = molecular_system
         self.extractor = None
-        self.molecular_system = None
-
-        if pharmacophore is not None:
-
-            if form=='pharmer':
-                self.__from_pharmer(pharmacophore)
-            elif form=='ligandscout':
-                self.__from_ligandscout(pharmacophore)
-            else:
-                raise NotImplementedError
 
     def add_to_NGLView(self, view, color_palette='openpharmacophore'):
 
@@ -154,7 +145,7 @@ class Pharmacophore():
 
         pass
 
-    def __reset(self):
+    def _reset(self):
 
         """Private method to reset all attributes to default values.
 
@@ -177,66 +168,7 @@ class Pharmacophore():
         self.extractor=None
         self.molecular_system=None
 
-    def __from_pharmer(self, pharmacophore):
-
-        """Private method to update the attributes with those from an imported pharmer pharmacophore.
-
-        Parameters
-        ----------
-        pharmacophore: :obj: str
-            File or object with the pharmer pharmacophoric model.
-
-        Note
-        ----
-
-            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_pharmer(pharmacophore_pharmer_file)
-
-        """
-
-        from openpharmacophore.io import from_pharmer as _from_pharmer
-        tmp_pharmacophore = _from_pharmer(pharmacophore)
-        self.__reset()
-        self.elements = tmp_pharmacophore.elements
-        self.n_elements = tmp_pharmacophore.n_elements
-        self.molecular_system = tmp_pharmacophore.molecular_system
-
-        pass
-
-    def to_pharmer(self, file_name=None):
-
-        """Method to export the pharmacophore to the pharmer compatible format.
-
-        Parameters
-        ----------
-        file_name: str
-            Name of file to be written with the pharmer format of the pharmacophore.
-
-        Note
-        ----
-
-            Nothing is returned. A new file is written.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.demo.pharmacophore
-        >>> pharmacophore.to_pharmer('pharmer_pharmacophore.json')
-
-        """
-
-        from openpharmacophore.io import to_pharmer as _to_pharmer
-        return _to_pharmer(self, file_name=file_name)
-
-    def __from_ligandscout(self, pharmacophore):
+    def _from_ligandscout(self, pharmacophore):
 
         """Private method to update the attributes with those from an imported ligandscout pharmacophore.
 
