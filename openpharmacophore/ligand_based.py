@@ -1,25 +1,84 @@
 from openpharmacophore import Pharmacophore
 from openpharmacophore.visualization.view_ligands import view_ligands
-from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 from openpharmacophore.extractors.dbscan import dbscan_pharmacophore
+from openpharmacophore.io.mol2 import load_Mol2_file
+from rdkit import Chem
 import nglview as nv
-import pyunitwizard as puw 
 
 class LigandBasedPharmacophore(Pharmacophore):
 
     def __init__(self, elements=[], molecular_system=None):
         super().__init__(elements=elements, molecular_system=molecular_system)
     
-    def from_ligand_list(self, ligands, method, radius=1, feat_list=None):
+    def from_ligand_list(self, ligands, method, radius=1, feat_list=None, point_type="spheres"):
+
+        """Compute pharmacophore from a list of rdkit molecules 
+
+        Parameters
+        ----------
+        ligands: :obj: rdkit.Chem.rdmolfiles.SmilesMolSupplier or list of rdkit.Chem.rdchem.Mol
+            List of ligands
+        
+        method: str
+            Name of method or algorithm to compute the ligand based pharmacophore
+
+        radius: int (optional)
+            Lenght of the radius of the parmacohporic points (Default: 1)
+        
+        feat_list: list of str (optional)
+            List of features that will be used to compute the pharmacophore
+
+        Returns
+        -------
+
+        """
+        if not isinstance(ligands, list):
+            ligands = list(ligands)
         
         if method == "dbscan":
-            tmp_pharmacophore = dbscan_pharmacophore(ligands, radius)
+            points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list)
         else:
             raise NotImplementedError
 
-        self.elements = tmp_pharmacophore.elements
+        self.elements = points
         self.n_elements = len(self.elements)
-        self.molecular_system = tmp_pharmacophore.molecular_system
+        self.molecular_system = ligands
+        self.extractor = method
+
+    
+    def from_ligand_file(self, fname, method, radius=1, feat_list=None, point_type="spheres"):
+        """Compute pharmacophore from a file of ligands
+
+        Accepted file formats: smi, mol2, sdf, pdb 
+
+        Parameters
+        ----------
+        fname: str
+            Name of the file containing the ligands
+        
+        method: str
+            Name of method or algorithm to compute the ligand based pharmacophore
+
+        radius: int (optional)
+            Lenght of the radius of the parmacohporic points (Default: 1)
+        
+        feat_list: list of str (optional)
+            List of features that will be used to compute the pharmacophore
+
+        Returns
+        -------
+        """
+        accepted_files = ["smi", "mol2", "sdf", "pdb"]
+        fextension = fname.split(".")[-1]
+        if fextension not in accepted_files:
+            raise NotImplementedError
+        
+        if fextension == "smi":
+            ligands = Chem.SmilesMolSupplier(fname, delimiter='\t', titleLine=False)
+        elif fextension == "mol2":
+            ligands = load_Mol2_file(fname)
+
+        self.from_ligand_list(ligands=ligands, method=method, radius=radius, feat_list=feat_list, point_type=point_type)
 
     def show(self, show_ligands=True, palette="openpharmacophore"):
     
@@ -28,30 +87,8 @@ class LigandBasedPharmacophore(Pharmacophore):
         else:
             view = nv.NGLWidget()
         
-        if palette == "openpharmacophore":
-            feature_colors = {
-                'positive charge': (0.12, 0.36, 0.52), # Blue
-                'negative charge': (0.90, 0.30, 0.24),  # Red
-                'hb acceptor': (0.90, 0.30, 0.24),  # Red
-                'hb donor': (0.13, 0.56, 0.30), # Green
-                'included volume': (0, 0, 0), # Black,
-                'excluded volume': (0, 0, 0), # Black
-                'hydrophobicity': (1, 0.9, 0),  # Yellow
-                'aromatic ring': (1, 0.9, 0),  # Yellow
-            }
-        else:
-            raise NotImplementedError
+        self.add_to_NGLView(view, palette=palette)
 
-        # TODO: implement visualization of vectors. Openpharmacophore palette is not working
-
-        for i, element in enumerate(self.elements):
-            center = puw.get_value(element.center, to_unit="angstroms").tolist()
-            radius = puw.get_value(element.radius, to_unit="angstroms")
-            # feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
-            feature_color = feature_colors[element.feature_name]
-            label = f"{element.feature_name}_{i}"
-            view.shape.add_sphere(center, feature_color, radius, label)
-        
         return view
 
 

@@ -10,7 +10,10 @@ def align_set_of_ligands(ligands):
         Align a set of ligands to each other
     """
     
-    molecules = copy.deepcopy(list(ligands))
+    if not isinstance(ligands, list):
+        ligands = list(ligands)
+
+    molecules = copy.deepcopy(ligands)
     molecules = [generate_conformers(mol, 100) for mol in molecules]
 
     crippen_contribs = [rdMolDescriptors._CalcCrippenContribs(mol) for mol in molecules]

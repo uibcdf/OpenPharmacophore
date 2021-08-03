@@ -1,4 +1,7 @@
 import molsysmt as msm
+import pyunitwizard as puw
+import nglview as nv
+from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
 class Pharmacophore():
 
@@ -40,7 +43,7 @@ class Pharmacophore():
         self.molecular_system = molecular_system
         self.extractor = None
 
-    def add_to_NGLView(self, view, color_palette='openpharmacophore'):
+    def add_to_NGLView(self, view, palette='openpharmacophore'):
 
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
 
@@ -51,7 +54,7 @@ class Pharmacophore():
         view: :obj: `nglview.NGLWidget`
             View as NGLView widget where the representation of the pharmacophore is going to be
             added.
-        color_palette: :obj: `str`, dict
+        palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Note
@@ -73,19 +76,39 @@ class Pharmacophore():
 
         """
 
-        for element in self.elements:
-            element.add_to_NGLView(view, color_palette=color_palette)
+        if palette == "openpharmacophore":
+            feature_colors = {
+                'positive charge': (0.12, 0.36, 0.52), # Blue
+                'negative charge': (0.90, 0.30, 0.24),  # Red
+                'hb acceptor': (0.90, 0.30, 0.24),  # Red
+                'hb donor': (0.13, 0.56, 0.30), # Green
+                'included volume': (0, 0, 0), # Black,
+                'excluded volume': (0, 0, 0), # Black
+                'hydrophobicity': (1, 0.9, 0),  # Yellow
+                'aromatic ring': (1, 0.9, 0),  # Yellow
+            }
+        else:
+            raise NotImplementedError
 
-        pass
+        # TODO: implement visualization of vectors. Openpharmacophore palette is not working
 
-    def show(self, color_palette='openpharmacophore'):
+        for i, element in enumerate(self.elements):
+            center = puw.get_value(element.center, to_unit="angstroms").tolist()
+            radius = puw.get_value(element.radius, to_unit="angstroms")
+            # feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
+            feature_color = feature_colors[element.feature_name]
+            label = f"{element.feature_name}_{i}"
+            view.shape.add_sphere(center, feature_color, radius, label)
+
+
+    def show(self, palette='openpharmacophore'):
 
         """Showing the pharmacophore model together with the molecular system from with it was
         extracted as a new view (NGLWidget) from NGLView.
 
         Parameters
         ----------
-        color_palette: :obj: `str`, dict
+        palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns
@@ -107,8 +130,8 @@ class Pharmacophore():
 
         """
 
-        view = msm.view(self.molecular_system, standardize=False)
-        self.add_to_NGLView(view, color_palette=color_palette)
+        view = nv.NGLWidget()
+        self.add_to_NGLView(view, palette=palette)
 
         return view
 
@@ -191,6 +214,7 @@ class Pharmacophore():
         >>> pharmacophore._from_pharmer(pharmacophore_ligandscout_file)
 
         """
+        # TODO: complete function
 
         from openpharmacophore.io import from_ligandscout as _from_ligandscout
         self = _from_ligandscout(pharmacophore)
@@ -219,6 +243,7 @@ class Pharmacophore():
         >>> pharmacophore.to_ligandscout('ligandscout_pharmacophore.xxx')
 
         """
+        # TODO: complete function
 
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)

@@ -2,7 +2,7 @@ import nglview as nv
 
 def view_ligands(molecules):
     """
-    Generate a view of the ligand molecules.
+    Generate a view of a set of ligands
 
     Parameters
     -----------

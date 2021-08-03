@@ -49,7 +49,7 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, sigma=None, p
                                             direction=direction)
     elif point_type == "gaussian":
         point = points["gaussian"][feat_name](center=puw.quantity(coords, "angstroms"),
-                                            sigma=sigma)
+                                            sigma=puw.quantity(sigma, "angstroms"))
     else:
         raise NotImplementedError
     

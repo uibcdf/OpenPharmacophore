@@ -1,5 +1,4 @@
 from openpharmacophore.utils.alignment import align_set_of_ligands
-from openpharmacophore.ligand_based import LigandBasedPharmacophore
 from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
 import numpy as np
 import os
@@ -81,6 +80,4 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
             point = rdkit_to_point(feature_type, center, radius=radius)
             pharmacophoric_points.append(point)
 
-    pharmacophore = LigandBasedPharmacophore(elements=pharmacophoric_points, molecular_system=aligned_ligands)
-
-    return pharmacophore
+    return pharmacophoric_points, aligned_ligands
