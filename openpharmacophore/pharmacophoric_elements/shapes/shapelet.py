@@ -1,3 +1,11 @@
+"""Parent class for pharmacophoric elements with the shape: shapelet.
+
+This module contains a parent class to be inherited with attributes and methods for pharamacophoric
+elements with the 'shapelet' shape.
+
+"""
+
+
 import numpy as np
 from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
@@ -9,10 +17,10 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class Shapelet():
 
-    """ Parent class of pharmacophoric shapelet.
+    """ Parent class for the pharmacophoric shape shapelet.
 
-    Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    shapelets classes.
+    Common attributes and methods will be included here to be inherited by specific pharmacophoric
+    elements with shape shapelet.
 
     Parameters
     ----------
@@ -32,11 +40,7 @@ class Shapelet():
         pass
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None):
-        """Adding the sphapelet representation to a NGLview view
-
-        Note
-        ----
-        This method does not return a new view but modifies the input object.
+        """Adding the sphapelet representation to an NGLview view
 
         Parameters
         ----------
@@ -46,6 +50,10 @@ class Shapelet():
             Color palette to show the point representation.
         color : str or list
             Color to show the point representation as HEX or RGB code.
+
+        Note
+        ----
+        This method does not return a new view but modifies the input object.
 
         """
 

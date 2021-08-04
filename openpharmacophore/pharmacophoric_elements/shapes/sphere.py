@@ -1,3 +1,11 @@
+"""Parent class for pharmacophoric elements with the shape: sphere.
+
+This module contains a parent class to be inherited with attributes and methods for pharamacophoric
+elements with the 'sphere' shape.
+
+"""
+
+
 import numpy as np
 from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
@@ -9,16 +17,16 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class Sphere():
 
-    """ Parent class of pharmacophoric point.
+    """ Parent class for the pharmacophoric shape sphere.
 
-    Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    points classes.
+    Common attributes and methods will be included here to be inherited by specific pharmacophoric
+    elements with shape sphere.
 
     Parameters
     ----------
     center : Quantity (dimensionality:{'[L]':1}; value_type:list,tuple,numpy.ndarray; shape:(3,))
         Coordinates of the sphere center.
-        radius : Quantity (dimensionality:{'[L]':1}; value:float)
+    radius : Quantity (dimensionality:{'[L]':1}; value:float)
         Radius of the pharmacophoric sphere.
 
     Attributes
@@ -45,11 +53,7 @@ class Sphere():
         self.radius = _puw.standardize(radius)
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the sphere representation to a NGLview view
-
-        Note
-        ----
-        This method does not return a new view but modifies the input object.
+        """Adding the sphere representation to an NGLview view
 
         Parameters
         ----------
@@ -59,6 +63,10 @@ class Sphere():
             Color palette to show the point representation.
         color : str or list
             Color to show the point representation as HEX or RGB code.
+
+        Note
+        ----
+        This method does not return a new view but modifies in place the input one.
 
         """
 

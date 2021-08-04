@@ -1,3 +1,10 @@
+"""Parent class for pharmacophoric elements with the shape: sphere and vector.
+
+This module contains a parent class to be inherited with attributes and methods for pharamacophoric
+elements with the 'sphere and vector' shape.
+
+"""
+
 import numpy as np
 from openpharmacophore import _puw
 from openpharmacophore import __documentation_web__
@@ -9,10 +16,10 @@ from openpharmacophore.pharmacophoric_elements.features.color_palettes import ge
 
 class SphereAndVector():
 
-    """ Parent class of pharmacophoric point.
+    """ Parent class of pharmacophoric shape sphere and vector.
 
     Common attributes and methods will be included here to be inherited by the specific pharmacophoric
-    points classes.
+    elements with shape sphere and vector.
 
     Parameters
     ----------
@@ -52,11 +59,7 @@ class SphereAndVector():
         self.direction = direction/np.linalg.norm(direction)
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the sphere representation to a NGLview view
-
-        Note
-        ----
-        This method does not return a new view but modifies the input object.
+        """Adding the sphere representation to an NGLview view
 
         Parameters
         ----------
@@ -66,6 +69,10 @@ class SphereAndVector():
             Color palette to show the point representation.
         color : str or list
             Color to show the point representation as HEX or RGB code.
+
+        Note
+        ----
+        This method does not return a new view but modifies the input object.
 
         """
 
