@@ -1,7 +1,7 @@
 from openpharmacophore import Pharmacophore
 from openpharmacophore.visualization.view_ligands import view_ligands
 from openpharmacophore.extractors.dbscan import dbscan_pharmacophore
-from openpharmacophore.io.mol2 import load_Mol2_file
+from openpharmacophore.io.mol2 import load_mol2_file
 from rdkit import Chem
 import nglview as nv
 
@@ -75,8 +75,14 @@ class LigandBasedPharmacophore(Pharmacophore):
         
         if fextension == "smi":
             ligands = Chem.SmilesMolSupplier(fname, delimiter='\t', titleLine=False)
+            ligands = list(ligands)
         elif fextension == "mol2":
-            ligands = load_Mol2_file(fname)
+            ligands = load_mol2_file(fname)
+        elif fextension == "sdf":
+            ligands = Chem.SDMolSupplier("../data/abl1/actives_final.sdf")
+            ligands = list(ligands)
+        elif fextension == "pdb":
+            raise NotImplementedError
 
         self.from_ligand_list(ligands=ligands, method=method, radius=radius, feat_list=feat_list, point_type=point_type)
 

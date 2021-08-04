@@ -1,6 +1,6 @@
 from rdkit import Chem
 
-def load_Mol2_file(fname):
+def load_mol2_file(fname):
     """Load molecules from a mol2 file
        
        code by https://chem-workflows.com/articles/2020/03/23/building-a-multi-molecule-mol2-reader-for-rdkit-v2/
