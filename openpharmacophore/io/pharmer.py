@@ -1,17 +1,18 @@
-from openpharmacophore import _puw, Pharmacophore
+from openpharmacophore.structured_based import StructuredBasedPharmacophore
+from openpharmacophore import _puw, pharmacophore
 from openpharmacophore import pharmacophoric_elements as elements
 import molsysmt as msm
 import json
 import pyunitwizard as puw
 
 
-def from_pharmer(pharmacophore):
+def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
-    tmp_pharmacophore = Pharmacophore()
+    tmp_pharmacophore = StructuredBasedPharmacophore(elements=[], molecular_system=None)
 
-    if type(pharmacophore)==str:
-        if pharmacophore.endswith('.json'):
-            with open(pharmacophore, "r") as fff:
+    if type(pharmacophore_file) == str:
+        if pharmacophore_file.endswith('.json'):
+            with open(pharmacophore_file, "r") as fff:
                 pharmacophore = json.load(fff)
         else:
             raise NotImplementedError
@@ -70,17 +71,25 @@ def from_pharmer(pharmacophore):
 
         else:
             raise NotImplementedError
+        
+    if load_mol_sys:
 
-    if "ligand" in pharmacophore:
-        ligand = msm.convert(pharmacophore["ligand"], to_form="molsysmt.MolSys")
-        #receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
-        #tmp_pharmacophore.molecular_system = msm.merge([ligand, receptor])
+        has_ligand = "ligand" in pharmacophore and pharmacophore["ligand"] != ""
+        if has_ligand: 
+            ligand = msm.convert(pharmacophore["ligand"], to_form="molsysmt.MolSys") 
+            tmp_pharmacophore.molecular_system = ligand
 
-        tmp_pharmacophore.molecular_system = ligand
+        has_receptor = "receptor" in pharmacophore and pharmacophore["receptor"] != ""
+        if has_receptor: 
+            receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
+            tmp_pharmacophore.molecular_system = receptor
 
+        if has_ligand and has_receptor:
+            tmp_pharmacophore.molecular_system = msm.merge([ligand, receptor])
+                
     return tmp_pharmacophore
 
-def to_pharmer(pharmacophore, file_name):
+def to_pharmer(pharmacophore, file_name, return_dict=False):
 
     pharmer_element_name = { # dictionary to map openpharmacophore feature names to pharmer feature names
         "aromatic ring": "Aromatic",
@@ -120,10 +129,17 @@ def to_pharmer(pharmacophore, file_name):
 
         points.append(point_dict)
 
-    pharmacophore = {}
-    pharmacophore["points"] = points
+    pharmacophore_dict = {}
+    pharmacophore_dict["points"] = points
 
     # TODO: add ligand and/or receptor
+    # if pharmacophore.molecular_system is not None:
+    #     ligand = msm.extract(pharmacophore.molecular_system, selection='molecule_type=="small_molecule"')
+    #     receptor = msm.extract(pharmacophore.molecular_system, selection='molecule_type=="protein"')
+    #     pharmacophore_dict["receptor"] = ligand
+    #     pharmacophore_dict["ligand"] = receptor
+    if return_dict:
+        return pharmacophore_dict
     
     with open(file_name, "w") as outfile:
-        json.dump(pharmacophore, outfile)
+        json.dump(pharmacophore_dict, outfile)

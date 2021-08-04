@@ -47,7 +47,7 @@ class SphereAndVector():
         #: InputArgumentError shouldn't need arguments
         if not check_input_argument(center, 'quantity', dimensionality={'[L]':1}, value_type=[list, tuple, np.ndarray]):
             raise InputArgumentError('center', 'SphereAndVector', __documentation_web__)
-        if not check_input_argument(radius, 'quantity', dimensionality={'[L]':1}, value_type=float):
+        if not check_input_argument(radius, 'quantity', dimensionality={'[L]':1}, value_type=[float, int]):
             raise InputArgumentError('radius', 'SphereAndVector', __documentation_web__)
         if not check_input_argument(direction, [tuple, list, np.ndarray], shape=(3,)):
             raise InputArgumentError('direction', 'SphereAndVector', __documentation_web__)

@@ -1,4 +1,7 @@
 import molsysmt as msm
+import pyunitwizard as puw
+import nglview as nv
+from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
 class Pharmacophore():
 
@@ -33,23 +36,14 @@ class Pharmacophore():
     """
 
 
-    def __init__(self, pharmacophore=None, form=None):
+    def __init__(self, elements=[], molecular_system=None):
 
-        self.elements = []
-        self.n_elements = 0
+        self.elements = elements
+        self.n_elements = len(elements)
+        self.molecular_system = molecular_system
         self.extractor = None
-        self.molecular_system = None
 
-        if pharmacophore is not None:
-
-            if form=='pharmer':
-                self.__from_pharmer(pharmacophore)
-            elif form=='ligandscout':
-                self.__from_ligandscout(pharmacophore)
-            else:
-                raise NotImplementedError
-
-    def add_to_NGLView(self, view, color_palette='openpharmacophore'):
+    def add_to_NGLView(self, view, palette='openpharmacophore'):
 
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
 
@@ -60,7 +54,7 @@ class Pharmacophore():
         view: :obj: `nglview.NGLWidget`
             View as NGLView widget where the representation of the pharmacophore is going to be
             added.
-        color_palette: :obj: `str`, dict
+        palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Note
@@ -82,19 +76,39 @@ class Pharmacophore():
 
         """
 
-        for element in self.elements:
-            element.add_to_NGLView(view, color_palette=color_palette)
+        if palette == "openpharmacophore":
+            feature_colors = {
+                'positive charge': (0.12, 0.36, 0.52), # Blue
+                'negative charge': (0.90, 0.30, 0.24),  # Red
+                'hb acceptor': (0.90, 0.30, 0.24),  # Red
+                'hb donor': (0.13, 0.56, 0.30), # Green
+                'included volume': (0, 0, 0), # Black,
+                'excluded volume': (0, 0, 0), # Black
+                'hydrophobicity': (1, 0.9, 0),  # Yellow
+                'aromatic ring': (1, 0.9, 0),  # Yellow
+            }
+        else:
+            raise NotImplementedError
 
-        pass
+        # TODO: implement visualization of vectors. Openpharmacophore palette is not working
 
-    def show(self, color_palette='openpharmacophore'):
+        for i, element in enumerate(self.elements):
+            center = puw.get_value(element.center, to_unit="angstroms").tolist()
+            radius = puw.get_value(element.radius, to_unit="angstroms")
+            # feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
+            feature_color = feature_colors[element.feature_name]
+            label = f"{element.feature_name}_{i}"
+            view.shape.add_sphere(center, feature_color, radius, label)
+
+
+    def show(self, palette='openpharmacophore'):
 
         """Showing the pharmacophore model together with the molecular system from with it was
         extracted as a new view (NGLWidget) from NGLView.
 
         Parameters
         ----------
-        color_palette: :obj: `str`, dict
+        palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns
@@ -116,8 +130,8 @@ class Pharmacophore():
 
         """
 
-        view = msm.view(self.molecular_system, standardize=False)
-        self.add_to_NGLView(view, color_palette=color_palette)
+        view = nv.NGLWidget()
+        self.add_to_NGLView(view, palette=palette)
 
         return view
 
@@ -154,7 +168,7 @@ class Pharmacophore():
 
         pass
 
-    def __reset(self):
+    def _reset(self):
 
         """Private method to reset all attributes to default values.
 
@@ -177,66 +191,7 @@ class Pharmacophore():
         self.extractor=None
         self.molecular_system=None
 
-    def __from_pharmer(self, pharmacophore):
-
-        """Private method to update the attributes with those from an imported pharmer pharmacophore.
-
-        Parameters
-        ----------
-        pharmacophore: :obj: str
-            File or object with the pharmer pharmacophoric model.
-
-        Note
-        ----
-
-            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_pharmer(pharmacophore_pharmer_file)
-
-        """
-
-        from openpharmacophore.io import from_pharmer as _from_pharmer
-        tmp_pharmacophore = _from_pharmer(pharmacophore)
-        self.__reset()
-        self.elements = tmp_pharmacophore.elements
-        self.n_elements = tmp_pharmacophore.n_elements
-        self.molecular_system = tmp_pharmacophore.molecular_system
-
-        pass
-
-    def to_pharmer(self, file_name=None):
-
-        """Method to export the pharmacophore to the pharmer compatible format.
-
-        Parameters
-        ----------
-        file_name: str
-            Name of file to be written with the pharmer format of the pharmacophore.
-
-        Note
-        ----
-
-            Nothing is returned. A new file is written.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.demo.pharmacophore
-        >>> pharmacophore.to_pharmer('pharmer_pharmacophore.json')
-
-        """
-
-        from openpharmacophore.io import to_pharmer as _to_pharmer
-        return _to_pharmer(self, file_name=file_name)
-
-    def __from_ligandscout(self, pharmacophore):
+    def _from_ligandscout(self, pharmacophore):
 
         """Private method to update the attributes with those from an imported ligandscout pharmacophore.
 
@@ -259,6 +214,7 @@ class Pharmacophore():
         >>> pharmacophore._from_pharmer(pharmacophore_ligandscout_file)
 
         """
+        # TODO: complete function
 
         from openpharmacophore.io import from_ligandscout as _from_ligandscout
         self = _from_ligandscout(pharmacophore)
@@ -287,6 +243,7 @@ class Pharmacophore():
         >>> pharmacophore.to_ligandscout('ligandscout_pharmacophore.xxx')
 
         """
+        # TODO: complete function
 
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
