@@ -6,8 +6,8 @@ from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
 import numpy as np
 import os
 
-def ligands_pharmacophoric_points(ligands, feat_list=None, feat_def='rdkit', 
-                                point_type="spheres", radius=None):
+def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def='rdkit', 
+                                point_type="spheres"):
 
     """
         Get pharmacophoric points for each ligand in a list of ligands. If a ligand has 
@@ -16,8 +16,12 @@ def ligands_pharmacophoric_points(ligands, feat_list=None, feat_def='rdkit',
         Parameters
         ----------
         ligands: :obj: rdkit.Chem.rdmolfiles.SmilesMolSupplier or list of rdkit.Chem.rdchem.Mol
-            List of ligands
+            List of ligands. Each ligand needs to have at least one conformer
         
+        radius: float
+            Lenght of the radius of the parmacohporic points. Required if point type is 'spheres' or
+            'spheres_vectors'
+
         feat_list: list of str (optional)
             List of features that will be used to compute the pharmacophore
 
@@ -27,9 +31,6 @@ def ligands_pharmacophoric_points(ligands, feat_list=None, feat_def='rdkit',
         point_type: str
             Type of pharmacophoric points to be returned
 
-        radius: int (optional)
-            Lenght of the radius of the parmacohporic points (Default: 1)
-        
         Returns
         -------
         points: a list of openpharmacophore.pharmacophoric_elements

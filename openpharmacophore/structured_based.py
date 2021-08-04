@@ -3,6 +3,36 @@ import molsysmt as msm
 
 class StructuredBasedPharmacophore(Pharmacophore):
 
+    """ Class to store and compute structured-based pharmacophores
+
+    Inherits from pharmacophore
+
+    Parameters
+    ----------
+
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+        List of pharmacophoric elements
+
+    molecular_system : :obj:`molsysmt.MolSys`
+        Molecular system from which this pharmacophore was extracted.
+
+    Attributes
+    ----------
+
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+        List of pharmacophoric elements
+
+    n_elements : int
+        Number of pharmacophoric elements
+
+    extractor : :obj:`openpharmacophore.extractors`
+        Extractor object used to elucidate the pharmacophore
+
+    molecular_system : :obj:`molsysmt.MolSys`
+        Molecular system from which this pharmacophore was extracted.
+
+    """
+
     def __init__(self, elements=[], molecular_system=None):
         super().__init__(elements=elements, molecular_system=molecular_system)
     
@@ -10,14 +40,14 @@ class StructuredBasedPharmacophore(Pharmacophore):
         # TODO: complete function
         pass
 
-    def show(self, color_palette='openpharmacophore'):
+    def show(self, palette='openpharmacophore'):
 
         """Showing the pharmacophore model together with the molecular system from with it was
         extracted as a new view (NGLWidget) from NGLView.
 
         Parameters
         ----------
-        color_palette: :obj: `str`, dict
+        palette: :obj: `str`, dict
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns
@@ -40,12 +70,12 @@ class StructuredBasedPharmacophore(Pharmacophore):
         """
 
         view = msm.view(self.molecular_system, standardize=False)
-        self.add_to_NGLView(view, color_palette=color_palette)
+        self.add_to_NGLView(view, palette=palette)
 
         return view
     
     
-    def _from_pharmer(self, pharmacophore, load_mol_system):
+    def _from_pharmer(self, pharmacophore, load_mol_system=False):
 
         """Private method to update the attributes with those from an imported pharmer pharmacophore.
 
@@ -53,6 +83,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         ----------
         pharmacophore: :obj: str
             File or object with the pharmer pharmacophoric model.
+
+        load_mol_sys: bool
+            If true loads the molecular system associated to the pharmacophore. (Default: False)
 
         Note
         ----

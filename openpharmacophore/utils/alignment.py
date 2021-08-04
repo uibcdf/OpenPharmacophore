@@ -8,6 +8,20 @@ import copy
 def align_set_of_ligands(ligands):
     """
         Align a set of ligands to each other
+
+        Parameters
+        ----------
+        ligands: :obj: list of rdkit.Chem.rdchem.Mol rdkit.Chem.SmilesMolSupplier or rdkit.Chem.SDMolSupplier
+            List of ligands
+        
+        Returns
+        ----------
+        aligned_molecules: list of rdkit.Chem.rdchem.Mol
+            List of aligned ligands
+        
+        crippen_score: list of float
+            List with crippen scores calculated during the alignment
+
     """
     
     if not isinstance(ligands, list):

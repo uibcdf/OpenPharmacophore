@@ -1,4 +1,3 @@
-import molsysmt as msm
 import pyunitwizard as puw
 import nglview as nv
 from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
@@ -7,16 +6,18 @@ class Pharmacophore():
 
     """ Native object for pharmacophores.
 
+    Parent class of LigandBasedPharmacophore, StrucutredBasedPharmacophore and Dynophore
+
     Openpharmacophore native class to store pharmacophoric models.
 
     Parameters
     ----------
 
-    pharmacophore : :obj: (optional)
-        File or object with pharmacophoric model. (Default: None)
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+        List of pharmacophoric elements
 
-    form : str (optional)
-        Form of input pharmacophore: 'pharmer', 'ligandscout'. (Default: None)
+    molecular_system : :obj:`molsysmt.MolSys`
+        Molecular system from which this pharmacophore was extracted.
 
     Attributes
     ----------

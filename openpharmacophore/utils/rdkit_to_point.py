@@ -3,7 +3,36 @@ from openpharmacophore import pharmacophoric_elements
 
 def rdkit_to_point(feat_name, coords, radius=None, direction=None, sigma=None, point_type="spheres"):
 
-    """Transform an rdkit feature point to an openpharmacophore pharmacophoric element"""
+    """Transform an rdkit feature point to an openpharmacophore pharmacophoric element.
+
+        Parameters
+        ----------
+
+        feat_name: str
+            rdkit name of the feature point.
+
+        coords: numpy.ndarray; shape: (3, )
+            3D coordinates of the centroid of the feature.
+        
+        radius: float
+            Lenght of the radius of the parmacohporic points. Required if point_type is 'spheres' or
+            'spheres_vectors'.
+        
+        point_type: str
+            Type of pharmacophoric points to be returned.
+
+        direction: list, tuple, numpy.ndarray; shape:(3,)
+            Unit vector. 
+        
+        sigma: float
+            Standard deviation of the Gaussian kernel of the pharmacophoric sphere.
+            Required if point_type is gaussian.
+
+        Returns
+        -------
+        point: an openpharmacophore.pharmacophoric_element
+    
+    """
 
     points = {
         "spheres": {

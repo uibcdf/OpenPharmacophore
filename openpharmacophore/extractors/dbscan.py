@@ -9,7 +9,30 @@ from openpharmacophore.utils.centroid import feature_centroid
 
 def get_feature_clusters(feat_coords, eps, min_samples):
     """
-    Get clusters of features for a ligand based pharmacophore
+    Get clusters of features for a ligand based pharmacophore.
+
+    Parameters
+    ----------
+
+    feat_coords: dict
+        Dictionary containing 3D coordinates for each feature type. Dictionary keys 
+        are feature name and values are an numpy array of coordinates 
+        
+    eps: float
+        The maximum distance between two pharmacophoric points for one to be considered 
+        as in the neighborhood of the other. (Default: 2)
+
+    min_samples: float between 0 and 1
+        Percentages of ligands that must contain a pharmacophoric point to be considered as a core point. 
+        (Default 0.75)
+    
+    Returns
+    ----------
+
+    clusters: dict
+        Dictionary with centroid of each cluster of features. Keys are feature name
+        and values is a list of coordinates
+
     """
     
     clusters = {}
@@ -38,7 +61,39 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
     """
     Compute a ligand based pharmacophore from a list of ligands, using a density based 
     clustering algorithm.
+    
+    Parameters
+    ----------
+
+    ligands: :obj: list of rdkit.Chem.rdchem.Mol rdkit.Chem.SmilesMolSupplier or rdkit.Chem.SDMolSupplier
+            List of ligands
+
+    radius: float
+        Lenght of the radius of the parmacohporic points (Default: 1)
+
+    eps: float
+        The maximum distance between two pharmacophoric points for one to be considered 
+        as in the neighborhood of the other. (Default: 2)
+
+    min_samples: float between 0 and 1
+        Percentages of ligands that must contain a pharmacophoric point to be considered as a core point. 
+        (Default 0.75)
+    
+    feat_list: list of str (optional)
+        List of features that will be used to compute the pharmacophore
+
+    Returns
+    ----------
+
+    pharmacophoric_points: list of openpharmacophore.pharmacophoric_elements
+        The pharmacophoric points of the common pharmacophore
+
+    aligned_ligands: list of rdkit.Chem.Mol
+        A list containing the aligned ligands
+
     """
+    if min_samples < 0 or min_samples > 1:
+        raise ValueError("min_samples must be a value between 0 and 1")
     
     aligned_ligands, _ = align_set_of_ligands(ligands)
 
