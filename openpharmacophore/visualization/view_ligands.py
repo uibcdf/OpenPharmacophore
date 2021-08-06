@@ -10,7 +10,7 @@ def view_ligands(molecules):
 
     Returns
     ----------
-    nglview.widget.NGLWidget
+    view: an nglview.widget.NGLWidget
     """
     if not isinstance(molecules, list):
         molecules = [molecules]

@@ -1,6 +1,7 @@
 import openpharmacophore as oph
 import pyunitwizard as puw
 from openpharmacophore.io.pharmer import from_pharmer, to_pharmer
+from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
 
 def test_from_pharmer():
@@ -66,3 +67,12 @@ def test_to_pharmer():
     expected["points"].append(acceptor)
 
     assert pharmer == expected
+
+def test_load_mol2_file():
+    fname = "./openpharmacophore/data/ace.mol2"
+    molecules = load_mol2_file(fname=fname)
+
+    assert len(molecules) == 3
+    assert molecules[0].GetNumAtoms() == 14
+    assert molecules[1].GetNumAtoms() == 25
+    assert molecules[2].GetNumAtoms() == 29

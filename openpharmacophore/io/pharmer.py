@@ -8,6 +8,23 @@ import pyunitwizard as puw
 
 def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
+    """ Loads a pharmacophore from a pharmer file
+
+        Parameters
+        ----------
+
+        pharmacophore_file: str
+            name of the file containing the pharmacophore
+
+        load_mol_sys: bool
+            If true loads the molecular system associated to the pharmacophore (Default: False)
+
+        Returns
+        -------
+        tmp_pharmacophore: obj: openpharmacophore.structured_based.StructuredBasedPharmacophore
+            An structured based pharmacophore with the point from the pharmer file
+    """
+
     tmp_pharmacophore = StructuredBasedPharmacophore(elements=[], molecular_system=None)
 
     if type(pharmacophore_file) == str:
@@ -90,6 +107,26 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
     return tmp_pharmacophore
 
 def to_pharmer(pharmacophore, file_name, return_dict=False):
+
+    """ Save a pharmacophore as a pharmer file (json file)
+
+        Parameters
+        ----------
+
+        pharmacophore: obj: openpharmacophore.strucutured_based.StructuredBasedPharmacophore
+            Pharmacophore object that will be saved to a file
+
+        file_name: str
+            Name of the file that will contain the pharmacophore
+
+        return_dict: bool
+            If true returns a dictionary that contains the pharmer pharmacophore (Default: false)
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+    """
 
     pharmer_element_name = { # dictionary to map openpharmacophore feature names to pharmer feature names
         "aromatic ring": "Aromatic",

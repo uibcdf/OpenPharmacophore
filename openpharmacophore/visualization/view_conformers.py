@@ -11,7 +11,7 @@ def view_conformers(molecule):
 
     Returns
     ----------
-    nglview.widget.NGLWidget
+    view: an nglview.widget.NGLWidget
     """
     view = nv.NGLWidget()
     for conformer in range(molecule.GetNumConformers()):
