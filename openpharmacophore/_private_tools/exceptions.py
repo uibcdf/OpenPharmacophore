@@ -13,7 +13,7 @@ class ShapeWithNoColorError(ValueError):
 
 class NoConformersError(Exception):
     """
-        Exception raised when an rdkit molecule has no conformers and thus, no 3D coordinates
+        Exception raised when an rdkit molecule has no conformers and thus, no 3D coordinates.
     """
     def __init__(self, n_conformers, message="Pharmacophoric points cannot be found without 3D coordinates."):
         self.n_conformers = n_conformers
@@ -25,7 +25,7 @@ class NoConformersError(Exception):
 
 class PointTypeError(Exception):
     """
-        Exception raised when an invalid pharmacophore point type is passed to a function
+        Exception raised when an invalid pharmacophore point type is passed to a function.
     """
 
     def __init__(self, point_type, message="Invalid point type"):
@@ -35,3 +35,12 @@ class PointTypeError(Exception):
 
     def __str__(self):
         return f"{self.message}. \"{self.point_type}\" is not a valid point type"
+
+class InvalidFeatureError(Exception):
+    """
+        Exception raised when trying to remove an invalid feature from a pharmacophore object.
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

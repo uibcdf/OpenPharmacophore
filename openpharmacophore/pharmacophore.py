@@ -1,3 +1,4 @@
+from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import nglview as nv
 from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
@@ -166,8 +167,55 @@ class Pharmacophore():
 
         self.elements.append(pharmacophoric_element)
         self.n_elements +=1
+    
+    def remove_element(self, element_indx):
 
-        pass
+        """Remove an element from the pharmacophore.
+
+        Parameters
+        ----------
+        element_inx: int
+            Index of the element to be removed
+
+        Returns
+        -------
+            The pharmacophoric element given as input argument is removed from the pharmacophore.
+        """
+
+        self.elements.pop(element_indx)
+        self.n_elements -=1
+
+    def remove_feature(self, feat_type):
+
+        """Remove an especific feature type from the pharmacophore elements list
+
+        Parameters
+        ----------
+        feat_type: str
+            Name or type of the feature to be removed
+
+        Returns
+        ------
+            The pharmacophoric elements of the feature type given as input argument 
+            are removed from the pharmacophore.
+        """
+        feats = [
+            "aromatic ring",
+            "hydrophobicity",
+            "hb acceptor",
+            "hb donor",
+            "included volume",
+            "excluded volume",
+            "positive charge",
+            "negative charge",
+        ]    
+        if feat_type not in feats:
+            raise InvalidFeatureError(f"Cannot remove feature. \"{feat_type}\" is not a valid feature type")
+        temp_elements = [element for element in self.elements if element.feature_name != feat_type]
+        if len(temp_elements) == self.n_elements: # No element was removed
+            raise InvalidFeatureError(f"Cannot remove feature. The pharmacophore does not contain any {feat_type}")
+        self.elements = temp_elements
+        self.n_elements = len(self.elements)
 
     def _reset(self):
 
