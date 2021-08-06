@@ -68,11 +68,10 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
                 point = rdkit_to_point(feat_name, coords, radius=radius, point_type=point_type)
                 conformer_id = "conformer_" + str(conformer_idx)
 
-                if conformer_id in points[ligand_id]:
-                    points[ligand_id][conformer_id].append(point)
-                else:
+                if conformer_id not in points[ligand_id]:
                     points[ligand_id][conformer_id] = []
-
+                points[ligand_id][conformer_id].append(point)
+                
     return points
 
 def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="spheres"):
@@ -121,7 +120,6 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
             atom_idxs = ligand.GetSubstructMatch(pattern)
             if len(atom_idxs) == 0:
                 continue
-            
             for conformer_idx in range(n_conformers):
                 if len(atom_idxs) == 1: # Donor or acceptor feature
                     position = ligand.GetConformer(conformer_idx).GetAtomPosition(atom_idxs[0])
@@ -130,15 +128,15 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
                     coords[1] = position.y
                     coords[2] = position.z
                 else: # Aromatic, hydrophobic, positive or negative feature
-                    coords = feature_centroid(ligand, conformer_idx, atom_idxs)
+                    coords = feature_centroid(ligand, atom_idxs, conformer_idx)
 
                 point = rdkit_to_point(feat_type, coords, radius=radius, point_type=point_type)
                 conformer_id = "conformer_" + str(conformer_idx)
 
-                if conformer_id in points[ligand_id]:
-                    points[ligand_id][conformer_id].append(point)
-                else:
+                if conformer_id not in points[ligand_id]:
                     points[ligand_id][conformer_id] = []
+                points[ligand_id][conformer_id].append(point)
+
     return points
 
 
@@ -176,7 +174,7 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
 
     point_type_list = ["spheres", "spheres_vectors", "gaussian", "shapelet"]
     if point_type not in point_type_list:
-        raise PointTypeError(point_type)
+        raise PointTypeError(f"Invalid point type. \"{point_type}\" is not a valid point type")
 
     if (point_type == "spheres" or point_type == "spheres_vectors") and radius is None:
         raise ValueError("Radius cannot be null if point type is spheres or spheres_vectors") 
@@ -190,7 +188,7 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
         feat_list = ['Acceptor', 'Aromatic', 'Donor', 'Hydrophobe', 'PosIonizable', 'NegIonizable']
     
     if feat_def is None: # If no feature definition is given use rdkit one
-        points = rdkit_points(lignads=ligands, radius=radius, feat_list=feat_list, point_type=point_type)
+        points = rdkit_points(ligands=ligands, radius=radius, feat_list=feat_list, point_type=point_type)
     else:
         points = custom_definition_points(ligands=ligands, radius=radius, feat_list=feat_list, feat_def=feat_def, point_type=point_type)
     
