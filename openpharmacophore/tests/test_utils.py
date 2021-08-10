@@ -110,3 +110,7 @@ def test_load_smarts_fdef():
     assert len(feat_def) == 28
     assert '[#16!H0]' in feat_def
     assert 'c1nn[nH1]n1' in feat_def
+
+def test_direction_vector():
+    dir_vector = [1, 0, 0]
+    assert np.all(dir_vector == direction_vector())

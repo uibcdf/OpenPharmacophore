@@ -57,6 +57,7 @@ class SphereAndVector():
         self.center = _puw.standardize(center)
         self.radius = _puw.standardize(radius)
         self.direction = direction/np.linalg.norm(direction)
+        self.has_direction = True
 
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
         """Adding the sphere representation to an NGLview view

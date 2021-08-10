@@ -3,6 +3,7 @@ from rdkit.Chem import ChemicalFeatures
 from openpharmacophore._private_tools.exceptions import NoConformersError, PointTypeError
 from openpharmacophore.utils.centroid import feature_centroid
 from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
+from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 import numpy as np
 import os
 
@@ -32,8 +33,8 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
     """
     fdefName = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
     factory = ChemicalFeatures.BuildFeatureFactory(fdefName)
-    points = {}
-        
+    
+    points = {}    
     for i, ligand in enumerate(ligands):
 
         n_conformers = ligand.GetNumConformers()
@@ -53,19 +54,28 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
             atom_idxs = f.GetAtomIds()
             
             for conformer_idx in range(n_conformers):
-                                    
-                if len(atom_idxs) > 1: # Get the centroid of that feature
-                    coords = feature_centroid(ligand, atom_idxs, conformer_idx)
+                if len(atom_idxs) > 1: 
+                    # Find the centroid
+                    coords = feature_centroid(ligand, atom_idxs, conformer_idx) # Aromatic, hydrophobic, positive or negative feature
+                    # Find direction vector
+                    if point_type == "spheres_vectors" and feat_name == "Aromatic":
+                        direction = aromatic_direction_vector(ligand, atom_idxs, conformer_idx)
+                    else:
+                        direction = None
                 else:
-                    position = ligand.GetConformer(conformer_idx).GetAtomPosition(atom_idxs[0])
+                    # Find the centroid
+                    position = ligand.GetConformer(conformer_idx).GetAtomPosition(atom_idxs[0]) # Donor or acceptor feature
                     coords = np.zeros((3,))
                     coords[0] = position.x
                     coords[1] = position.y
                     coords[2] = position.z
-
-                # TODO: find direction vector for vectorial pharmacophoric points
-
-                point = rdkit_to_point(feat_name, coords, radius=radius, point_type=point_type)
+                    # Find direction vector
+                    if point_type == "spheres_vectors":
+                        direction = donor_acceptor_direction_vector(ligand, atom_idxs[0], coords, conformer_idx)
+                    else:
+                        direction = None
+                        
+                point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction, point_type=point_type)
                 conformer_id = "conformer_" + str(conformer_idx)
 
                 if conformer_id not in points[ligand_id]:

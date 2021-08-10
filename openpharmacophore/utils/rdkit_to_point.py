@@ -47,9 +47,6 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, sigma=None, p
             "Acceptor": pharmacophoric_elements.HBAcceptorSphereAndVector,
             "Donor": pharmacophoric_elements.HBDonorSphereAndVector,
             "Aromatic": pharmacophoric_elements.AromaticRingSphereAndVector,
-            "Hydrophobe": pharmacophoric_elements.HydrophobicSphere,
-            "PosIonizable": pharmacophoric_elements.PositiveChargeSphere,
-            "NegIonizable": pharmacophoric_elements.NegativeChargeSphere,
         },
         "gaussian": {
             "Acceptor": pharmacophoric_elements.HBAcceptorGaussianKernel,
@@ -73,9 +70,13 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, sigma=None, p
         point = points["spheres"][feat_name](center=puw.quantity(coords, "angstroms"), 
                                             radius=puw.quantity(radius, "angstroms"))
     elif point_type == "spheres_vectors":
-        point = points["spheres_vectors"][feat_name](center=puw.quantity(coords, "angstroms"), 
-                                            radius=puw.quantity(radius, "angstroms"),
-                                            direction=direction)
+        if feat_name in ["Aromatic", "Donor", "Acceptor"]:
+            point = points["spheres_vectors"][feat_name](center=puw.quantity(coords, "angstroms"), 
+                                                radius=puw.quantity(radius, "angstroms"),
+                                                direction=direction)
+        else:
+            point = points["spheres"][feat_name](center=puw.quantity(coords, "angstroms"), 
+                                            radius=puw.quantity(radius, "angstroms"))
     elif point_type == "gaussian":
         point = points["gaussian"][feat_name](center=puw.quantity(coords, "angstroms"),
                                             sigma=puw.quantity(sigma, "angstroms"))

@@ -11,10 +11,10 @@ def feature_centroid(molecule, atom_indxs, conformer_idx):
                 Molecule that contains the feature which centroid will be computed
 
         atom_indxs: tuple of int
-                indices of the atoms that belong to the feature
+                Indices of the atoms that belong to the feature
 
         conformer_idx: int 
-                index of the conformer for which the feature centroid will be computed
+                Index of the conformer for which the feature centroid will be computed
 
         Returns
         -------
