@@ -104,12 +104,14 @@ class Pharmacophore():
             view.shape.add_sphere(center, feature_color, radius, label)
             # Add vectors
             if element.has_direction:
-                end_arrow = puw.get_value(element.center + 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
                 label = f"{element.feature_name}_vector"
-                view.shape.add_arrow(center, end_arrow, feature_color, 0.2, label)
-
-
-
+                if element.feature_name == "hb acceptor":
+                    end_arrow = puw.get_value(element.center - 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    view.shape.add_arrow(end_arrow, center, feature_color, 0.2, label)
+                else:
+                    end_arrow = puw.get_value(element.center + 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    view.shape.add_arrow(center, end_arrow, feature_color, 0.2, label)
+                   
     def show(self, palette='openpharmacophore'):
 
         """Showing the pharmacophore model together with the molecular system from with it was
@@ -304,3 +306,5 @@ class Pharmacophore():
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(n_elements: {self.n_elements})"

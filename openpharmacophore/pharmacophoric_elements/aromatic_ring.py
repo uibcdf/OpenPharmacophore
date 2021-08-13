@@ -7,6 +7,9 @@ class AromaticRingPoint(AromaticRing, Point):
 
         AromaticRing.__init__(self)
         Point.__init__(self, position)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(position: {self.position})"
 
 class AromaticRingSphere(AromaticRing, Sphere):
 
@@ -14,6 +17,9 @@ class AromaticRingSphere(AromaticRing, Sphere):
 
         AromaticRing.__init__(self)
         Sphere.__init__(self, center, radius)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius})"
 
 class AromaticRingSphereAndVector(AromaticRing, SphereAndVector):
 
@@ -22,11 +28,17 @@ class AromaticRingSphereAndVector(AromaticRing, SphereAndVector):
         AromaticRing.__init__(self)
         SphereAndVector.__init__(self, center, radius, direction)
 
+    def __str__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius}; direction: {self.direction})"
+
 class AromaticRingGaussianKernel(AromaticRing, GaussianKernel):
 
     def __init__(self, center, sigma):
         AromaticRing.__init__(self)
         GaussianKernel.__init__(self, center, sigma)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; sigma: {self.sigma})"
 
 class AromaticRingShapelet(AromaticRing, Shapelet):
 
@@ -34,4 +46,3 @@ class AromaticRingShapelet(AromaticRing, Shapelet):
 
         AromaticRing.__init__(self)
         Shapelet.__init__(self)
-

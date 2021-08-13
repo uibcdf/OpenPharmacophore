@@ -40,7 +40,7 @@ class LigandBasedPharmacophore(Pharmacophore):
     def __init__(self, elements=[], molecular_system=None):
         super().__init__(elements=elements, molecular_system=molecular_system)
     
-    def from_ligand_list(self, ligands, method, radius=1, feat_list=None, point_type="spheres"):
+    def from_ligand_list(self, ligands, method, radius=1, feat_list=None, feat_def=None, point_type="spheres"):
 
         """ Compute pharmacophore from a list of rdkit molecules 
 
@@ -57,6 +57,10 @@ class LigandBasedPharmacophore(Pharmacophore):
         
         feat_list: list of str (optional)
             List of features that will be used to compute the pharmacophore
+        
+        feat_def: dict
+            Definitions of the pharmacophoric points. 
+            Dictionary which keys are SMARTS strings and values are feature names.
 
         Note
         -------
@@ -68,7 +72,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             ligands = list(ligands)
         
         if method == "dbscan":
-            points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list)
+            points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list, feat_def=feat_def)
         else:
             raise NotImplementedError
 
@@ -78,7 +82,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         self.extractor = method
 
     
-    def from_ligand_file(self, fname, method, radius=1, feat_list=None, point_type="spheres"):
+    def from_ligand_file(self, fname, method, radius=1, feat_list=None, feat_def=None, point_type="spheres"):
 
         """ Compute pharmacophore from a file of ligands
 
@@ -97,6 +101,10 @@ class LigandBasedPharmacophore(Pharmacophore):
         
         feat_list: list of str (optional)
             List of features that will be used to compute the pharmacophore
+        
+        feat_def: dict
+            Definitions of the pharmacophoric points. 
+            Dictionary which keys are SMARTS strings and values are feature names.
 
         Note
         -------
@@ -118,7 +126,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         elif fextension == "pdb":
             raise NotImplementedError
 
-        self.from_ligand_list(ligands=ligands, method=method, radius=radius, feat_list=feat_list, point_type=point_type)
+        self.from_ligand_list(ligands=ligands, method=method, radius=radius, feat_list=feat_list, feat_def=feat_def, point_type=point_type)
 
     def show(self, show_ligands=True, palette="openpharmacophore"):
     
@@ -150,5 +158,4 @@ class LigandBasedPharmacophore(Pharmacophore):
         self.add_to_NGLView(view, palette=palette)
 
         return view
-
 

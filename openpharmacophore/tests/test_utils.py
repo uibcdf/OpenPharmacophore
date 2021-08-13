@@ -1,3 +1,4 @@
+from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 from openpharmacophore.utils.load_custom_feats import load_smarts_fdef
 from openpharmacophore._private_tools.exceptions import PointTypeError
 from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
@@ -25,7 +26,6 @@ def test_feature_centroid(sample_molecule):
 
     centroid = utils.centroid.feature_centroid(mol, idxs, 0)
 
-    # Round to two decimals because precission varies from machine to machine
     assert round(x, 2) == round(centroid[0], 2)
     assert round(y, 2) == round(centroid[1], 2)
     assert round(z, 2) == round(centroid[2], 2)
@@ -111,6 +111,31 @@ def test_load_smarts_fdef():
     assert '[#16!H0]' in feat_def
     assert 'c1nn[nH1]n1' in feat_def
 
-def test_direction_vector():
-    dir_vector = [1, 0, 0]
-    assert np.all(dir_vector == direction_vector())
+@pytest.fixture
+def benzoic_acid():
+    """Returns a benzoic acid molecule for testing"""
+    benz_acid = Chem.MolFromSmiles("C1=CC=C(C=C1)C(=O)O")
+    benz_acid = utils.conformers.generate_conformers(benz_acid, 1, random_seed=1, alignment=False)
+    return benz_acid
+
+def test_aromatic_direction_vector(benzoic_acid):
+
+    aromatic_atoms_inx = (0, 1, 2, 3, 4, 5)
+    direction_vector = aromatic_direction_vector(benzoic_acid, aromatic_atoms_inx, 0)
+
+    assert direction_vector.shape[0] == 3
+    assert np.all(np.around(np.array([ 0.02452289, -1.10048427,  1.20713535]), 2) == np.around(direction_vector, 2))
+
+def test_donor_acceptor_direction_vector(benzoic_acid):
+    donor_inx = 8
+    donor_center = np.array([2.78976376, 0.87765978, 0.71608437])
+    acceptor_inx = 7
+    acceptor_center = np.array([2.6851757, -0.79323208, -0.80504238])
+
+    donor_vector = donor_acceptor_direction_vector(benzoic_acid, 'Donor', donor_inx, donor_center, 0)
+    acceptor_vector = donor_acceptor_direction_vector(benzoic_acid, 'Acceptor', acceptor_inx, acceptor_center, 0)
+
+    assert donor_vector.shape[0] == 3
+    assert acceptor_vector.shape[0] == 3
+    assert np.all(np.around(np.array([0.7275082, 0.87517266, 0.7830512]), 2) == np.around(donor_vector, 2))
+    assert np.all(np.around(np.array([-0.62292014, 0.7957192 , 0.73807555]), 2) == np.around(acceptor_vector, 2))

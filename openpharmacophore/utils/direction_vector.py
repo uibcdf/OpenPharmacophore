@@ -1,6 +1,6 @@
 import numpy as np
 
-def donor_acceptor_direction_vector(molecule, atom_indx, coords, conformer_idx):
+def donor_acceptor_direction_vector(molecule, feat_type, atom_indx, coords, conformer_idx):
     """
         Compute the direction vector for an H bond donor or H bond acceptor feature 
 
@@ -8,6 +8,9 @@ def donor_acceptor_direction_vector(molecule, atom_indx, coords, conformer_idx):
         ----------
         molecule: :obj: rdkit.Chem.rdchem.Mol
                 Molecule that contains the feature which direction vector will be computed
+
+        feat_type: str
+                Type of feature. Wheter is donor or acceptor
 
         atom_indx: int
                 Index of the H bond acceptor or donor atom
@@ -33,8 +36,8 @@ def donor_acceptor_direction_vector(molecule, atom_indx, coords, conformer_idx):
         direction[0] += position.x - coords[0]
         direction[1] += position.y - coords[1]
         direction[2] += position.z - coords[2]
-    
-    direction = -direction
+    if feat_type == "Donor":
+        direction = -direction
     return direction
     
 
@@ -47,9 +50,8 @@ def aromatic_direction_vector(molecule, atom_indxs, conformer_idx):
         molecule: :obj: rdkit.Chem.rdchem.Mol
                 Molecule that contains the feature which direction vector will be computed
 
-        atom_indx: int
-                Index of the H bond acceptor or donor atom
-
+        atom_indxs: tuple of int
+                Indices of the aromatic atoms
 
         conformer_idx: int 
                 Index of the conformer for which the direction vector will be computed
