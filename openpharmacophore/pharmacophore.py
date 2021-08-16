@@ -8,8 +8,8 @@ class Pharmacophore():
     """ Native object for pharmacophores.
 
     Parent class of LigandBasedPharmacophore, StrucutredBasedPharmacophore and Dynophore
-
     Openpharmacophore native class to store pharmacophoric models.
+    A pharmacophore can be constructed from a list of elements or from a file.
 
     Parameters
     ----------
@@ -17,8 +17,11 @@ class Pharmacophore():
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
         List of pharmacophoric elements
 
-    molecular_system : an rdkit.Chem.rdchem.Mol or a list of rdkit.Chem.rdchem.Mol
-        Set of ligands from which this pharmacophore was extracted.
+    molecular_system : :obj:`molsysmt.MolSys`
+        Molecular system from which this pharmacophore was extracted.
+    
+    fname : str (optional)
+        Name of file with the pharmacophore object.
 
     Attributes
     ----------
@@ -38,7 +41,7 @@ class Pharmacophore():
     """
 
 
-    def __init__(self, elements=[], molecular_system=None):
+    def __init__(self, elements=[], molecular_system=None, fname=None):
 
         self.elements = elements
         self.n_elements = len(elements)

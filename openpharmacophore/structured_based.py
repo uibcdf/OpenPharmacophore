@@ -75,13 +75,13 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return view
     
     
-    def _from_pharmer(self, pharmacophore, load_mol_system=False):
+    def _from_pharmer(self, fname, load_mol_system=False):
 
         """Private method to update the attributes with those from an imported pharmer pharmacophore.
 
         Parameters
         ----------
-        pharmacophore: :obj: str
+        fname: :obj: str
             File or object with the pharmer pharmacophoric model.
 
         load_mol_sys: bool
@@ -103,13 +103,11 @@ class StructuredBasedPharmacophore(Pharmacophore):
         """
 
         from openpharmacophore.io import from_pharmer as _from_pharmer
-        tmp_pharmacophore = _from_pharmer(pharmacophore, load_mol_system)
+        tmp_pharmacophore = _from_pharmer(fname, load_mol_system)
         self._reset()
         self.elements = tmp_pharmacophore.elements
         self.n_elements = tmp_pharmacophore.n_elements
         self.molecular_system = tmp_pharmacophore.molecular_system
-
-        pass
 
     def to_pharmer(self, file_name=None):
 
