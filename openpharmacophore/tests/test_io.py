@@ -6,10 +6,10 @@ from openpharmacophore.structured_based import StructuredBasedPharmacophore
 
 def test_from_pharmer():
 
-    pharmacophore = from_pharmer("./openpharmacophore/data/pharmer.json", load_mol_sys=False)
-    assert pharmacophore.n_elements == 19
-    assert pharmacophore.molecular_system is None
-    assert isinstance(pharmacophore.elements[0], 
+    points, molecular_system = from_pharmer("./openpharmacophore/data/pharmer.json", load_mol_sys=False)
+    assert len(points) == 19
+    assert molecular_system is None
+    assert isinstance(points[0], 
                         oph.pharmacophoric_elements.aromatic_ring.AromaticRingSphereAndVector)
 
 def test_to_pharmer():

@@ -1,7 +1,11 @@
-from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import nglview as nv
+from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
 from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.io import from_pharmer, from_ligandscout
+from openpharmacophore.io.moe import from_moe
+from openpharmacophore.io.pharmagist import from_pharmagist
+from openpharmacophore.io.txt_file import from_text_file
 
 class Pharmacophore():
 
@@ -39,15 +43,31 @@ class Pharmacophore():
         Molecular system from which this pharmacophore was extracted.
 
     """
-
-
-    def __init__(self, elements=[], molecular_system=None, fname=None):
+    def __init__(self, elements=[], molecular_system=None):
 
         self.elements = elements
         self.n_elements = len(elements)
         self.molecular_system = molecular_system
         self.extractor = None
-
+    
+    @classmethod
+    def from_file(cls, fname):
+        fextension = fname.split(".")[-1]
+        if fextension == "json":
+            points, mol_sys = from_pharmer(fname)
+        elif fextension == "ph4":
+            points, mol_sys = from_moe(fname)
+        elif fextension == "pml":
+            points, mol_sys = from_ligandscout(fname)
+        elif fextension == "mol2":
+            points, mol_sys = from_pharmagist(fname)
+        elif fextension == "txt":
+            points, mol_sys = from_text_file(fname)
+        else:
+            raise InvalidFileError(f"Invalid file type, \"{fname}\" is not a supported file format")
+        
+        return cls(points, mol_sys)    
+        
     def add_to_NGLView(self, view, palette='openpharmacophore'):
 
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
@@ -64,21 +84,7 @@ class Pharmacophore():
 
         Note
         ----
-
         Nothing is returned. The `view` object is modified in place.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> import nglview as nv
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore(pharmacophore_pharmer_file, form='pharmer')
-        >>> view = nv.show_molsysmt(pharmacophore.molecular_system)
-        >>> pharmacophore.add_to_NGLView(view)
-        >>> view
-        NGLWidget()
-
         """
 
         if palette == "openpharmacophore":
@@ -131,17 +137,6 @@ class Pharmacophore():
             An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
             molecular system used to elucidate it.
 
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> import nglview as nv
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore(pharmacophore_pharmer_file, form='pharmer')
-        >>> view = pharmacophore.show()
-        >>> view
-        NGLWidget()
-
         """
 
         view = nv.NGLWidget()
@@ -164,16 +159,6 @@ class Pharmacophore():
 
             The pharmacophoric element given as input argument is added to the pharmacophore
             as a new entry of the list `elements`.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> element = oph.pharmacophoric_elements.PositiveChargeSphere('[0,0,0] nm', '1.0 nm')
-        >>> pharmacophore.add_element(element)
-        >>> pharmacophore.elements
-        [openpharmacophore.pharmacophoric_elements.aromatic_ring.AromaticRingSphere at 0x7fa33284a1d0>]
 
         """
 
@@ -238,49 +223,12 @@ class Pharmacophore():
 
            Nothing is returned. All attributes are set to default values.
 
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_reset()
-
         """
 
         self.elements=[]
         self.n_elements=0
         self.extractor=None
         self.molecular_system=None
-
-    def _from_ligandscout(self, pharmacophore):
-
-        """Private method to update the attributes with those from an imported ligandscout pharmacophore.
-
-        Parameters
-        ----------
-        pharmacophore: :obj: str
-            File or object with the ligandscout pharmacophoric model.
-
-        Note
-        ----
-
-            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore_ligandscout_file = oph.demo.pharmacophore_ligandscout_file
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_pharmer(pharmacophore_ligandscout_file)
-
-        """
-        # TODO: complete function
-
-        from openpharmacophore.io import from_ligandscout as _from_ligandscout
-        self = _from_ligandscout(pharmacophore)
-
-        pass
 
     def to_ligandscout(self, file_name=None):
 
@@ -296,18 +244,29 @@ class Pharmacophore():
 
             Nothing is returned. A new file is written.
 
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.demo.pharmacophore
-        >>> pharmacophore.to_ligandscout('ligandscout_pharmacophore.xxx')
-
         """
         # TODO: complete function
 
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
+    def to_pharmer(self, file_name=None):
+
+        """Method to export the pharmacophore to the pharmer compatible format.
+
+        Parameters
+        ----------
+        file_name: str
+            Name of file to be written with the pharmer format of the pharmacophore.
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+
+        """
+        from openpharmacophore.io import to_pharmer as _to_pharmer
+        return _to_pharmer(self, file_name=file_name)
+    
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
