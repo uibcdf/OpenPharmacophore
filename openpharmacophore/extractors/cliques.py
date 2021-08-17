@@ -1,2 +1,2 @@
-def cliques_detection_phamracophore():
+def clique_detection_pharmacophore():
     pass

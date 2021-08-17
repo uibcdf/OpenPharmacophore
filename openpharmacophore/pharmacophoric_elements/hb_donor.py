@@ -7,6 +7,9 @@ class HBDonorPoint(HBDonor, Point):
 
         HBDonor.__init__(self)
         Point.__init__(self, position)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(position: {self.position})"
 
 class HBDonorSphere(HBDonor, Sphere):
 
@@ -14,6 +17,9 @@ class HBDonorSphere(HBDonor, Sphere):
 
         HBDonor.__init__(self)
         Sphere.__init__(self, center, radius)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius})"
 
 class HBDonorSphereAndVector(HBDonor, SphereAndVector):
 
@@ -21,6 +27,9 @@ class HBDonorSphereAndVector(HBDonor, SphereAndVector):
 
         HBDonor.__init__(self)
         SphereAndVector.__init__(self, center, radius, direction)
+    
+    def __str__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius}; direction: {self.direction})"
 
 class HBDonorGaussianKernel(HBDonor, GaussianKernel):
 
@@ -28,4 +37,7 @@ class HBDonorGaussianKernel(HBDonor, GaussianKernel):
 
         HBDonor.__init__(self)
         GaussianKernel.__init__(self, center, sigma)
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(center: {self.center}; sigma: {self.sigma})"
 

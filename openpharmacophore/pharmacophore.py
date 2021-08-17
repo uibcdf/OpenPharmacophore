@@ -17,8 +17,8 @@ class Pharmacophore():
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
         List of pharmacophoric elements
 
-    molecular_system : :obj:`molsysmt.MolSys`
-        Molecular system from which this pharmacophore was extracted.
+    molecular_system : an rdkit.Chem.rdchem.Mol or a list of rdkit.Chem.rdchem.Mol
+        Set of ligands from which this pharmacophore was extracted.
 
     Attributes
     ----------
@@ -92,17 +92,26 @@ class Pharmacophore():
         else:
             raise NotImplementedError
 
-        # TODO: implement visualization of vectors. Openpharmacophore palette is not working
+        # TODO: Openpharmacophore palette is not working
 
         for i, element in enumerate(self.elements):
+            # Add Spheres
             center = puw.get_value(element.center, to_unit="angstroms").tolist()
             radius = puw.get_value(element.radius, to_unit="angstroms")
             # feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
             feature_color = feature_colors[element.feature_name]
             label = f"{element.feature_name}_{i}"
             view.shape.add_sphere(center, feature_color, radius, label)
-
-
+            # Add vectors
+            if element.has_direction:
+                label = f"{element.feature_name}_vector"
+                if element.feature_name == "hb acceptor":
+                    end_arrow = puw.get_value(element.center - 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    view.shape.add_arrow(end_arrow, center, feature_color, 0.2, label)
+                else:
+                    end_arrow = puw.get_value(element.center + 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    view.shape.add_arrow(center, end_arrow, feature_color, 0.2, label)
+                   
     def show(self, palette='openpharmacophore'):
 
         """Showing the pharmacophore model together with the molecular system from with it was
@@ -297,3 +306,5 @@ class Pharmacophore():
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
