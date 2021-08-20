@@ -32,7 +32,8 @@ import pkg_resources
 from openpharmacophore import pharmacophoric_elements as elements
 from openpharmacophore import Pharmacophore
 
-pharmacophore_pharmer_file = pkg_resources.resource_filename('openpharmacophore', 'data/pharmer.json')
+pharmacophore_pharmer_file = pkg_resources.resource_filename('openpharmacophore', 
+                        'data/pharmacophores/pharmer/pharmer.json')
 
 pharmacophore = Pharmacophore()
 #pharmacophore.add_element(elements.PositiveChargeSphere('[0,0,0] angstroms', '1.0 angstroms'))
