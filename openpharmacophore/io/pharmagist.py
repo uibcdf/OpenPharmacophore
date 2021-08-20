@@ -59,7 +59,7 @@ def read_pharmagist(file_name, pharmacophore_index=None):
     elements = pharmacophores[pharmacophore_index]
     return elements
 
-def to_pharmagist(pharmacophores, file_name):
+def to_pharmagist(pharmacophores, file_name, **kwargs):
 
     """ Save pharmacophores to pharmagist mol2 format
 
@@ -108,7 +108,10 @@ def to_pharmagist(pharmacophores, file_name):
         for i, element in enumerate(pharmacophore.elements):
             element_inx = str(i + 1)
             line += element_inx.rjust(7)
-            feat_name = pharmagist_element_name[element.feature_name]
+            try:
+                feat_name = pharmagist_element_name[element.feature_name]
+            except:
+                continue
             line += " " + feat_name
             # Get point coordinates
             center = np.around(puw.get_value(element.center, to_unit="angstroms"), 4)
@@ -137,6 +140,10 @@ def to_pharmagist(pharmacophores, file_name):
         lines.append("@<TRIPOS>BOND\n")
         for l in lines:
             doc.append(l)
-        
+    
+    if kwargs: # For testing purposes
+        if kwargs["testing"] == True:
+            return doc
+
     with open(file_name, "w") as f:
         f.writelines(doc)

@@ -7,7 +7,7 @@ import pyunitwizard as puw
 
 def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
-    """ Loads a pharmacophore from a pharmer file
+    """ Loads a pharmacophore from a pharmer json file
 
         Parameters
         ----------
@@ -20,7 +20,7 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
         Returns
         -------
         points: list of openpharmacophore.pharmacophoric_elements
-            A list if pharmacophoric elements
+            A list of pharmacophoric elements
         
         molecular_system: :obj:`molsysmt.MolSys`
             The molecular system associated with the pharmacophore. If there is no molecular system or
@@ -97,7 +97,7 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
                 
     return points, molecular_system
 
-def to_pharmer(pharmacophore, file_name, return_dict=False):
+def to_pharmer(pharmacophore, file_name, **kwargs):
 
     """ Save a pharmacophore as a pharmer file (json file)
 
@@ -109,9 +109,6 @@ def to_pharmer(pharmacophore, file_name, return_dict=False):
 
         file_name: str
             Name of the file that will contain the pharmacophore
-
-        return_dict: bool
-            If true returns a dictionary that contains the pharmer pharmacophore (Default: false)
 
         Note
         ----
@@ -166,8 +163,10 @@ def to_pharmer(pharmacophore, file_name, return_dict=False):
     #     receptor = msm.extract(pharmacophore.molecular_system, selection='molecule_type=="protein"')
     #     pharmacophore_dict["receptor"] = ligand
     #     pharmacophore_dict["ligand"] = receptor
-    if return_dict:
-        return pharmacophore_dict
+    
+    if kwargs: # For testing purposes
+        if kwargs["testing"] == True:
+            return pharmacophore_dict
     
     with open(file_name, "w") as outfile:
         json.dump(pharmacophore_dict, outfile)

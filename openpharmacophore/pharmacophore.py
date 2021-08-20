@@ -47,33 +47,34 @@ class Pharmacophore():
         self.extractor = None
     
     @classmethod
-    def from_file(cls, fname, **kwargs):
+    def from_file(cls, file_name, **kwargs):
         """
         Class method to load a pharmacohpore from a file.
         Sets the Pharmacophore atributes according to the file.
 
         Parameters
         ---------
-        fname: str
+        file_name: str
             Name of the file containing the pharmacophore
 
         """
-        fextension = fname.split(".")[-1]
+        fextension = file_name.split(".")[-1]
         if fextension == "json":
             from openpharmacophore.io import from_pharmer
             if kwargs:
                 load_mol_sys = kwargs["load_mol_sys"]
             else:
                 load_mol_sys = False
-            points, mol_sys = from_pharmer(fname, load_mol_sys)
+            points, mol_sys = from_pharmer(file_name, load_mol_sys)
 
         elif fextension == "ph4":
             from openpharmacophore.io.moe import from_moe
-            points, mol_sys = from_moe(fname)
+            points, mol_sys = from_moe(file_name)
 
         elif fextension == "pml":
             from openpharmacophore.io import from_ligandscout
-            points, mol_sys = from_ligandscout(fname)
+            points = from_ligandscout(file_name)
+            mol_sys = None
 
         elif fextension == "mol2":
             from openpharmacophore.io.pharmagist import read_pharmagist
@@ -81,15 +82,15 @@ class Pharmacophore():
                 ph_index = kwargs["index"]
             else:
                 ph_index = 0
-            points = read_pharmagist(fname, pharmacophore_index=ph_index)
+            points = read_pharmagist(file_name, pharmacophore_index=ph_index)
             mol_sys = None
 
         elif fextension == "txt":
             from openpharmacophore.io.txt_file import from_text_file
-            points, mol_sys = from_text_file(fname)
+            points, mol_sys = from_text_file(file_name)
             
         else:
-            raise InvalidFileError(f"Invalid file type, \"{fname}\" is not a supported file format")
+            raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
         
         return cls(points, mol_sys)    
         
@@ -266,12 +267,9 @@ class Pharmacophore():
 
         Note
         ----
-
-            Nothing is returned. A new file is written.
+        Nothing is returned. A new file is written.
 
         """
-        # TODO: complete function
-
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
