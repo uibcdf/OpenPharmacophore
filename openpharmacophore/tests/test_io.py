@@ -1,12 +1,16 @@
-import openpharmacophore as oph
-import pyunitwizard as puw
+from openpharmacophore.io.pharmagist import read_pharmagist
 from openpharmacophore.io.pharmer import from_pharmer, to_pharmer
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
+import openpharmacophore as oph
+import pyunitwizard as puw
+import pytest
+import os
 
 def test_from_pharmer():
 
-    points, molecular_system = from_pharmer("./openpharmacophore/data/pharmer.json", load_mol_sys=False)
+    points, molecular_system = from_pharmer("./openpharmacophore/data/pharmacophores/pharmer/pharmer.json", 
+                                            load_mol_sys=False)
     assert len(points) == 19
     assert molecular_system is None
     assert isinstance(points[0], 
@@ -69,10 +73,32 @@ def test_to_pharmer():
     assert pharmer == expected
 
 def test_load_mol2_file():
-    fname = "./openpharmacophore/data/ace.mol2"
+    fname = "./openpharmacophore/data/ligands/ace.mol2"
     molecules = load_mol2_file(fname=fname)
 
     assert len(molecules) == 3
     assert molecules[0].GetNumAtoms() == 14
     assert molecules[1].GetNumAtoms() == 25
     assert molecules[2].GetNumAtoms() == 29
+
+@pytest.mark.parametrize("fname,index",[
+    ("elastase.mol2", None),
+    ("elastase.mol2", 0),
+    ("streptadivin.mol2", None)
+])
+def test_read_pharmagist(fname, index):
+    path = "./openpharmacophore/data/pharmacophores/pharmagist"
+    fpath = os.path.join(path, fname)
+    
+    result = read_pharmagist(fpath, index)
+    if index is None:
+        assert isinstance(result[0], oph.ligand_based.LigandBasedPharmacophore)
+        if fname == "elastase.mol2":
+            assert result[0].n_elements == 4
+            assert len(result) == 8
+        else:
+            assert result[0].n_elements == 9
+            assert len(result) == 6
+    else:
+        assert len(result) == 4
+        assert isinstance(result[0], oph.pharmacophoric_elements.HBAcceptorSphere)

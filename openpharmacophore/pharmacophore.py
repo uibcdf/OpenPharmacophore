@@ -1,11 +1,7 @@
 import pyunitwizard as puw
 import nglview as nv
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
-from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore.io import from_pharmer, from_ligandscout
-from openpharmacophore.io.moe import from_moe
-from openpharmacophore.io.pharmagist import from_pharmagist
-from openpharmacophore.io.txt_file import from_text_file
+# from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
 class Pharmacophore():
 
@@ -51,18 +47,47 @@ class Pharmacophore():
         self.extractor = None
     
     @classmethod
-    def from_file(cls, fname):
+    def from_file(cls, fname, **kwargs):
+        """
+        Class method to load a pharmacohpore from a file.
+        Sets the Pharmacophore atributes according to the file.
+
+        Parameters
+        ---------
+        fname: str
+            Name of the file containing the pharmacophore
+
+        """
         fextension = fname.split(".")[-1]
         if fextension == "json":
-            points, mol_sys = from_pharmer(fname)
+            from openpharmacophore.io import from_pharmer
+            if kwargs:
+                load_mol_sys = kwargs["load_mol_sys"]
+            else:
+                load_mol_sys = False
+            points, mol_sys = from_pharmer(fname, load_mol_sys)
+
         elif fextension == "ph4":
+            from openpharmacophore.io.moe import from_moe
             points, mol_sys = from_moe(fname)
+
         elif fextension == "pml":
+            from openpharmacophore.io import from_ligandscout
             points, mol_sys = from_ligandscout(fname)
+
         elif fextension == "mol2":
-            points, mol_sys = from_pharmagist(fname)
+            from openpharmacophore.io.pharmagist import read_pharmagist
+            if kwargs:
+                ph_index = kwargs["index"]
+            else:
+                ph_index = 0
+            points = read_pharmagist(fname, pharmacophore_index=ph_index)
+            mol_sys = None
+
         elif fextension == "txt":
+            from openpharmacophore.io.txt_file import from_text_file
             points, mol_sys = from_text_file(fname)
+            
         else:
             raise InvalidFileError(f"Invalid file type, \"{fname}\" is not a supported file format")
         
@@ -267,6 +292,24 @@ class Pharmacophore():
         """
         from openpharmacophore.io import to_pharmer as _to_pharmer
         return _to_pharmer(self, file_name=file_name)
+
+    def to_pharmagist(self, file_name=None):
+
+        """Method to export the pharmacophore to the pharmagist compatible format.
+
+        Parameters
+        ----------
+        file_name: str
+            Name of file to be written with the pharmagist format of the pharmacophore.
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+
+        """
+        from openpharmacophore.io.pharmagist import to_pharmagist as _to_pharmagist
+        return _to_pharmagist(self, file_name=file_name)
     
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"

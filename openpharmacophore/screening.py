@@ -21,7 +21,7 @@ class VirtualScreening():
     Attributes
     ----------
 
-    succes : list of 2-tuples (float, rdkit.Chem.mol)
+    success : list of 2-tuples (float, rdkit.Chem.mol)
         List of molecules with its SSD value retrieved from the screen that match the pharmacophore
 
     n_success : int
