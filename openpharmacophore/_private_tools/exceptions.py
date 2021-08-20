@@ -40,3 +40,13 @@ class InvalidFeatureError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+class InvalidFileError(Exception):
+    """
+        Exception raised when trying to load a pharmacophore from an invalid file type.
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+

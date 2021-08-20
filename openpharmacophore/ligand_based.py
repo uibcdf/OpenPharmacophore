@@ -17,8 +17,8 @@ class LigandBasedPharmacophore(Pharmacophore):
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
         List of pharmacophoric elements
 
-    molecular_system : :obj:`molsysmt.MolSys`
-        Molecular system from which this pharmacophore was extracted.
+    molecular_system : an rdkit.Chem.rdchem.Mol or a list of rdkit.Chem.rdchem.Mol
+        Set of ligands from which this pharmacophore was extracted.
 
     Attributes
     ----------
@@ -112,10 +112,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         The molecular system is updated with the set of ligands and the extractor is updated accoirding to the method used.
 
         """
-        accepted_files = ["smi", "mol2", "sdf", "pdb"]
         fextension = fname.split(".")[-1]
-        if fextension not in accepted_files:
-            raise NotImplementedError
         
         if fextension == "smi":
             ligands = Chem.SmilesMolSupplier(fname, delimiter='\t', titleLine=False)
@@ -124,6 +121,8 @@ class LigandBasedPharmacophore(Pharmacophore):
         elif fextension == "sdf":
             ligands = Chem.SDMolSupplier(fname)
         elif fextension == "pdb":
+            raise NotImplementedError
+        else:
             raise NotImplementedError
 
         self.from_ligand_list(ligands=ligands, method=method, radius=radius, feat_list=feat_list, feat_def=feat_def, point_type=point_type)

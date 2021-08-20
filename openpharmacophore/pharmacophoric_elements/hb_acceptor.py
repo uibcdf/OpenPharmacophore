@@ -28,7 +28,7 @@ class HBAcceptorSphereAndVector(HBAcceptor, SphereAndVector):
         HBAcceptor.__init__(self)
         SphereAndVector.__init__(self, center, radius, direction)
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius}; direction: {self.direction})"
 
 class HBAcceptorGaussianKernel(HBAcceptor, GaussianKernel):

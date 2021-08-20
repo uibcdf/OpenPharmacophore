@@ -1,15 +1,15 @@
-from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import nglview as nv
-from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
+# from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
 class Pharmacophore():
 
     """ Native object for pharmacophores.
 
     Parent class of LigandBasedPharmacophore, StrucutredBasedPharmacophore and Dynophore
-
     Openpharmacophore native class to store pharmacophoric models.
+    A pharmacophore can be constructed from a list of elements or from a file.
 
     Parameters
     ----------
@@ -17,8 +17,11 @@ class Pharmacophore():
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
         List of pharmacophoric elements
 
-    molecular_system : an rdkit.Chem.rdchem.Mol or a list of rdkit.Chem.rdchem.Mol
-        Set of ligands from which this pharmacophore was extracted.
+    molecular_system : :obj:`molsysmt.MolSys`
+        Molecular system from which this pharmacophore was extracted.
+    
+    fname : str (optional)
+        Name of file with the pharmacophore object.
 
     Attributes
     ----------
@@ -36,15 +39,61 @@ class Pharmacophore():
         Molecular system from which this pharmacophore was extracted.
 
     """
-
-
     def __init__(self, elements=[], molecular_system=None):
 
         self.elements = elements
         self.n_elements = len(elements)
         self.molecular_system = molecular_system
         self.extractor = None
+    
+    @classmethod
+    def from_file(cls, file_name, **kwargs):
+        """
+        Class method to load a pharmacohpore from a file.
+        Sets the Pharmacophore atributes according to the file.
 
+        Parameters
+        ---------
+        file_name: str
+            Name of the file containing the pharmacophore
+
+        """
+        fextension = file_name.split(".")[-1]
+        if fextension == "json":
+            from openpharmacophore.io import from_pharmer
+            if kwargs:
+                load_mol_sys = kwargs["load_mol_sys"]
+            else:
+                load_mol_sys = False
+            points, mol_sys = from_pharmer(file_name, load_mol_sys)
+
+        elif fextension == "ph4":
+            from openpharmacophore.io.moe import from_moe
+            points, mol_sys = from_moe(file_name)
+
+        elif fextension == "pml":
+            from openpharmacophore.io import from_ligandscout
+            points = from_ligandscout(file_name)
+            mol_sys = None
+
+        elif fextension == "mol2":
+            from openpharmacophore.io.pharmagist import read_pharmagist
+            if kwargs:
+                ph_index = kwargs["index"]
+            else:
+                ph_index = 0
+            points = read_pharmagist(file_name, pharmacophore_index=ph_index)
+            mol_sys = None
+
+        elif fextension == "txt":
+            from openpharmacophore.io.txt_file import from_text_file
+            points, mol_sys = from_text_file(file_name)
+            
+        else:
+            raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
+        
+        return cls(points, mol_sys)    
+        
     def add_to_NGLView(self, view, palette='openpharmacophore'):
 
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
@@ -61,21 +110,7 @@ class Pharmacophore():
 
         Note
         ----
-
         Nothing is returned. The `view` object is modified in place.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> import nglview as nv
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore(pharmacophore_pharmer_file, form='pharmer')
-        >>> view = nv.show_molsysmt(pharmacophore.molecular_system)
-        >>> pharmacophore.add_to_NGLView(view)
-        >>> view
-        NGLWidget()
-
         """
 
         if palette == "openpharmacophore":
@@ -128,17 +163,6 @@ class Pharmacophore():
             An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
             molecular system used to elucidate it.
 
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> import nglview as nv
-        >>> pharmacophore_pharmer_file = oph.demo.pharmacophore_pharmer_file
-        >>> pharmacophore = oph.Pharmacophore(pharmacophore_pharmer_file, form='pharmer')
-        >>> view = pharmacophore.show()
-        >>> view
-        NGLWidget()
-
         """
 
         view = nv.NGLWidget()
@@ -161,16 +185,6 @@ class Pharmacophore():
 
             The pharmacophoric element given as input argument is added to the pharmacophore
             as a new entry of the list `elements`.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> element = oph.pharmacophoric_elements.PositiveChargeSphere('[0,0,0] nm', '1.0 nm')
-        >>> pharmacophore.add_element(element)
-        >>> pharmacophore.elements
-        [openpharmacophore.pharmacophoric_elements.aromatic_ring.AromaticRingSphere at 0x7fa33284a1d0>]
 
         """
 
@@ -235,49 +249,12 @@ class Pharmacophore():
 
            Nothing is returned. All attributes are set to default values.
 
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_reset()
-
         """
 
         self.elements=[]
         self.n_elements=0
         self.extractor=None
         self.molecular_system=None
-
-    def _from_ligandscout(self, pharmacophore):
-
-        """Private method to update the attributes with those from an imported ligandscout pharmacophore.
-
-        Parameters
-        ----------
-        pharmacophore: :obj: str
-            File or object with the ligandscout pharmacophoric model.
-
-        Note
-        ----
-
-            Nothing is returned. All attributes are updated with those coming from the input pharmacophore.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore_ligandscout_file = oph.demo.pharmacophore_ligandscout_file
-        >>> pharmacophore = oph.Pharmacophore()
-        >>> pharmacophore._from_pharmer(pharmacophore_ligandscout_file)
-
-        """
-        # TODO: complete function
-
-        from openpharmacophore.io import from_ligandscout as _from_ligandscout
-        self = _from_ligandscout(pharmacophore)
-
-        pass
 
     def to_ligandscout(self, file_name=None):
 
@@ -290,21 +267,47 @@ class Pharmacophore():
 
         Note
         ----
-
-            Nothing is returned. A new file is written.
-
-        Example
-        -------
-
-        >>> import openpharmacophore as oph
-        >>> pharmacophore = oph.demo.pharmacophore
-        >>> pharmacophore.to_ligandscout('ligandscout_pharmacophore.xxx')
+        Nothing is returned. A new file is written.
 
         """
-        # TODO: complete function
-
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
+    def to_pharmer(self, file_name=None):
+
+        """Method to export the pharmacophore to the pharmer compatible format.
+
+        Parameters
+        ----------
+        file_name: str
+            Name of file to be written with the pharmer format of the pharmacophore.
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+
+        """
+        from openpharmacophore.io import to_pharmer as _to_pharmer
+        return _to_pharmer(self, file_name=file_name)
+
+    def to_pharmagist(self, file_name=None):
+
+        """Method to export the pharmacophore to the pharmagist compatible format.
+
+        Parameters
+        ----------
+        file_name: str
+            Name of file to be written with the pharmagist format of the pharmacophore.
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+
+        """
+        from openpharmacophore.io.pharmagist import to_pharmagist as _to_pharmagist
+        return _to_pharmagist(self, file_name=file_name)
+    
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
