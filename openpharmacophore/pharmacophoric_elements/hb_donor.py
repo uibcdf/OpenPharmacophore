@@ -1,5 +1,7 @@
 from .features import HBDonor
 from .shapes import Point, Sphere, SphereAndVector, GaussianKernel
+import numpy as np
+import pyunitwizard as puw
 
 class HBDonorPoint(HBDonor, Point):
 
@@ -9,7 +11,8 @@ class HBDonorPoint(HBDonor, Point):
         Point.__init__(self, position)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(position: {self.position})"
+        position = np.around(puw.get_value(self.position, "angstroms"), 2)
+        return f"{self.__class__.__name__}(position: {position})"
 
 class HBDonorSphere(HBDonor, Sphere):
 
@@ -19,7 +22,10 @@ class HBDonorSphere(HBDonor, Sphere):
         Sphere.__init__(self, center, radius)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius})"
+        # String representation of the class is always in angstroms and rounded to 2 decimals
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
+        return f"{self.__class__.__name__}(center: {center}; radius: {radius})"
 
 class HBDonorSphereAndVector(HBDonor, SphereAndVector):
 
@@ -29,7 +35,10 @@ class HBDonorSphereAndVector(HBDonor, SphereAndVector):
         SphereAndVector.__init__(self, center, radius, direction)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius}; direction: {self.direction})"
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
+        direction = np.around(self.direction, 2)
+        return f"{self.__class__.__name__}(center: {center}; radius: {radius}; direction: {direction})"
 
 class HBDonorGaussianKernel(HBDonor, GaussianKernel):
 
@@ -39,5 +48,6 @@ class HBDonorGaussianKernel(HBDonor, GaussianKernel):
         GaussianKernel.__init__(self, center, sigma)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(center: {self.center}; sigma: {self.sigma})"
-
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        sigma = np.around(puw.get_value(self.sigma, "angstroms"), 2)
+        return f"{self.__class__.__name__}(center: {center}; sigma: {sigma})"

@@ -4,7 +4,6 @@ import molsysmt as msm
 import json
 import pyunitwizard as puw
 
-
 def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
     """ Loads a pharmacophore from a pharmer json file

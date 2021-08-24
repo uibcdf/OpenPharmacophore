@@ -117,3 +117,5 @@ record.txt
 devtools/playground/*
 !devtools/playground/README.md
 
+# Other
+.DS_store

@@ -1,3 +1,4 @@
+from openpharmacophore.pharmacophoric_elements.positive_charge import PositiveChargeGaussianKernel
 from openpharmacophore import Pharmacophore
 import molsysmt as msm
 
@@ -71,7 +72,5 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         view = msm.view(self.molecular_system, standardize=False)
         self.add_to_NGLView(view, palette=palette)
-
         return view
-    
     
