@@ -1,5 +1,7 @@
 from .features import NegativeCharge
 from .shapes import Point, Sphere, GaussianKernel
+import numpy as np
+import pyunitwizard as puw
 
 class NegativeChargePoint(NegativeCharge, Point):
 
@@ -9,7 +11,8 @@ class NegativeChargePoint(NegativeCharge, Point):
         Point.__init__(self, position)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(position: {self.position})"
+        position = np.around(puw.get_value(self.position, "angstroms"), 2)
+        return f"{self.__class__.__name__}(position: {position})"
 
 class NegativeChargeSphere(NegativeCharge, Sphere):
 
@@ -19,7 +22,10 @@ class NegativeChargeSphere(NegativeCharge, Sphere):
         Sphere.__init__(self, center, radius)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(center: {self.center}; radius: {self.radius})"
+        # String representation of the class is always in angstroms and rounded to 2 decimals
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
+        return f"{self.__class__.__name__}(center: {center}; radius: {radius})"
 
 
 class NegativeChargeGaussianKernel(NegativeCharge, GaussianKernel):
@@ -30,5 +36,7 @@ class NegativeChargeGaussianKernel(NegativeCharge, GaussianKernel):
         GaussianKernel.__init__(self, center, sigma)
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(center: {self.center}; sigma: {self.sigma})"
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        sigma = np.around(puw.get_value(self.sigma, "angstroms"), 2)
+        return f"{self.__class__.__name__}(center: {center}; sigma: {sigma})"
 

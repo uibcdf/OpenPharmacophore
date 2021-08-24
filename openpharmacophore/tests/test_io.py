@@ -1,14 +1,16 @@
-from numpy.core.fromnumeric import around
+from openpharmacophore.io.mol2 import load_mol2_file
+from openpharmacophore.io.moe import from_moe, to_moe
+from openpharmacophore.io.ligandscout import from_ligandscout, to_ligandscout
 from openpharmacophore.io.pharmagist import read_pharmagist, to_pharmagist
 from openpharmacophore.io.pharmer import from_pharmer, to_pharmer
-from openpharmacophore.io.ligandscout import from_ligandscout, to_ligandscout
-from openpharmacophore.io.mol2 import load_mol2_file
-from openpharmacophore.structured_based import StructuredBasedPharmacophore
-from openpharmacophore.ligand_based import LigandBasedPharmacophore
 import openpharmacophore.pharmacophoric_elements as phe
-import pyunitwizard as puw
+from openpharmacophore.ligand_based import LigandBasedPharmacophore
+from openpharmacophore.structured_based import StructuredBasedPharmacophore
+
 import numpy as np
+import pyunitwizard as puw
 import pytest
+
 import os
 
 @pytest.fixture
@@ -121,7 +123,7 @@ def test_read_pharmagist(fname, index):
         assert isinstance(result[0], phe.HBAcceptorSphere)
 
 def test_to_pharmagist(three_element_pharmacophore):
-    mol2_list = to_pharmagist(three_element_pharmacophore, "temp", testing=True)
+    mol2_list = to_pharmagist(three_element_pharmacophore, file_name=None, testing=True)
     expected_output = ['@<TRIPOS>MOLECULE\n',
                         '@<TRIPOS>ATOM\n',
                         '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
@@ -173,6 +175,92 @@ def test_from_ligandscout():
 
 def test_to_ligandscout(three_element_pharmacophore):
     expected_string = b'<pharmacophore name="pharmacophore.pml" pharmacophoreType="LIGAND_SCOUT"><plane disabled="false" featureId="ai_1" name="AR" optional="false" weight="1.0"><position tolerance="0.9999999999999999" x3="0.9999999999999999" y3="0.0" z3="0.0" /><normal tolerance="0.9999999999999999" x3="0.0" y3="0.0" z3="1.0" /></plane><vector disabled="false" featureId="ha_2" hasSyntheticProjectedPoint="false" name="HBA" optional="false" pointsToLigand="false" weight="1.0"><origin tolerance="0.9999999999999999" x3="0.9999999999999999" y3="1.9999999999999998" z3="1.9999999999999998" /><target tolerance="0.9999999999999999" x3="0.9999999999999999" y3="1.2928932188134523" z3="1.2928932188134523" /></vector><volume disabled="false" featureId="ev_3" optional="false" type="exclusion" weight="1.0"><position tolerance="0.9999999999999999" x3="1.9999999999999998" y3="0.9999999999999999" z3="1.9999999999999998" /></volume></pharmacophore>'
-    pml_string = to_ligandscout(three_element_pharmacophore, "temp.pml", testing=True)
+    pml_string = to_ligandscout(three_element_pharmacophore, file_name=None, testing=True)
 
     assert pml_string == expected_string
+
+def test_from_moe():
+    file_name = "./openpharmacophore/data/pharmacophores/moe/gmp.ph4"
+    points = from_moe(file_name)
+    assert len(points) == 10
+
+    donor = points[0]
+    assert isinstance(donor, phe.HBDonorSphere)
+    assert np.all(
+        np.around(puw.get_value(donor.center, "angstroms"), 2) == np.around(np.array([1.71, 1.43075, -1.4255]), 2)
+        )
+    assert np.around(puw.get_value(donor.radius, "angstroms"), 2) == 0.51
+        
+    
+    hyd = points[1]
+    assert isinstance(hyd, phe.HydrophobicSphere)
+    assert np.all(
+        np.around(puw.get_value(hyd.center, "angstroms"), 2) == np.around(np.array([2.7895, 2.4035, -1.40875]), 2)
+        )
+    assert np.around(puw.get_value(hyd.radius, "angstroms"), 2) == 0.55
+    
+    acceptor = points[2]
+    assert isinstance(acceptor, phe.HBAcceptorSphere)
+    assert np.all(
+        np.around(puw.get_value(acceptor.center, "angstroms"), 2) == np.around(np.array([0.312, 3.0175, -2.44825]), 2)
+        )
+    assert np.around(puw.get_value(acceptor.radius, "angstroms"), 2) == 0.57
+    
+    aromatic_1 = points[3]
+    assert isinstance(aromatic_1, phe.AromaticRingSphere)
+    assert np.all(
+        np.around(puw.get_value(aromatic_1.center, "angstroms"), 2) == 
+        np.around(np.array([-0.748458333333333, 2.13108333333333, -2.490375]), 2)
+        )
+    assert np.around(puw.get_value(aromatic_1.radius, "angstroms"), 2) == 0.58
+        
+    
+    aromatic_2 = points[4]
+    assert isinstance(aromatic_2, phe.AromaticRingSphere)
+    assert np.all(
+        np.around(puw.get_value(aromatic_2.center, "angstroms"), 2) == 
+        np.around(np.array([-1.719625, -0.0273333333333334, -2.055625]), 2)
+        )
+    assert np.around(puw.get_value(aromatic_2.radius, "angstroms"), 2) == 0.6
+
+    
+    aromatic_3 = points[5]
+    assert isinstance(aromatic_3, phe.AromaticRingSphere)
+    assert np.all(
+        np.around(puw.get_value(aromatic_3.center, "angstroms"), 2) == 
+        np.around(np.array([5.20029166666667, 1.25479166666667, -0.199041666666667]), 2)
+        )
+    assert np.around(puw.get_value(aromatic_3.radius, "angstroms"), 2) == 0.61
+    
+    acceptor = points[6]
+    assert isinstance(acceptor, phe.HBAcceptorSphere)
+    assert np.all(
+        np.around(puw.get_value(acceptor.center, "angstroms"), 2) == 
+        np.around(np.array([-1.95875, 2.536, -3.03625]), 2)
+        )
+    assert np.around(puw.get_value(acceptor.radius, "angstroms"), 2) == 0.62
+        
+    
+    hyd_2 = points[7]
+    assert isinstance(hyd_2, phe.HydrophobicSphere)
+    assert np.all(
+        np.around(puw.get_value(hyd_2.center, "angstroms"), 2) == np.around(np.array([-1.54725, -2.979375, -0.961875]), 2)
+        )
+    assert np.around(puw.get_value(hyd_2.radius, "angstroms"), 2) == 0.74
+      
+    
+    acceptor_2 = points[8]
+    assert isinstance(acceptor_2, phe.HBAcceptorSphere)
+    assert np.all(
+        np.around(puw.get_value(acceptor_2.center, "angstroms"), 2) == 
+        np.around(np.array([-0.755095833333333, 6.3286375, -3.96758333333333]), 2)
+        )
+    assert np.around(puw.get_value(acceptor_2.radius, "angstroms"), 2) == 1.25
+    
+def test_to_moe(three_element_pharmacophore):
+
+    pharmacophore_str = to_moe(three_element_pharmacophore, file_name=None, testing=True)
+    expected_str = '#moe:ph4que 2021.8\n#pharmacophore 5 tag t value *\nscheme t Unified matchsize i 0 title t s $\n#feature 3 expr tt color ix x r y r z r r r ebits ix gbits ix\nAro df2f2 0.9999999999999999 0.0 0.0 0.9999999999999999 0 300 Acc df2f2 0.9999999999999999 1.9999999999999998 1.9999999999999998 0.9999999999999999 0 300 \n#volumesphere 90 x r y r z r r r\n1.9999999999999998 0.9999999999999999 1.9999999999999998 0.9999999999999999 \n#endpharmacophore'
+
+    assert pharmacophore_str == expected_str
+
