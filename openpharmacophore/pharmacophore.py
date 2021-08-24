@@ -69,7 +69,8 @@ class Pharmacophore():
 
         elif fextension == "ph4":
             from openpharmacophore.io.moe import from_moe
-            points, mol_sys = from_moe(file_name)
+            points = from_moe(file_name)
+            mol_sys = None
 
         elif fextension == "pml":
             from openpharmacophore.io import from_ligandscout
@@ -87,7 +88,7 @@ class Pharmacophore():
 
         elif fextension == "txt":
             from openpharmacophore.io.txt_file import from_text_file
-            points, mol_sys = from_text_file(file_name)
+            points = from_text_file(file_name)
             
         else:
             raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
@@ -256,7 +257,7 @@ class Pharmacophore():
         self.extractor=None
         self.molecular_system=None
 
-    def to_ligandscout(self, file_name=None):
+    def to_ligandscout(self, file_name):
 
         """Method to export the pharmacophore to the ligandscout compatible format.
 
@@ -273,7 +274,7 @@ class Pharmacophore():
         from openpharmacophore.io import to_ligandscout as _to_ligandscout
         return _to_ligandscout(self, file_name=file_name)
 
-    def to_pharmer(self, file_name=None):
+    def to_pharmer(self, file_name):
 
         """Method to export the pharmacophore to the pharmer compatible format.
 
@@ -291,7 +292,7 @@ class Pharmacophore():
         from openpharmacophore.io import to_pharmer as _to_pharmer
         return _to_pharmer(self, file_name=file_name)
 
-    def to_pharmagist(self, file_name=None):
+    def to_pharmagist(self, file_name):
 
         """Method to export the pharmacophore to the pharmagist compatible format.
 
@@ -308,6 +309,24 @@ class Pharmacophore():
         """
         from openpharmacophore.io.pharmagist import to_pharmagist as _to_pharmagist
         return _to_pharmagist(self, file_name=file_name)
+    
+    def to_moe(self, file_name):
+
+        """Method to export the pharmacophore to the MOE compatible format.
+
+        Parameters
+        ----------
+        file_name: str
+            Name of file to be written with the MOE format of the pharmacophore.
+
+        Note
+        ----
+
+            Nothing is returned. A new file is written.
+
+        """
+        from openpharmacophore.io.moe import to_moe as _to_moe
+        return _to_moe(self, file_name=file_name)
     
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
