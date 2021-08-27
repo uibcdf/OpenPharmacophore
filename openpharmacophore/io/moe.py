@@ -105,6 +105,21 @@ def from_moe(file_name):
             
 
 def to_moe(pharmacophore, file_name, **kwargs):
+
+    """ Saves a pharmacophore to a MOE ph4 file.
+
+        Parameters
+        ----------
+        pharmacophore: obj: openpharmacophore.strucutured_based.StructuredBasedPharmacophore
+            Pharmacophore object that will be saved to a file
+
+        file_name: str
+            Name of the file containing the pharmacophore.
+
+         Note
+        ----
+            Nothing is returned. A new file is written.
+    """
     
     oph_to_moe = {
         "aromatic ring": "Aro",
