@@ -1,12 +1,13 @@
 from openpharmacophore.io.mol2 import load_mol2_file
-from operator import itemgetter
+
 from rdkit import RDConfig, Chem, Geometry
 from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms
 from rdkit.Chem.Pharm3D import Pharmacophore, EmbedLib
 from rdkit.Numerics import rdAlignment
-from openpharmacophore.io.mol2 import load_mol2_file
-from tqdm.auto import tqdm
 import pyunitwizard as puw
+from tqdm.auto import tqdm
+
+from operator import itemgetter
 import os
     
 class VirtualScreening():

@@ -5,6 +5,7 @@ channels:
 - ambermd
 - defaults
 dependencies:
+- plip
 - uibcdf_stdlib
 - pyunitwizard
 - molsysmt
