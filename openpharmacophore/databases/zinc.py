@@ -1,8 +1,15 @@
+from openpharmacophore._private_tools.exceptions import MissingParameters, InvalidFileError
+
+from tqdm.auto import tqdm
+
 import os
+import pkg_resources
 import requests
 import string
 
-def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=None, logp_range=None, **kwargs):
+def download_ZINC(download_path, subset="Drug-like", 
+                  mol_weight_range=None, logp_range=None,
+                  file_format="smi", **kwargs):
     """Download a set of molecules as .smi files from ZINC database.
 
         Parameters
@@ -15,11 +22,14 @@ def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=N
             "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
             and "Shards".
         
-        mol_weight_range: 2-tuple of int
+        mol_weight_range: 2-tuple of float
             Range of molecular weight for the downloaded molecules.
         
-        logp_range: 2-tuple of int
+        logp_range: 2-tuple of float
             Range of logP for the downloaded molecules.
+        
+        file_format: str
+            Format of the files that will be downloaded. Can be .smi or .sdf.
 
         Note
         -------
@@ -27,8 +37,11 @@ def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=N
 
         """
     if (mol_weight_range is None or logp_range is None) and subset is None:
-        raise ValueError("Missing parameters")
+        raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected")
     
+    if file_format != "smi" and file_format != "sdf":
+        raise InvalidFileError("{} is not a valid file format".format(file_format))
+
     # Subsets defined by ZINC
     subsets = {
         # First tuple is start and end columns, second tuple is start and end rows
@@ -54,6 +67,7 @@ def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=N
     logp = dict(zip(logp_values, logp_rows))
     
     if subset is None:
+
         mw_lower_bound, mw_upper_bound = mol_weight_range
         logp_lower_bound, logp_upper_bound = logp_range
         
@@ -65,9 +79,10 @@ def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=N
 
         start_col = mw_cols.index(molecular_weight[mw_lower_bound])
         end_col = mw_cols.index(molecular_weight[mw_upper_bound]) 
-       
+    
         start_row = logp_rows.index(logp[logp_lower_bound])
         end_row = logp_rows.index(logp[logp_upper_bound])
+
     else:
         start_col, end_col = subsets[subset][0]
         start_row, end_row = subsets[subset][1]
@@ -75,39 +90,48 @@ def download_ZINC2D_smiles(download_path, subset="Drug-like", mol_weight_range=N
     col_list = mw_cols[start_col:end_col + 1]
     row_list = logp_rows[start_row:end_row + 1]
 
-    # For testing purposes
-    if kwargs:
-        if kwargs["testing"] == True:
-            url_list = []
+    url_list = []
     
-    base_url = "http://files.docking.org/2D/"
-    # Get urls and download files
-    for col in col_list:
+    if file_format == "smi":
+        base_url = "http://files.docking.org/2D/"
+        # Get urls for smi files
+        for col in col_list:
+            for row in row_list:
+                tranch = col + row
+                url = base_url + tranch + "/" + tranch
+                # Each tranch is divided into various files from A to E
+                for f in ["A", "B", "C", "E"]:
+                    for j in ["A", "B"]:
+                        url_download = url + f + j + ".smi"
+                        url_list.append(url_download)
+    else:
+        # Get tranches for sdf files
+        tranches = []
         for row in row_list:
-            tranch = col + row
-            url = base_url + tranch + "/" + tranch
-            # Each tranch is divided into various files from A to E
-            for f in ["A", "B", "C", "E"]:
-                for j in ["A", "B"]:
-                    url_download = url + f + j + ".smi"
+            for col in col_list:
+                tranch = row + col
+                tranches.append(tranch)
+        url_list = get_ZINC3D_url_list(tranches)    
 
-                    if kwargs:
-                        if kwargs["testing"] == True:
-                            url_list.append(url_download)
-                            continue
-                    try:
-                        r = requests.get(url_download, allow_redirects=True)
-                    except:
-                        print("Could not download file from {}".format(url_download))
-                    file_name = tranch + f + j + ".smi"
-                    file_path = os.path.join(download_path, file_name)
-                    with open(file_path, "wb") as file:
-                        file.write(r.content)
-
+    # for testing purposes
     if kwargs:
         if kwargs["testing"] == True:
             return url_list
 
+    # Download files
+    for url in tqdm(url_list):
+        try:
+            r = requests.get(url, allow_redirects=True)
+        except:
+            print("Could not download file from {}".format(url))
+            continue
+        if file_format== "smi":
+            file_name =  url[-8:]
+        else:
+            file_name = url[-17:]
+        file_path = os.path.join(download_path, file_name)
+        with open(file_path, "wb") as file:
+            file.write(r.content)
 
 def discretize_values(value, bins, name, lower=True):
     """Download a set of molecules as .smi files from ZINC database.
@@ -144,3 +168,20 @@ def discretize_values(value, bins, name, lower=True):
                 value = bins[i + 1]
 
     return value
+
+def get_ZINC3D_url_list(tranches):
+    """Retrieves urls that matches the desired tranches given by
+       molecular weight and logp range. URLS are read from a file 
+    """
+    zinc_urls_file = pkg_resources.resource_filename('openpharmacophore',
+                    "./data/zinc3d.uri")
+
+    url_list = []
+    with open(zinc_urls_file, "r") as f:
+        for url in f.readlines():
+            # Extract the column-row from the url
+            tranch = url.split("/")[4]
+            if tranch in tranches:
+                url_list.append(url.rstrip())
+
+    return url_list
