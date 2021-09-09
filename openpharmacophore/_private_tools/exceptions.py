@@ -50,3 +50,12 @@ class InvalidFileError(Exception):
         self.message = message
         super().__init__(self.message)
 
+class MissingParameters(Exception):
+    """
+        Exception raised when calling a function and not passing all required parameters.
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+

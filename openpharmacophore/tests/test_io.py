@@ -11,6 +11,7 @@ import numpy as np
 import pyunitwizard as puw
 import pytest
 
+import datetime
 import os
 
 @pytest.fixture
@@ -260,7 +261,11 @@ def test_from_moe():
 def test_to_moe(three_element_pharmacophore):
 
     pharmacophore_str = to_moe(three_element_pharmacophore, file_name=None, testing=True)
-    expected_str = '#moe:ph4que 2021.8\n#pharmacophore 5 tag t value *\nscheme t Unified matchsize i 0 title t s $\n#feature 3 expr tt color ix x r y r z r r r ebits ix gbits ix\nAro df2f2 0.9999999999999999 0.0 0.0 0.9999999999999999 0 300 Acc df2f2 0.9999999999999999 1.9999999999999998 1.9999999999999998 0.9999999999999999 0 300 \n#volumesphere 90 x r y r z r r r\n1.9999999999999998 0.9999999999999999 1.9999999999999998 0.9999999999999999 \n#endpharmacophore'
+
+    now = datetime.datetime.now()
+    month = str(now.month)
+    year = str(now.year)
+    expected_str = f'#moe:ph4que {year}.{month}\n#pharmacophore 5 tag t value *\nscheme t Unified matchsize i 0 title t s $\n#feature 3 expr tt color ix x r y r z r r r ebits ix gbits ix\nAro df2f2 0.9999999999999999 0.0 0.0 0.9999999999999999 0 300 Acc df2f2 0.9999999999999999 1.9999999999999998 1.9999999999999998 0.9999999999999999 0 300 \n#volumesphere 90 x r y r z r r r\n1.9999999999999998 0.9999999999999999 1.9999999999999998 0.9999999999999999 \n#endpharmacophore'
 
     assert pharmacophore_str == expected_str
 

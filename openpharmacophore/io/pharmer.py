@@ -1,6 +1,6 @@
 from openpharmacophore import _puw
 from openpharmacophore import pharmacophoric_elements as elements
-import molsysmt as msm
+#import molsysmt as msm
 import json
 import pyunitwizard as puw
 
@@ -82,17 +82,17 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
         points.append(element)
 
-    if load_mol_sys:
-        has_ligand = "ligand" in pharmacophore and pharmacophore["ligand"] != ""
-        if has_ligand: 
-            ligand = msm.convert(pharmacophore["ligand"], to_form="molsysmt.MolSys") 
-            molecular_system = ligand
-        has_receptor = "receptor" in pharmacophore and pharmacophore["receptor"] != ""
-        if has_receptor: 
-            receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
-            molecular_system = receptor
-        if has_ligand and has_receptor:
-            molecular_system = msm.merge([ligand, receptor])
+    # if load_mol_sys:
+    #     has_ligand = "ligand" in pharmacophore and pharmacophore["ligand"] != ""
+    #     if has_ligand: 
+    #         ligand = msm.convert(pharmacophore["ligand"], to_form="molsysmt.MolSys") 
+    #         molecular_system = ligand
+    #     has_receptor = "receptor" in pharmacophore and pharmacophore["receptor"] != ""
+    #     if has_receptor: 
+    #         receptor = msm.convert(pharmacophore["receptor"], to_form="molsysmt.MolSys")
+    #         molecular_system = receptor
+    #     if has_ligand and has_receptor:
+    #         molecular_system = msm.merge([ligand, receptor])
                 
     return points, molecular_system
 

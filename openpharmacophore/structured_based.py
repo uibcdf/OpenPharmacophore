@@ -148,7 +148,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         # List with all interactions
         interactions = interactions.all_itypes
         # list of pharmacophoric_elements
-        points = [] 
+        points = []
+        # list oh hydrophobic points
+        hydrophobics = [] 
         for interaction in interactions:
             interaction_name = type(interaction).__name__
             
@@ -169,7 +171,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     center=center,
                     radius=radius
                 )
-                points.append(hydrophobic)
+                hydrophobics.append(hydrophobic)
             
             elif interaction_name == "saltbridge":
                 if interaction.protispos:
@@ -220,6 +222,32 @@ class StructuredBasedPharmacophore(Pharmacophore):
         for p in points:
             if p not in points_filtered:
                 points_filtered.append(p)
+        
+        # Group hydrophobic interactions within a distance of 2.5 angstroms
+        if hydrophobics:
+            skip = []
+            for inx, hyd1 in enumerate(hydrophobics):
+                if hyd1 in skip:
+                    continue
+                centroid = hyd1.center
+                count = 0
+                hyd1_center = puw.get_value(hyd1.center, "angstroms")
+
+                for hyd2 in hydrophobics[inx + 1:]:
+                    if hyd1 == hyd2:
+                        skip.append(hyd2)
+                        continue
+                    hyd2_center = puw.get_value(hyd2.center, "angstroms")
+                    distance = np.linalg.norm(hyd1_center - hyd2_center)
+
+                    if distance <= 2.5:
+                        centroid += hyd2.center
+                        count += 1
+                        skip.append(hyd2)
+                if count > 0:
+                    centroid /= (count + 1)
+                
+                points_filtered.append(phe.HydrophobicSphere(center=centroid, radius=radius))
         
         return points_filtered
 

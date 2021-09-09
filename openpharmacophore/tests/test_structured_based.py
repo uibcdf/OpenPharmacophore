@@ -15,13 +15,13 @@ def test_from_pdb(file_name, ligand_id):
     pharmacophore = SBP().from_pdb(file_path, radius=1.0, ligand_id=ligand_id)
 
     if file_name == "1ncr":
-       assert len(pharmacophore.elements) == 7
+       assert len(pharmacophore.elements) == 5
        assert pharmacophore.molecular_system is not None
     elif file_name == "1hz1":
-        assert len(pharmacophore.elements) == 12
+        assert len(pharmacophore.elements) == 10
         assert pharmacophore.molecular_system is not None
     elif file_name == "1hzi":
-        assert len(pharmacophore.elements) == 8
+        assert len(pharmacophore.elements) == 5
         assert pharmacophore.molecular_system is not None
        
 @pytest.mark.parametrize("file_name", [
@@ -65,18 +65,18 @@ def test_sb_pharmacophore_points(file_name):
     if file_name == "1ncr":
         interactions = all_interactions["W11:A:7001"]
         pharmacophoric_points = SBP._sb_pharmacophore_points(interactions, radius=1.0)
-        assert len(pharmacophoric_points) == 7
+        assert len(pharmacophoric_points) == 5
         assert isinstance(pharmacophoric_points[0], phe.AromaticRingSphereAndVector)
         n_hydrophobics = 0
         for point in pharmacophoric_points:
             if point.feature_name == "hydrophobicity":
                 n_hydrophobics += 1
-        assert n_hydrophobics == 6
+        assert n_hydrophobics == 4
     
     elif file_name == "2hz1":
         interactions = all_interactions["HEM:A:125"]
         pharmacophoric_points = SBP._sb_pharmacophore_points(interactions, radius=1.0)
-        assert len(pharmacophoric_points) == 12
+        assert len(pharmacophoric_points) == 10
         n_hydrophobics = 0
         n_neg_charges = 0
         n_hb_acceptors = 0
@@ -87,19 +87,19 @@ def test_sb_pharmacophore_points(file_name):
                 n_hb_acceptors += 1
             elif point.feature_name == "negative charge":
                 n_neg_charges += 1
-        assert n_hydrophobics == 9
+        assert n_hydrophobics == 7
         assert n_neg_charges == 2
         assert n_hb_acceptors == 1
     
     elif file_name == "2hzi":
         interactions = all_interactions["JIN:A:600"]
         pharmacophoric_points = SBP._sb_pharmacophore_points(interactions, radius=1.0)
-        assert len(pharmacophoric_points) == 8
+        assert len(pharmacophoric_points) == 5
         assert isinstance(pharmacophoric_points[0], phe.HBAcceptorSphereAndVector)
         assert isinstance(pharmacophoric_points[1], phe.HBDonorSphereAndVector)
         n_hydrophobics = 0
         for point in pharmacophoric_points:
             if point.feature_name == "hydrophobicity":
                 n_hydrophobics += 1
-        assert n_hydrophobics == 6
+        assert n_hydrophobics == 3
     
