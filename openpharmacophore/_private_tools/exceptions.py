@@ -59,3 +59,11 @@ class MissingParameters(Exception):
         self.message = message
         super().__init__(self.message)
 
+class InvalidFileFormat(Exception):
+    """
+        Exception raised when passing an invalid file format to a function that requires it.
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
