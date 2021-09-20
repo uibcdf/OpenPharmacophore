@@ -7,22 +7,22 @@ import pkg_resources
 import requests
 import string
 
-def download_ZINC(download_path, subset="Drug-like", 
-                  mol_weight_range=None, logp_range=None,
-                  file_format="smi", **kwargs):
-    """Download a set of molecules as .smi files from ZINC database.
+def get_zinc_urls(subset="Lead-Like", 
+                  mw_range=None, logp_range=None,
+                  file_format="smi"):
+    """Get urls for a set of molecules  of the ZINC database. If filef_format is 
+        smi, the 2D set of ZINC will be used. If it is sdf the 3D set will be
+        used.
 
         Parameters
         ----------
-        download_path: str
-            Name of the path where the files will be downloaded.
 
-        subset: str (optional)
+        subset: str
             Name of the ZINC subset to be downloaded. Available subsets are "Drug-Like",
             "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
             and "Shards".
         
-        mol_weight_range: 2-tuple of float
+        mw_range: 2-tuple of float
             Range of molecular weight for the downloaded molecules.
         
         logp_range: 2-tuple of float
@@ -31,12 +31,12 @@ def download_ZINC(download_path, subset="Drug-like",
         file_format: str
             Format of the files that will be downloaded. Can be .smi or .sdf.
 
-        Note
+        Returns
         -------
-        Nothing is returned. Files are downloaded
-
+        url_list: list of str
+            A list with the urls
         """
-    if (mol_weight_range is None or logp_range is None) and subset is None:
+    if (mw_range is None or logp_range is None) and subset is None:
         raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected")
     
     if file_format != "smi" and file_format != "sdf":
@@ -68,7 +68,7 @@ def download_ZINC(download_path, subset="Drug-like",
     
     if subset is None:
 
-        mw_lower_bound, mw_upper_bound = mol_weight_range
+        mw_lower_bound, mw_upper_bound = mw_range
         logp_lower_bound, logp_upper_bound = logp_range
         
         # Discretize mol weight and logp values:
@@ -113,28 +113,13 @@ def download_ZINC(download_path, subset="Drug-like",
                 tranches.append(tranch)
         url_list = get_ZINC3D_url_list(tranches)    
 
-    # for testing purposes
-    if kwargs:
-        if kwargs["testing"] == True:
-            return url_list
 
-    # Download files
-    for url in tqdm(url_list):
-        try:
-            r = requests.get(url, allow_redirects=True)
-        except:
-            print("Could not download file from {}".format(url))
-            continue
-        if file_format== "smi":
-            file_name =  url[-8:]
-        else:
-            file_name = url[-17:]
-        file_path = os.path.join(download_path, file_name)
-        with open(file_path, "wb") as file:
-            file.write(r.content)
+    return url_list
+
+    
 
 def discretize_values(value, bins, name, lower=True):
-    """Download a set of molecules as .smi files from ZINC database.
+    """Discretize a value
 
     Parameters
     ----------
@@ -142,7 +127,7 @@ def discretize_values(value, bins, name, lower=True):
         Value that will be disctretized.
 
     bins: list of int
-        List containing the bins ti discretize the value
+        List containing the bins to discretize the value
     
     name: str
         Name of the variable that will be discretized
@@ -153,7 +138,8 @@ def discretize_values(value, bins, name, lower=True):
 
     Returns
     -------
-    Nothing is returned. Files are downloaded
+    value: double
+        THe discretized value
 
     """
     for i in range(len(bins) - 1):
@@ -171,7 +157,8 @@ def discretize_values(value, bins, name, lower=True):
 
 def get_ZINC3D_url_list(tranches):
     """Retrieves urls that matches the desired tranches given by
-       molecular weight and logp range. URLS are read from a file 
+       molecular weight and logp range for ZINC 3D. URLS are read 
+       from a file. 
     """
     zinc_urls_file = pkg_resources.resource_filename('openpharmacophore',
                     "./data/zinc3d.uri")
@@ -185,3 +172,48 @@ def get_ZINC3D_url_list(tranches):
                 url_list.append(url.rstrip())
 
     return url_list
+
+
+def download_ZINC(download_path, subset, mw_range=None, logp_range=None, file_format="smi"):
+    """
+    Download a subset from ZINC database.
+
+    Parmeters
+    ---------
+    subset: str 
+            Name of the ZINC subset to be downloaded. Available subsets are "Drug-Like",
+            "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
+            and "Shards".
+        
+    mw_range: 2-tuple of float
+        Range of molecular weight for the downloaded molecules.
+    
+    logp_range: 2-tuple of float
+        Range of logP for the downloaded molecules.
+
+    download_path: str
+            Name of the path where the files will be downloaded.
+    
+    file_format: str
+            Format of the files that will be downloaded. Can be .smi or .sdf.
+
+    Notes
+    -----
+    Nothing is returned. Files are downloaded.
+    """
+    url_list = get_zinc_urls(subset, mw_range=mw_range, logp_range=logp_range, file_format=file_format)
+    
+    print("Downloading from ZINC...")
+    for url in tqdm(url_list):
+        try:
+            r = requests.get(url, allow_redirects=True)
+        except:
+            print("Could not download file from {}".format(url))
+            continue
+        if file_format== "smi":
+            file_name =  url[-8:]
+        else:
+            file_name = url[-17:]
+        file_path = os.path.join(download_path, file_name)
+        with open(file_path, "wb") as file:
+            file.write(r.content)
