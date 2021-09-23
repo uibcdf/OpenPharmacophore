@@ -6,6 +6,7 @@ import nglview as nv
 from plip.structure.preparation import PDBComplex
 import pyunitwizard as puw
 from rdkit import Chem
+import requests
 
 class StructuredBasedPharmacophore(Pharmacophore):
 
@@ -43,25 +44,44 @@ class StructuredBasedPharmacophore(Pharmacophore):
         super().__init__(elements=elements, molecular_system=molecular_system)
     
     @classmethod
-    def from_pdb(cls, file_name, radius=1.0, ligand_id=None):
-        """Class method to obtain a pharmacophore from a pdb file containing
-            a protein-ligand complex.
+    def from_pdb(cls, pdb, radius=1.0, ligand_id=None):
+        """ Class method to obtain a pharmacophore from a pdb file containing
+            a protein-ligand complex. 
+            
+            Only the interactions of a single lignad will be computed in case 
+            the protein structure contains more than one ligand. The id of the 
+            ligand can be passed as a string, or if it is not passed a list of 
+            the ligands will appear and the user will be asked to enter whicho
+            one shoul be used.  
 
         Parameters
         ----------
-        file_name: str
-            Name of the pdb file containing the protein-ligand complex.
+        pdb: str
+            PDB id or path to the pdb file containing the protein-ligand complex.
         
         radius: float (optional)
             Radius of the spheres of the pharmacophoric points. (Default: 1.0)
         
         ligand_id: str (optional)
-            Id of the ligand for which the pharmacophore will be computed
+            Id of the ligand for which the pharmacophore will be computed.
+        
+        Returns
+        -------
+        An openpharmacophore.StructuredBasedPharmacophore with the elements 
 
         """
-        # TODO: this method should also accept a PDB ID without needing to pass
-        # the actual file  
-        all_interactions, pdb_string = StructuredBasedPharmacophore._protein_ligand_interactions(file_name)
+        pdb_id = pdb
+        # Check if an ID was passed or a file
+        if pdb.endswith(".pdb"):
+            as_string = False
+        elif len(pdb) == 4:
+            pdb = StructuredBasedPharmacophore._fetch_pdb(pdb)
+            as_string = True
+        else:
+            raise Exception("Invalid file or PDB id")
+
+        # pdb_string is the "corrected" pdb that plip generates
+        all_interactions, pdb_string = StructuredBasedPharmacophore._protein_ligand_interactions(pdb, as_string=as_string)
         if ligand_id:
             for id in all_interactions.keys():
                 if ligand_id in id:
@@ -71,7 +91,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             interactions = list(all_interactions.values())[0]
         else:
             # If there is more than one ligand and is not specified, prompt the user for the ligand name
-            print(f"{file_name} PDB contains the following ligands:\n")
+            print(f"{pdb_id} PDB contains the following ligands:\n")
             for lig_id in all_interactions.keys():
                 print(lig_id)
             print("\nPlease enter for which one the pharmacophore should be computed ")
@@ -84,9 +104,33 @@ class StructuredBasedPharmacophore(Pharmacophore):
         molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system)
+    
+    @staticmethod
+    def _fetch_pdb(pdb_id):
+        """ Fetch a protein estructure from PDB.
+            
+            Parameters
+            ----------
+            pdb_id: str of len == 4
+                The id of the protein structure.
+            
+            Returns
+            -------
+            pdb_str: str
+                The pdb as a string.
+        """
+        url = 'http://files.rcsb.org/download/{}.pdb'.format(pdb_id)
+        try:
+            res = requests.get(url, allow_redirects=True)
+        except:
+            print("Could not downlaod pdb from {}".format(url))
+        
+        pdb_str = res.content.decode()
+
+        return pdb_str
         
     @staticmethod
-    def _protein_ligand_interactions(file_name):
+    def _protein_ligand_interactions(file_name, as_string):
         """Static method to calculate protein-ligand interactions for each ligand in
             the pdb file
 
@@ -106,7 +150,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         """
         mol_system = PDBComplex()
-        mol_system.load_pdb(file_name)
+        mol_system.load_pdb(file_name, as_string=as_string)
         mol_system.analyze()
 
         pdb_string = mol_system.corrected_pdb
@@ -142,6 +186,15 @@ class StructuredBasedPharmacophore(Pharmacophore):
             A list of pharmacophoric points.
 
         """
+        ### TODO: The way PLIP computes hydrophobic interactions is different from the method that is
+        ### normally used in the pharmacopophore literature. Plip computes hydrophobics taking into account
+        ### the interactions with other residues, making this features have directionality, which is not
+        ### used for pharmacophores. Also when using plip a lot of hydrophobic features are found, whereas 
+        ### in pharmacophore modeling features that are closed to each other are merged into a signle one.
+        ### The problem of having many hydrophobic features is that molecules are less likely to match the
+        ### pharmacophore model. To fix this we try using rdkit to get hydrophobics and plip for the other
+        ### features.
+        ### Also, excluded volumes should be added in the future.    
     
         radius = puw.quantity(radius, "angstroms")
 

@@ -34,7 +34,7 @@ def test_protein_ligand_interactions(file_name):
     pdbs_path = "./openpharmacophore/data/pdb/"
     file_path = os.path.join(pdbs_path, file_name + ".pdb" )
 
-    interactions, pdb_str = SBP._protein_ligand_interactions(file_path)  
+    interactions, pdb_str = SBP._protein_ligand_interactions(file_path, as_string=False)  
     assert isinstance(interactions, dict)
     assert isinstance(pdb_str, str)
     
@@ -60,7 +60,7 @@ def test_protein_ligand_interactions(file_name):
 def test_sb_pharmacophore_points(file_name):
     pdbs_path = "./openpharmacophore/data/pdb/"
     file_path = os.path.join(pdbs_path, file_name + ".pdb" )
-    all_interactions, _ = SBP._protein_ligand_interactions(file_path) 
+    all_interactions, _ = SBP._protein_ligand_interactions(file_path, as_string=False) 
 
     if file_name == "1ncr":
         interactions = all_interactions["W11:A:7001"]

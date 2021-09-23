@@ -1,4 +1,4 @@
-from openpharmacophore.databases.zinc import download_ZINC, discretize_values
+from openpharmacophore.databases.zinc import get_zinc_urls, discretize_values
 import pytest
 
 @pytest.mark.parametrize("subset,mol_weight,logp,format", [
@@ -10,12 +10,12 @@ import pytest
 ])
 def test_download_ZINC2D_smiles(subset, mol_weight, logp, format):
 
-    url_list = download_ZINC("./", 
+    url_list = get_zinc_urls( 
         subset=subset,
-        mol_weight_range=mol_weight, 
+        mw_range=mol_weight, 
         logp_range=logp,
         file_format=format,
-        testing=True)
+        )
     
     if format == "smi":
         base_url = "http://files.docking.org/2D/"
