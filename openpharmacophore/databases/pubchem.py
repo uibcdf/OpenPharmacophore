@@ -8,7 +8,7 @@ import time
 
 class PubChem():
     """ Class to interact with PubChem database, download bioassays
-        and perform similaruty searches
+        and perform similarity searches.
     """
 
     def __init__(self):
@@ -54,7 +54,7 @@ class PubChem():
 
             Parameters
             ----------
-            assay_id: str
+            assay_id: int
                 The id of the bioassay
             
             attempts: int
@@ -62,19 +62,21 @@ class PubChem():
 
             Returns
             ----------
-                A dictionary containing the compounds ids
+                A list containing the compounds ids
         """
         assay_url = self.base_url + "/bioassay/AID/{}/cids/JSON".format(assay_id)
         data = self._get_data(assay_url, attempts)
         
-        return json.loads(data)
+        ids_dict = json.loads(data)
+
+        return ids_dict["InformationList"]["Information"][0]["CID"]
 
     def get_assay_description(self, assay_id, summary=True, attempts=10):
         """ Get the description of an assay in JSON format.
 
             Parameters
             ----------
-            assay_id: str
+            assay_id: int
                 The id of the bioassay.
             
             summary: bool
@@ -102,7 +104,7 @@ class PubChem():
 
             Parameters
             ----------
-            assay_id: str
+            assay_id: int
                 The id of the bioassay.
             
             form: str
@@ -121,7 +123,7 @@ class PubChem():
         elif form == "dict":
             format = "JSON"
         else:
-            raise Exception("{} is not a valid form".format(form))
+            raise ValueError("{} is not a valid form".format(form))
 
         assay_url = self.base_url + "/assay/aid/{}/{}".format(assay_id, format)
 
@@ -138,7 +140,7 @@ class PubChem():
 
             Parameters
             ----------
-            assay_id: str
+            assay_id: int
                 The id of the bioassay.
             
             attempts: int
@@ -157,19 +159,19 @@ class PubChem():
 
             Parameters
             ----------
-                assay_id: str
+                assay_id: int
                     The id of the bioassay.
             Returns
             ----------
-                actives 2-tuple:
-                    The first element is a list of the active compunds PubChem ids, and
-                    the second elment is a list of smiles for the active compunds
+                actives: 2-tuple
+                    The first element is a list of the active compounds PubChem ids, and
+                    the second elment is a list of smiles for the active compounds.
                 
-                inactives 2-tuple:
-                    The first element is a list of the inactive compunds PubChem ids, and
-                    the second elment is a list of smiles for the inactive compunds
+                inactives: 2-tuple
+                    The first element is a list of the inactive compounds PubChem ids, and
+                    the second elment is a list of smiles for the inactive compounds.
         """
-        assay_results = self.get_assay_results(assay_id=assay_id, format="csv")
+        assay_results = self.get_assay_results(assay_id=assay_id, form="dataframe")
         # Keep only cid and activity columns
         df = assay_results[["PUBCHEM_CID", "PUBCHEM_ACTIVITY_OUTCOME"]]
         df = df.dropna()
@@ -271,7 +273,7 @@ class PubChem():
             ----------
                 A dictionary containing the compound description.
         """
-        # If a string is passed assume its compund name
+        # If a string is passed assume its compound name
         if isinstance(compound_identifier, str):
             compound_url = self.base_url + "/compound/name/{}/description/JSON".format(compound_identifier)
         # Else use compound id
@@ -302,7 +304,7 @@ class PubChem():
         return smiles
 
     def get_target_assays(self, identifier, identifier_type, attempts=10):
-        """ Get assay ids for a given target
+        """ Get assay ids and name for a given target
 
             Parameters
             ----------
@@ -313,16 +315,33 @@ class PubChem():
                     The type of the identifier can be genesymbol, geneid or gi. 
             Returns
             ----------
-                A dictionary with the assays ids for the passed target
+                A pandas.DataFrame with the assays ids and names for the passed target
         """
         identifier_type = identifier_type.lower()
         valid_identifiers = ["genesymbol", "geneid", "gi"]
         if identifier_type not in valid_identifiers:
             raise Exception("{} is not a valid identifier type")
 
-        target_url = self.base_url + "assay/target/{}/{}/aids/JSON".format(identifier_type, identifier)
+        target_url = self.base_url + "/assay/target/{}/{}/description/JSON".format(identifier_type, identifier)
         data = self._get_data(target_url, attempts)
-        return json.load(data)
+
+        assays_dict = json.loads(data)
+        ids = []
+        names = []
+        # Retrieve only id and name
+        for i in range(len(assays_dict["PC_AssayContainer"])):
+            assay = assays_dict['PC_AssayContainer'][i]['assay']['descr']
+            id = int(assay["aid"]["id"])
+            name = assay["name"]
+            ids.append(id)
+            names.append(name)
+
+        assays = {
+            "id": ids,
+            "name": names,
+        }
+
+        return pd.DataFrame.from_dict(assays)
 
     def similarity_search(self, compound, threshold=None, max_records=None, attempts=5):
         """ Perform a 2D similarity search for a given compound.

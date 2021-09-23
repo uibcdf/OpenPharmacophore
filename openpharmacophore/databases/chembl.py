@@ -52,7 +52,7 @@ def get_ro5_dataset( download_dir):
     file.close()
 
 
-def get_bioactivity_data( target_chembl_id):
+def get_bioactivity_data(target_chembl_id):
     """Get bioactivity data for a given target.
     
         Parameters

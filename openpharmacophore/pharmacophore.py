@@ -3,6 +3,10 @@ import nglview as nv
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
 # from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
+from rdkit import Geometry
+from rdkit.Chem import ChemicalFeatures
+from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
+
 class Pharmacophore():
 
     """ Native object for pharmacophores.
@@ -85,11 +89,7 @@ class Pharmacophore():
                 ph_index = 0
             points = read_pharmagist(file_name, pharmacophore_index=ph_index)
             mol_sys = None
-
-        elif fextension == "txt":
-            from openpharmacophore.io.txt_file import from_text_file
-            points = from_text_file(file_name)
-            
+        
         else:
             raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
         
@@ -328,5 +328,46 @@ class Pharmacophore():
         from openpharmacophore.io.moe import to_moe as _to_moe
         return _to_moe(self, file_name=file_name)
     
+    def to_rdkit(self):
+        """ Returns an rdkit pharmacophore with the elements from the original
+            pharmacophore. rdkit pharmacophores do not store the elements radii,
+            so they are returned as well.
+
+            Returns
+            -------
+            rdkit_pharmacophore: rdkit.Chem.Pharm3D.Pharmacophore
+                The rdkit pharmacophore.
+
+            radii: list of float
+                List with the radius of each pharmacophoric point.
+        """
+        rdkit_element_name = { # dictionary to map openpharmacophore feature names to rdkit feature names
+        "aromatic ring": "Aromatic",
+        "hydrophobicity": "Hydrophobe",
+        "hb acceptor": "Acceptor",
+        "hb donor": "Donor",
+        "positive charge": "PosIonizable",
+        "negative charge": "NegIonizable",
+        }
+
+        points = []
+        radii = []
+
+        for element in self.elements:
+            feat_name = rdkit_element_name[element.feature_name]
+            center = puw.get_value(element.center, to_unit="angstroms")
+            center = Geometry.Point3D(center[0], center[1], center[2])
+            points.append(ChemicalFeatures.FreeChemicalFeature(
+                feat_name,
+                center
+            ))
+            radius = puw.get_value(element.radius, to_unit="angstroms")
+            radii.append(radius)
+
+        rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
+        return rdkit_pharmacophore, radii
+    
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
+
+    

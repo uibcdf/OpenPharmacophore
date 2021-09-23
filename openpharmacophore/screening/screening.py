@@ -1,9 +1,10 @@
-from openpharmacophore.databases import chembl
+from openpharmacophore.databases import chembl, pubchem
 from openpharmacophore.databases.zinc import get_zinc_urls
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore._private_tools.exceptions import MissingParameters
-from rdkit import Chem
 import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import Descriptors
 from tqdm.auto import tqdm
 import json
 import os
@@ -14,7 +15,7 @@ import time
 
 class VirtualScreening():
     """ Base class for performing virtual screening for a database of 
-        molecules. The database can be fetched, loaded from a file or
+        molecules. The database can be fetched, loaded from files or
         simply passing a list of rdkit molecules.  
 
     Parameters
@@ -24,11 +25,28 @@ class VirtualScreening():
 
     Attributes
     ----------
-    matched_mols: list of rdkit.Chem.mol
-        List of molecules that match the pharmacophore.
+    matches: list of 3-tuples (float, str, rdkit.Chem.mol)
+        List of molecules that match the pharmacophore. Each tuple is formed by scoring 
+        value, the molecule id, and the molecule object.
+    
+    n_matches : int
+        Number of molecules matched to the pharmacophore.
 
     n_molecules: int
         Number of molcules screened.
+    
+    n_fails : int
+        Number of molecules that cannot be matched to the pharmacophore.
+    
+    scoring_metric: str
+        Metric used to score the molecules, how well they fit to the pharmacophore.
+
+    _screen_fn: function
+        The function used for screening.
+    
+    _file_queue: queue.Queue
+        A queue of files that will be screened. Used when downloading from 
+        ZINC or ChemBl.
 
     """
 
@@ -59,7 +77,7 @@ class VirtualScreening():
             report_str += str(round(self.matches[0][0], 4)).rjust(10)
             report_str += f"\nHighest {self.scoring_metric} value: " 
             report_str += str((round(self.matches[-1][0], 4))).rjust(10)
-            # Calculate mean SSD
+            # Calculate mean
             mean = 0
             N = self.n_matches
             for i in range(N):
@@ -73,11 +91,18 @@ class VirtualScreening():
             else:
                 n_top_mols = 5                
             report_str += "\n\nTop {} molecules:\n".format(n_top_mols)
-            report_str += f"\n{self.db}ID " + f"{self.scoring_metric}".rjust(7)
-            report_str += "\n-------  " + " ------\n"
+            if self.db:
+                report_str += f"\n{self.db}ID " + f"{self.scoring_metric}".rjust(12)
+            else:
+                report_str += "\n   ID   " + f"{self.scoring_metric}".rjust(12)
+            report_str += "\n-------".ljust(12) + "------\n".rjust(10)
             for i in range(n_top_mols):
-                report_str += str(self.matches[i][-1]) + "   "
-                report_str += str(round(self.matches[i][0], 4)) + "\n"
+                if self.scoring_metric == "Similarity":
+                    i = -(i + 1)
+                id = str(self.matches[i][1])
+                score = str(round(self.matches[i][0], 4))
+                report_str += id.ljust(12)
+                report_str += score.rjust(8) + "\n"
         print(report_str)
 
     def save_results_to_file(self, file_name):
@@ -94,19 +119,22 @@ class VirtualScreening():
            -----
            Does not return anything. A new file is written.
         """
-        #TODO: add molecular properties. MW, logP
         file_format = file_name.split(".")[-1]
 
         # Values of the scoring that was used for screening. Examples: SSD, 
         # tanimoto similarity
         score_vals = [i[0] for i in self.matches]
-        smiles = [Chem.MolToSmiles(i[1]) for i in self.matches]
-        ids = [i[2] for i in self.matches]
+        smiles = [Chem.MolToSmiles(i[2]) for i in self.matches]
+        ids = [i[1] for i in self.matches]
+        mw = [Descriptors.MolWt(i[2]) for i in self.matches]
+        logp = [Descriptors.MolLogP(i[2]) for i in self.matches]
 
         results = {
             f"{self.db}_id": ids,
             "Smiles": smiles,
             self.scoring_metric: score_vals,
+            "Mol_weight": mw,
+            "logP": logp
         }
 
         if file_format == "csv":
@@ -192,7 +220,6 @@ class VirtualScreening():
         else:
             raise NotImplementedError
         
-           
     def screen_db_from_dir(self, path, file_extensions=None):
         """ Screen a database of molecules contained in one or more files. 
             Format can be smi, mol2, sdf.
@@ -235,7 +262,16 @@ class VirtualScreening():
 
         else:
             raise Exception("{} is not a valid file/directory".format(path))
-            
+    
+    def screen_mol_list(self, molecules):
+        """Screen a list of molecules
+
+           Parameters
+           ----------
+           molecules: list of rdkit.Chem.mol
+        """
+        self._screen_fn(molecules)
+
     def _download_zinc_file(self, url, download_path):
         """Download a single file form ZINC.
            
@@ -264,7 +300,6 @@ class VirtualScreening():
            
            Parameters
            ----------
-
            download_path: str
                 Path where the file will be stored
         """
@@ -315,7 +350,7 @@ class VirtualScreening():
                 If true, files will be deleted after processing.
 
             n_files: int
-                NUmber of files that will be downloaded
+                Number of files that will be downloaded
 
         """
         # Sleep a little so that the download bar appears first.
@@ -332,7 +367,7 @@ class VirtualScreening():
             self._file_queue.task_done()
 
 
-class RetrospectiveScreening(VirtualScreening):
+class RetrospectiveScreening():
     """ Base class for performing retrospective virtual screening. This
         class expects molecules classified as actives and inactives. 
 
@@ -345,21 +380,139 @@ class RetrospectiveScreening(VirtualScreening):
     ----------
 
     """
-
     def __init__(self, pharmacophore):
+        self.pharmacophore = pharmacophore
+        self.n_molecules = 0
         self.n_actives = 0
         self.n_inactives = 0
-        self.enrichment_factor = 0
-        self.auc_score = 0
+        self.n_true_actives = 0 # True positives
+        self.n_true_inactives = 0 # True negatives
+        self.n_false_actives = 0 # False positives
+        self.n_false_inactives = 0 # False negatives
+        self.mismatched_actives = []
+        self.mismatched_inactives = []
+        self.scoring_metric = ""
+        self._screen_fn = None
 
-    def enrichment_plot():
+    def from_chembl_target_id(self, target_id, pIC50_threshold=6.3):
+        """Retrospective screening from bioactivity data fetched 
+           from chembl for the specific target.
+           
+           Parameters
+           ----------
+           target_id: str
+                ChemBl target id.
+           
+           pIC50_threshold: float
+                The cuttoff value from which a molecule is considered active.
+           
+           """
+        actives, inactives = chembl.get_training_data(target_id, pIC50_threshold)
+        
+        self.db = "Pubchem"
+        self.from_training_data(actives, inactives)
+
+    def from_training_data(self, actives, inactives):
+        """Retrospective screening from a list of active and inactive molecules
+        
+            Parameters
+            ----------
+            actives: 2-tuple
+                    The first element is a list of the active compounds ids, and
+                    the second elment is a list of smiles for the active compounds
+                
+            inactives: 2-tuple
+                The first element is a list of the inactive compounds ids, and
+                the second elment is a list of smiles for the inactive compounds
+
+            Returns
+            -------
+        
+        """
+        actives_ids, actives_smiles = actives
+        inactives_ids, inactives_smiles = inactives
+
+        self.n_actives = len(actives_ids)
+        self.n_inactives = len(inactives_ids)
+        self.n_molecules = self.n_actives + self.n_inactives
+
+        # TODO: Add ids to molecule object
+        mols_actives = [Chem.MolFromSmiles(smi) for smi in actives_smiles]
+        mols_inactives = [Chem.MolFromSmiles(smi) for smi in inactives_smiles]
+        
+        # Active molecules that were found to be active by the pharmacophore
+        matched_actives, self.mismatched_actives = self._screen_fn(mols_actives)
+        # Inactive molecules that were found to be active by the pharmacophore
+        matched_inactives, self.mismatched_inactives = self._screen_fn(mols_inactives)
+
+        self.n_true_actives = len(matched_actives)
+        self.n_true_inactives = len(self.mismatched_inactives)
+        self.n_false_actives = len(self.mismatched_actives)
+        self.n_false_inactives = len(matched_inactives)
+    
+    def from_pubchem_bioassay_id(self, bioassay_id):
+        """ Retrospective screening from a pubchem bioassay.
+
+            Parameters
+            ----------
+            bioassay_id: int
+                PubChem bioassay id. 
+        """
+        pubchem_client = pubchem.PubChem()
+        actives, inactives = pubchem_client.get_assay_training_data(bioassay_id)
+        self.db = "Pubchem"
+        self.from_training_data(actives, inactives)
+
+    def from_file(self, file_name):
         pass
 
-    def enrichment_factor():
+    def enrichment_plot(self):
+        # To compute enrichment plot and factor we need a list of sorted molecules by a scoring
+        # metric i.e SSD values, tanimoto similiarity, etc. We also need to know which molecules
+        # are actives and which ones inactives.
+
+        # All molecules need to be assigned a scoring metric else it will not be possible to sort
+        # them, which is essential for enrichment calculations.
+
+        # For the ROC plot we need an array with the labels of the molecules, 0 being an inactive
+        # molecule and 1 an active one. Moreover, we need an array with the scores. Thats why we
+        # need to assign scores to every molecule.
+
+        # Need to check if rdkit alignment functions can assign values to molecules which it cannot
+        # match.
+
         pass
 
-    def ROC_plot():
+    def ROC_plot(self):
         pass
 
-    def AUC():
+    def AUC(self):
         pass
+
+    def enrichment_factor(self):
+        n = self.n_true_positives + self.n_true_inactives
+        TP = self.n_true_actives
+        A = self.n_actives
+        N = self.n_inactives
+        return (TP / n) / (A / N)
+
+    def sensitivity(self):
+        TP = self.n_true_actives
+        A = self.n_actives
+        return TP / A
+
+    def specificity(self):
+        TN = self.n_true_inactives
+        FP = self.n_false_actives
+        return  TN / (TN + FP)
+
+    def yield_of_actives(self):
+        n = self.n_true_positives + self.n_true_inactives
+        TP = self.n_true_actives
+        return TP / n
+
+    def accuracy(self):
+        TP = self.n_true_actives
+        TN = self.n_true_inactives
+        N = self.n_inactives
+        return (TP + TN) / N

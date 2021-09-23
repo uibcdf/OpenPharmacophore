@@ -1,18 +1,17 @@
-from openpharmacophore.screening.screening import VirtualScreening
-from rdkit import RDConfig, Chem, Geometry
-from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms
-from rdkit.Chem.Pharm3D import Pharmacophore, EmbedLib
-from rdkit.Numerics import rdAlignment
-import pandas as pd
-import pyunitwizard as puw
+from openpharmacophore.screening.screening import RetrospectiveScreening, VirtualScreening
+from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
+from rdkit import RDConfig, Chem
+from rdkit.Chem import ChemicalFeatures, rdDistGeom
+from rdkit.Chem.Pharm3D import EmbedLib
 import bisect
-import json
 from operator import itemgetter
 import os
     
 class VirtualScreening3D(VirtualScreening):
     """ Class to perform virtual screening with a pharmacophore by 3D alignment of the molecules
-        to the pharmacophore. 
+        to the pharmacophore.
+
+        Inherits from VirtualScreening class. 
 
     Code adapted from:
     https://github.com/rdkit/UGM_2016/blob/master/Notebooks/Stiefl_RDKitPh4FullPublication.ipynb
@@ -25,100 +24,23 @@ class VirtualScreening3D(VirtualScreening):
     Attributes
     ----------
 
-    aligned_mols : list of 3-tuples (float, rdkit.Chem.mol, str)
+    aligned_mols : list of 3-tuples (float, str, rdkit.Chem.mol)
         List of molecules that match the pharmacophore. Each tuple is formed by SSD value,
-        the molecule object, and the molecule id.
+        the molecule id, and the molecule object.
 
-    n_aligned_mols : int
-        Number of molecules that match with the pharmacophore. Molecules succesfully aligned to the
-        pharmacophore.
-
-    n_fails : int
-         Number of molecules that cannot be aligned to the pharmacophore.
     """
 
     def __init__(self, pharmacophore):
         super().__init__(pharmacophore)
         self.aligned_mols = self.matches 
-        self.n_aligned_mols = self.n_matches
         self.scoring_metric = "SSD"
         self._screen_fn = self._align_molecules
         
-    def print_report(self):
-        """ Prints a summary report of the screening.
-        """
-        report_str = "Virtual Screening Results\n"
-        report_str += "-------------------------\n"
-        report_str += "\nMolecules scanned: " 
-        report_str += "{:,}".format(self.n_molecules).rjust(36)
-        report_str += "\nMolecules matched to pharmacophore: " 
-        report_str += str(self.n_aligned_mols).rjust(19)
-        report_str += "\nMolecules that didn't match the pharmacophore: " 
-        report_str += "{:,}".format(self.n_fails).rjust(8)
-        if self.n_aligned_mols > 0:
-            report_str += "\nLowest  SSD value: " + str(round(self.aligned_mols[0][0], 4)).rjust(10)
-            report_str += "\nHighest SSD value: " + str((round(self.aligned_mols[-1][0], 4))).rjust(10)
-            # Calculate mean SSD
-            mean = 0
-            N = self.n_aligned_mols
-            for i in range(N):
-                mean += self.aligned_mols[i][0]
-            mean /= N
-            report_str += "\nAverage SSD value: " + str(round(mean, 4)).rjust(10)         
-            # Print top 5 molecules or less if there are less than 5
-            if self.n_aligned_mols < 5:
-                n_top_mols = min(self.n_aligned_mols, 5)
-            else:
-                n_top_mols = 5                
-            report_str += "\n\nTop {} molecules:\n".format(n_top_mols)
-            report_str += "\nZincID " + "SSD".rjust(7)
-            report_str += "\n-------  " + " ------\n"
-            for i in range(n_top_mols):
-                report_str += str(self.aligned_mols[i][-1]) + "   "
-                report_str += str(round(self.aligned_mols[i][0], 4)) + "\n"
-        print(report_str)
-
-    def save_results_to_file(self, file_name):
-        """Save the results of the screening to a file. The file contains the 
-           matched molecules ids, smiles and SSD value. File can be saved as 
-           csv or json.
-
-           Parameters
-           ----------
-           file_name: str
-                Name of the file
-
-           Notes
-           -----
-           Does not return anything. A new file is written.
-        """
-        file_format = file_name.split(".")[-1]
-
-        ssd = [i[0] for i in self.aligned_mols]
-        smiles = [Chem.MolToSmiles(i[1]) for i in self.aligned_mols]
-        ids = [i[2] for i in self.aligned_mols]
-
-        results = {
-            "mol_id": ids,
-            "smiles": smiles,
-            "ssd": ssd,
-        }
-
-        if file_format == "csv":
-            df = pd.DataFrame().from_dict(results)
-            df.to_csv(file_name, index=False)
-        elif file_format == "json":
-            json_str = json.dumps(results)
-            with open(file_name, "w") as f:
-                f.write(json_str)
-        else:
-            raise NotImplementedError
-
-
     def _align_molecules(self, molecules, verbose=0):
-        
         """ Align a list of molecules to a given pharmacophore.
 
+        Parameters
+        ----------
         molecules: list of rdkit.Chem.mol
             List of molecules to align.
 
@@ -127,37 +49,14 @@ class VirtualScreening3D(VirtualScreening):
         
         Notes
         -------
-        Does not return anything. The attributes aligned_mols, n_aligned_mols,
+        Does not return anything. The attributes aligned_mols, n_mathces,
         and n_fails are updated.
 
         """
         self.n_molecules += len(molecules)
 
-        points = []
-        radii = []
-
-        rdkit_element_name = { # dictionary to map openpharmacophore feature names to rdkit feature names
-        "aromatic ring": "Aromatic",
-        "hydrophobicity": "Hydrophobe",
-        "hb acceptor": "Acceptor",
-        "hb donor": "Donor",
-        "positive charge": "PosIonizable",
-        "negative charge": "NegIonizable",
-        }
-
-        for element in self.pharmacophore.elements:
-            feat_name = rdkit_element_name[element.feature_name]
-            center = puw.get_value(element.center, to_unit="angstroms")
-            center = Geometry.Point3D(center[0], center[1], center[2])
-            points.append(ChemicalFeatures.FreeChemicalFeature(
-                feat_name,
-                center
-            ))
-            radius = puw.get_value(element.radius, to_unit="angstroms")
-            radii.append(radius)
-
-        rdkit_pharmacophore = Pharmacophore.Pharmacophore(points)
-        self._apply_radii_to_bounds(radii, rdkit_pharmacophore)
+        rdkit_pharmacophore, radii = self.pharmacophore.to_rdkit()
+        apply_radii_to_bounds(radii, rdkit_pharmacophore)
 
         fdef = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
         featFactory = ChemicalFeatures.BuildFeatureFactory(fdef)
@@ -165,7 +64,7 @@ class VirtualScreening3D(VirtualScreening):
         for i, mol in enumerate(molecules):
 
             if verbose == 1 and i % 100 == 0 and i != 0:
-                print(f"Screened {i} molecules. Number of matches: {self.n_aligned_mols}; Number of fails: {self.n_fails}")
+                print(f"Screened {i} molecules. Number of matches: {self.n_matches}; Number of fails: {self.n_fails}")
 
             bounds_matrix = rdDistGeom.GetMoleculeBoundsMatrix(mol)
             # Check if the molecule features can match with the pharmacophore.
@@ -201,110 +100,31 @@ class VirtualScreening3D(VirtualScreening):
                 self.n_fails += 1
                 continue
             # Align embeddings to the pharmacophore 
-            SSDs = self._transform_embeddings(rdkit_pharmacophore, embeddings, atom_match) 
+            SSDs = transform_embeddings(rdkit_pharmacophore, embeddings, atom_match) 
             best_fit_index = min(enumerate(SSDs), key=itemgetter(1))[0]
 
             mol_id = mol.GetProp("_Name")
-            matched_mol = (SSDs[best_fit_index], embeddings[best_fit_index], mol_id)
+            matched_mol = (SSDs[best_fit_index], mol_id, embeddings[best_fit_index])
             # Append to list in ordered manner
-            bisect.insort(self.aligned_mols, matched_mol) 
-            self.n_aligned_mols += 1
-    
-    def _apply_radii_to_bounds(self, radii, pharmacophore):
-        """
-            Apply the radius of the pharmacophoric points to the bound
-            matrix of the pharmacophore
+            try:
+                bisect.insort(self.aligned_mols, matched_mol) 
+                self.n_matches += 1
+            except:
+                # Case when a molecule is repeated. It will throw an error since bisect
+                # cannot compare molecules.
+                self.n_molecules -= 1
+                continue
 
-            Parameters
-            ----------
-            radii: list of float
-                list with the radius of each of the pharmacophoric points
-            
-            pharmacophore: rdkit.Chem.Pharm3D.Pharmacophore
-                The pharmacophore wich bounds matriz will be modified
-            
-            Returns
-            -------
-            Nothing is returned. The pharmacophore bounds matrix is updated
+class RetrospectiveScreening3D(RetrospectiveScreening):
+    """ Class for performing retrospective virtual screening by 
+        3D alignment of the molecules to the pharmacophore.
 
-        """
-        for i in range(len(radii)):
-            for j in range(i + 1, len(radii)):
-                sum_radii = radii[i] + radii[j]
-                pharmacophore.setLowerBound(i, j, max(pharmacophore.getLowerBound(i, j) - sum_radii, 0))
-                pharmacophore.setUpperBound(i, j, pharmacophore.getUpperBound(i, j) + sum_radii)
+    Parameters
+    ----------
 
-    def _get_transform_matrix(self, align_ref, conf_embed, atom_match):
+    Attributes
+    ----------
 
-        """Get the transformation matrix for a conformer.
-
-            Parameters
-            ----------
-            align_ref: list of rdkit.Geometry.Point3D
-                list of pharmacophore reference points for the alignment.
-
-            conf_embed: rdkit.Chem.Conformer
-                The conformer embedding.
-
-            atom_match: list of list
-                List of list of atoms ids that match the pharmacophore.
-
-            Returns
-            -------
-            a 2-tuple
-
-            ssd: float
-                SSD value for the alignment.
-
-            transform_matrix: numpy.ndarray; shape(4, 4)
-                The transform matrix.
-
-            """
-    
-        align_probe = [] # probe points to align to reference points
-        for match_ids in atom_match:
-            dummy_point = Geometry.Point3D(0.0,0.0,0.0)
-            for id in match_ids:
-                dummy_point += conf_embed.GetAtomPosition(id)
-            dummy_point /= len(match_ids)
-            align_probe.append(dummy_point)
-        
-        ssd, transform_matrix = rdAlignment.GetAlignmentTransform(align_ref, align_probe)
-        return ssd, transform_matrix
-
-    def _transform_embeddings(self, pharmacophore, embeddings, atom_match):
-
-        """Transform embeddings. Performs the alignment of the molecules 
-            to the pharmacophore.
-
-            Parameters
-            ----------
-            pharmacophore: rdkit.Chem.Pharm3D.Pharmacophore
-                A pharmacophore object.
-
-            embeddings: list of rdkit.Chem.Mol
-                List of molecules with a single conformer.
-
-            atom_match: list of list
-                List of list of atoms ids that match the pharmacophore.
-
-            Returns
-            -------
-            SSDs: list of float
-                List of sum of square deviations (SSD) values for the alignments.
-
-            """
-
-        align_ref = [f.GetPos() for f in pharmacophore.getFeatures()]
-        ssds = []
-        for embedding in embeddings:
-            conformer = embedding.GetConformer()
-            ssd, transform_matrix = self._get_transform_matrix(align_ref, conformer, atom_match)
-            # Transform the coordinates of the conformer
-            rdMolTransforms.TransformConformer(conformer, transform_matrix)
-            ssds.append(ssd)
-        
-        return ssds
-
-
-    
+    """
+    def __init__(self, pharmacophore):
+        super().__init__(pharmacophore)
