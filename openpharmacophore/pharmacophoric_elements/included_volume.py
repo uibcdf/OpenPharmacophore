@@ -29,15 +29,16 @@ class IncludedVolumeSphere(IncludedVolume, Sphere):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             radius_eq = self.radius == other.radius
-            center_eq = np.all(self.center == other.center)
+            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
             return radius_eq and center_eq
         return False
     
     def __repr__(self):
-        # String representation of the class is always in angstroms and rounded to 2 decimals
-        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        # String representation of the class is always in angstroms and rounded to 4 decimals
+        center = np.around(puw.get_value(self.center, "angstroms"), 4)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
-        return f"{self.__class__.__name__}(center: {center}; radius: {radius})"
+        x, y, z = center[0], center[1], center[2]
+        return f"{self.__class__.__name__}(center: ({x}, {y}, {z}); radius: {radius})"
 
 class IncludedVolumeGaussianKernel(IncludedVolume, GaussianKernel):
 
@@ -49,7 +50,7 @@ class IncludedVolumeGaussianKernel(IncludedVolume, GaussianKernel):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             sigma_eq = self.sigma == other.sigma
-            center_eq = np.all(self.center == other.center)
+            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
             return sigma_eq and center_eq
         return False
     

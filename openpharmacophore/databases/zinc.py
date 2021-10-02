@@ -1,7 +1,5 @@
 from openpharmacophore._private_tools.exceptions import MissingParameters, InvalidFileError
-
 from tqdm.auto import tqdm
-
 import os
 import pkg_resources
 import requests
@@ -205,11 +203,12 @@ def download_ZINC(download_path, subset, mw_range=None, logp_range=None, file_fo
     
     print("Downloading from ZINC...")
     for url in tqdm(url_list):
-        try:
-            r = requests.get(url, allow_redirects=True)
-        except:
-            print("Could not download file from {}".format(url))
-            continue
+
+        r = requests.get(url, allow_redirects=True)
+        if r.status_code != requests.codes.ok:
+            print("Could not fetch file from {}".format(url))
+            continue 
+
         if file_format== "smi":
             file_name =  url[-8:]
         else:

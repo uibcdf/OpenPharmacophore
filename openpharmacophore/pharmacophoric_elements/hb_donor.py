@@ -29,15 +29,16 @@ class HBDonorSphere(HBDonor, Sphere):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             radius_eq = self.radius == other.radius
-            center_eq = np.all(self.center == other.center)
+            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
             return radius_eq and center_eq
         return False
     
     def __repr__(self):
-        # String representation of the class is always in angstroms and rounded to 2 decimals
-        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        # String representation of the class is always in angstroms and rounded to 4 decimals
+        center = np.around(puw.get_value(self.center, "angstroms"), 4)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
-        return f"{self.__class__.__name__}(center: {center}; radius: {radius})"
+        x, y, z = center[0], center[1], center[2]
+        return f"{self.__class__.__name__}(center: ({x}, {y}, {z}); radius: {radius})"
 
 class HBDonorSphereAndVector(HBDonor, SphereAndVector):
 
@@ -49,16 +50,18 @@ class HBDonorSphereAndVector(HBDonor, SphereAndVector):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             radius_eq = self.radius == other.radius
-            center_eq = np.all(self.center == other.center)
-            direction_eq = np.all(self.direction == other.direction)
+            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
+            direction_eq = np.allclose(self.direction, other.direction, rtol=1e-03)
             return radius_eq and center_eq and direction_eq
         return False
     
     def __repr__(self):
-        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        center = np.around(puw.get_value(self.center, "angstroms"), 4)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
-        direction = np.around(self.direction, 2)
-        return f"{self.__class__.__name__}(center: {center}; radius: {radius}; direction: {direction})"
+        direction = np.around(self.direction, 4)
+        x, y, z = center[0], center[1], center[2]
+        xd, yd, zd = direction[0], direction[1], direction[2]
+        return f"{self.__class__.__name__}(center: ({x}, {y}, {z}); radius: {radius}; direction: ({xd}, {yd}, {zd}))"
 
 class HBDonorGaussianKernel(HBDonor, GaussianKernel):
 
@@ -70,7 +73,7 @@ class HBDonorGaussianKernel(HBDonor, GaussianKernel):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             sigma_eq = self.sigma == other.sigma
-            center_eq = np.all(self.center == other.center)
+            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
             return sigma_eq and center_eq
         return False
             

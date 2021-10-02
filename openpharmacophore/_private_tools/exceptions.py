@@ -67,3 +67,13 @@ class InvalidFileFormat(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+class FetchError(Exception):
+    """
+        Exception raised when fetching a file from a url.
+    """
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+

@@ -96,7 +96,10 @@ class VirtualScreening2D(VirtualScreening):
                 raise NotImplementedError
             
             if similarity >= self.similarity_cutoff:
-                mol_id = mol.GetProp("_Name")
+                try:
+                    mol_id = mol.GetProp("_Name")
+                except:
+                    mol_id = None
                 matched_mol = (similarity, mol_id, mol)
                 # Append to list in ordered manner
                 try:

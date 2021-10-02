@@ -3,9 +3,10 @@ import nglview as nv
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
 # from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
 
-from rdkit import Geometry
+from rdkit import Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
+RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
 
 class Pharmacophore():
 
@@ -339,7 +340,7 @@ class Pharmacophore():
                 The rdkit pharmacophore.
 
             radii: list of float
-                List with the radius of each pharmacophoric point.
+                List with the radius ina angstroms of each pharmacophoric point.
         """
         rdkit_element_name = { # dictionary to map openpharmacophore feature names to rdkit feature names
         "aromatic ring": "Aromatic",

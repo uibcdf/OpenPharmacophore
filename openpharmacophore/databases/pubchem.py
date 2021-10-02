@@ -1,4 +1,4 @@
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat
+from openpharmacophore._private_tools.exceptions import FetchError
 import pandas as pd
 from tqdm.auto import tqdm
 from io import StringIO
@@ -14,7 +14,7 @@ class PubChem():
     def __init__(self):
         self.base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
-    def _get_data(self, url, attempts):
+    def _get_data(self, url, attempts=5):
         """ Downloads data from a given url
              Parameters
             ----------
@@ -28,23 +28,19 @@ class PubChem():
             ----------
             A request.resonse.content object. The content of the response
         """
-        status_code = None
+        if attempts <= 0:
+            raise ValueError("Number of attempts must be greater than 0")
+
         while (attempts > 0):
-            try:
-                res = requests.get(url)
-                status_code = int(res.status_code)
-                if status_code == 200 or status_code == 202:
-                    break
-                else:
-                    attempts -= 1
-                    time.sleep(2)
-            except Exception as e:
-                print(e)
+            res = requests.get(url)
+            if res.status_code == requests.codes.ok:
+                break
+            else:
                 attempts -= 1
                 time.sleep(2)
         
-        if status_code != 200 and status_code != 202:
-            raise Exception("Failed to get data from {}".format(url))
+        if res.status_code != requests.codes.ok:
+            raise FetchError("Failed to get data from {}".format(url))
         
         return res.content
         
@@ -55,10 +51,10 @@ class PubChem():
             Parameters
             ----------
             assay_id: int
-                The id of the bioassay
+                The id of the bioassay.
             
             attempts: int
-                number of times to try to download the data in case of failure
+                number of times to try to download the data in case of failure.
 
             Returns
             ----------
