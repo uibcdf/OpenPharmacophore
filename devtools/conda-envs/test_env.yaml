@@ -17,3 +17,4 @@ dependencies:
 - pip
 - pytest-cov
 - codecov
+- chembl_webresource_client
