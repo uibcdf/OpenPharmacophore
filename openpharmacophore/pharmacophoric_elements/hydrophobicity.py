@@ -28,13 +28,13 @@ class HydrophobicSphere(Hydrophobicity, Sphere):
     
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            radius_eq = self.radius == other.radius
-            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
+            radius_eq = np.allclose(self.radius, other.radius, rtol=0, atol=1e-02)
+            center_eq = np.allclose(self.center, other.center, rtol=0, atol=1e-04)
             return radius_eq and center_eq
         return False
     
     def __repr__(self):
-        # String representation of the class is always in angstroms and rounded to 2 decimals
+        # String representation of the class is always in angstroms and rounded to 4 decimals
         center = np.around(puw.get_value(self.center, "angstroms"), 4)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
         x, y, z = center[0], center[1], center[2]
@@ -50,7 +50,7 @@ class HydrophobicGaussianKernel(Hydrophobicity, GaussianKernel):
     def __eq__(self, other):
         if isinstance(other, type(self)):
             sigma_eq = self.sigma == other.sigma
-            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
+            center_eq = np.allclose(self.center, other.center, rtol=0, atol=1e-04)
             return sigma_eq and center_eq
         return False
     

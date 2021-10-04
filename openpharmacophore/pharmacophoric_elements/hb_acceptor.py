@@ -28,8 +28,8 @@ class HBAcceptorSphere(HBAcceptor, Sphere):
     
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            radius_eq = self.radius == other.radius
-            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
+            radius_eq = np.allclose(self.radius, other.radius, rtol=0, atol=1e-02)
+            center_eq = np.allclose(self.center, other.center, rtol=0, atol=1e-04)
             return radius_eq and center_eq
         return False
     
@@ -49,9 +49,9 @@ class HBAcceptorSphereAndVector(HBAcceptor, SphereAndVector):
     
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            radius_eq = self.radius == other.radius
-            center_eq = np.allclose(self.center, other.center, rtol=1e-04)
-            direction_eq = np.allclose(self.direction, other.direction, rtol=1e-03)
+            radius_eq = np.allclose(self.radius, other.radius, rtol=0, atol=1e-02)
+            center_eq = np.allclose(self.center, other.center, rtol=0, atol=1e-04)
+            direction_eq = np.allclose(self.direction, other.direction, rtol=0, atol=1e-04)
             return radius_eq and center_eq and direction_eq
         return False
 
