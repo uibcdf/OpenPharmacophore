@@ -83,6 +83,6 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, sigma=None, p
     else:
         raise NotImplementedError
     
-    # TODO: incorporate other point types. Shapelet is missing phamracophoric element types.
+    # TODO: incorporate other point types. Shapelet is missing pharmacophoric element types.
 
     return point

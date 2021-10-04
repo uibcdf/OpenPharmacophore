@@ -3,6 +3,9 @@ from openpharmacophore import pharmacophoric_elements
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import pytest
+import numpy as np
+from rdkit.Chem import Pharm3D
+
 
 @pytest.fixture
 def three_element_pharmacophore():
@@ -53,6 +56,34 @@ def test_reset(three_element_pharmacophore):
     assert len(three_element_pharmacophore.elements) == 0
     assert three_element_pharmacophore.extractor is None
     assert three_element_pharmacophore.molecular_system is None
+
+def test_to_rdkit(three_element_pharmacophore):
+    rdkit_ph, radii = three_element_pharmacophore.to_rdkit()
+
+    assert len(radii) == 3
+    assert np.allclose(np.array(radii), np.array([1.0, 1.0, 1.0]))
+
+    assert isinstance(rdkit_ph, Pharm3D.Pharmacophore.Pharmacophore)
+    feats = rdkit_ph.getFeatures()
+    assert len(feats) == 3
+
+    acceptor = feats[0]
+    assert acceptor.GetFamily() == "Acceptor"
+    assert np.allclose(acceptor.GetPos().x, 1.0)
+    assert np.allclose(acceptor.GetPos().y, 0.0)
+    assert np.allclose(acceptor.GetPos().z, 0.0)
+    
+    ring_1 = feats[1]
+    assert ring_1.GetFamily() == "Aromatic"
+    assert np.allclose(ring_1.GetPos().x, 2.0)
+    assert np.allclose(ring_1.GetPos().y, 1.0)
+    assert np.allclose(ring_1.GetPos().z, 4.0)
+
+    ring_2 = feats[2]
+    assert ring_2.GetFamily() == "Aromatic"
+    assert np.allclose(ring_2.GetPos().x, 0.0)
+    assert np.allclose(ring_2.GetPos().y, 1.0)
+    assert np.allclose(ring_2.GetPos().z, 2.0)
 
 def test_add_to_NGLView():
     pass

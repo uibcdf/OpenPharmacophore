@@ -1,12 +1,14 @@
 from openpharmacophore.screening.screening import RetrospectiveScreening, VirtualScreening
 from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
-from rdkit import RDConfig, Chem
+from rdkit import RDConfig, Chem, RDLogger
 from rdkit.Chem import ChemicalFeatures, rdDistGeom
 from rdkit.Chem.Pharm3D import EmbedLib
 import bisect
 from operator import itemgetter
 import os
-    
+
+RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
+
 class VirtualScreening3D(VirtualScreening):
     """ Class to perform virtual screening with a pharmacophore by 3D alignment of the molecules
         to the pharmacophore.
@@ -102,8 +104,11 @@ class VirtualScreening3D(VirtualScreening):
             # Align embeddings to the pharmacophore 
             SSDs = transform_embeddings(rdkit_pharmacophore, embeddings, atom_match) 
             best_fit_index = min(enumerate(SSDs), key=itemgetter(1))[0]
-
-            mol_id = mol.GetProp("_Name")
+            
+            try:
+                mol_id = mol.GetProp("_Name")
+            except:
+                mol_id = None
             matched_mol = (SSDs[best_fit_index], mol_id, embeddings[best_fit_index])
             # Append to list in ordered manner
             try:

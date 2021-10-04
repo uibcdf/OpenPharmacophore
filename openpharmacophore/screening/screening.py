@@ -61,8 +61,243 @@ class VirtualScreening():
        self._screen_fn = None
        self._file_queue = Queue()
     
+    def get_screening_results(self, form="dataframe"):
+        """ Get the results of the screen on a dataframe or a
+            dictionaty
+
+            Returns
+            -------
+            pandas.DataFrame
+                dataframe with the results information.
+        """
+        # Values of the scoring that was used for screening. Examples: SSD, 
+        # tanimoto similarity
+        if self.n_matches == 0:
+            raise ValueError("""There were no matches in this screen or no database has been screened. 
+            Cannot get results.""")
+    
+        score_vals = [i[0] for i in self.matches]
+        smiles = [Chem.MolToSmiles(i[2]) for i in self.matches]
+        ids = [i[1] for i in self.matches]
+        mw = [Descriptors.MolWt(i[2]) for i in self.matches]
+        logp = [Descriptors.MolLogP(i[2]) for i in self.matches]
+
+        results = {
+            f"{self.db}_id": ids,
+            "Smiles": smiles,
+            self.scoring_metric: score_vals,
+            "Mol_weight": mw,
+            "logP": logp
+        }
+
+        if form == "dict":
+            return results
+        else:
+            return pd.DataFrame().from_dict(results) 
+
     def print_report(self):
         """ Prints a summary report of the screening.
+        """
+        report_str = self._get_report()
+        print(report_str)
+
+    def save_results_to_file(self, file_name):
+        """Save the results of the screening to a file. The file contains the 
+           matched molecules ids, smiles and SSD value. File can be saved as 
+           csv or json.
+
+           Parameters
+           ----------
+           file_name: str
+                Name of the file
+
+           Notes
+           -----
+           Does not return anything. A new file is written.
+        """
+        file_format = file_name.split(".")[-1]
+        if file_format == "csv":
+            df = self.get_screening_results(form="dataframe")
+            df.to_csv(file_name, index=False)
+        elif file_format == "json":
+            results = self.get_screening_results(form="dict")
+            json_str = json.dumps(results)
+            with open(file_name, "w") as f:
+                f.write(json_str)
+        else:
+            raise NotImplementedError
+
+    def screen_db(self, db="zinc", download_path=None, **kwargs):
+        """ Screen ZINC or ChemBl databases.
+            
+            Parameters
+            ---------
+            db: str
+                Name of the database that will be fetched. Can be "zinc" or "chembl".
+
+            download_path: bool (optional)
+                Directory where files will be saved. If None, files will be deleted 
+                after processing. Defaults to None
+
+        """
+        if not download_path:
+            delete_files = True
+            download_path = "./tmp"
+            if not os.path.isdir(download_path):    
+                os.mkdir(download_path)
+        else:
+            delete_files = False
+
+        if db == "zinc":
+            self.db = "ZINC"
+            if kwargs:
+                try:
+                    subset = kwargs["subset"]
+                except:
+                    raise MissingParameters("subset argument is required")
+                if subset is None:
+                    try:
+                        mw_range = kwargs["mw_range"]
+                        logp_range = kwargs["logp_range"]
+                    except:
+                        raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected") 
+                else:
+                    mw_range = None
+                    logp_range = None
+                urls = get_zinc_urls(subset=None, mw_range=mw_range, logp_range=logp_range)
+            else:
+                urls = get_zinc_urls(subset="Lead-Like")
+        
+            print("Downloading from ZINC...")
+            file_path = self._download_zinc_file(urls[0], download_path)
+            if file_path is not None:
+                self._file_queue.put(file_path)
+           
+            n_files = len(urls)
+            # Start the thread to process files
+            threading.Thread(target=self._process_files, daemon=True, args=[delete_files, n_files]).start()
+
+            for url in tqdm(urls[1:]):
+                file_path = self._download_zinc_file(url, download_path)
+                if file_path is not None:
+                    self._file_queue.put(file_path)
+            
+            self._file_queue.join()
+            print("Finished screening ZINC database")
+
+            try:
+                os.rmdir(download_path)
+            except:
+                pass
+
+        # elif db == "chembl":
+        #     self.db = "ChemBL"
+        #     # If a subset kwarg is not passed. Use RO5 subset
+        #     if kwargs:
+        #         subset = kwargs["subset"]
+        #     else:
+        #         subset = "Ro5"
+
+        #     if subset == "Ro5":
+        #         chembl.get_ro5_dataset(download_path)
+        #     else:
+        #         raise NotImplementedError
+        else:
+            raise NotImplementedError
+        
+    def screen_db_from_dir(self, path, file_extensions=None, **kwargs):
+        """ Screen a database of molecules contained in one or more files. 
+            Format can be smi, mol2, sdf.
+
+            Parmeters
+            ---------
+            path: str
+                The path to the file or directory that contains the molecules.
+
+            file_extensions: list of str (optional)
+                A list of file extensions that will be searched for if a directory is passed.
+                The default behavior is to load all valid file extensions.
+
+            Notes
+            --------
+            It does not retur anything. The parameters of the VirtualScreening object are updated accordingly. 
+        """
+        if not file_extensions:
+            file_extensions = ["smi", "mol2", "sdf"]
+
+        if os.path.isdir(path):
+            files_list = []
+            for root, dirs, files in os.walk(path):
+                if '.ipynb_checkpoints' in root:
+                    continue
+                for file in files:
+                    f_extension = file.split(".")[-1]
+                    if f_extension not in file_extensions:
+                        continue
+                    files_list.append(os.path.join(root, file))
+            for f in tqdm(files_list):
+                molecules = self._load_molecules_file(f, **kwargs)
+                self._screen_fn(molecules)
+
+        elif os.path.isfile(path):
+            file = path
+            molecules = self._load_molecules_file(file, **kwargs)
+            self._screen_fn(molecules)
+            print("File scanned!")
+
+        else:
+            raise Exception("{} is not a valid file/directory".format(path))
+    
+    def screen_mol_list(self, molecules, **kwargs):
+        """Screen a list of molecules
+
+           Parameters
+           ----------
+           molecules: list of rdkit.Chem.mol
+        """
+        self._screen_fn(molecules, **kwargs)
+
+    def _download_zinc_file(self, url, download_path):
+        """Download a single file form ZINC.
+           
+           Parameters
+           ----------
+           url: str
+                URL of the file that will be downloaded.
+
+           download_path: str
+                Path where the file will be stored
+        """
+        res = requests.get(url, allow_redirects=True)
+
+        if res.status_code != requests.codes.ok:
+            print("Could not fetch file from {}".format(url))
+            return 
+
+        file_name =  url[-8:]
+        file_path = os.path.join(download_path, file_name)
+        with open(file_path, "wb") as file:
+            file.write(res.content)
+        
+        return file_path
+
+    def _download_chembl_file(self, download_path):
+        """Download a single file form ChemBl.
+           
+           Parameters
+           ----------
+           download_path: str
+                Path where the file will be stored
+        """
+        pass
+    
+    def _get_report(self):
+        """ Get a report of the screening results.
+            
+            Returns
+            -------
+            report_str: str
+                The report in string form
         """
         report_str = "Virtual Screening Results\n"
         report_str += "-------------------------\n"
@@ -103,209 +338,10 @@ class VirtualScreening():
                 score = str(round(self.matches[i][0], 4))
                 report_str += id.ljust(12)
                 report_str += score.rjust(8) + "\n"
-        print(report_str)
-
-    def save_results_to_file(self, file_name):
-        """Save the results of the screening to a file. The file contains the 
-           matched molecules ids, smiles and SSD value. File can be saved as 
-           csv or json.
-
-           Parameters
-           ----------
-           file_name: str
-                Name of the file
-
-           Notes
-           -----
-           Does not return anything. A new file is written.
-        """
-        file_format = file_name.split(".")[-1]
-
-        # Values of the scoring that was used for screening. Examples: SSD, 
-        # tanimoto similarity
-        score_vals = [i[0] for i in self.matches]
-        smiles = [Chem.MolToSmiles(i[2]) for i in self.matches]
-        ids = [i[1] for i in self.matches]
-        mw = [Descriptors.MolWt(i[2]) for i in self.matches]
-        logp = [Descriptors.MolLogP(i[2]) for i in self.matches]
-
-        results = {
-            f"{self.db}_id": ids,
-            "Smiles": smiles,
-            self.scoring_metric: score_vals,
-            "Mol_weight": mw,
-            "logP": logp
-        }
-
-        if file_format == "csv":
-            df = pd.DataFrame().from_dict(results)
-            df.to_csv(file_name, index=False)
-        elif file_format == "json":
-            json_str = json.dumps(results)
-            with open(file_name, "w") as f:
-                f.write(json_str)
-        else:
-            raise NotImplementedError
-
-    def screen_db(self, db="zinc", download_path=None, **kwargs):
-        """ Screen ZINC or ChemBl databases.
-            
-            Parameters
-            ---------
-            db: str
-                Name of the database that will be fetched. Can be "zinc" or "chembl".
-
-            download_path: bool (optional)
-                Directory where files will be saved. If None, files will be deleted 
-                after processing. Defaults to None
-
-        """
-        if not download_path:
-            delete_files = True
-            download_path = "./tmp"
-            if not os.path.isdir(download_path):    
-                os.mkdir(download_path)
-        else:
-            delete_files = False
-
-        if db == "zinc":
-            self.db = "ZINC"
-            if kwargs:
-                subset = kwargs["subset"]
-                if subset is None:
-                    try:
-                        mw_range = kwargs["mw_range"]
-                        logp_range = kwargs["logp_range"]
-                    except:
-                        raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected") 
-                else:
-                    mw_range = None
-                    logp_range = None
-                urls = get_zinc_urls(subset=None, mw_range=mw_range, logp_range=logp_range)
-            else:
-                urls = get_zinc_urls(subset="Lead-Like")
         
-            print("Downloading from ZINC...")
-            file_path = self._download_zinc_file(urls[0], download_path)
-            self._file_queue.put(file_path)
-           
-            n_files = len(urls)
-            # Start the thread to process files
-            threading.Thread(target=self._process_files, daemon=True, args=[delete_files, n_files]).start()
+        return report_str
 
-            for url in tqdm(urls[1:]):
-                file_path = self._download_zinc_file(url, download_path)
-                self._file_queue.put(file_path)
-            
-            self._file_queue.join()
-            print("Finished screening ZINC database")
-
-            try:
-                os.rmdir(download_path)
-            except:
-                pass
-
-        # elif db == "chembl":
-        #     self.db = "ChemBL"
-        #     # If a subset kwarg is not passed. Use RO5 subset
-        #     if kwargs:
-        #         subset = kwargs["subset"]
-        #     else:
-        #         subset = "Ro5"
-
-        #     if subset == "Ro5":
-        #         chembl.get_ro5_dataset(download_path)
-        #     else:
-        #         raise NotImplementedError
-        else:
-            raise NotImplementedError
-        
-    def screen_db_from_dir(self, path, file_extensions=None):
-        """ Screen a database of molecules contained in one or more files. 
-            Format can be smi, mol2, sdf.
-
-            Parmeters
-            ---------
-            path: str
-                The path to the file or directory that contains the molecules.
-
-            file_extensions: list of str (optional)
-                A list of file extensions that will be searched for if a directory is passed.
-                The default behavior is to load all valid file extensions.
-
-            Notes
-            --------
-            It does not retur anything. The parameters of the VirtualScreening object are updated accordingly. 
-        """
-        if not file_extensions:
-            file_extensions = ["smi", "mol2", "sdf"]
-
-        if os.path.isdir(path):
-            files_list = []
-            for root, dirs, files in os.walk(path):
-                if '.ipynb_checkpoints' in root:
-                    continue
-                for file in files:
-                    f_extension = file.split(".")[-1]
-                    if f_extension not in file_extensions:
-                        continue
-                    files_list.append(os.path.join(root, file))
-            for f in tqdm(files_list):
-                molecules = self._load_molecules_file(f)
-                self._screen_fn(molecules)
-
-        elif os.path.isfile(path):
-            file = path
-            molecules = self._load_molecules_file(file)
-            self._screen_fn(molecules)
-            print("File scanned!")
-
-        else:
-            raise Exception("{} is not a valid file/directory".format(path))
-    
-    def screen_mol_list(self, molecules):
-        """Screen a list of molecules
-
-           Parameters
-           ----------
-           molecules: list of rdkit.Chem.mol
-        """
-        self._screen_fn(molecules)
-
-    def _download_zinc_file(self, url, download_path):
-        """Download a single file form ZINC.
-           
-           Parameters
-           ----------
-           url: str
-                URL of the file that will be downloaded.
-
-           download_path: str
-                Path where the file will be stored
-        """
-        try:
-            r = requests.get(url, allow_redirects=True)
-        except:
-            print("Could not download file from {}".format(url))
-
-        file_name =  url[-8:]
-        file_path = os.path.join(download_path, file_name)
-        with open(file_path, "wb") as file:
-            file.write(r.content)
-        
-        return file_path
-
-    def _download_chembl_file(self, download_path):
-        """Download a single file form ChemBl.
-           
-           Parameters
-           ----------
-           download_path: str
-                Path where the file will be stored
-        """
-        pass
-
-    def _load_molecules_file(self, file_name):
+    def _load_molecules_file(self, file_name, **kwargs):
         """
             Load a file of molecules of any format and return a list of 
             rdkit molecules.
@@ -322,7 +358,15 @@ class VirtualScreening():
         fextension = file_name.split(".")[-1]
         
         if fextension == "smi":
-            ligands = Chem.SmilesMolSupplier(file_name, delimiter=' ', titleLine=True)
+            if kwargs:
+                if "delimiter" in kwargs and "titleLine" in kwargs:
+                    ligands = Chem.SmilesMolSupplier(file_name, delimiter=kwargs["delimiter"], titleLine=kwargs["titleLine"])
+                elif "delimiter" in kwargs:
+                    ligands = Chem.SmilesMolSupplier(file_name, delimiter=kwargs["delimiter"], titleLine=True)
+                elif "titleLine" in kwargs:
+                    ligands = Chem.SmilesMolSupplier(file_name, delimiter=' ', titleLine=kwargs["titleLine"])
+            else:    
+                ligands = Chem.SmilesMolSupplier(file_name, delimiter=' ', titleLine=True)
         elif fextension == "mol2":
             ligands = load_mol2_file(file_name)
         elif fextension == "sdf":
@@ -365,6 +409,7 @@ class VirtualScreening():
                 os.remove(file)
             pbar.update()
             self._file_queue.task_done()
+
 
 
 class RetrospectiveScreening():

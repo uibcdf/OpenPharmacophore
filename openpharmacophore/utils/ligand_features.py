@@ -28,7 +28,10 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
 
         Returns
         -------
-        points: a list of openpharmacophore.pharmacophoric_elements
+        points: nested dictionary with the following structure
+            {ligand_id: conformer_id: {list of openpharmacophore.pharmacophoric_elements}}
+            It stores pharmacophoric elements for each conformer of each ligand in the original
+            ligand list.
 
     """
     fdefName = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
@@ -86,7 +89,7 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
 
 def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="spheres"):
     """
-        Get pharmacophoric points for a list of ligands using rdkit chemical feature definition. 
+        Get pharmacophoric points for a list of ligands using custom smarts feature definition. 
 
         Parameters
         ----------
@@ -109,7 +112,10 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
 
         Returns
         -------
-        points: a list of openpharmacophore.pharmacophoric_elements
+        points: nested dictionary with the following structure
+            {ligand_id: conformer_id: {list of openpharmacophore.pharmacophoric_elements}}
+            It stores pharmacophoric elements for each conformer of each ligand in the original
+            ligand list.
 
     """
     
@@ -171,8 +177,8 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
 
         Parameters
         ----------
-        ligands: :obj: rdkit.Chem.rdmolfiles.SmilesMolSupplier or list of rdkit.Chem.rdchem.Mol
-            List of ligands. Each ligand needs to have at least one conformer.
+        ligands: list of rdkit.Chem.Mol or a single rdkit.Chem.Mol 
+            List of ligands or a single ligand. Each ligand needs to have at least one conformer.
         
         radius: float
             Lenght of the radius of the parmacohporic points. Required if point type is 'spheres' or
