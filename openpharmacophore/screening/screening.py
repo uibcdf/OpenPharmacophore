@@ -454,7 +454,7 @@ class RetrospectiveScreening():
            """
         actives, inactives = chembl.get_training_data(target_id, pIC50_threshold)
         
-        self.db = "Pubchem"
+        self.db = "PubChem"
         self.from_training_data(actives, inactives)
 
     def from_training_data(self, actives, inactives):
@@ -522,9 +522,6 @@ class RetrospectiveScreening():
         # For the ROC plot we need an array with the labels of the molecules, 0 being an inactive
         # molecule and 1 an active one. Moreover, we need an array with the scores. Thats why we
         # need to assign scores to every molecule.
-
-        # Need to check if rdkit alignment functions can assign values to molecules which it cannot
-        # match.
 
         pass
 

@@ -1,7 +1,8 @@
-from openpharmacophore.screening.screening import VirtualScreening
+from openpharmacophore.screening.screening import VirtualScreening, RetrospectiveScreening
 from rdkit import DataStructs
 from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
 from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
+import numpy as np
 import bisect
 
 class VirtualScreening2D(VirtualScreening):
@@ -114,3 +115,70 @@ class VirtualScreening2D(VirtualScreening):
                 self.n_fails += 1 
 
 
+class RetrospectiveScreening2D(RetrospectiveScreening):
+    """ Class for performing retrospective virtual screening by 
+        3D alignment of the molecules to the pharmacophore.
+
+    Parameters
+    ----------
+
+    Attributes
+    ----------
+
+    """
+    def __init__(self, query_mol, similarity="tanimoto"):
+        if similarity != "tanimoto" and similarity != "dice":
+            raise NotImplementedError
+
+        self._factory = Gobbi_Pharm2D.factory
+        fingerprint = Gen2DFingerprint(query_mol, self._factory)
+        super().__init__(pharmacophore=fingerprint)
+
+    def _fingerprint_similarity(self, molecules, bioactivity):
+        """ Compute fingerprints and similarity values for a list
+            of molecules. 
+
+        Parameters
+        ----------
+        molecules: list of rdkit.Chem.mol
+            List of molecules whose similarity to the pharmacophore 
+            fingerprint will be calculated.
+        
+        Notes
+        -------
+        Does not return anything. Attributes are updated accordingly.
+
+        """
+        self.n_molecules = len(molecules)
+        self.n_actives = np.sum(bioactivity)
+        self.n_inactives = bioactivity.shape[0] - self.n_actives
+
+        for mol in molecules:
+            fingerprint = Gen2DFingerprint(mol, self._factory)
+            if self.similiarity_fn == "tanimoto":
+                similarity = DataStructs.TanimotoSimilarity(self.pharmacophore, fingerprint)
+            elif self.similiarity_fn == "dice":
+                similarity = DataStructs.DiceSimilarity(self.pharmacophore, fingerprint)
+            else:
+                raise NotImplementedError
+            
+            if similarity >= self.similarity_cutoff:
+                try:
+                    mol_id = mol.GetProp("_Name")
+                except:
+                    mol_id = None
+                matched_mol = (similarity, mol_id, mol)
+                # Append to list in ordered manner
+                try:
+                    bisect.insort(self.similar_mols, matched_mol)
+                    self.n_matches += 1
+                except:
+                    # Case when a molecule is repeated. It will throw an error since bisect
+                    # cannot compare molecules.
+                    self.n_molecules -= 1
+                    continue
+            else:
+                self.n_fails += 1 
+    
+
+         

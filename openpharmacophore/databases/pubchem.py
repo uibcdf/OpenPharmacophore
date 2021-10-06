@@ -150,7 +150,44 @@ class PubChem():
         data = self._get_data(target_url, attempts)
         return json.loads(data)
     
-    def get_assay_training_data(self, assay_id):
+    def get_assay_bioactivity_data(self, assay_id):
+        """ Get bioactivity data and the compounds in an assay. 
+        
+            Parameters
+            ----------
+                assay_id: int
+                    The id of the bioassay.
+            Returns
+            ----------
+                compounds: list of 2-tuples
+                    The first element is the compound PubChem id.
+                    The second element is the smiles of the compound.
+                
+                bioactivity: np.array of bits
+                    An array where each element corresponds to the index of the compounds list.
+                    An entry is either one if the compound is active or zero if the compund is inactive.
+        """
+        assay_results = self.get_assay_results(assay_id=assay_id, form="dataframe")
+        # Keep only cid and activity columns
+        df = assay_results[["PUBCHEM_CID", "PUBCHEM_ACTIVITY_OUTCOME"]]
+        df = df.dropna()
+        # Add activity column of 1 and 0
+        df["activity"] = df["PUBCHEM_ACTIVITY_OUTCOME"].apply(lambda x: 0 if x == "Inactive" else 1)
+        # Drop original activity column
+        df = df.drop("PUBCHEM_ACTIVITY_OUTCOME", axis=1)
+        df = df.astype("int32")
+        molecules_ids = df["PUBCHEM_CID"].tolist()
+        bioactivity = df["activity"].to_numpy() 
+
+        molecules = []
+        print("Fetching molecules smiles...")
+        for mol_id in tqdm(molecules_ids):
+            smiles = self.get_compound_smiles(mol_id)
+            molecules.append((mol_id, smiles))
+
+        return molecules, bioactivity
+
+    def get_assay_actives_and_inactives(self, assay_id):
         """ Get smiles for compounds in an assay split into active and inactive.
 
             Parameters
