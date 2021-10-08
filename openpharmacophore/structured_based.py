@@ -122,6 +122,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
         molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
+        if ligand:
+            ligand = Chem.AddHs(ligand, addCoords=True)
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
@@ -413,10 +415,25 @@ class StructuredBasedPharmacophore(Pharmacophore):
             molecular system used to elucidate it.
 
         """
+        view = nv.NGLWidget()
+        view.add_component(self.molecular_system)
+        if self.ligand:
+            view.representations = [
+                {"type": "cartoon", "params": {
+                    "sele": "protein", "color": "residueindex"
+                }},
+            ]
+            view.add_component(self.ligand)
+        else:
+            view.representations = [
+                {"type": "cartoon", "params": {
+                    "sele": "protein", "color": "residueindex"
+                }},
+                {"type": "ball+stick", "params": {
+                    "sele": "( not polymer or hetero ) and not ( water or ion )" # Show ligand
+                }}
+            ]
 
-        # Molsysmt throws an exception. Temporarily using rdkit 
-        # view = msm.view(self.molecular_system, standardize=False)
-        view = nv.show_rdkit(self.molecular_system)
         self.add_to_NGLView(view, palette=palette)
         return view
     
