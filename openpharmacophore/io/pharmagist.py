@@ -1,4 +1,4 @@
-from openpharmacophore import pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 import pyunitwizard as puw
 import numpy as np
 import re
@@ -25,12 +25,12 @@ def read_pharmagist(file_name, pharmacophore_index=None):
             A list of pharmacophoric points from a single pharmacophore.
     """
     pharmagist_element_name = { # dictionary to map pharmagist feature names to openpharmacophore elements
-        "AR": phe.AromaticRingSphere,
-        "HYD": phe.HydrophobicSphere,
-        "ACC": phe.HBAcceptorSphere,
-        "DON": phe.HBDonorSphere,
-        "CAT": phe.PositiveChargeSphere,
-        "ANI": phe.NegativeChargeSphere,
+        "AR": "aromatic ring",
+        "HYD": "hydrophobicity",
+        "ACC": "hb acceptor",
+        "DON": "hb donor",
+        "CAT": "positive charge",
+        "ANI": "negative charge",
     }
     
     pharmacophores = []
@@ -45,7 +45,10 @@ def read_pharmagist(file_name, pharmacophore_index=None):
                 feat_type = pharmagist_element_name[point_line[1]]
                 center = [float(coord) for coord in point_line[2: 5]] # convert coordinates to float
                 center = puw.quantity(center, "angstroms")
-                element = feat_type(center=center, radius=puw.quantity(1.0, "angstroms"))
+                element = PharmacophoricPoint(
+                    feat_type=feat_type,
+                    center=center, 
+                    radius=puw.quantity(1.0, "angstroms"))
                 points.append(element)
             if "@<TRIPOS>BOND" in line:
                 pharmacophores.append(points)

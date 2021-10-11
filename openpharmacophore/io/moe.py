@@ -1,5 +1,4 @@
-from openpharmacophore.pharmacophoric_elements import excluded_volume
-from openpharmacophore import pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 import pyunitwizard as puw
 import re
 import datetime
@@ -19,12 +18,12 @@ def from_moe(file_name):
             A list of pharmacophoric points.
     """
     moe_to_oph = {
-        "Cat": phe.PositiveChargeSphere,
-        "Ani": phe.NegativeChargeSphere,
-        "Don": phe.HBDonorSphere, 
-        "Acc": phe.HBAcceptorSphere,
-        "Hyd": phe.HydrophobicSphere,
-        "Aro": phe.AromaticRingSphere,
+        "Cat": "positive charge",
+        "Ani": "negative charge",
+        "Don": "hb donor", 
+        "Acc": "hb acceptor",
+        "Hyd": "hydrophobicity",
+        "Aro": "aromatic ring",
     }
 
     points = []
@@ -48,11 +47,13 @@ def from_moe(file_name):
                 y = float(pieces[i + 3])
                 z = float(pieces[i + 4])
                 radius = float(pieces[i + 5])
-                point_1 = moe_to_oph[feat_name_1](
+                point_1 = PharmacophoricPoint(
+                    feat_type=moe_to_oph[feat_name_1],
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
-                point_2 = moe_to_oph[feat_name_2](
+                point_2 = PharmacophoricPoint(
+                    feat_type=moe_to_oph[feat_name_2],
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
@@ -67,7 +68,8 @@ def from_moe(file_name):
                 y = float(pieces[i + 3])
                 z = float(pieces[i + 4])
                 radius = float(pieces[i + 5])
-                point = moe_to_oph[feat_name](
+                point = PharmacophoricPoint(
+                    feat_type=moe_to_oph[feat_name],
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 ) 
@@ -94,7 +96,8 @@ def from_moe(file_name):
                 count += 1
             elif count == 4:
                 radius = float(p)
-                excluded_sphere = phe.ExcludedVolumeSphere(
+                excluded_sphere = PharmacophoricPoint(
+                    feat_type="excluded sphere",
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
@@ -138,7 +141,7 @@ def to_moe(pharmacophore, file_name, **kwargs):
 
     excluded_spheres = []
     for element in pharmacophore.elements:
-        if element.feature_name == "excluded volume":
+        if element.feature_name == "excluded sphere":
             excluded_spheres.append(element)
             continue
         feat_name = oph_to_moe[element.feature_name]

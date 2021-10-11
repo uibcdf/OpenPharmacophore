@@ -1,4 +1,4 @@
-from openpharmacophore import pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from collections import namedtuple
 import xml.etree.ElementTree as ET
 import pyunitwizard as puw
@@ -26,13 +26,13 @@ def from_ligandscout(file_name):
     pharmacophore = tree.getroot()
 
     ligandscout_to_oph = { # dictionary to map ligandscout features to openpharmacophore elements
-        "PI": phe.PositiveChargeSphere,
-        "NI": phe.NegativeChargeSphere,
-        "HBD": phe.HBDonorSphereAndVector, 
-        "HBA": phe.HBAcceptorSphereAndVector,
-        "H": phe.HydrophobicSphere,
-        "AR": phe.AromaticRingSphereAndVector,
-        "exclusion": phe.ExcludedVolumeSphere
+        "PI": "positive charge",
+        "NI": "negative charge",
+        "HBD": "hb donor", 
+        "HBA": "hb acceptor",
+        "H": "hydrophobicity",
+        "AR": "aromatic ring",
+        "exclusion": "excluded sphere"
     }
 
     points = []
@@ -46,8 +46,9 @@ def from_ligandscout(file_name):
                 y = float(coords["y3"])
                 z = float(coords["z3"])
                 radius = float(coords["tolerance"])
-            point = ligandscout_to_oph[feat_name](center=puw.quantity([x, y, z], "angstroms"),
-                                                  radius=puw.quantity(radius, "angstroms"))
+            point = PharmacophoricPoint(feat_type=ligandscout_to_oph[feat_name],
+                        center=puw.quantity([x, y, z], "angstroms"),
+                        radius=puw.quantity(radius, "angstroms"))
             points.append(point)
 
         elif element.tag == "vector":
@@ -65,9 +66,10 @@ def from_ligandscout(file_name):
                     y_2 = float(coords_2["y3"])
                     z_2 = float(coords_2["z3"])
                     radius_2 = float(coords_2["tolerance"])  
-            point = ligandscout_to_oph[feat_name](center=puw.quantity([x_1, y_1, z_1], "angstroms"),
-                                                  radius=puw.quantity(radius_1, "angstroms"),
-                                                  direction=[x_2, y_2, z_2])
+            point = PharmacophoricPoint(feat_type=ligandscout_to_oph[feat_name],
+                        center=puw.quantity([x_1, y_1, z_1], "angstroms"),
+                        radius=puw.quantity(radius_1, "angstroms"),
+                        direction=[x_2, y_2, z_2])
             points.append(point)
 
         elif element.tag == "plane":
@@ -86,9 +88,11 @@ def from_ligandscout(file_name):
                     y_2 = float(coords_2["y3"])
                     z_2 = float(coords_2["z3"])
                     radius_2 = float(coords_2["tolerance"])
-            point = ligandscout_to_oph[feat_name](center=puw.quantity(center, "angstroms"),
-                                                  radius=puw.quantity(radius_1, "angstroms"),
-                                                  direction=[x_2, y_2, z_2])
+            point = PharmacophoricPoint(
+                        feat_type=ligandscout_to_oph[feat_name],
+                        center=puw.quantity(center, "angstroms"),
+                        radius=puw.quantity(radius_1, "angstroms"),
+                        direction=[x_2, y_2, z_2])
             points.append(point)
 
         elif element.tag == "volume":
@@ -99,8 +103,10 @@ def from_ligandscout(file_name):
                 y = float(coords["y3"])
                 z = float(coords["z3"])
                 radius = float(coords["tolerance"])
-            point = ligandscout_to_oph[feat_name](center=puw.quantity([x, y, z], "angstroms"),
-                                                  radius=puw.quantity(radius, "angstroms"))
+            point = PharmacophoricPoint(
+                    feat_type=ligandscout_to_oph[feat_name],
+                    center=puw.quantity([x, y, z], "angstroms"),
+                    radius=puw.quantity(radius, "angstroms"))
             points.append(point)
 
     return points
@@ -127,7 +133,7 @@ def to_ligandscout(pharmacophore, file_name, **kwargs):
         "hydrophobicity": Feature("H", "hi_"),
         "hb acceptor": Feature("HBA", "ha_"),
         "hb donor": Feature("HBD", "hd_"),
-        "excluded volume": Feature("exclusion", "ev_"),
+        "excluded sphere": Feature("exclusion", "ev_"),
         "positive charge": Feature("PI", "pi_"),
         "negative charge": Feature("NI", "ni_"),
     }

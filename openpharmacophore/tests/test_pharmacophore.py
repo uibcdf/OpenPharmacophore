@@ -1,4 +1,5 @@
 from openpharmacophore.pharmacophore import Pharmacophore
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore import pharmacophoric_elements
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
@@ -10,15 +11,18 @@ from rdkit.Chem import Pharm3D
 @pytest.fixture
 def three_element_pharmacophore():
     """Returns as pharmacophore with three elements"""
-    hb_acceptor = pharmacophoric_elements.HBAcceptorSphere(
+    hb_acceptor = PharmacophoricPoint(
+        feat_type="hb acceptor",
         center=puw.quantity([1,0,0], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    ring_1 = pharmacophoric_elements.AromaticRingSphere(
+    ring_1 = PharmacophoricPoint(
+        feat_type="aromatic ring",
         center=puw.quantity([2, 1, 4], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    ring_2 = pharmacophoric_elements.AromaticRingSphere(
+    ring_2 = PharmacophoricPoint(
+        feat_type="aromatic ring",
         center=puw.quantity([0, 1, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )

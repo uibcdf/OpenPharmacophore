@@ -52,7 +52,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.ligand = ligand
     
     @classmethod
-    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit"):
+    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit", load_mol_system=True):
         """ Class method to obtain a pharmacophore from a pdb file containing
             a protein-ligand complex. 
             
@@ -120,8 +120,12 @@ class StructuredBasedPharmacophore(Pharmacophore):
             hydrophobics="plip"
         pharmacophoric_points = StructuredBasedPharmacophore._sb_pharmacophore_points(interactions, radius, ligand, hydrophobics)
 
-        # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
-        molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
+        if load_mol_system:
+            # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
+            molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
+        else:
+            molecular_system = None
+            
         if ligand:
             ligand = Chem.AddHs(ligand, addCoords=True)
 

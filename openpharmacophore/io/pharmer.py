@@ -1,5 +1,5 @@
 from openpharmacophore import _puw
-from openpharmacophore import pharmacophoric_elements as elements
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 #import molsysmt as msm
 import json
 import pyunitwizard as puw
@@ -50,35 +50,35 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
         if pharmer_feature_name=='Aromatic':
             center, radius, direction = get_pharmer_element_properties(pharmer_element, direction=True)
-            element = elements.AromaticRingSphereAndVector(center, radius, direction)
+            element = PharmacophoricPoint("aromatic ring", center, radius, direction)
 
         elif pharmer_feature_name=='Hydrophobic':
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element = elements.HydrophobicSphere(center, radius)
+            element = PharmacophoricPoint("hydrophobicity", center, radius)
 
         elif pharmer_feature_name=='HydrogenAcceptor':
             center, radius, direction = get_pharmer_element_properties(pharmer_element, direction=True)
-            element = elements.HBAcceptorSphereAndVector(center, radius, direction)
+            element = PharmacophoricPoint("hb acceptor" ,center, radius, direction)
 
         elif pharmer_feature_name=="HydrogenDonor":
             center, radius, direction = get_pharmer_element_properties(pharmer_element, direction=True)
-            element = elements.HBDonorSphereAndVector(center, radius, direction)
+            element = PharmacophoricPoint("hb donor" ,center, radius, direction)
 
         elif pharmer_feature_name=="PositiveIon":
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element = elements.PositiveChargeSphere(center, radius)
+            element = PharmacophoricPoint("positive charge", center, radius)
         
         elif pharmer_feature_name=="NegativeIon":
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element = elements.NegativeChargeSphere(center, radius)
+            element = PharmacophoricPoint("negative charge", center, radius)
 
         elif pharmer_feature_name=="ExclusionSphere":
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element = elements.ExcludedVolumeSphere(center, radius)
+            element = PharmacophoricPoint("excluded sphere", center, radius)
 
         elif pharmer_feature_name=='InclusionSphere':
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element = elements.IncludedVolumeSphere(center, radius)
+            element =PharmacophoricPoint("included sphere", center, radius)
 
         points.append(element)
 
@@ -120,8 +120,8 @@ def to_pharmer(pharmacophore, file_name, **kwargs):
         "hydrophobicity": "Hydrophobic",
         "hb acceptor": "HydrogenAcceptor",
         "hb donor": "HydrogenDonor",
-        "included volume": "InclusionSphere",
-        "excluded volume": "ExclusionSphere",
+        "included sphere": "InclusionSphere",
+        "excluded sphere": "ExclusionSphere",
         "positive charge": "PositiveIon",
         "negative charge": "NegativeIon",
     }
@@ -131,7 +131,7 @@ def to_pharmer(pharmacophore, file_name, **kwargs):
         temp_center = puw.get_value(element.center, to_unit='angstroms')
         point_dict["name"] = pharmer_element_name[element.feature_name]
         point_dict["svector"] = {}
-        if hasattr(element, "direction"): 
+        if element.has_direction: 
             point_dict["hasvec"] = True
             point_dict["svector"]["x"] = element.direction[0]
             point_dict["svector"]["y"] = element.direction[1] 

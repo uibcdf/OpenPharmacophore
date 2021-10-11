@@ -3,7 +3,7 @@ from openpharmacophore.io.moe import from_moe, to_moe
 from openpharmacophore.io.ligandscout import from_ligandscout, to_ligandscout
 from openpharmacophore.io.pharmagist import read_pharmagist, to_pharmagist
 from openpharmacophore.io.pharmer import from_pharmer, to_pharmer
-import openpharmacophore.pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.ligand_based import LigandBasedPharmacophore
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
 
@@ -18,21 +18,40 @@ import os
 def two_element_pharmacophore():
     """Returns a pharmacophore with an aromatic ring and an hb acceptor"""
     radius = puw.quantity(1.0, "angstroms")
-    ring = phe.AromaticRingSphereAndVector(puw.quantity([1,0,0], "angstroms"), 
-                                            radius, [0, 0, 1])
-    acceptor = phe.HBAcceptorSphere(puw.quantity([1,2,2], "angstroms"), 
-                                    radius)
+    ring = PharmacophoricPoint(
+        feat_type="aromatic ring",
+        center=puw.quantity([1,0,0], "angstroms"), 
+        radius=radius,
+        direction=[0, 0, 1],
+        atoms_inxs=None
+        )
+    acceptor = PharmacophoricPoint(
+        feat_type="hb acceptor",
+        center=puw.quantity([1,2,2], "angstroms"), 
+        radius=radius)
     pharmacophore = StructuredBasedPharmacophore(elements=[ring, acceptor])
     return pharmacophore
 
 @pytest.fixture
 def three_element_pharmacophore():
     radius = puw.quantity(1.0, "angstroms")
-    ring = phe.AromaticRingSphereAndVector(puw.quantity([1,0,0], "angstroms"), 
-                                            radius, [0, 0, 1])
-    acceptor = phe.HBAcceptorSphereAndVector(puw.quantity([1,2,2], "angstroms"), 
-                                    radius, [0,1,1])
-    excluded = phe.ExcludedVolumeSphere(puw.quantity([2,1,2], "angstroms"), radius)
+    ring = PharmacophoricPoint(
+        feat_type="aromatic ring",
+        center=puw.quantity([1,0,0], "angstroms"), 
+        radius=radius,
+        direction=[0, 0, 1],
+        atoms_inxs=None
+    )
+    acceptor = PharmacophoricPoint(
+        feat_type="hb acceptor",
+        center=puw.quantity([1,2,2], "angstroms"), 
+        radius=radius, 
+        direction=[0,1,1]
+    )
+    excluded = PharmacophoricPoint(
+        feat_type="excluded sphere",
+        center=puw.quantity([2,1,2], "angstroms"), 
+        radius=radius)
     pharmacophore = StructuredBasedPharmacophore(elements=[ring, acceptor, excluded])
     return pharmacophore
 
@@ -43,7 +62,7 @@ def test_from_pharmer():
     assert len(points) == 19
     assert molecular_system is None
     assert isinstance(points[0], 
-                        phe.aromatic_ring.AromaticRingSphereAndVector)
+                        PharmacophoricPoint)
 
 def test_to_pharmer(two_element_pharmacophore):
     
@@ -121,7 +140,7 @@ def test_read_pharmagist(fname, index):
             assert len(result) == 6
     else:
         assert len(result) == 4
-        assert isinstance(result[0], phe.HBAcceptorSphere)
+        assert isinstance(result[0], PharmacophoricPoint)
 
 def test_to_pharmagist(three_element_pharmacophore):
     mol2_list = to_pharmagist(three_element_pharmacophore, file_name=None, testing=True)
@@ -137,14 +156,14 @@ def test_from_ligandscout():
     assert len(points) == 4
 
     neg_ion = points[0]  
-    assert isinstance(neg_ion, phe.NegativeChargeSphere)
+    assert neg_ion.feature_name == "negative charge"
     assert np.all(
             np.around(puw.get_value(neg_ion.center, "angstroms"), 1) == np.array([-8.0, 10.0, -9.5])
             )
     assert puw.get_value(neg_ion.radius, "angstroms") == 1.5
     
     donor = points[1]
-    assert isinstance(donor, phe.HBDonorSphereAndVector)
+    assert donor.feature_name == "hb donor"
     assert np.all(
             np.around(puw.get_value(donor.center, "angstroms"), 1) ==  np.array([-8.0, 2.0, -10.0])
             )
@@ -156,7 +175,7 @@ def test_from_ligandscout():
             )
     
     ring = points[2]
-    assert isinstance(ring, phe.AromaticRingSphereAndVector)
+    assert ring.feature_name == "aromatic ring"
     assert np.all(
             np.around(puw.get_value(ring.center, "angstroms"), 1) ==  np.array([0.0, 6.5, -3.0])
             )
@@ -168,7 +187,7 @@ def test_from_ligandscout():
             )
     
     excluded_vol = points[3]
-    assert isinstance(excluded_vol, phe.ExcludedVolumeSphere)
+    assert excluded_vol.feature_name == "excluded sphere"
     assert np.all(
             np.around(puw.get_value(excluded_vol.center, "angstroms"), 1) ==  np.array([5.5, 4.5, -2.0])
             )
@@ -186,7 +205,7 @@ def test_from_moe():
     assert len(points) == 10
 
     donor = points[0]
-    assert isinstance(donor, phe.HBDonorSphere)
+    assert donor.feature_name == "hb donor"
     assert np.all(
         np.around(puw.get_value(donor.center, "angstroms"), 2) == np.around(np.array([1.71, 1.43075, -1.4255]), 2)
         )
@@ -194,21 +213,21 @@ def test_from_moe():
         
     
     hyd = points[1]
-    assert isinstance(hyd, phe.HydrophobicSphere)
+    assert hyd.feature_name == "hydrophobicity"
     assert np.all(
         np.around(puw.get_value(hyd.center, "angstroms"), 2) == np.around(np.array([2.7895, 2.4035, -1.40875]), 2)
         )
     assert np.around(puw.get_value(hyd.radius, "angstroms"), 2) == 0.55
     
     acceptor = points[2]
-    assert isinstance(acceptor, phe.HBAcceptorSphere)
+    assert acceptor.feature_name == "hb acceptor"
     assert np.all(
         np.around(puw.get_value(acceptor.center, "angstroms"), 2) == np.around(np.array([0.312, 3.0175, -2.44825]), 2)
         )
     assert np.around(puw.get_value(acceptor.radius, "angstroms"), 2) == 0.57
     
     aromatic_1 = points[3]
-    assert isinstance(aromatic_1, phe.AromaticRingSphere)
+    assert aromatic_1.feature_name == "aromatic ring"
     assert np.all(
         np.around(puw.get_value(aromatic_1.center, "angstroms"), 2) == 
         np.around(np.array([-0.748458333333333, 2.13108333333333, -2.490375]), 2)
@@ -217,7 +236,7 @@ def test_from_moe():
         
     
     aromatic_2 = points[4]
-    assert isinstance(aromatic_2, phe.AromaticRingSphere)
+    assert aromatic_2.feature_name == "aromatic ring"
     assert np.all(
         np.around(puw.get_value(aromatic_2.center, "angstroms"), 2) == 
         np.around(np.array([-1.719625, -0.0273333333333334, -2.055625]), 2)
@@ -226,7 +245,7 @@ def test_from_moe():
 
     
     aromatic_3 = points[5]
-    assert isinstance(aromatic_3, phe.AromaticRingSphere)
+    assert aromatic_3.feature_name == "aromatic ring"
     assert np.all(
         np.around(puw.get_value(aromatic_3.center, "angstroms"), 2) == 
         np.around(np.array([5.20029166666667, 1.25479166666667, -0.199041666666667]), 2)
@@ -234,7 +253,7 @@ def test_from_moe():
     assert np.around(puw.get_value(aromatic_3.radius, "angstroms"), 2) == 0.61
     
     acceptor = points[6]
-    assert isinstance(acceptor, phe.HBAcceptorSphere)
+    assert acceptor.feature_name == "hb acceptor"
     assert np.all(
         np.around(puw.get_value(acceptor.center, "angstroms"), 2) == 
         np.around(np.array([-1.95875, 2.536, -3.03625]), 2)
@@ -243,7 +262,7 @@ def test_from_moe():
         
     
     hyd_2 = points[7]
-    assert isinstance(hyd_2, phe.HydrophobicSphere)
+    assert hyd_2.feature_name == "hydrophobicity"
     assert np.all(
         np.around(puw.get_value(hyd_2.center, "angstroms"), 2) == np.around(np.array([-1.54725, -2.979375, -0.961875]), 2)
         )
@@ -251,7 +270,7 @@ def test_from_moe():
       
     
     acceptor_2 = points[8]
-    assert isinstance(acceptor_2, phe.HBAcceptorSphere)
+    assert acceptor_2.feature_name == "hb acceptor"
     assert np.all(
         np.around(puw.get_value(acceptor_2.center, "angstroms"), 2) == 
         np.around(np.array([-0.755095833333333, 6.3286375, -3.96758333333333]), 2)
