@@ -1,3 +1,4 @@
+from uibcdf_stdlib.exceptions import InputArgumentError
 """Module with objects and methods to choose and define the color code to represent pharmacophoric
 features when a pharmacophore is shown.
 

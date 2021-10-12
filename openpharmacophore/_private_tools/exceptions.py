@@ -23,15 +23,6 @@ class NoConformersError(Exception):
     def __str__(self):
         return f"Molecule has {self.n_conformers} conformers. -> {self.message}"
 
-class PointTypeError(Exception):
-    """
-        Exception raised when an invalid pharmacophore point type is passed to a function.
-    """
-
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
 class InvalidFeatureError(Exception):
     """
         Exception raised when trying to remove an invalid feature from a pharmacophore object.
