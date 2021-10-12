@@ -1,4 +1,4 @@
-from openpharmacophore import pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.structured_based import StructuredBasedPharmacophore as SBP
 from openpharmacophore.utils.conformers import generate_conformers
 import numpy as np
@@ -25,28 +25,33 @@ def test_from_pdb(file_name, ligand_id, hydrophobics):
         assert len(pharmacophore.elements) == 5
         assert pharmacophore.molecular_system is not None
         
-        ring = phe.AromaticRingSphereAndVector(
+        ring = PharmacophoricPoint(
+            feat_type="aromatic ring",
             center=puw.quantity((38.0292, 4.3594, 123.7382), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([-0.6702, -0.0512, -0.7404])
         )
         assert ring == pharmacophore.elements[0]
-        hyd_1 = phe.HydrophobicSphere(
+        hyd_1 = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((42.4462, -1.1092, 122.6226), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd_1 == pharmacophore.elements[1]
-        hyd_2 = phe.HydrophobicSphere(
+        hyd_2 = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((37.699, 4.393, 122.609), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd_2 == pharmacophore.elements[2]
-        hyd_3 = phe.HydrophobicSphere(
+        hyd_3 = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((35.827, 5.861, 123.815), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd_3 == pharmacophore.elements[3]
-        hyd_4 = phe.HydrophobicSphere(
+        hyd_4 = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((45.46, 2.006, 123.421), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
@@ -55,48 +60,57 @@ def test_from_pdb(file_name, ligand_id, hydrophobics):
         assert len(pharmacophore.elements) == 10
         assert pharmacophore.molecular_system is not None
         assert pharmacophore.ligand is None
-        neg_sphere = phe.NegativeChargeSphere(
+        neg_sphere = PharmacophoricPoint(
+            feat_type="negative charge",
             center=puw.quantity((2.279, 2.6625, 3.2525), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert neg_sphere == pharmacophore.elements[0]
-        neg_sphere = phe.NegativeChargeSphere(
+        neg_sphere = PharmacophoricPoint(
+            feat_type="negative charge",
             center=puw.quantity((1.074, 4.8205, 7.3245), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert neg_sphere == pharmacophore.elements[1]
-        hb_acceptor = phe.HBAcceptorSphereAndVector(
+        hb_acceptor = PharmacophoricPoint(
+            feat_type="hb acceptor",
             center=puw.quantity((2.327, 3.574, 2.628), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([-0.8834, 0.2719, 0.3816])
         )
         assert hb_acceptor == pharmacophore.elements[2]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((5.134, 11.9745, 11.8155), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[3]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((0.396, 6.793, 7.373), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[4]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((11.724, 5.702, 7.226), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[5]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((12.502, 7.731, 9.51), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[6]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((7.62, 3.602, 4.389), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[7]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((8.728, 11.736, 11.502), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
@@ -106,29 +120,34 @@ def test_from_pdb(file_name, ligand_id, hydrophobics):
         assert len(pharmacophore.elements) == 5
         assert pharmacophore.molecular_system is not None
         assert pharmacophore.ligand is None
-        acceptor = phe.HBAcceptorSphereAndVector(
+        acceptor = PharmacophoricPoint(
+            feat_type="hb acceptor",
             center=puw.quantity((16.163, 12.126, 2.521), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([-0.0991, 0.9107, 0.4011])
         )
         assert acceptor == pharmacophore.elements[0]
-        donor = phe.HBDonorSphereAndVector(
+        donor = PharmacophoricPoint(
+            feat_type="hb donor",
             center=puw.quantity((13.988, 12.055, 2.867), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([-0.1195, -0.9419, -0.3139])
         )
         assert donor == pharmacophore.elements[1]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((10.418, 11.8007, 2.3763), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[2]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((21.7962, 17.734, 4.249), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[3]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((17.506, 13.853, 3.414), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
@@ -137,30 +156,35 @@ def test_from_pdb(file_name, ligand_id, hydrophobics):
         assert len(pharmacophore.elements) == 6
         assert pharmacophore.molecular_system is not None
         assert pharmacophore.ligand is not None
-        acceptor = phe.HBAcceptorSphereAndVector(
+        acceptor = PharmacophoricPoint(
+            feat_type="hb acceptor",
             center=puw.quantity((100.598, 17.99, 25.704), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([0.7872, -0.4533, 0.4182])
         )
         assert acceptor == pharmacophore.elements[0]
-        acceptor = phe.HBAcceptorSphereAndVector(
+        acceptor = PharmacophoricPoint(
+            feat_type="hb acceptor",
             center=puw.quantity((109.61, 12.027, 22.746), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([-0.5805, 0.431, 0.6908])
         )
         assert acceptor == pharmacophore.elements[1]
-        ring = phe.AromaticRingSphereAndVector(
+        ring = PharmacophoricPoint(
+            feat_type="aromatic ring",
             center=puw.quantity((102.8133, 16.7163, 24.5195), "angstroms"),
             radius=puw.quantity(1.0, "angstroms"),
             direction = np.array([0.0937, 0.4983, -0.8619])
         )
         assert ring == pharmacophore.elements[3]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((107.379, 12.449, 24.419), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
         assert hyd == pharmacophore.elements[4]
-        hyd = phe.HydrophobicSphere(
+        hyd = PharmacophoricPoint(
+            feat_type="hydrophobicity",
             center=puw.quantity((107.2112, 12.5732, 22.1112), "angstroms"),
             radius=puw.quantity(1.0, "angstroms")
         )
@@ -209,7 +233,8 @@ def test_sb_pharmacophore_points(file_name):
         interactions = all_interactions["W11:A:7001"]
         pharmacophoric_points = SBP._sb_pharmacophore_points(interactions, radius=1.0, ligand=None, hydrophobics="plip")
         assert len(pharmacophoric_points) == 5
-        assert isinstance(pharmacophoric_points[0], phe.AromaticRingSphereAndVector)
+        assert isinstance(pharmacophoric_points[0], PharmacophoricPoint)
+        assert pharmacophoric_points[0].feature_name == "aromatic ring"
         n_hydrophobics = 0
         for point in pharmacophoric_points:
             if point.feature_name == "hydrophobicity":
@@ -238,8 +263,10 @@ def test_sb_pharmacophore_points(file_name):
         interactions = all_interactions["JIN:A:600"]
         pharmacophoric_points = SBP._sb_pharmacophore_points(interactions, radius=1.0, ligand=None, hydrophobics="plip")
         assert len(pharmacophoric_points) == 5
-        assert isinstance(pharmacophoric_points[0], phe.HBAcceptorSphereAndVector)
-        assert isinstance(pharmacophoric_points[1], phe.HBDonorSphereAndVector)
+        assert isinstance(pharmacophoric_points[0], PharmacophoricPoint)
+        assert pharmacophoric_points[0].feature_name == "hb acceptor"
+        assert isinstance(pharmacophoric_points[1], PharmacophoricPoint)
+        assert pharmacophoric_points[1].feature_name == "hb donor"
         n_hydrophobics = 0
         for point in pharmacophoric_points:
             if point.feature_name == "hydrophobicity":
@@ -258,7 +285,10 @@ def test_rdkit_hydrophobics():
     hyd_2 = hydrophobics[1]
     hyd_2_center = puw.get_value(hyd_2.center, "angstroms")
     hyd_2_radius = puw.get_value(hyd_2.radius, "angstroms")
-    assert hyd_1 == phe.HydrophobicSphere(center=puw.quantity((1.4268, -1.9841, -1.4186), "angstroms"),
-                                         radius=puw.quantity(1.0, "angstroms"))
+    assert hyd_1 == PharmacophoricPoint(
+                    feat_type="hydrophobicity",
+                    center=puw.quantity((1.4268, -1.9841, -1.4186), "angstroms"),
+                    radius=puw.quantity(1.0, "angstroms")
+                    )
     assert np.allclose(np.around(hyd_2_center, 3), (-2.130, -0.542, -0.479), rtol=0, atol=1e-04)
     assert np.allclose(hyd_2_radius, hyd_2_radius, rtol=0, atol=1e-03) 

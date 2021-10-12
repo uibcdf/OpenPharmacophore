@@ -29,7 +29,6 @@ These demonstration objects and files should be replaced. The current ones are t
 
 
 import pkg_resources
-from openpharmacophore import pharmacophoric_elements as elements
 from openpharmacophore import Pharmacophore
 
 pharmacophore_pharmer_file = pkg_resources.resource_filename('openpharmacophore', 
@@ -42,5 +41,5 @@ pharmacophore = Pharmacophore()
 #pharmacophore.add_element(elements.HydrophobicGaussianKernel('[1,1,3] angstroms', '1.0 angstroms'))
 #pharmacophore.add_element(elements.AromaticRingSphere('[-2,-3,0] angstroms', '1.5 angstroms'))
 
-del(pkg_resources, elements, Pharmacophore)
+del(pkg_resources, Pharmacophore)
 

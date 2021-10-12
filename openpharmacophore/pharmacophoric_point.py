@@ -1,7 +1,7 @@
 from openpharmacophore import __documentation_web__
 from uibcdf_stdlib.colors import convert as convert_color_code
 from openpharmacophore._private_tools.exceptions import ShapeWithNoColorError
-from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from uibcdf_stdlib.input_arguments import check_input_argument
 from uibcdf_stdlib.exceptions import InputArgumentError
 import numpy as np
@@ -9,7 +9,7 @@ import pyunitwizard as puw
 
 class PharmacophoricPoint():
     """ Class to store pharmacophoric points of any feature type. This class can
-        store sheres or sphere and vector points.
+        store spheres or sphere and vector pharmacophoric points.
 
         This class will replace the other classes.
 
