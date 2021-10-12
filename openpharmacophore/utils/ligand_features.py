@@ -1,13 +1,14 @@
+from openpharmacophore._private_tools.exceptions import NoConformersError
+from openpharmacophore.utils.centroid import feature_centroid
+from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
+import pyunitwizard as puw
 from rdkit import RDConfig, Chem
 from rdkit.Chem import ChemicalFeatures
-from openpharmacophore._private_tools.exceptions import NoConformersError, PointTypeError
-from openpharmacophore.utils.centroid import feature_centroid
-from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
-from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 import numpy as np
 import os
 
-def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
+def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
     """
         Get pharmacophoric points for a list of ligands using rdkit chemical feature definition. 
 
@@ -22,10 +23,10 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
 
         feat_list: list of str
             List of features that will be used to compute the pharmacophore.
-        
-        point_type: str
-            Type of pharmacophoric points to be returned.
 
+        direction_vector: bool
+            If true aromatic, donor and acceptors points will have direction.
+        
         Returns
         -------
         points: nested dictionary with the following structure
@@ -61,7 +62,7 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
                     # Find the centroid
                     coords = feature_centroid(ligand, atom_idxs, conformer_idx) # Aromatic, hydrophobic, positive or negative feature
                     # Find direction vector
-                    if point_type == "spheres_vectors" and feat_name == "Aromatic":
+                    if direction_vector:
                         direction = aromatic_direction_vector(ligand, atom_idxs, conformer_idx)
                     else:
                         direction = None
@@ -73,12 +74,12 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
                     coords[1] = position.y
                     coords[2] = position.z
                     # Find direction vector
-                    if point_type == "spheres_vectors":
+                    if direction_vector:
                         direction = donor_acceptor_direction_vector(ligand, feat_name, atom_idxs[0], coords, conformer_idx)
                     else:
                         direction = None
                         
-                point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction, point_type=point_type)
+                point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction)
                 conformer_id = "conformer_" + str(conformer_idx)
 
                 if conformer_id not in points[ligand_id]:
@@ -87,7 +88,7 @@ def rdkit_points(ligands, radius, feat_list=None, point_type="spheres"):
                 
     return points
 
-def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="spheres"):
+def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vector=False):
     """
         Get pharmacophoric points for a list of ligands using custom smarts feature definition. 
 
@@ -107,8 +108,8 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
             Definitions of the pharmacophoric points. 
             Dictionary which keys are SMARTS strings and values are feature names.
         
-        point_type: str
-            Type of pharmacophoric points to be returned.
+        direction_vector: bool
+            If true aromatic, donor and acceptors points will have direction.
 
         Returns
         -------
@@ -141,7 +142,7 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
                     # Find the centroid
                     coords = feature_centroid(ligand, atom_idxs, conformer_idx) # Aromatic, hydrophobic, positive or negative feature
                     # Find direction vector
-                    if point_type == "spheres_vectors" and feat_name == "Aromatic":
+                    if direction_vector:
                         direction = aromatic_direction_vector(ligand, atom_idxs, conformer_idx)
                     else:
                         direction = None
@@ -153,12 +154,12 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
                     coords[1] = position.y
                     coords[2] = position.z
                     # Find direction vector
-                    if point_type == "spheres_vectors":
+                    if direction_vector:
                         direction = donor_acceptor_direction_vector(ligand, atom_idxs[0], coords, conformer_idx)
                     else:
                         direction = None
 
-                point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction, point_type=point_type)
+                point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction)
                 conformer_id = "conformer_" + str(conformer_idx)
 
                 if conformer_id not in points[ligand_id]:
@@ -168,9 +169,7 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, point_type="s
     return points
 
 
-def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None, 
-                                point_type="spheres"):
-
+def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None):
     """
         Get pharmacophoric points for each ligand in a list of ligands. If a ligand has 
         more than one conformer, pharamcophoric points will be computed for each one.  
@@ -190,23 +189,12 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
         feat_def: dict (optional)
             Definitions of the pharmacophoric points. 
             Dictionary which keys are SMARTS strings and values are feature names.
-        
-        point_type: str
-            Type of pharmacophoric points to be returned.
 
         Returns
         -------
         points: a list of openpharmacophore.pharmacophoric_elements
 
     """
-
-    point_type_list = ["spheres", "spheres_vectors", "gaussian", "shapelet"]
-    if point_type not in point_type_list:
-        raise PointTypeError(f"Invalid point type. \"{point_type}\" is not a valid point type")
-
-    if (point_type == "spheres" or point_type == "spheres_vectors") and radius is None:
-        raise ValueError("Radius cannot be null if point type is spheres or spheres_vectors") 
-
     if isinstance(ligands, Chem.rdchem.Mol): # Check if it's a single molecule
         ligands = [ligands]
     elif not isinstance(ligands, list):
@@ -216,10 +204,51 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
         feat_list = ['Acceptor', 'Aromatic', 'Donor', 'Hydrophobe', 'PosIonizable', 'NegIonizable']
     
     if feat_def is None: # If no feature definition is given use rdkit one
-        points = rdkit_points(ligands=ligands, radius=radius, feat_list=feat_list, point_type=point_type)
+        points = rdkit_points(ligands=ligands, radius=radius, feat_list=feat_list)
     else:
-        points = custom_definition_points(ligands=ligands, radius=radius, feat_list=feat_list, feat_def=feat_def, point_type=point_type)
+        points = custom_definition_points(ligands=ligands, radius=radius, feat_list=feat_list, feat_def=feat_def)
     
     return points
 
     
+def rdkit_to_point(feat_name, coords, radius=None, direction=None):
+    """Transform an rdkit feature point to an openpharmacophore pharmacophoric point.
+
+        Parameters
+        ----------
+        feat_name: str
+            rdkit name of the feature point.
+
+        coords: numpy.ndarray; shape: (3, )
+            3D coordinates of the centroid of the feature.
+        
+        radius: float
+            Lenght of the radius of the parmacohporic points. 
+
+        direction: list, tuple, numpy.ndarray; shape:(3,)
+            Unit vector. 
+
+        Returns
+        -------
+        point: an openpharmacophore.pharmacophoric_point.PharmacophoricPoint
+    
+    """
+
+    points = {
+        "Acceptor": "hb acceptor",
+        "Donor": "hb donor",
+        "Aromatic": "aromatic ring",
+        "Hydrophobe": "hydrophobicity",
+        "PosIonizable": "positive charge",
+        "NegIonizable": "negative charge",
+    }
+
+    point = PharmacophoricPoint(
+        feat_type=points[feat_name],
+        center=puw.quantity(coords, "angstroms"),
+        radius=puw.quantity(radius, "angstroms"),
+        direction=direction,
+        atoms_inxs=None
+    )
+
+    return point

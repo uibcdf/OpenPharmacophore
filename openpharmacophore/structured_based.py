@@ -1,6 +1,6 @@
 from openpharmacophore._private_tools.exceptions import FetchError
 from openpharmacophore import Pharmacophore
-from openpharmacophore import pharmacophoric_elements as phe
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.utils import ligand_features
 # import molsysmt as msm
 import numpy as np
@@ -52,7 +52,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.ligand = ligand
     
     @classmethod
-    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit"):
+    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit", load_mol_system=True):
         """ Class method to obtain a pharmacophore from a pdb file containing
             a protein-ligand complex. 
             
@@ -120,8 +120,14 @@ class StructuredBasedPharmacophore(Pharmacophore):
             hydrophobics="plip"
         pharmacophoric_points = StructuredBasedPharmacophore._sb_pharmacophore_points(interactions, radius, ligand, hydrophobics)
 
-        # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
-        molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
+        if load_mol_system:
+            # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
+            molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
+        else:
+            molecular_system = None
+            
+        if ligand:
+            ligand = Chem.AddHs(ligand, addCoords=True)
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
@@ -221,7 +227,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         Returns
         -------
-        list of openpharmacophore.pharmacophoric_elements
+        list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
             A list of pharmacophoric points.
 
         """   
@@ -240,7 +246,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 ligand_center = np.array(interaction.ligandring.center)
                 protein_center = np.array(interaction.proteinring.center)
                 direction = protein_center - ligand_center
-                aromatic = phe.AromaticRingSphereAndVector(
+                aromatic = PharmacophoricPoint(
+                    feat_type="aromatic ring",
                     center=puw.quantity(ligand_center, "angstroms"),
                     radius=radius,
                     direction=direction
@@ -251,7 +258,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 if hydrophobics != "plip":
                     continue
                 center = puw.quantity(interaction.ligatom.coords, "angstroms")
-                hydrophobic = phe.HydrophobicSphere(
+                hydrophobic = PharmacophoricPoint(
+                    feat_type="hydrophobicity",
                     center=center,
                     radius=radius
                 )
@@ -261,14 +269,16 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 if interaction.protispos:
                     # The ligand has a negative charge
                     center = puw.quantity(interaction.negative.center, "angstroms")
-                    charge_sphere = phe.NegativeChargeSphere(
+                    charge_sphere = PharmacophoricPoint(
+                        feat_type="negative charge",
                         center=center,
                         radius=radius
                     ) 
                 else:
                     # The ligand has a positive charge
                     center = puw.quantity(interaction.positive.center, "angstroms")
-                    charge_sphere = phe.PositiveChargeSphere(
+                    charge_sphere = PharmacophoricPoint(
+                        feat_type="positive charge",
                         center=center,
                         radius=radius
                     ) 
@@ -280,7 +290,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     ligand_acceptor_center = np.array(interaction.a.coords)
                     protein_donor_center = np.array(interaction.d.coords)
                     direction = ligand_acceptor_center - protein_donor_center 
-                    acceptor = phe.HBAcceptorSphereAndVector(
+                    acceptor = PharmacophoricPoint(
+                        feat_type="hb acceptor",
                         center=puw.quantity(ligand_acceptor_center, "angstroms"),
                         radius=radius,
                         direction=direction
@@ -291,7 +302,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     ligand_donor_center = np.array(interaction.d.coords)
                     protein_acceptor_center = np.array(interaction.a.coords)
                     direction = protein_acceptor_center - ligand_donor_center
-                    donor = phe.HBDonorSphereAndVector(
+                    donor = PharmacophoricPoint(
+                        feat_type="hb donor",
                         center=puw.quantity(ligand_donor_center, "angstroms"),
                         radius=radius,
                         direction=direction
@@ -324,12 +336,12 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
             Parameters
             ----------
-            hydrophobics: list of openpharmacophore.pharmacophoric_elements.HydrophobicSphere
+            hydrophobics: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
                 List with the hydrophobic points.
 
             Returns
             -------
-            grouped_points: list of openpharmacophore.pharmacophoric_elements.HydrophobicSphere
+            grouped_points: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
                 List with the grouped points.
         """
         grouped_points = []
@@ -355,7 +367,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             if count > 0:
                 centroid /= (count + 1)
             
-            grouped_points.append(phe.HydrophobicSphere(center=centroid, radius=radius))
+            grouped_points.append(PharmacophoricPoint(feat_type="hydrophobicity", center=centroid, radius=radius))
         
         return grouped_points
 
@@ -373,7 +385,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
             Returns
             ---------
-            points: list of openpharmacophore.pharmacophoric_elements.HydrophobicSphere
+            points: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
                 List with the hydrophobic points.
         """
         hydrophobic_smarts = [
@@ -413,10 +425,25 @@ class StructuredBasedPharmacophore(Pharmacophore):
             molecular system used to elucidate it.
 
         """
+        view = nv.NGLWidget()
+        view.add_component(self.molecular_system)
+        if self.ligand:
+            view.representations = [
+                {"type": "cartoon", "params": {
+                    "sele": "protein", "color": "residueindex"
+                }},
+            ]
+            view.add_component(self.ligand)
+        else:
+            view.representations = [
+                {"type": "cartoon", "params": {
+                    "sele": "protein", "color": "residueindex"
+                }},
+                {"type": "ball+stick", "params": {
+                    "sele": "( not polymer or hetero ) and not ( water or ion )" # Show ligand
+                }}
+            ]
 
-        # Molsysmt throws an exception. Temporarily using rdkit 
-        # view = msm.view(self.molecular_system, standardize=False)
-        view = nv.show_rdkit(self.molecular_system)
         self.add_to_NGLView(view, palette=palette)
         return view
     

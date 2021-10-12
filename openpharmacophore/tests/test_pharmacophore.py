@@ -1,5 +1,5 @@
 from openpharmacophore.pharmacophore import Pharmacophore
-from openpharmacophore import pharmacophoric_elements
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import pytest
@@ -10,15 +10,18 @@ from rdkit.Chem import Pharm3D
 @pytest.fixture
 def three_element_pharmacophore():
     """Returns as pharmacophore with three elements"""
-    hb_acceptor = pharmacophoric_elements.HBAcceptorSphere(
+    hb_acceptor = PharmacophoricPoint(
+        feat_type="hb acceptor",
         center=puw.quantity([1,0,0], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    ring_1 = pharmacophoric_elements.AromaticRingSphere(
+    ring_1 = PharmacophoricPoint(
+        feat_type="aromatic ring",
         center=puw.quantity([2, 1, 4], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    ring_2 = pharmacophoric_elements.AromaticRingSphere(
+    ring_2 = PharmacophoricPoint(
+        feat_type="aromatic ring",
         center=puw.quantity([0, 1, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
@@ -26,13 +29,15 @@ def three_element_pharmacophore():
     return pharmacophore
 
 def test_add_element(three_element_pharmacophore):
-    hydrophobic = pharmacophoric_elements.HydrophobicSphere(
+    hydrophobic = PharmacophoricPoint(
+        feat_type="hydrophobicity",
         center=puw.quantity([-1, 0, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
     three_element_pharmacophore.add_element(hydrophobic)
     assert three_element_pharmacophore.n_elements == 4
-    assert isinstance(three_element_pharmacophore.elements[3], pharmacophoric_elements.HydrophobicSphere)
+    assert isinstance(three_element_pharmacophore.elements[3], PharmacophoricPoint)
+    assert three_element_pharmacophore.elements[3].feature_name == "hydrophobicity"
 
 def test_remove_element(three_element_pharmacophore):
     three_element_pharmacophore.remove_element(0)
@@ -48,7 +53,7 @@ def test_remove_feature(three_element_pharmacophore, feat_type, exception):
         assert e.message == "Cannot remove feature. The pharmacophore does not contain any hydrophobicity"
     else:
         assert three_element_pharmacophore.n_elements == 1
-        assert not isinstance(three_element_pharmacophore.elements[0], pharmacophoric_elements.AromaticRingSphere)
+        assert three_element_pharmacophore.elements[0].feature_name != "aromatic ring"
 
 def test_reset(three_element_pharmacophore):
     three_element_pharmacophore._reset()

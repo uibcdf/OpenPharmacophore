@@ -19,7 +19,7 @@ class Pharmacophore():
     Parameters
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
     molecular_system : :obj:`molsysmt.MolSys`
@@ -31,7 +31,7 @@ class Pharmacophore():
     Attributes
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
     n_elements : int

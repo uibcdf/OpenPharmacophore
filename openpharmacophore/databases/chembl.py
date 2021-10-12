@@ -52,7 +52,7 @@ def get_ro5_dataset( download_dir):
     file.close()
 
 
-def get_bioactivity_data(target_chembl_id):
+def get_bioactivity_dataframe(target_chembl_id):
     """Get bioactivity data for a given target.
     
         Parameters
@@ -137,8 +137,34 @@ def get_bioactivity_data(target_chembl_id):
     bioactivities_df = bioactivities_df.drop("IC50", axis=1)
 
     return bioactivities_df
+
+def get_assay_bioactivity_data(target_chembl_id, pIC50_threshold=6.3):
+    """ Get bioactivity data and the compounds in an assay. 
+        
+            Parameters
+            ----------
+                assay_id: int
+                    The id of the bioassay.
+            Returns
+            ----------
+                compounds: list of 2-tuples
+                    The first element is the compound PubChem id.
+                    The second element is the smiles of the compound.
+                
+                bioactivity: np.array of bits
+                    An array where each element corresponds to the index of the compounds list.
+                    An entry is either one if the compound is active or zero if the compund is inactive.
+    """
+    bioactivities_df = get_bioactivity_dataframe(target_chembl_id=target_chembl_id)
+    bioactivities_df["activity"] = bioactivities_df["pIC50"].apply(
+        lambda x: 1 if x >=  pIC50_threshold else 0)
     
-def get_training_data( target_chembl_id, pIC50_threshold=6.3):
+    molecules = list(zip(bioactivities_df["ChemblID"].tolist(), bioactivities_df["Smiles"].tolist()))
+    bioactivity = bioactivities_df["activity"].to_numpy()
+
+    return molecules, bioactivity
+
+def get_actives_and_inactives(target_chembl_id, pIC50_threshold=6.3):
     """Get a list of active and inactive compounds for a given target.
 
         Parameters
@@ -159,7 +185,7 @@ def get_training_data( target_chembl_id, pIC50_threshold=6.3):
             First element of the tuple is a list of Chembl ids. Second element
             is a list of smiles for the inactive compounds
     """
-    bioactivities_df = get_bioactivity_data(target_chembl_id=target_chembl_id)
+    bioactivities_df = get_bioactivity_dataframe(target_chembl_id=target_chembl_id)
 
     actives_df = bioactivities_df[bioactivities_df["pIC50"] >= pIC50_threshold]
     inactives_df = bioactivities_df[bioactivities_df["pIC50"] < pIC50_threshold]

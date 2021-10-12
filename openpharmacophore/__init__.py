@@ -16,6 +16,5 @@ __github_issues_web__ = __github_web__ + '/issues'
 
 # Add imports here
 from ._pyunitwizard import puw as _puw
-from . import pharmacophoric_elements
 from .pharmacophore import Pharmacophore
 from . import demo as demo

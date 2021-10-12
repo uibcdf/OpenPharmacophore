@@ -1,5 +1,5 @@
 from openpharmacophore.utils.alignment import align_set_of_ligands
-from openpharmacophore.utils.rdkit_to_point import rdkit_to_point
+from openpharmacophore.utils.ligand_features import rdkit_to_point
 from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 import numpy as np
 import os

@@ -1,5 +1,5 @@
-from openpharmacophore import pharmacophoric_elements
 from openpharmacophore.pharmacophore import Pharmacophore
+from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.screening import screening, screening2D, screening3D
 import numpy as np
 import pytest
@@ -112,14 +112,23 @@ def test_load_molecules_file(file_name):
 def test_screen_db_from_dir_3D():
 
     elements = [
-    pharmacophoric_elements.HBAcceptorSphere(center=puw.quantity([3.877, 7.014, 1.448], "angstroms"),
-                                             radius=puw.quantity(1.0, "angstroms")),
-    pharmacophoric_elements.HBAcceptorSphere(center=puw.quantity([7.22, 11.077, 5.625], "angstroms"),
-                                             radius=puw.quantity(1.0, "angstroms")),
-    pharmacophoric_elements.HBDonorSphere(center=puw.quantity([4.778, 8.432, 7.805], "angstroms"),
-                                         radius=puw.quantity(1.0, "angstroms")),
-    pharmacophoric_elements.AromaticRingSphere(center=puw.quantity([1.56433333333334, 7.06399999999999, 3.135], "angstroms"),
-                                              radius=puw.quantity(1.0, "angstroms"))
+        PharmacophoricPoint(
+        feat_type="hb acceptor",
+        center=puw.quantity([3.877, 7.014, 1.448], "angstroms"),
+        radius=puw.quantity(1.0, "angstroms")
+        ),
+        PharmacophoricPoint(
+        feat_type="hb acceptor",
+        center=puw.quantity([7.22, 11.077, 5.625], "angstroms"),
+        radius=puw.quantity(1.0, "angstroms")),
+        PharmacophoricPoint(
+        feat_type="hb donor",
+        center=puw.quantity([4.778, 8.432, 7.805], "angstroms"),
+        radius=puw.quantity(1.0, "angstroms")),
+        PharmacophoricPoint(
+        feat_type="aromatic ring",
+        center=puw.quantity([1.56433333333334, 7.06399999999999, 3.135], "angstroms"),
+        radius=puw.quantity(1.0, "angstroms"))
     ]
     pharmacophore = Pharmacophore(elements)
 
