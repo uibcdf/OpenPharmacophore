@@ -49,7 +49,6 @@ class Pharmacophore():
         self.elements = elements
         self.n_elements = len(elements)
         self.molecular_system = molecular_system
-        self.extractor = None
     
     @classmethod
     def from_file(cls, file_name, **kwargs):
@@ -241,25 +240,30 @@ class Pharmacophore():
             raise InvalidFeatureError(f"Cannot remove feature. The pharmacophore does not contain any {feat_type}")
         self.elements = temp_elements
         self.n_elements = len(self.elements)
+    
+    def remove_molecular_system(self):
+        """ Set molecular system attribute to None.
+        """
+        self.molecular_system = None
+    
+    def set_molecular_system(self, molecular_system):
+        """ Update molecular_system attribute.
+        """
+        self.molecular_system = molecular_system
 
     def _reset(self):
-
         """Private method to reset all attributes to default values.
 
         Note
         ----
-
-           Nothing is returned. All attributes are set to default values.
-
+        Nothing is returned. All attributes are set to default values.
         """
-
         self.elements=[]
         self.n_elements=0
         self.extractor=None
         self.molecular_system=None
 
     def to_ligandscout(self, file_name):
-
         """Method to export the pharmacophore to the ligandscout compatible format.
 
         Parameters
@@ -276,7 +280,6 @@ class Pharmacophore():
         return _to_ligandscout(self, file_name=file_name)
 
     def to_pharmer(self, file_name):
-
         """Method to export the pharmacophore to the pharmer compatible format.
 
         Parameters
@@ -286,7 +289,6 @@ class Pharmacophore():
 
         Note
         ----
-
             Nothing is returned. A new file is written.
 
         """
@@ -294,7 +296,6 @@ class Pharmacophore():
         return _to_pharmer(self, file_name=file_name)
 
     def to_pharmagist(self, file_name):
-
         """Method to export the pharmacophore to the pharmagist compatible format.
 
         Parameters
@@ -304,7 +305,6 @@ class Pharmacophore():
 
         Note
         ----
-
             Nothing is returned. A new file is written.
 
         """
@@ -312,7 +312,6 @@ class Pharmacophore():
         return _to_pharmagist(self, file_name=file_name)
     
     def to_moe(self, file_name):
-
         """Method to export the pharmacophore to the MOE compatible format.
 
         Parameters
@@ -322,7 +321,6 @@ class Pharmacophore():
 
         Note
         ----
-
             Nothing is returned. A new file is written.
 
         """
