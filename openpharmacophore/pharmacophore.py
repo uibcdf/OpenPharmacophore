@@ -1,8 +1,7 @@
 import pyunitwizard as puw
 import nglview as nv
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
-# from openpharmacophore.pharmacophoric_elements.features.color_palettes import get_color_from_palette_for_feature
-
+from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from rdkit import Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
@@ -113,29 +112,12 @@ class Pharmacophore():
         ----
         Nothing is returned. The `view` object is modified in place.
         """
-
-        if palette == "openpharmacophore":
-            feature_colors = {
-                'positive charge': (0.12, 0.36, 0.52), # Blue
-                'negative charge': (0.90, 0.30, 0.24),  # Red
-                'hb acceptor': (0.90, 0.30, 0.24),  # Red
-                'hb donor': (0.13, 0.56, 0.30), # Green
-                'included volume': (0, 0, 0), # Black,
-                'excluded volume': (0, 0, 0), # Black
-                'hydrophobicity': (1, 0.9, 0),  # Yellow
-                'aromatic ring': (1, 0.9, 0),  # Yellow
-            }
-        else:
-            raise NotImplementedError
-
-        # TODO: Openpharmacophore palette is not working
-
+        # TODO: Add opacity to spheres
         for i, element in enumerate(self.elements):
             # Add Spheres
             center = puw.get_value(element.center, to_unit="angstroms").tolist()
             radius = puw.get_value(element.radius, to_unit="angstroms")
-            # feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
-            feature_color = feature_colors[element.feature_name]
+            feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
             label = f"{element.feature_name}_{i}"
             view.shape.add_sphere(center, feature_color, radius, label)
             # Add vectors

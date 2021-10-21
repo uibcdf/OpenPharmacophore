@@ -80,7 +80,7 @@ class PharmacophoricPoint():
             "positive charge": "P",
             "negative charge": "N",
             "excluded sphere": "E",
-            "included sphere": "I"
+            "included sphere": "I",
         }
 
         if feat_type not in list(feature_to_char.keys()):

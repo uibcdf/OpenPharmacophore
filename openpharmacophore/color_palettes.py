@@ -1,4 +1,5 @@
 from uibcdf_stdlib.exceptions import InputArgumentError
+from matplotlib.colors import to_rgb
 """Module with objects and methods to choose and define the color code to represent pharmacophoric
 features when a pharmacophore is shown.
 
@@ -17,15 +18,15 @@ redefined: colors are temporary.
 
 """
 
-openpharmacophore={
-    'positive charge': '#E1B07E',
-    'negative charge': '#A5F8D3',
-    'hb acceptor': '#F13030',
-    'hb donor': '#5B618A',
-    'included volume': '#109648',
-    'excluded volume': '#14110F',
-    'hydrophobicity': '#9EADC8',
-    'aromatic ring': '#D6D84F',
+openpharmacophore = {
+    'positive charge': '#3498DB', # Blue
+    'negative charge': '#884EA0', # Purple 
+    'hb acceptor': '#B03A2E', # Red
+    'hb donor': '#17A589', # Green
+    'included volume': '#707B7C', # Gray
+    'excluded volume': '#283747', # Black
+    'hydrophobicity': '#F5B041', # Orange
+    'aromatic ring': '#F1C40F', # Yellow
 }
 
 def get_color_from_palette_for_feature(feature_name, color_palette='openpharmacophore'):
@@ -91,7 +92,7 @@ def get_color_from_palette_for_feature(feature_name, color_palette='openpharmaco
             raise InputArgumentError('color_palette')
 
     try:
-        color = color_palette[feature_name]
+        color = to_rgb(color_palette[feature_name])
     except:
         raise InputArgumentError('feature_name')
 

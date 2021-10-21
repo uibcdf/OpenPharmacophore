@@ -1,5 +1,6 @@
-from openpharmacophore._private_tools.exceptions import FetchError
+from openpharmacophore._private_tools.exceptions import FetchError, InvalidFileFormat
 from openpharmacophore import Pharmacophore
+from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.utils import ligand_features
 # import molsysmt as msm
@@ -9,6 +10,9 @@ import nglview as nv
 from plip.structure.preparation import PDBComplex
 import pyunitwizard as puw
 from rdkit import Chem, RDLogger
+from rdkit.Chem.Draw import rdMolDraw2D
+from collections import defaultdict
+import copy
 from io import StringIO, BytesIO
 import requests
 import re
@@ -445,6 +449,68 @@ class StructuredBasedPharmacophore(Pharmacophore):
         points_dict = ligand_features.ligands_pharmacophoric_points(ligand, radius, feat_list=None, feat_def=smarts_dict)
         points = points_dict["ligand_0"]["conformer_0"]
         return points 
+
+    def draw(self, file_name, img_size=(500,500), legend=""):
+        """ Draw a 2d representation of the pharmacophore. This is a drawing of the
+            ligand with the pharmacophoric features highlighted.
+
+            Parameters
+            ----------
+            file_name: str
+                File where the drawing will be saved. Must be a png file.
+
+            img_size: 2-tuple of int, optional, default=(500,500)
+                The size of the image
+
+            legend: str, optional
+                Image legend.
+        """
+        if self.ligand is None:
+            raise Exception("Cannot draw pharmacophore if there is no ligand")
+        
+        if not file_name.endswith(".png"):
+            raise InvalidFileFormat("File must be a png.")
+
+        ligand = copy.deepcopy(self.ligand)
+        ligand.RemoveAllConformers()
+
+        atoms = []
+        bond_colors = {}
+        atom_highlights = defaultdict(list)
+        highlight_radius = {}
+
+        for point in self.elements:
+
+            indices = point.atoms_inxs
+            for idx in indices:
+                
+                atoms.append(idx)
+                atom_highlights[idx].append(get_color_from_palette_for_feature(point.feature_name))
+                highlight_radius[idx] = 0.6
+
+                # Draw aromatic rings bonds
+                if point.feature_name == "aromatic ring":
+                    for neighbor in ligand.GetAtomWithIdx(idx).GetNeighbors():
+                        nbr_idx = neighbor.GetIdx()
+                        if nbr_idx not in indices:
+                            continue
+                        bond = ligand.GetBondBetweenAtoms(idx, nbr_idx).GetIdx()
+                        bond_colors[bond] = [get_color_from_palette_for_feature("aromatic ring")]
+                
+                # If an atom has more than one feature label will contain both names
+                if idx in atoms:
+                    if ligand.GetAtomWithIdx(idx).HasProp("atomNote"):
+                        label = ligand.GetAtomWithIdx(idx).GetProp("atomNote")
+                        label += "|" + str(point.short_name)
+                else:
+                    label = point.short_name
+
+                ligand.GetAtomWithIdx(idx).SetProp("atomNote", label)
+
+        drawing = rdMolDraw2D.MolDraw2DCairo(img_size[0], img_size[1])
+        drawing.DrawMoleculeWithHighlights(ligand, legend, dict(atom_highlights), bond_colors, highlight_radius, {})
+        drawing.FinishDrawing()
+        drawing.WriteDrawingText(file_name)
 
     def show(self, palette='openpharmacophore'):
 

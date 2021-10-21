@@ -1,15 +1,20 @@
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 from openpharmacophore.pharmacophoric_point import UniquePharmacophoricPoint
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
 from openpharmacophore import Pharmacophore
 from openpharmacophore.utils.random_string import random_string
 from openpharmacophore.utils.conformers import conformer_energy
+from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 import matplotlib.pyplot as plt
 import MDAnalysis as mda
 from MDAnalysis.lib.util import NamedStream
 import mdtraj as mdt
 import numpy as np
 import pandas as pd
+from rdkit.Chem.Draw import rdMolDraw2D
 from tqdm.auto import tqdm
+import copy
+from collections import defaultdict
 import bisect
 from io import StringIO
 import os
@@ -82,9 +87,84 @@ class Dynophore():
 
         pass
 
-    def draw():
-        """ Draw a 2d representation of the dynamic pharmacophore."""
-        pass
+    def draw(self, file_name, img_size=(500,500), legend="", freq_threshold=0.2):
+        """ Draw a 2d representation of the dynamic pharmacophore. This is a drawing of the
+            ligand with the pharmacophoric features highlighted and the frequency if each
+            one. 
+
+            Parameters
+            ----------
+            file_name: str
+                File where the drawing will be saved. Must be a png file.
+
+            img_size: 2-tuple of int, optional, default=(500,500)
+                The size of the image
+
+            legend: str, optional
+                Image legend.
+
+            freq_threshold: double betwwn 0.0 and 1.0, optiona, default=0.2
+                The minimun frequency of a pharmacophoric point to be drawn.  
+        """
+        if freq_threshold < 0.0 or freq_threshold > 1.0:
+            raise ValueError("Freqency threshold must be a value between 0 and 1")    
+
+        if not file_name.endswith(".png"):
+            raise InvalidFileFormat("File must be a png.")
+
+        # Extract a ligand
+        if self.pharmacophores[0].ligand is None:
+            raise Exception("Ligand could not be extracted")
+        ligand = copy.deepcopy(self.pharmacophores[0].ligand)
+        ligand.RemoveAllConformers()
+
+        atoms = []
+        bond_colors = {}
+        atom_highlights = defaultdict(list)
+        highlight_radius = {}
+
+        for up in self.unique_pharmacophoric_points:
+            
+            if up.frequency < freq_threshold:
+                continue
+
+            indices = up.atoms_inxs
+            update_freq = True
+            for idx in indices:
+
+                # If an atom has more than one feature keep higher frequency value
+                if idx in atoms:
+                    if ligand.GetAtomWithIdx(idx).HasProp("atomNote"):
+                        freq = int(ligand.GetAtomWithIdx(idx).GetProp("atomNote")[2:])
+                        if freq > up.frequency:
+                            update_freq = False
+
+                atoms.append(idx)
+                if "hydrophobicity" in up.feature_name:
+                    feat_name = "hydrophobicity"
+                else:
+                    feat_name = " ".join(up.feature_name.split()[0:2])
+                
+                atom_highlights[idx].append(get_color_from_palette_for_feature(feat_name))
+                highlight_radius[idx] = 0.6
+
+                # Draw aromatic rings bonds
+                if up.short_name == "R":
+                    for neighbor in ligand.GetAtomWithIdx(idx).GetNeighbors():
+                        nbr_idx = neighbor.GetIdx()
+                        if nbr_idx not in indices:
+                            continue
+                        bond = ligand.GetBondBetweenAtoms(idx, nbr_idx).GetIdx()
+                        bond_colors[bond] = [get_color_from_palette_for_feature("aromatic ring")]
+            
+            if update_freq:
+                frequency = int(up.frequency * 100)
+                ligand.GetAtomWithIdx(idx).SetProp("atomNote", f"f={frequency}")
+
+        drawing = rdMolDraw2D.MolDraw2DCairo(img_size[0], img_size[1])
+        drawing.DrawMoleculeWithHighlights(ligand, legend, dict(atom_highlights), bond_colors, highlight_radius, {})
+        drawing.FinishDrawing()
+        drawing.WriteDrawingText(file_name)
 
     def first_and_last_pharmacophore(self):
         """ Derive a pharmacophore model for the first and last frames of a trajectory.
@@ -205,12 +285,15 @@ class Dynophore():
         frequency.reset_index(inplace=True)
         return frequency
 
-    def point_frequency_plot(self, threshold=0.0, n_bins=10):
+    def point_frequency_plot(self, threshold=0.0, n_bins=10, ax=None):
         """ Plot of pharmacophoric points frequency vs time. Each pharmacophoric
             point will appear as a different line in the plot.
 
             Parameters
             ----------
+            ax: matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
+                An axes object where the plot will be drawn.
+
             threshold: double (Defaulf = 0)
                 The value of overall frequency from which points will form part of the 
                 plot. If there are a lot of points with really low frequency, setting
@@ -225,7 +308,8 @@ class Dynophore():
         if threshold < 0 or threshold > 1:
             raise ValueError("Threshold must be a number between 0 and 1")
 
-        fig, ax = plt.subplots(figsize=(12, 10))
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(10, 7))
         n_timesteps = self._n_frames
         bins = np.arange(0, n_timesteps + 1, n_timesteps/n_bins)
 
@@ -247,6 +331,8 @@ class Dynophore():
         ax.set_xlabel("Timesteps")
         ax.set_ylabel("Count")
         plt.show()
+
+        return ax
     
     def representative_pharmacophore_models(self):
         """ Get all representative pharmacophore models in a trajectory. That is the pharmacophore

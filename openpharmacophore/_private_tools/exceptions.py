@@ -34,7 +34,7 @@ class InvalidFeatureError(Exception):
 
 class InvalidFileError(Exception):
     """
-        Exception raised when trying to load a pharmacophore from an invalid file type.
+        Exception raised when trying to load or save from or to an invalid file type.
     """
 
     def __init__(self, message):
