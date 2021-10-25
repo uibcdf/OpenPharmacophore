@@ -29,8 +29,15 @@ def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
         
         Returns
         -------
-        points: nested dictionary with the following structure
-            {ligand_id: conformer_id: {list of openpharmacophore.pharmacophoric_elements}}
+        points: dict
+            Nested dictionary with the following structure:
+
+            {ligand_id: 
+                conformer_id: {
+                    list of openpharmacophore.Pharmacophoric_Point
+                    }
+            }
+
             It stores pharmacophoric elements for each conformer of each ligand in the original
             ligand list.
 
@@ -113,8 +120,15 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vec
 
         Returns
         -------
-        points: nested dictionary with the following structure
-            {ligand_id: conformer_id: {list of openpharmacophore.pharmacophoric_elements}}
+        points: dict
+            Nested dictionary with the following structure:
+
+            {ligand_id: 
+                conformer_id: {
+                    list of openpharmacophore.Pharmacophoric_Point
+                    }
+            }
+            
             It stores pharmacophoric elements for each conformer of each ligand in the original
             ligand list.
 
@@ -192,7 +206,17 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
 
         Returns
         -------
-        points: a list of openpharmacophore.pharmacophoric_elements
+        points: dict
+            Nested dictionary with the following structure:
+
+            {ligand_id: 
+                conformer_id: {
+                    list of openpharmacophore.Pharmacophoric_Point
+                    }
+            }
+            
+            It stores pharmacophoric elements for each conformer of each ligand in the original
+            ligand list.
 
     """
     if isinstance(ligands, Chem.rdchem.Mol): # Check if it's a single molecule

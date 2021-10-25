@@ -29,16 +29,16 @@ class StructuredBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
-    molecular_system : :obj:`molsysmt.MolSys`
-        Molecular system from which this pharmacophore was extracted.
+    molecular_system : rdkit.Chem.mol
+        The protein from which this pharmacophore was extracted.
 
     Attributes
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
+    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
     n_elements : int
@@ -47,8 +47,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
     extractor : :obj:`openpharmacophore.extractors`
         Extractor object used to elucidate the pharmacophore
 
-    molecular_system : :obj:`molsysmt.MolSys`
-        Molecular system from which this pharmacophore was extracted.
+    molecular_system : rdkit.Chem.mol
+        The protein from which this pharmacophore was extracted.
 
     """
 
@@ -137,7 +137,6 @@ class StructuredBasedPharmacophore(Pharmacophore):
         pharmacophoric_points = StructuredBasedPharmacophore._sb_pharmacophore_points(interactions, radius, ligand, hydrophobics)
 
         if load_mol_system:
-            # molecular_system = msm.convert(pdb_string, to_form="molsysmt.MolSys")
             molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pdb_string)
         else:
             molecular_system = None
@@ -473,6 +472,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         ligand = copy.deepcopy(self.ligand)
         ligand.RemoveAllConformers()
+        ligand = Chem.RemoveHs(ligand)
 
         atoms = []
         bond_colors = {}
@@ -502,10 +502,12 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     if ligand.GetAtomWithIdx(idx).HasProp("atomNote"):
                         label = ligand.GetAtomWithIdx(idx).GetProp("atomNote")
                         label += "|" + str(point.short_name)
+                    else:
+                        label = point.short_name
                 else:
                     label = point.short_name
 
-                ligand.GetAtomWithIdx(idx).SetProp("atomNote", label)
+            ligand.GetAtomWithIdx(idx).SetProp("atomNote", label)
 
         drawing = rdMolDraw2D.MolDraw2DCairo(img_size[0], img_size[1])
         drawing.DrawMoleculeWithHighlights(ligand, legend, dict(atom_highlights), bond_colors, highlight_radius, {})

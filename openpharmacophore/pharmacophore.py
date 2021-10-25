@@ -21,11 +21,8 @@ class Pharmacophore():
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
-    molecular_system : :obj:`molsysmt.MolSys`
+    molecular_system : rdkit.Chem.mol
         Molecular system from which this pharmacophore was extracted.
-    
-    fname : str (optional)
-        Name of file with the pharmacophore object.
 
     Attributes
     ----------
@@ -36,10 +33,7 @@ class Pharmacophore():
     n_elements : int
         Number of pharmacophoric elements
 
-    extractor : :obj:`openpharmacophore.extractors`
-        Extractor object used to elucidate the pharmacophore
-
-    molecular_system : :obj:`molsysmt.MolSys`
+    molecular_system : rdkit.Chem.mol
         Molecular system from which this pharmacophore was extracted.
 
     """
@@ -53,7 +47,6 @@ class Pharmacophore():
     def from_file(cls, file_name, **kwargs):
         """
         Class method to load a pharmacohpore from a file.
-        Sets the Pharmacophore atributes according to the file.
 
         Parameters
         ---------
@@ -240,10 +233,10 @@ class Pharmacophore():
         ----
         Nothing is returned. All attributes are set to default values.
         """
-        self.elements=[]
-        self.n_elements=0
-        self.extractor=None
-        self.molecular_system=None
+        self.elements.clear()
+        self.n_elements = 0
+        self.extractor = None
+        self.molecular_system = None
 
     def to_ligandscout(self, file_name):
         """Method to export the pharmacophore to the ligandscout compatible format.

@@ -1,4 +1,4 @@
-from openpharmacophore._private_tools.exceptions import MissingParameters, InvalidFileError
+from openpharmacophore._private_tools.exceptions import MissingParameters
 from tqdm.auto import tqdm
 import os
 import pkg_resources
@@ -8,7 +8,7 @@ import string
 def get_zinc_urls(subset="Lead-Like", 
                   mw_range=None, logp_range=None,
                   file_format="smi"):
-    """Get urls for a set of molecules  of the ZINC database. If filef_format is 
+    """ Get urls for a set of molecules of the ZINC database. If filef_format is 
         smi, the 2D set of ZINC will be used. If it is sdf the 3D set will be
         used.
 
@@ -38,7 +38,7 @@ def get_zinc_urls(subset="Lead-Like",
         raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected")
     
     if file_format != "smi" and file_format != "sdf":
-        raise InvalidFileError("{} is not a valid file format".format(file_format))
+        raise ValueError(f"{file_format} is not a valid file format")
 
     # Subsets defined by ZINC
     subsets = {
@@ -52,6 +52,9 @@ def get_zinc_urls(subset="Lead-Like",
         "Big-n-Greasy": [(9, 10), (8, 10)],
         "Shards": [(0, 0), [0, 10]]
     }
+
+    if subset is not None and subset not in list(subsets.keys()):
+        raise ValueError(f"{subset} is not a valid subset. Valid subsets are: {list(subsets.keys())}")
 
     # This are the values that ZINC accepts
     mw_values = [200, 250, 300, 325, 350, 375, 400, 425, 450, 500, 550]
