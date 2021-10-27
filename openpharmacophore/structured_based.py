@@ -1,9 +1,9 @@
 from openpharmacophore._private_tools.exceptions import FetchError, InvalidFileFormat
-from openpharmacophore import Pharmacophore
+from openpharmacophore import Pharmacophore, pharmacophore
+from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.utils import ligand_features
-# import molsysmt as msm
 from MDAnalysis.lib.util import NamedStream
 import numpy as np
 import nglview as nv
@@ -14,6 +14,7 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from collections import defaultdict
 import copy
 from io import StringIO, BytesIO
+import json
 import requests
 import re
 import warnings
@@ -53,7 +54,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
     """
 
     def __init__(self, elements=[], molecular_system=None, ligand=None):
-        super().__init__(elements=elements, molecular_system=molecular_system)
+        super().__init__(elements=elements)
+        self.molecular_system = molecular_system
         self.ligand = ligand
     
     @classmethod
@@ -152,6 +154,25 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
+    @classmethod
+    def from_file(cls, file_name, load_mol_sys=True):
+        """
+        Class method to load an structured based pharmacophore from a file.
+
+        Parameters
+        ---------
+        file_name: str
+            Name of the file containing the pharmacophore
+
+        """
+        fextension = file_name.split(".")[-1]
+        if fextension == "json":
+            points, receptor, ligand = from_pharmer(file_name, load_mol_sys)
+        else:
+            raise InvalidFileFormat(f"Invalid file type, \"{file_name}\" is not a supported file format")
+        
+        return cls(points, receptor, ligand)    
+
     @staticmethod
     def _fetch_pdb(pdb_id):
         """ Fetch a protein estructure from PDB.
@@ -446,8 +467,10 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         smarts_dict = {smarts : "Hydrophobe" for smarts in hydrophobic_smarts}
         points_dict = ligand_features.ligands_pharmacophoric_points(ligand, radius, feat_list=None, feat_def=smarts_dict)
-        points = points_dict["ligand_0"]["conformer_0"]
-        return points 
+        if "conformer_0" in points_dict["ligand_0"]:
+            return points_dict["ligand_0"]["conformer_0"]
+        else:     
+            return [] 
 
     def draw(self, file_name, img_size=(500,500), legend=""):
         """ Draw a 2d representation of the pharmacophore. This is a drawing of the
@@ -554,3 +577,32 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.add_to_NGLView(view, palette=palette)
         return view
     
+    def to_pharmer(self, file_name, save_mol_system=True):
+        """ Save a pharmacophore as a pharmer file (json file). The receptor
+            and ligand can also be saved.
+
+        Parameters
+        ----------
+        pharmacophore: obj: openpharmacophore.StructuredBasedPharmacophore or openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file
+
+        file_name: str
+            Name of the file that will contain the pharmacophore
+
+        Note
+        ----
+            Nothing is returned. A new file is written.
+    """
+        pharmacophore_dict = _pharmer_dict(self)
+
+        if save_mol_system:
+            if self.molecular_system is not None:
+                receptor = Chem.MolToPDBBlock(pharmacophore.molecular_system)
+                pharmacophore_dict["receptor"] = receptor
+
+            if self.ligand is not None:
+                ligand = Chem.MolToPDBBlock(pharmacophore.ligand)
+                pharmacophore_dict["ligand"] = ligand
+
+        with open(file_name, "w") as outfile:
+            json.dump(pharmacophore_dict, outfile)

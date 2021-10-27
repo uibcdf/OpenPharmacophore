@@ -377,8 +377,7 @@ class Dynophore():
             if len(rpm) > 2:
                 rpms_indices.append(rpm)
         
-        pharmacophores = self._pharmacophores_from_ligand_median_energy(rpms_indices)
-        return pharmacophores
+        return self._pharmacophores_from_ligand_median_energy(rpms_indices)
 
     def _pharmacophores_from_ligand_median_energy(self, rpms_indices):
         """ Get the representative pharmacophore models that correspond to the pharmacophore

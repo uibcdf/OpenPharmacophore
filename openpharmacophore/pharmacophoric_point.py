@@ -79,8 +79,8 @@ class PharmacophoricPoint():
             "hydrophobicity": "H",
             "positive charge": "P",
             "negative charge": "N",
-            "excluded sphere": "E",
-            "included sphere": "I",
+            "excluded volume": "E",
+            "included volume": "I",
         }
 
         if feat_type not in list(feature_to_char.keys()):
@@ -212,6 +212,20 @@ class PharmacophoricPoint():
                 The atom indexes.
         """
         return self.atoms_inxs
+    
+    @staticmethod
+    def get_valid_features():
+        """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
+        return [
+            "hb acceptor",
+            "hb donor",
+            "aromatic ring",
+            "hydrophobicity",
+            "positive charge",
+            "negative charge",
+            "excluded volume",
+            "included volume",
+        ]
     
     def set_center(self, center):
         """ Update center attribute

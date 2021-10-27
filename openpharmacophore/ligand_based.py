@@ -43,8 +43,8 @@ class LigandBasedPharmacophore(Pharmacophore):
     """
 
     def __init__(self, elements=[], ligands=[], feat_def=None):
-        super().__init__(elements=elements, molecular_system=ligands)
-        self.ligands = self.molecular_system
+        super().__init__(elements=elements)
+        self.ligands = ligands
         self.feature_def = feat_def
 
     def draw(self, n_per_row, lig_indices=None, subimage_size=(250, 200), legends=None):
@@ -267,8 +267,8 @@ class LigandBasedPharmacophore(Pharmacophore):
             molecular system used to elucidate it.
         """
 
-        if self.molecular_system and show_ligands:
-            view = view_ligands(self.molecular_system)
+        if self.ligands and show_ligands:
+            view = view_ligands(self.ligands)
         else:
             view = nv.NGLWidget()
         

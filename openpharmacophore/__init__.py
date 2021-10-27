@@ -17,4 +17,10 @@ __github_issues_web__ = __github_web__ + '/issues'
 # Add imports here
 from ._pyunitwizard import puw as _puw
 from .pharmacophore import Pharmacophore
+from .ligand_based import LigandBasedPharmacophore
+from .structured_based import StructuredBasedPharmacophore
+from .pharmacophoric_point import PharmacophoricPoint
+from .screening.screening3D import VirtualScreening3D
+from .screening.screening2D import VirtualScreening2D
+from .dynophore import Dynophore as Dynophore
 from . import demo as demo

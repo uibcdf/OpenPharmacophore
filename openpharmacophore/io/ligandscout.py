@@ -32,7 +32,7 @@ def from_ligandscout(file_name):
         "HBA": "hb acceptor",
         "H": "hydrophobicity",
         "AR": "aromatic ring",
-        "exclusion": "excluded sphere"
+        "exclusion": "excluded volume"
     }
 
     points = []
@@ -112,7 +112,6 @@ def from_ligandscout(file_name):
     return points
 
 def to_ligandscout(pharmacophore, file_name, **kwargs):
-    
     """ Save a pharmacophore as a ligandscout file (pml file)
 
         Parameters
@@ -127,13 +126,33 @@ def to_ligandscout(pharmacophore, file_name, **kwargs):
         ----
         Nothing is returned. A new file is written.
     """
+    tree, _ = _ligandscout_xml_tree(pharmacophore)
+    tree.write(file_name, encoding="UTF-8", xml_declaration=True)
+
+def _ligandscout_xml_tree(pharmacophore):
+    """ Get an xml element tree necesary to create a ligandscout pharmacophore.
+
+        Parameters
+        ----------
+        pharmacophore: obj: openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file.
+
+        file_name: str
+            Name of the file that will contain the pharmacophore.
+
+        Returns
+        -------
+        tree: xml.etree.ElementTree
+            The element tree.
+
+    """
     Feature = namedtuple("Feature", ["name", "id"])
     feature_mapper = { # dictionary to map openpharmacophore features to ligandscout
         "aromatic ring": Feature("AR", "ai_"),
         "hydrophobicity": Feature("H", "hi_"),
         "hb acceptor": Feature("HBA", "ha_"),
         "hb donor": Feature("HBD", "hd_"),
-        "excluded sphere": Feature("exclusion", "ev_"),
+        "excluded volume": Feature("exclusion", "ev_"),
         "positive charge": Feature("PI", "pi_"),
         "negative charge": Feature("NI", "ni_"),
     }
@@ -154,21 +173,12 @@ def to_ligandscout(pharmacophore, file_name, **kwargs):
         z = str(coords[2])
         radius = str(puw.get_value(element.radius, to_unit="angstroms"))
         feat_id =  feature_mapper[element.feature_name].id + str(i + 1)
-        if feat_name == "PI" or feat_name == "NI" or feat_name == "H":
-            point = ET.SubElement(document, "point")
-            # Set point attributes
-            point.set("name", feat_name)
-            point.set("featureId", feat_id)
-            point.set("optional", "false")
-            point.set("disabled", "false")
-            point.set("weight", "1.0")
-            # Add position tag
-            position = ET.SubElement(point, "position")
-            position.set("x3", x)
-            position.set("y3", y)
-            position.set("z3", z)
-            position.set("tolerance", radius)
-        elif feat_name == "HBD" or feat_name == "HBA":
+
+        is_point = (feat_name == "PI" or feat_name == "NI" or feat_name == "H" 
+                    or feat_name == "HBD" or feat_name == "HBA")
+        is_vector = element.has_direction and (feat_name == "HBD" or feat_name == "HBA")
+
+        if is_vector:
             direction = coords - element.direction
             dir_x = str(direction[0])
             dir_y = str(direction[1])
@@ -194,6 +204,20 @@ def to_ligandscout(pharmacophore, file_name, **kwargs):
             target.set("y3", dir_y)
             target.set("z3", dir_z)
             target.set("tolerance", radius)
+        elif is_point:
+            point = ET.SubElement(document, "point")
+            # Set point attributes
+            point.set("name", feat_name)
+            point.set("featureId", feat_id)
+            point.set("optional", "false")
+            point.set("disabled", "false")
+            point.set("weight", "1.0")
+            # Add position tag
+            position = ET.SubElement(point, "position")
+            position.set("x3", x)
+            position.set("y3", y)
+            position.set("z3", z)
+            position.set("tolerance", radius)
         elif feat_name == "AR":
             direction = element.direction
             dir_x = str(direction[0])
@@ -234,10 +258,5 @@ def to_ligandscout(pharmacophore, file_name, **kwargs):
             position.set("tolerance", radius)
 
     tree._setroot(document)
-    if kwargs: # For testing purposes
-        if kwargs["testing"] == True:
-             xml_string = ET.tostring(document)
-             return xml_string
 
-    tree.write(file_name, encoding="UTF-8", xml_declaration=True)
-
+    return tree, document

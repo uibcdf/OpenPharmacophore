@@ -4,7 +4,6 @@ import numpy as np
 import re
 
 def read_pharmagist(file_name, pharmacophore_index=None):
-
     """ Loads pharmacophores from a pharmagist mol2 file.
 
         Parameters
@@ -62,8 +61,7 @@ def read_pharmagist(file_name, pharmacophore_index=None):
     elements = pharmacophores[pharmacophore_index]
     return elements
 
-def to_pharmagist(pharmacophores, file_name, **kwargs):
-
+def to_pharmagist(pharmacophores, file_name):
     """ Save pharmacophores to pharmagist mol2 format
 
         Parameters
@@ -74,15 +72,27 @@ def to_pharmagist(pharmacophores, file_name, **kwargs):
         file_name: str
             Name of the file containing the pharmacophore.
 
+        Notes
+        -------
+        Nothing is returned. A new file is written.
+    """
+    doc = _pharmagist_file_info(pharmacophores)
+    with open(file_name, "w") as f:
+        f.writelines(doc)
+
+def _pharmagist_file_info(pharmacophores):
+    """ Get necessary info to create a pharmagist mol2 file to store pharmacophores.
+
+        Parameters
+        ----------
+        pharmacophores: list of openpharmacophore.Pharmacophore or an openpharmacophore.Pharmacophore
+            Pharmacophore or pharmacophores that will be saved
+
         Returns
         -------
-        pharmacophores: list of openpharmacophore.ligand_based.LigandBasedPharmacophores
-            A list of ligand based pharmacophores.
-        
-        elements: list of openpharmacophore.pharmacophoric_elements
-            A list of pharmacophoric points from a single pharmacophore.
+        doc: list of list
+            List where each sublist contains a pharmacophore represented as a mol2 string.
     """
-
     pharmagist_element_name = { # dictionary to map openphamracohpore feature names to pharmagist 
         "aromatic ring": "AR ",
         "hydrophobicity": "HYD",
@@ -136,17 +146,11 @@ def to_pharmagist(pharmacophores, file_name, **kwargs):
             line += str(i).rjust(5)
             line += pharmagist_element_specs[element.feature_name].rjust(6)
             line += "0.0000\n".rjust(12)
-            print(line)
             lines.append(line)
             line = ""
 
         lines.append("@<TRIPOS>BOND\n")
         for l in lines:
             doc.append(l)
-    
-    if kwargs: # For testing purposes
-        if kwargs["testing"] == True:
-            return doc
-
-    with open(file_name, "w") as f:
-        f.writelines(doc)
+        
+    return doc

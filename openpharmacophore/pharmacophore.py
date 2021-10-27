@@ -1,8 +1,10 @@
-import pyunitwizard as puw
-import nglview as nv
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
+from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, read_pharmagist,
+ to_ligandscout, to_moe, to_pharmagist, to_pharmer)
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
-from rdkit import Geometry, RDLogger
+import nglview as nv
+import pyunitwizard as puw
+from rdkit import Chem, Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
@@ -21,9 +23,6 @@ class Pharmacophore():
     elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
         List of pharmacophoric elements
 
-    molecular_system : rdkit.Chem.mol
-        Molecular system from which this pharmacophore was extracted.
-
     Attributes
     ----------
 
@@ -33,15 +32,11 @@ class Pharmacophore():
     n_elements : int
         Number of pharmacophoric elements
 
-    molecular_system : rdkit.Chem.mol
-        Molecular system from which this pharmacophore was extracted.
-
     """
-    def __init__(self, elements=[], molecular_system=None):
+    def __init__(self, elements=[]):
 
         self.elements = elements
         self.n_elements = len(elements)
-        self.molecular_system = molecular_system
     
     @classmethod
     def from_file(cls, file_name, **kwargs):
@@ -56,36 +51,25 @@ class Pharmacophore():
         """
         fextension = file_name.split(".")[-1]
         if fextension == "json":
-            from openpharmacophore.io import from_pharmer
-            if kwargs:
-                load_mol_sys = kwargs["load_mol_sys"]
-            else:
-                load_mol_sys = False
-            points, mol_sys = from_pharmer(file_name, load_mol_sys)
+            points, _ , _ = from_pharmer(file_name, False)
 
         elif fextension == "ph4":
-            from openpharmacophore.io.moe import from_moe
             points = from_moe(file_name)
-            mol_sys = None
-
+           
         elif fextension == "pml":
-            from openpharmacophore.io import from_ligandscout
             points = from_ligandscout(file_name)
-            mol_sys = None
 
         elif fextension == "mol2":
-            from openpharmacophore.io.pharmagist import read_pharmagist
             if kwargs:
                 ph_index = kwargs["index"]
             else:
                 ph_index = 0
             points = read_pharmagist(file_name, pharmacophore_index=ph_index)
-            mol_sys = None
         
         else:
             raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
         
-        return cls(points, mol_sys)    
+        return cls(elements=points)    
         
     def add_to_NGLView(self, view, palette='openpharmacophore'):
 
@@ -167,25 +151,28 @@ class Pharmacophore():
         self.elements.append(pharmacophoric_element)
         self.n_elements +=1
     
-    def remove_element(self, element_indx):
-
-        """Remove an element from the pharmacophore.
+    def remove_elements(self, element_indices):
+        """Remove elements from the pharmacophore.
 
         Parameters
         ----------
-        element_inx: int
-            Index of the element to be removed
+        element_indices: int or list of int
+            Indices of the elements to be removed. Can be a list of integers if multiple elements will be
+            removed or a single integer to remove one element.
 
         Returns
         -------
             The pharmacophoric element given as input argument is removed from the pharmacophore.
         """
-
-        self.elements.pop(element_indx)
-        self.n_elements -=1
+        if isinstance(element_indices, int):
+            self.elements.pop(element_indices)
+            self.n_elements -=1
+        elif isinstance(element_indices, list):
+            new_elements = [element for i, element in enumerate(self.elements) if i not in element_indices]
+            self.elements = new_elements
+            self.n_elements = len(self.elements)
 
     def remove_feature(self, feat_type):
-
         """Remove an especific feature type from the pharmacophore elements list
 
         Parameters
@@ -251,8 +238,7 @@ class Pharmacophore():
         Nothing is returned. A new file is written.
 
         """
-        from openpharmacophore.io import to_ligandscout as _to_ligandscout
-        return _to_ligandscout(self, file_name=file_name)
+        return to_ligandscout(self, file_name=file_name)
 
     def to_pharmer(self, file_name):
         """Method to export the pharmacophore to the pharmer compatible format.
@@ -267,8 +253,7 @@ class Pharmacophore():
             Nothing is returned. A new file is written.
 
         """
-        from openpharmacophore.io import to_pharmer as _to_pharmer
-        return _to_pharmer(self, file_name=file_name)
+        return to_pharmer(self, file_name=file_name)
 
     def to_pharmagist(self, file_name):
         """Method to export the pharmacophore to the pharmagist compatible format.
@@ -283,8 +268,7 @@ class Pharmacophore():
             Nothing is returned. A new file is written.
 
         """
-        from openpharmacophore.io.pharmagist import to_pharmagist as _to_pharmagist
-        return _to_pharmagist(self, file_name=file_name)
+        return to_pharmagist(self, file_name=file_name)
     
     def to_moe(self, file_name):
         """Method to export the pharmacophore to the MOE compatible format.
@@ -299,8 +283,7 @@ class Pharmacophore():
             Nothing is returned. A new file is written.
 
         """
-        from openpharmacophore.io.moe import to_moe as _to_moe
-        return _to_moe(self, file_name=file_name)
+        return to_moe(self, file_name=file_name)
     
     def to_rdkit(self):
         """ Returns an rdkit pharmacophore with the elements from the original
