@@ -12,6 +12,7 @@ dependencies:
 - jupyterlab
 - nglview
 - matplotlib
+- rdkit
 - pytest
 - pip
 - pytest-cov
@@ -22,3 +23,5 @@ dependencies:
 - nbsphinx
 - recommonmark
 - sphinx-markdown-tables
+- pip:
+  - chembl_webresource_client==0.10.7

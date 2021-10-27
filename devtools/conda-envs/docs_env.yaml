@@ -13,6 +13,7 @@ dependencies:
 - nglview
 - matplotlib
 - rdkit
+- pip
 - sphinx
 - sphinx_rtd_theme
 - sphinxcontrib-bibtex
@@ -20,3 +21,5 @@ dependencies:
 - recommonmark
 - sphinx-markdown-tables
 - jupyterlab
+- pip:
+  - chembl_webresource_client==0.10.7
