@@ -97,7 +97,7 @@ def from_moe(file_name):
             elif count == 4:
                 radius = float(p)
                 excluded_sphere = PharmacophoricPoint(
-                    feat_type="excluded sphere",
+                    feat_type="excluded volume",
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
@@ -107,8 +107,7 @@ def from_moe(file_name):
     return points
             
 
-def to_moe(pharmacophore, file_name, **kwargs):
-
+def to_moe(pharmacophore, file_name):
     """ Saves a pharmacophore to a MOE ph4 file.
 
         Parameters
@@ -123,7 +122,26 @@ def to_moe(pharmacophore, file_name, **kwargs):
         ----
             Nothing is returned. A new file is written.
     """
-    
+    ph4_str = _moe_ph4_string(pharmacophore)
+    with open(file_name, "w") as f:
+        f.writelines(ph4_str)
+
+def _moe_ph4_string(pharmacophore):
+    """ Returns a string with the necessary info to create a MOE ph4 file.
+
+        Parameters
+        ----------
+        pharmacophore: obj: openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file.
+
+        file_name: str
+            Name of the file containing the pharmacophore.
+
+        Returns
+        ------
+        ph4_str: str
+            The pharmacophore string.
+    """
     oph_to_moe = {
         "aromatic ring": "Aro",
         "hydrophobicity": "Hyd",
@@ -141,7 +159,7 @@ def to_moe(pharmacophore, file_name, **kwargs):
 
     excluded_spheres = []
     for element in pharmacophore.elements:
-        if element.feature_name == "excluded sphere":
+        if element.feature_name == "excluded volume":
             excluded_spheres.append(element)
             continue
         feat_name = oph_to_moe[element.feature_name]
@@ -156,8 +174,8 @@ def to_moe(pharmacophore, file_name, **kwargs):
     if excluded_spheres:
         ph4_str += "\n#volumesphere 90 x r y r z r r r\n"
         for excluded in excluded_spheres:
-            center = puw.get_value(element.center, to_unit="angstroms")
-            radius = str(puw.get_value(element.radius, to_unit="angstroms")) + " "
+            center = puw.get_value(excluded.center, to_unit="angstroms")
+            radius = str(puw.get_value(excluded.radius, to_unit="angstroms")) + " "
             x = str(center[0]) + " "
             y = str(center[1]) + " "
             z = str(center[2]) + " "
@@ -165,11 +183,4 @@ def to_moe(pharmacophore, file_name, **kwargs):
 
     ph4_str += "\n#endpharmacophore"
 
-    if kwargs: # For testing purposes
-        if kwargs["testing"] == True:
-            return ph4_str
-    
-    with open(file_name, "w") as f:
-        f.writelines(ph4_str)
-
-
+    return ph4_str

@@ -40,7 +40,7 @@ def test_add_element(three_element_pharmacophore):
     assert three_element_pharmacophore.elements[3].feature_name == "hydrophobicity"
 
 def test_remove_element(three_element_pharmacophore):
-    three_element_pharmacophore.remove_element(0)
+    three_element_pharmacophore.remove_elements(0)
     assert three_element_pharmacophore.n_elements == 2
 
 @pytest.mark.parametrize('feat_type,exception', [

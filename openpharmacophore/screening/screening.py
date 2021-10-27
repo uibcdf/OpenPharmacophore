@@ -1,7 +1,8 @@
 from openpharmacophore.databases import chembl, pubchem
 from openpharmacophore.databases.zinc import get_zinc_urls
 from openpharmacophore.io.mol2 import load_mol2_file
-from openpharmacophore._private_tools.exceptions import MissingParameters
+from openpharmacophore.utils.random_string import random_string
+from openpharmacophore._private_tools.exceptions import OpenPharmacophoreException
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors
@@ -20,8 +21,8 @@ class VirtualScreening():
 
     Parameters
     ----------
-    pharmacophore: openpharmacophore.Pharmacophore
-        The pharmacophore that will be used to screen the database.
+    pharmacophore: openpharmacophore.Pharmacophore or list of openpharmacophore.Pharmacophore
+        The pharmacophore  or pharmacophores that will be used to screen the database.
 
     Attributes
     ----------
@@ -58,6 +59,7 @@ class VirtualScreening():
        self.n_matches = 0
        self.n_molecules = 0
        self.pharmacophore = pharmacophore
+       self.n_pharmacophores = 0
        self._screen_fn = None
        self._file_queue = Queue()
     
@@ -73,7 +75,7 @@ class VirtualScreening():
         # Values of the scoring that was used for screening. Examples: SSD, 
         # tanimoto similarity
         if self.n_matches == 0:
-            raise ValueError("""There were no matches in this screen or no database has been screened. 
+            raise OpenPharmacophoreException("""There were no matches in this screen or no database has been screened. 
             Cannot get results.""")
     
         score_vals = [i[0] for i in self.matches]
@@ -127,8 +129,8 @@ class VirtualScreening():
         else:
             raise NotImplementedError
 
-    def screen_db(self, db="zinc", download_path=None, **kwargs):
-        """ Screen ZINC or ChemBl databases.
+    def screen_ZINC(self, db="zinc", download_path=None, subset="Lead-Like", mw_range=None, logp_range=None, **kwargs):
+        """ Screen ZINC database.
             
             Parameters
             ---------
@@ -142,68 +144,41 @@ class VirtualScreening():
         """
         if not download_path:
             delete_files = True
-            download_path = "./tmp"
+            download_path = "./tmp" + random_string(10)
             if not os.path.isdir(download_path):    
                 os.mkdir(download_path)
         else:
             delete_files = False
 
-        if db == "zinc":
-            self.db = "ZINC"
-            if kwargs:
-                try:
-                    subset = kwargs["subset"]
-                except:
-                    raise MissingParameters("subset argument is required")
-                if subset is None:
-                    try:
-                        mw_range = kwargs["mw_range"]
-                        logp_range = kwargs["logp_range"]
-                    except:
-                        raise MissingParameters("Must pass a molecular weight range and a logP range if no subset is selected") 
-                else:
-                    mw_range = None
-                    logp_range = None
-                urls = get_zinc_urls(subset=None, mw_range=mw_range, logp_range=logp_range)
-            else:
-                urls = get_zinc_urls(subset="Lead-Like")
+        self.db = "ZINC"
+        urls = get_zinc_urls(subset=subset, mw_range=mw_range, logp_range=logp_range)
+    
+        print("Downloading from ZINC...")
+        file_path = self._download_zinc_file(urls[0], download_path)
+        if file_path is not None:
+            self._file_queue.put(file_path)
         
-            print("Downloading from ZINC...")
-            file_path = self._download_zinc_file(urls[0], download_path)
+        n_files = len(urls)
+        # Start the thread to process files
+        threading.Thread(target=self._process_files, daemon=True, args=[delete_files, n_files]).start()
+
+        for url in tqdm(urls[1:]):
+            file_path = self._download_zinc_file(url, download_path)
             if file_path is not None:
                 self._file_queue.put(file_path)
-           
-            n_files = len(urls)
-            # Start the thread to process files
-            threading.Thread(target=self._process_files, daemon=True, args=[delete_files, n_files]).start()
+        
+        self._file_queue.join()
+        print("Finished screening ZINC database")
 
-            for url in tqdm(urls[1:]):
-                file_path = self._download_zinc_file(url, download_path)
-                if file_path is not None:
-                    self._file_queue.put(file_path)
-            
-            self._file_queue.join()
-            print("Finished screening ZINC database")
-
-            try:
-                os.rmdir(download_path)
-            except:
-                pass
-
-        # elif db == "chembl":
-        #     self.db = "ChemBL"
-        #     # If a subset kwarg is not passed. Use RO5 subset
-        #     if kwargs:
-        #         subset = kwargs["subset"]
-        #     else:
-        #         subset = "Ro5"
-
-        #     if subset == "Ro5":
-        #         chembl.get_ro5_dataset(download_path)
-        #     else:
-        #         raise NotImplementedError
-        else:
-            raise NotImplementedError
+        try:
+            os.rmdir(download_path)
+        except:
+            pass
+        
+    def screen_chembl(self, download_path):
+        """ Screen ChemBl database"""
+        self.db = "ChemBL"
+        pass
         
     def screen_db_from_dir(self, path, file_extensions=None, **kwargs):
         """ Screen a database of molecules contained in one or more files. 
@@ -246,7 +221,7 @@ class VirtualScreening():
             print("File scanned!")
 
         else:
-            raise Exception("{} is not a valid file/directory".format(path))
+            raise IOError("{} is not a valid file/directory".format(path))
     
     def screen_mol_list(self, molecules, **kwargs):
         """Screen a list of molecules

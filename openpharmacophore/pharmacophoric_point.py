@@ -30,9 +30,9 @@ class PharmacophoricPoint():
             Vector direction as a three dimensional vector. If the pharmacophoric point doesn't have
             direction is set to None.
         
-        atoms_inxs: tuple of int
+        atoms_inxs: list, set or tuple of int
             The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
-            they were extracted. 
+            they were extracted. A list, set or tupple can be passed. 
 
         Attributes
         ----------
@@ -56,9 +56,9 @@ class PharmacophoricPoint():
             The name of the element contains the feature type and wheter the point is a sphere or a sphere
             and vector.
         
-         atoms_inxs: tuple of int
-            The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
-            they were extracted. 
+        atoms_inxs: set of int
+            A set of the indices of the atoms corresponding to the pharmacophoic point in the molecule from which
+            they were extracted.  
 
     
     """
@@ -72,21 +72,24 @@ class PharmacophoricPoint():
         if not isinstance(feat_type, str):
             raise ValueError("feat_type must be a string")
         
-        valid_feat_types = ["aromatic ring",
-            "hydrophobicity",
-            "hb acceptor",
-            "hb donor",
-            "positive charge",
-            "negative charge",
-            "excluded sphere",
-            "included sphere"]
+        feature_to_char = {
+            "hb acceptor": "A",
+            "hb donor": "D",
+            "aromatic ring": "R",
+            "hydrophobicity": "H",
+            "positive charge": "P",
+            "negative charge": "N",
+            "excluded volume": "E",
+            "included volume": "I",
+        }
 
-        if feat_type not in valid_feat_types:
-            raise ValueError(f"{feat_type} is not a valid feature type. Valid feature names are {valid_feat_types}")
+        if feat_type not in list(feature_to_char.keys()):
+            raise ValueError(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
 
         self.center = puw.standardize(center)
         self.radius = puw.standardize(radius)
         self.feature_name = feat_type
+        self.short_name = feature_to_char[feat_type]
         self.element_name = "".join([n.capitalize() for n in self.feature_name.split()])
         if direction is not None:
             if not check_input_argument(direction, [tuple, list, np.ndarray], shape=(3,)):
@@ -99,12 +102,14 @@ class PharmacophoricPoint():
             self.has_direction = False
             self.element_name += "Sphere"
         
-        if atoms_inxs:
-            self.atoms_inxs = atoms_inxs
+        if atoms_inxs is not None:
+            self.atoms_inxs = set(atoms_inxs)
         else:
             self.atoms_inxs = None
         
-    
+        self.pharmacophore_index = 0
+        
+        
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
         """Adding the element representation to an NGLview view
 
@@ -197,9 +202,65 @@ class PharmacophoricPoint():
         """
         return puw.get_value(self.radius, to_unit=unit)
     
+    def get_indices(self):
+        """ Get the indices of the atoms corresponding to the pharmacophoric
+            point.
+
+            Returns
+            -------
+            list of int
+                The atom indexes.
+        """
+        return self.atoms_inxs
+    
+    @staticmethod
+    def get_valid_features():
+        """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
+        return [
+            "hb acceptor",
+            "hb donor",
+            "aromatic ring",
+            "hydrophobicity",
+            "positive charge",
+            "negative charge",
+            "excluded volume",
+            "included volume",
+        ]
+    
+    def set_center(self, center):
+        """ Update center attribute
+        """
+        self.center = center
+    
+    def set_direction(self, direction):
+        """ Update direction attribute
+        """
+        self.direction = direction
+
+    def set_radius(self, radius):
+        """ Update radius attribute
+        """
+        self.radius = radius
+
+    def set_indices(self, indices):
+        """ Update the atoms_inxs attribute
+        """
+        self.atoms_inxs.clear()
+        self.atoms_inxs = set(indices)
+    
+    def is_equal(self, other):
+        """ Compare equality of two pharmacophoric points based on atoms indices.
+        """
+        if self.short_name == other.short_name and self.atoms_inxs == other.atoms_inxs:
+                return True
+        return False
+
     def __eq__(self, other):
+        """ Compare equality of two pharmacophoric points based on their 3D coordinates,
+            directionality and radius.
+        """
         if isinstance(other, type(self)):
-            if self.feature_name != other.feature_name:
+            if self.short_name != other.short_name:
                 return False
             if self.has_direction != other.has_direction:
                 return False
@@ -222,3 +283,21 @@ class PharmacophoricPoint():
             return f"{self.element_name}(center: ({x}, {y}, {z}); radius: {radius}; direction: ({xd}, {yd}, {zd}))"
         else:
             return f"{self.element_name}(center: ({x}, {y}, {z}); radius: {radius})"
+
+
+class UniquePharmacophoricPoint(PharmacophoricPoint):
+    """ A class to keep track of unique pharmacophoric points on a dynophore or in a set
+        with multiple pharmacophores.
+
+        Inherits from PharmacophoricPoint.
+
+    """
+    def __init__(self, point):
+        super().__init__(point.feature_name, 
+                        point.center, 
+                        point.radius, 
+                        direction=None, 
+                        atoms_inxs=point.atoms_inxs)
+        self.count = 1 # To keep the count of each point when working with multiple pharmacophores.
+        self.frequency = 0.0
+        self.timesteps = [] 

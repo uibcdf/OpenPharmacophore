@@ -1,18 +1,17 @@
 from openpharmacophore.io.mol2 import load_mol2_file
-from openpharmacophore.io.moe import from_moe, to_moe
-from openpharmacophore.io.ligandscout import from_ligandscout, to_ligandscout
-from openpharmacophore.io.pharmagist import read_pharmagist, to_pharmagist
-from openpharmacophore.io.pharmer import from_pharmer, to_pharmer
+from openpharmacophore.io.moe import from_moe, _moe_ph4_string
+from openpharmacophore.io.ligandscout import from_ligandscout, _ligandscout_xml_tree
+from openpharmacophore.io.pharmagist import read_pharmagist, _pharmagist_file_info
+from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.ligand_based import LigandBasedPharmacophore
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
-
 import numpy as np
 import pyunitwizard as puw
 import pytest
-
 import datetime
 import os
+import xml.etree.ElementTree as ET
 
 @pytest.fixture
 def two_element_pharmacophore():
@@ -49,7 +48,7 @@ def three_element_pharmacophore():
         direction=[0,1,1]
     )
     excluded = PharmacophoricPoint(
-        feat_type="excluded sphere",
+        feat_type="excluded volume",
         center=puw.quantity([2,1,2], "angstroms"), 
         radius=radius)
     pharmacophore = StructuredBasedPharmacophore(elements=[ring, acceptor, excluded])
@@ -57,16 +56,17 @@ def three_element_pharmacophore():
 
 def test_from_pharmer():
 
-    points, molecular_system = from_pharmer("./openpharmacophore/data/pharmacophores/pharmer/pharmer.json", 
+    points, molecular_system, ligand = from_pharmer("./openpharmacophore/data/pharmacophores/pharmer/pharmer.json", 
                                             load_mol_sys=False)
     assert len(points) == 19
     assert molecular_system is None
+    assert ligand is None
     assert isinstance(points[0], 
                         PharmacophoricPoint)
 
 def test_to_pharmer(two_element_pharmacophore):
     
-    pharmer = to_pharmer(two_element_pharmacophore, "temp.json", testing=True)
+    pharmer = _pharmer_dict(two_element_pharmacophore)
 
     # Expected output from to_pharmer
     expected = {}
@@ -143,7 +143,7 @@ def test_read_pharmagist(fname, index):
         assert isinstance(result[0], PharmacophoricPoint)
 
 def test_to_pharmagist(three_element_pharmacophore):
-    mol2_list = to_pharmagist(three_element_pharmacophore, file_name=None, testing=True)
+    mol2_list = _pharmagist_file_info(three_element_pharmacophore)
     expected_output = ['@<TRIPOS>MOLECULE\n',
                         '@<TRIPOS>ATOM\n',
                         '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
@@ -187,7 +187,7 @@ def test_from_ligandscout():
             )
     
     excluded_vol = points[3]
-    assert excluded_vol.feature_name == "excluded sphere"
+    assert excluded_vol.feature_name == "excluded volume"
     assert np.all(
             np.around(puw.get_value(excluded_vol.center, "angstroms"), 1) ==  np.array([5.5, 4.5, -2.0])
             )
@@ -195,7 +195,8 @@ def test_from_ligandscout():
 
 def test_to_ligandscout(three_element_pharmacophore):
     expected_string = b'<pharmacophore name="pharmacophore.pml" pharmacophoreType="LIGAND_SCOUT"><plane disabled="false" featureId="ai_1" name="AR" optional="false" weight="1.0"><position tolerance="0.9999999999999999" x3="0.9999999999999999" y3="0.0" z3="0.0" /><normal tolerance="0.9999999999999999" x3="0.0" y3="0.0" z3="1.0" /></plane><vector disabled="false" featureId="ha_2" hasSyntheticProjectedPoint="false" name="HBA" optional="false" pointsToLigand="false" weight="1.0"><origin tolerance="0.9999999999999999" x3="0.9999999999999999" y3="1.9999999999999998" z3="1.9999999999999998" /><target tolerance="0.9999999999999999" x3="0.9999999999999999" y3="1.2928932188134523" z3="1.2928932188134523" /></vector><volume disabled="false" featureId="ev_3" optional="false" type="exclusion" weight="1.0"><position tolerance="0.9999999999999999" x3="1.9999999999999998" y3="0.9999999999999999" z3="1.9999999999999998" /></volume></pharmacophore>'
-    pml_string = to_ligandscout(three_element_pharmacophore, file_name=None, testing=True)
+    _, document = _ligandscout_xml_tree(three_element_pharmacophore)
+    pml_string = ET.tostring(document)
 
     assert pml_string == expected_string
 
@@ -279,7 +280,7 @@ def test_from_moe():
     
 def test_to_moe(three_element_pharmacophore):
 
-    pharmacophore_str = to_moe(three_element_pharmacophore, file_name=None, testing=True)
+    pharmacophore_str = _moe_ph4_string(three_element_pharmacophore)
 
     now = datetime.datetime.now()
     month = str(now.month)

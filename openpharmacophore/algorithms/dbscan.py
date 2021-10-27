@@ -1,12 +1,11 @@
 from openpharmacophore.utils.alignment import align_set_of_ligands
+from openpharmacophore.utils.centroid import feature_centroid
 from openpharmacophore.utils.ligand_features import rdkit_to_point
-from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 import numpy as np
-import os
 from sklearn.cluster import DBSCAN
 from rdkit import Chem, RDConfig
 from rdkit.Chem import ChemicalFeatures
-from openpharmacophore.utils.centroid import feature_centroid
+import os
 
 def get_feature_clusters(feat_coords, eps, min_samples):
     """
@@ -159,7 +158,7 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
     pharmacophoric_points = []
     for feature_type, coords in feature_clusters.items():
         for center in coords:            
-            point = rdkit_to_point(feature_type, center, radius=radius, direction=None, point_type="spheres")
+            point = rdkit_to_point(feature_type, center, radius=radius, direction=None)
             pharmacophoric_points.append(point)
 
     return pharmacophoric_points, aligned_ligands
