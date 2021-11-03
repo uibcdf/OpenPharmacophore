@@ -20,7 +20,7 @@ from .pharmacophore import Pharmacophore
 from .ligand_based import LigandBasedPharmacophore
 from .structured_based import StructuredBasedPharmacophore
 from .pharmacophoric_point import PharmacophoricPoint
-from .screening.screening3D import VirtualScreening3D
-from .screening.screening2D import VirtualScreening2D
+from .screening.screening import VirtualScreening
+from .screening.retrospective import RetrospectiveScreening
 from .dynophore import Dynophore as Dynophore
 from . import demo as demo

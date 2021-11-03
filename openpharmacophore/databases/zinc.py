@@ -14,7 +14,6 @@ def get_zinc_urls(subset="Lead-Like",
 
         Parameters
         ----------
-
         subset: str
             Name of the ZINC subset to be downloaded. Available subsets are "Drug-Like",
             "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"

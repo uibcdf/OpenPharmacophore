@@ -1,3 +1,4 @@
+from pyunitwizard.kernel import initialize
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
 from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, read_pharmagist,
  to_ligandscout, to_moe, to_pharmagist, to_pharmer)
@@ -72,7 +73,6 @@ class Pharmacophore():
         return cls(elements=points)    
         
     def add_to_NGLView(self, view, palette='openpharmacophore'):
-
         """Adding the pharmacophore representation to a view (NGLWidget) from NGLView.
 
         Each pharmacophoric element is added to the NGLWidget as a new component.
@@ -89,14 +89,15 @@ class Pharmacophore():
         ----
         Nothing is returned. The `view` object is modified in place.
         """
-        # TODO: Add opacity to spheres
-        for i, element in enumerate(self.elements):
+        first_element_index = len(view._ngl_component_ids)
+        for ii, element in enumerate(self.elements):
             # Add Spheres
             center = puw.get_value(element.center, to_unit="angstroms").tolist()
             radius = puw.get_value(element.radius, to_unit="angstroms")
             feature_color = get_color_from_palette_for_feature(element.feature_name, color_palette=palette)
-            label = f"{element.feature_name}_{i}"
+            label = f"{element.feature_name}_{ii}"
             view.shape.add_sphere(center, feature_color, radius, label)
+
             # Add vectors
             if element.has_direction:
                 label = f"{element.feature_name}_vector"
@@ -106,9 +107,13 @@ class Pharmacophore():
                 else:
                     end_arrow = puw.get_value(element.center + 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
                     view.shape.add_arrow(center, end_arrow, feature_color, 0.2, label)
-                   
-    def show(self, palette='openpharmacophore'):
+        
+        # Add opacity to spheres
+        last_element_index = len(view._ngl_component_ids)
+        for jj in range(first_element_index, last_element_index):
+            view.update_representation(component=jj, opacity=0.8)
 
+    def show(self, palette='openpharmacophore'):
         """Showing the pharmacophore model together with the molecular system from with it was
         extracted as a new view (NGLWidget) from NGLView.
 
@@ -131,7 +136,6 @@ class Pharmacophore():
         return view
 
     def add_element(self, pharmacophoric_element):
-
         """Adding a new element to the pharmacophore.
 
         Parameters

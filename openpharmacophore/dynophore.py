@@ -61,7 +61,7 @@ class Dynophore():
         else:
             raise TypeError("Trajectory must be of type string, mdtraj.Trajectory or MdAnalysis.Universe")
         
-        self._n_frames = trajectory.n_frames
+        self._n_frames = self._trajectory.n_frames
         self._saved_ligand = False
         self._averaged_coords = False
 
@@ -423,6 +423,7 @@ class Dynophore():
         """
         if file_name.endswith("h5"):
             traj = mdt.load(file_name)
+            self._trajectory_type = "mdt"
         else:
             raise NotImplementedError
 
@@ -553,6 +554,8 @@ class Dynophore():
         
         return pharmacophore
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(n_pharmacophores={self.n_pharmacophores}; n_frames={self._n_frames})"
 
     
     
