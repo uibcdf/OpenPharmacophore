@@ -4,13 +4,14 @@ import pandas as pd
 from tqdm.auto import tqdm
 import os
 
-def get_ro5_dataset( download_dir):
-    """Download subset of molecules that do not violate Lipinky's rule of five.
-    Molecules are stored in smi files with its smiles and ChemblId
+def get_ro5_dataset(download_dir):
+    """ Download subset of molecules that do not violate Lipinky's rule of five.
+    
+        Molecules are stored in smi files with its smiles and ChemblId.
         
         Parameters
         ----------
-        download_dir: str
+        download_dir : str
             Directory where the files will be saved.
         
         Notes
@@ -53,16 +54,16 @@ def get_ro5_dataset( download_dir):
 
 
 def get_bioactivity_dataframe(target_chembl_id):
-    """Get bioactivity data for a given target.
+    """ Get bioactivity data for a given target.
     
         Parameters
         ----------
-        target_chembl_id: str
+        target_chembl_id : str
             The target chembl id.
         
         Returns
         -------
-        bioactivities_df: pandas.DataFrame
+        bioactivities_df : pandas.DataFrame
             A dataframe with the following columns: ChemblID, Smiles,
             and pIC50.
     """
@@ -141,19 +142,20 @@ def get_bioactivity_dataframe(target_chembl_id):
 def get_assay_bioactivity_data(target_chembl_id, pIC50_threshold=6.3):
     """ Get bioactivity data and the compounds in an assay. 
         
-            Parameters
-            ----------
-                assay_id: int
-                    The id of the bioassay.
-            Returns
-            ----------
-                compounds: list of 2-tuples
-                    The first element is the compound PubChem id.
-                    The second element is the smiles of the compound.
-                
-                bioactivity: np.array of bits
-                    An array where each element corresponds to the index of the compounds list.
-                    An entry is either one if the compound is active or zero if the compund is inactive.
+        Parameters
+        ----------
+        assay_id : int
+            The id of the bioassay.
+
+        Returns
+        --------
+        compounds : list of 2-tuples
+            The first element is the compound PubChem id.
+            The second element is the smiles of the compound.
+        
+        bioactivity : np.array of bits
+            An array where each element corresponds to the index of the compounds list.
+            An entry is either one if the compound is active or zero if the compund is inactive.
     """
     bioactivities_df = get_bioactivity_dataframe(target_chembl_id=target_chembl_id)
     bioactivities_df["activity"] = bioactivities_df["pIC50"].apply(
@@ -165,23 +167,23 @@ def get_assay_bioactivity_data(target_chembl_id, pIC50_threshold=6.3):
     return molecules, bioactivity
 
 def get_actives_and_inactives(target_chembl_id, pIC50_threshold=6.3):
-    """Get a list of active and inactive compounds for a given target.
+    """ Get a list of active and inactive compounds for a given target.
 
         Parameters
         ----------
-        target_chembl_id: str
+        target_chembl_id : str
             The target chembl id.
 
-        pIC50_threshold: float
+        pIC50_threshold : float
             The cuttoff value from which a molecule is considered active.
         
         Returns
         -------
-        actives: 2-tuple
+        actives : 2-tuple
             First element of the tuple is a list of Chembl ids. Second element
             is a list of smiles for the active compounds
         
-        inactives: 2-tuple
+        inactives : 2-tuple
             First element of the tuple is a list of Chembl ids. Second element
             is a list of smiles for the inactive compounds
     """

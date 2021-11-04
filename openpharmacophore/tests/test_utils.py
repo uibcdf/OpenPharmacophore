@@ -53,7 +53,7 @@ def test_ligands_pharmacophoric_points(radius, feat_def,):
     if feat_def == "rdkit":
         definition = None
     elif feat_def == "custom":
-        definition = load_smarts_fdef(fname="openpharmacophore/data/smarts_features.txt")
+        definition = load_smarts_fdef(file_name="openpharmacophore/data/smarts_features.txt")
     
     points = ligands_pharmacophoric_points(
                     acetic_acid, 
@@ -95,7 +95,7 @@ def test_rdkit_to_point():
 
 
 def test_load_smarts_fdef():
-    feat_def = load_smarts_fdef(fname="openpharmacophore/data/smarts_features.txt")
+    feat_def = load_smarts_fdef(file_name="openpharmacophore/data/smarts_features.txt")
 
     assert len(feat_def) == 28
     assert '[#16!H0]' in feat_def

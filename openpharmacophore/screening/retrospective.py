@@ -26,15 +26,14 @@ class RetrospectiveScreening(VirtualScreening):
             self.similarity_cutoff = 0.0
 
     def from_chembl_target_id(self, target_id, pIC50_threshold=6.3):
-        """Retrospective screening from bioactivity data fetched 
-           from chembl for the specific target.
+        """ Retrospective screening from bioactivity data fetched from chembl.
            
            Parameters
            ----------
-           target_id: str
+           target_id : str
                 ChemBl target id.
            
-           pIC50_threshold: float
+           pIC50_threshold : float, default=6.3
                 The cuttoff value from which a molecule is considered active.
            
            """
@@ -44,23 +43,19 @@ class RetrospectiveScreening(VirtualScreening):
         self.from_bioactivity_data(smiles, activity)
 
     def from_bioactivity_data(self, smiles, activity):
-        """Retrospective screening from a set of molecules classified as active or 
-           inactive.
+        """Retrospective screening from a set of molecules classified as active or inactive.
         
             Parameters
             ----------
-            smiles: List of 2-tuple of str
+            smiles : List of 2-tuples
                 A list with the molecules for screening. Each element of the list is 
                 a tuple, where the first elements is the compound id and the second 
                 the smiles of the molecule.
 
-            activity: numpy.ndarray 
+            activity : numpy.ndarray 
                 Array with the labels of each molecule; 1 corresponds to an active molecule
                 and 0 to an inactive one. An array of rank 1 where the first dimension is 
                 equal to the len of the molecules list is expected. 
-
-            Returns
-            -------
         
         """
         if len(activity.shape) > 1:
@@ -86,7 +81,7 @@ class RetrospectiveScreening(VirtualScreening):
 
             Parameters
             ----------
-            bioassay_id: int
+            bioassay_id : int
                 PubChem bioassay id. 
         """
         pubchem_client = pubchem.PubChem()
@@ -101,6 +96,10 @@ class RetrospectiveScreening(VirtualScreening):
             -------
             area : float
                 The value of the area under the curve.
+
+            References
+            ----------
+            Fawcett, T. An Introduction to ROC Analysis. Pattern Recognition Letters 2006, 27, 861−874
         """
         def trapezoid_area(x1, x2, y1, y2):
             """ Calculate the area of a trapezoid.
@@ -169,6 +168,10 @@ class RetrospectiveScreening(VirtualScreening):
             ----------
             ax : matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
                 An axes object whith the plot.
+
+            References
+            ----------
+            Fawcett, T. An Introduction to ROC Analysis. Pattern Recognition Letters 2006, 27, 861−874
 
         """
 

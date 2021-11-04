@@ -22,23 +22,27 @@ class LigandBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
-        List of pharmacophoric elements
+    elements : list of openpharmacophore.PharamacoporicPoint
+        List of pharmacophoric points.
 
-    ligands : a list of rdkit.Chem.rdchem.Mol
-        Set of ligands from which this pharmacophore was extracted.
+    ligands : list of rdkit.Chem.Mol
+        Set of ligands from which the pharmacophore will be derived.
+
+    feat_def : dict, optional
+        A custom smarts feature definition that will be used to obtain the pharmacophoric
+        points.
 
     Attributes
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacoforic_elements`
-        List of pharmacophoric elements
+    elements : list of openpharmacophore.PharamacophoricPoint
+        List of pharmacophoric points.
 
     n_elements : int
-        Number of pharmacophoric elements
+        Number of pharmacophoric points.
 
     ligands : list of rdkit.Chem.mol
-        Lis of ligands from which this pharmacophore was extracted.
+        List of ligands from which this pharmacophore was extracted.
 
     """
 
@@ -52,20 +56,24 @@ class LigandBasedPharmacophore(Pharmacophore):
             
             Parameters
             ----------
-            n_per_row: int 
-                number of ligands that will be drawn in each row.
+            n_per_row : int 
+                Number of ligands that will be drawn in each row.
+            
+            lig_indices : list of int, optional
+                A list with the indices of the ligands that will be drawn. If none is passed
+                all ligands will be drawn.
 
-            sub_img_size: 2-tuple of int, optional, default=(250,200)
+            sub_img_size : 2-tuple of int, default=(250,200)
                 The size of each subimage (each ligand drawing). The final image size may
                 vary depending on the number per rows.
 
-            legends: list of str, optional
+            legends : list of str, optional
                 The legends of the ligands.
 
             Returns
             -------
-            bytes: 
-                The image in bytes. To visualize use a function shuch as Image from IPython.display.
+            bytes : 
+                The image in bytes. To visualize use a function such as Image from IPython.display.
         """
         if len(self.ligands) == 0:
             raise OpenPharmacophoreException("This pharmacophore contains no ligands. Cannot be drawn.")
@@ -154,27 +162,27 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         
     @classmethod
-    def from_ligand_list(cls, ligands, method, radius=1, feat_list=None, feat_def=None):
+    def from_ligand_list(cls, ligands, method, radius=1.0, feat_list=None, feat_def=None):
         """ Class Method to derive a pharmacophore model from a list of rdkit molecules. 
 
         Parameters
         ----------
-        ligands: :obj: list of rdkit.Chem.rdchem.Mol
+        ligands : list of rdkit.Chem.rdchem.Mol
             List of ligands
         
-        method: str
+        method : str
             Name of method or algorithm to derive the ligand based pharmacophore.
 
-        radius: float (optional)
-            Lenght of the radius of the parmacohporic points (Default: 1)
+        radius : float, default=1.0
+            The radius in angstroms of the parmacohporic points.
         
-        feat_list: list of str (optional)
+        feat_list : list of str, optional
             List of features that will be used to derive the pharmacophore. If None is passed the
             default features will be used: donors, acceptors, aromatic rings, hydrophobics, positive
             and negative charges.
         
-        feat_def: dict (optional)
-            Definitions of the pharmacophoric points. Dictionary which keys are SMARTS strings and 
+        feat_def : dict, optional
+            Definitions of the pharmacophoric features. Dictionary which keys are SMARTS strings and 
             values are feature names. If None is passed the default rdkit definition will be used.
 
         Note
@@ -201,21 +209,23 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         Parameters
         ----------
-        file_name: str
+        file_name : str
             Name or path of the file containing the ligands.
         
-        method: str
+        method : str
             Name of method or algorithm to compute the ligand based pharmacophore.
 
-        radius: int (optional)
-            Lenght of the radius of the parmacohporic points. (Default: 1)
+        radius : float, default=1.0
+            The radius in angstroms of the parmacohporic points.
         
-        feat_list: list of str (optional)
-            List of features that will be used to compute the pharmacophore.
+        feat_list : list of str, optional
+            List of features that will be used to derive the pharmacophore. If None is passed the
+            default features will be used: donors, acceptors, aromatic rings, hydrophobics, positive
+            and negative charges.
         
-        feat_def: dict
-            Definitions of the pharmacophoric points. 
-            Dictionary which keys are SMARTS strings and values are feature names.
+        feat_def : dict, optional
+            Definitions of the pharmacophoric features. Dictionary which keys are SMARTS strings and 
+            values are feature names. If None is passed the default rdkit definition will be used.
 
         Note
         -------
@@ -248,16 +258,14 @@ class LigandBasedPharmacophore(Pharmacophore):
         return cls(elements=tmp_pharmacophore.elements, ligands=tmp_pharmacophore.ligands, feat_def=feat_def)
 
     def show(self, show_ligands=True, palette="openpharmacophore"):
-        """Showing the pharmacophore model together with the set of ligands from with it was
-        extracted as a new view (NGLWidget) from NGLView.
+        """ Visualize the pharmacophore model. 
 
         Parameters
         ----------
-        show_ligands: bool (Default: True)
-            If true the ligands associated to the pharmacophore molecular system are added 
-            to the view. 
+        show_ligands: bool, default=True
+            If true the ligands associated to the pharmacophore molecular system will be shown. 
 
-        palette: :obj: `str`, dict
+        palette: str or dict, optional
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns

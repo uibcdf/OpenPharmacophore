@@ -8,7 +8,7 @@ method to extract color codes from these palettes or from a user defined one as 
 
 Attributes
 ----------
-openpharmacophore: dict
+openpharmacophore : dict
     Native color palette.
 
 Todo
@@ -30,32 +30,18 @@ openpharmacophore = {
 }
 
 def get_color_from_palette_for_feature(feature_name, color_palette='openpharmacophore'):
-
-    """Getting the color code of a pharmacophoric feature from a color palette.
+    """ Get the color code of a pharmacophoric feature from a color palette.
 
     A color palette is a Python dictionary where keys are the farmacophoric feature names and
     the corresponding values are hexadecimal or normalized RGB color codes. For example:
 
-        my_color_palette={
-            'positive charge': '#E1B07E',
-            'negative charge': '#A5F8D3',
-            'hb acceptor': '#F13030',
-            'hb donor': '#5B618A',
-            'included volume': '#109648',
-            'excluded volume': '#14110F',
-            'hydrophobicity': '#9EADC8',
-            'aromatic ring': '#D6D84F',
-        }
-
-    Some colorpalettes are defined already in the module
-    `openpharmacophore.pharmacophoric_elements.features.color_palettes`.
-
     Parameters
     ----------
-    feature_name: str
+    feature_name : str
         Feature name: 'positive charge', 'negative charge', 'hb acceptor', 'hb donor',
         'included volume', 'excluded volume', 'hydrophobicity' or 'aromatic ring'.
-    color_palette: :obj: `str`, dict
+        
+    color_palette: str or dict
         Dictionary or color palette name predefined already in the module `openpharmacophore.pharmacophoric_elements.features.color_palettes`. (Default: 'openpharmacophore')
 
     Examples

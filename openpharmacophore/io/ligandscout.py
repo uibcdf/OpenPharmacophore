@@ -5,21 +5,17 @@ import pyunitwizard as puw
 import numpy as np
 
 def from_ligandscout(file_name): 
-
-    """ Loads a pharmacophore from a ligandscout pml file
+    """ Loads a pharmacophore from a ligandscout pml file.
 
         Parameters
         ----------
-        pharmacophore_file: str
-            name of the file containing the pharmacophore
-
-        load_mol_sys: bool
-            If true loads the molecular system associated to the pharmacophore (Default: False)
+        pharmacophore_file : str
+            Name of the file containing the pharmacophore.
 
         Returns
         -------
-        points: list of openpharmacophore.pharmacophoric_elements
-            A list of pharmacophoric elements
+        points : list of openpharmacophore.PharmacophoricPoints
+            A list of pharmacophoric elements.
         
     """
     tree = ET.parse(file_name)
@@ -111,16 +107,17 @@ def from_ligandscout(file_name):
 
     return points
 
-def to_ligandscout(pharmacophore, file_name, **kwargs):
+def to_ligandscout(pharmacophore, file_name):
     """ Save a pharmacophore as a ligandscout file (pml file)
 
         Parameters
         ----------
-        pharmacophore: obj: openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file
+        pharmacophore : openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file. Can be a Pharmacophore, 
+            LigandBasedPharmacophore or StructureBasedPharmaophore.
 
-        file_name: str
-            Name of the file that will contain the pharmacophore
+        file_name : str
+            Name of the file that will contain the pharmacophore.
 
         Note
         ----
@@ -134,15 +131,12 @@ def _ligandscout_xml_tree(pharmacophore):
 
         Parameters
         ----------
-        pharmacophore: obj: openpharmacophore.Pharmacophore
+        pharmacophore : openpharmacophore.Pharmacophore
             Pharmacophore object that will be saved to a file.
-
-        file_name: str
-            Name of the file that will contain the pharmacophore.
 
         Returns
         -------
-        tree: xml.etree.ElementTree
+        tree : xml.etree.ElementTree
             The element tree.
 
     """

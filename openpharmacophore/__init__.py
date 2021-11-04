@@ -1,6 +1,6 @@
 """
 OpenPharmacophore
-This must be a short description of the project
+A library to work with pharmacophores.
 """
 
 # Handle versioneer
@@ -16,10 +16,10 @@ __github_issues_web__ = __github_web__ + '/issues'
 
 # Add imports here
 from ._pyunitwizard import puw as _puw
+from .pharmacophoric_point import PharmacophoricPoint
 from .pharmacophore import Pharmacophore
 from .ligand_based import LigandBasedPharmacophore
 from .structured_based import StructuredBasedPharmacophore
-from .pharmacophoric_point import PharmacophoricPoint
 from .screening.screening import VirtualScreening
 from .screening.retrospective import RetrospectiveScreening
 from .dynophore import Dynophore as Dynophore

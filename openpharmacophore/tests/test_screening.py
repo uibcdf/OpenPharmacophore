@@ -1,14 +1,16 @@
-from openpharmacophore.pharmacophore import Pharmacophore
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.screening import screening, screening2D, screening3D
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import Pharmacophore
+from openpharmacophore import VirtualScreening
 import numpy as np
 import pytest
 import pyunitwizard as puw
 import pandas as pd
 from rdkit import Chem
+from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
+from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
 import os
 
-### Tests for VirtrualScreening base class ###
+### Tests for VitualScreening class with s standard pharmacophore###
 
 @pytest.fixture
 def mock_screening_results():
@@ -16,7 +18,7 @@ def mock_screening_results():
         with fake attributes.
     """
     pharmacophore = Pharmacophore()
-    screener = screening.VirtualScreening(pharmacophore)
+    screener = VirtualScreening(pharmacophore)
     screener.n_molecules = 60000
     screener.n_matches = 3
     screener.n_fails = 60000 - 3
@@ -94,7 +96,7 @@ def test_get__screening_results(form, mock_screening_results):
 ])
 def test_load_molecules_file(file_name):
     pharmacophore = Pharmacophore()
-    screener = screening.VirtualScreening(pharmacophore)
+    screener = VirtualScreening(pharmacophore)
     file_path = os.path.join("./openpharmacophore/data/ligands", file_name)
     
     if file_name.endswith(".smi"):
@@ -108,7 +110,7 @@ def test_load_molecules_file(file_name):
     for lig in ligands:
         assert isinstance(lig, Chem.Mol)
 
-### Tests for VirtrualScreening3D class ###
+
 def test_screen_db_from_dir_3D():
 
     elements = [
@@ -134,7 +136,7 @@ def test_screen_db_from_dir_3D():
 
     file_path = "./openpharmacophore/data/ligands/mols.smi"
 
-    screener = screening3D.VirtualScreening3D(pharmacophore)
+    screener = VirtualScreening(pharmacophore)
     screener.screen_db_from_dir(file_path, titleLine=False)
 
     assert screener.n_molecules == 5
@@ -145,12 +147,15 @@ def test_screen_db_from_dir_3D():
         assert id is None
         assert isinstance(mol, Chem.Mol)
 
-### Tests for VirtrualScreening2D class ###
+### Tests for VirtrualScreening class with a fingerprint###
 def test_screen_db_from_dir_2D():
     file_path = "./openpharmacophore/data/ligands/mols.smi"
     mol = Chem.MolFromSmiles("Cc1cccc(c2n[nH]cc2c3ccc4ncccc4n3)n1")
 
-    screener = screening2D.VirtualScreening2D(mol, similarity="tanimoto", sim_cutoff=0.6)
+    factory = Gobbi_Pharm2D.factory
+    fingerprint = Gen2DFingerprint(mol, factory)
+
+    screener = VirtualScreening(fingerprint, similarity="tanimoto", sim_cutoff=0.6)
     screener.screen_db_from_dir(file_path, titleLine=False)
     assert screener.n_molecules == 5
     assert screener.n_matches == 1

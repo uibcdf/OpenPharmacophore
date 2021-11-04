@@ -99,13 +99,17 @@ class VirtualScreening():
        self._file_queue = Queue()
     
     def get_screening_results(self, form="dataframe"):
-        """ Get the results of the screen on a dataframe or a
-            dictionaty
+        """ Get the results of the screen on a dataframe or a dictionaty
+
+            Parameters
+            ---------
+            form : {"dataframe", "dict"}
+                Whether to return a dataframe or a dictionary.
 
             Returns
             -------
-            pandas.DataFrame
-                dataframe with the results information.
+            pandas.DataFrame or dict
+                Dataframe or dictionary with the results information.
         """
         # Values of the scoring that was used for screening. Examples: SSD, 
         # tanimoto similarity
@@ -129,8 +133,10 @@ class VirtualScreening():
 
         if form == "dict":
             return results
+        elif form == "dataframe":
+            return pd.DataFrame().from_dict(results)
         else:
-            return pd.DataFrame().from_dict(results) 
+            raise ValueError("form must be dataframe or dict")
 
     def print_report(self):
         """ Prints a summary report of the screening.
@@ -139,13 +145,14 @@ class VirtualScreening():
         print(report_str)
 
     def save_results_to_file(self, file_name):
-        """Save the results of the screening to a file. The file contains the 
-           matched molecules ids, smiles and SSD value. File can be saved as 
-           csv or json.
+        """Save the results of the screening to a file. 
+        
+           The file contains the matched molecules ids, smiles and SSD value. 
+           File can be saved as csv or json.
 
            Parameters
            ----------
-           file_name: str
+           file_name : str
                 Name of the file
 
            Notes
@@ -164,26 +171,31 @@ class VirtualScreening():
         else:
             raise NotImplementedError
 
-    def screen_ZINC(self, subset, mw_range=None, logp_range=None, download_path=None):
-        """ Screen a subset of ZINC database. The subset can be one of ZINC predefined subsets.
-            Alternatively a subset with a custom molecular weight and logP range can be screened.
+    def screen_ZINC(self, subset, mw_range=None, logp_range=None, download_path=""):
+        """ Screen a subset of ZINC database. 
+        
+            The subset can be one of ZINC predefined subsets. Alternatively a subset with a custom molecular 
+            weight and logP range can be screened.
             
             Parameters
             ---------
-            subset: str
-                Name of the predifined ZINC subset to be downloaded. Available subsets are "Drug-Like",
-                "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
-                and "Shards".
+            subset : {"Drug-Like", "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", 
+                    "Big-n-Greasy", "Shards"}
+                Name of the predifined ZINC subset to be downloaded. 
             
-            mw_range: 2-tuple of float, (optional) default is None
+            mw_range : 2-tuple of float, optional 
                 Range of molecular weight for the downloaded molecules.
         
-            logp_range: 2-tuple of float, (optional) default is None
+            logp_range : 2-tuple of float, optional
                 Range of logP for the downloaded molecules.
 
-            download_path: bool, (optional), default is None
+            download_path : str, default="" 
                 Directory where files will be saved. If None, files will be deleted 
                 after processing.
+            
+            Note
+            -----
+            If mw_range argument is passed, logp_range must also be passed.
 
         """
         self.db = "ZINC"
@@ -219,20 +231,18 @@ class VirtualScreening():
         
     def screen_db_from_dir(self, path, file_extensions=None, **kwargs):
         """ Screen a database of molecules contained in one or more files. 
-            Format can be smi, mol2, sdf.
 
-            Parmeters
-            ---------
-            path: str
+            Supported file formats can be smi, mol2, sdf.
+
+            Parameters
+            ----------
+            path : str
                 The path to the file or directory that contains the molecules.
 
-            file_extensions: list of str (optional)
+            file_extensions : list of str, optional
                 A list of file extensions that will be searched for if a directory is passed.
                 The default behavior is to load all valid file extensions.
 
-            Notes
-            --------
-            It does not return anything. The parameters of the VirtualScreening object are updated accordingly. 
         """
         if not file_extensions:
             file_extensions = ["smi", "mol2", "sdf"]
@@ -284,10 +294,10 @@ class VirtualScreening():
            
            Parameters
            ----------
-           url: str
+           url : str
                 URL of the file that will be downloaded.
 
-           download_path: str
+           download_path : str
                 Path where the file will be stored
         """
         res = requests.get(url, allow_redirects=True)
@@ -304,8 +314,16 @@ class VirtualScreening():
         return file_path
 
     def download_zinc_subset(self, urls, download_path):
-        """ Download a subset from ZINC database."""
-    
+        """ Download a subset from ZINC database.
+
+           Parameters
+           ----------
+           urls : list of str
+                List with the URLs of the files that will be downloaded.
+
+           download_path : str
+                Path where the file will be stored
+        """
         print("Downloading from ZINC...")
         files = []
         file_path = self._download_zinc_file(urls[0], download_path)
@@ -326,23 +344,21 @@ class VirtualScreening():
 
         Parameters
         ----------
-        molecules: list of rdkit.Chem.mol
+        molecules : list of rdkit.Chem.mol
             List of molecules to align.
 
-        verbose: int
-            Level of verbosity
+        verbose : int
+            Level of verbosity.
 
         sort : bool
-            If true, the list of matcehd molecules will be sorted in ascending order.
+            If true, the list of matched molecules will be sorted in ascending order.
         
         pbar : bool
-            If true a progress bar will be displayed. 
+            If true, a progress bar will be displayed. 
         
         Notes
         -------
-        Does not return anything. The attributes matches, n_matches,
-        and n_fails are updated.
-
+        Does not return anything. The attributes matches, n_matches, and n_fails are updated.
         """
         self.n_molecules += len(molecules)
 
@@ -441,11 +457,11 @@ class VirtualScreening():
             If true, the list of matcehd molecules will be sorted in ascending order.
         
         pbar : bool
-            If true a progress bar will be displayed. 
+            If true, a progress bar will be displayed. 
         
         Notes
         -----
-        Does not return anything. Attributes are updated accordingly.
+        Does not return anything. The attributes matches, n_matches, and n_fails are updated.
 
         """
         if self.similiarity_fn == "tanimoto":
@@ -487,15 +503,17 @@ class VirtualScreening():
                 progress_bar.update()
 
     def _get_pharmacophore_fingerprint(self, molecule):
-        """ Compute pharmacophore fingreprint for a single molecule
+        """ Compute a pharmacophore fingerprint for a single molecule
 
             Parameters
             ----------
-            molecule: rdkit.Chem.mol
+            molecule : rdkit.Chem.mol
+                The molecule whose pharmacophore fingerprint will be computed.
             
             Returns
             -------
-            fingerprint: rdkit.DataStructs.SparseBitVect
+            fingerprint : rdkit.DataStructs.SparseBitVect
+                The pharmacophoric fingerprint.
         """
         factory = Gobbi_Pharm2D.factory
         fingerprint = Gen2DFingerprint(molecule, factory)
@@ -506,8 +524,8 @@ class VirtualScreening():
             
             Returns
             -------
-            report_str: str
-                The report in string form
+            report_str : str
+                The report in string form.
         """
         report_str = "Virtual Screening Results\n"
         report_str += "-------------------------\n"
@@ -552,18 +570,16 @@ class VirtualScreening():
         return report_str
 
     def _load_molecules_file(self, file_name, **kwargs):
-        """
-            Load a file of molecules of any format and return a list of 
-            rdkit molecules.
+        """ Load a file of molecules into a list of rdkit molecules.
 
             Parameters
             ----------
-            file_name: str
+            file_name : str
                 Name of the file that will be loaded
             
             Returns
             -------
-            A list of rdkit.Chem.mol
+            list of rdkit.Chem.mol
         """
         fextension = file_name.split(".")[-1]
         
@@ -594,17 +610,18 @@ class VirtualScreening():
         return ligands
     
     def _process_files(self, delete_files, n_files):
-        """
-            For each downloaded file, converts it init a list of rdkit molecules
+        """ Process a file queue. 
+
+            For each downloaded file, converts it into a list of rdkit molecules
             and then applies the screening function to each. 
 
             Parameters
             ----------
-            delete_files: bool
+            delete_files : bool
                 If true, files will be deleted after processing.
 
-            n_files: int
-                Number of files that will be downloaded
+            n_files : int
+                Number of files that will be downloaded.
 
         """
         # Sleep a little so that the download bar appears first.
@@ -625,10 +642,10 @@ class ZincMultiScreening():
     
         Parameters
         ----------
-        screeners: list of openpharmacophore.VirtualScreening3D
+        screeners: list of openpharmacophore.VirtualScreening
             A list with virtual screening objects.
         
-        download_path: str, optional, default=""
+        download_path: str, default=""
             The path where the files will be saved. If nothing is passed files will
             be deleted afterwards. 
     """
@@ -650,6 +667,21 @@ class ZincMultiScreening():
         return self
 
     def screen(self, subset="Lead-Like", mw_range=None, logp_range=None):
+        """ Screen the ZINC subset with each pharmacophore
+        
+            Parameters
+            ----------
+            subset : {"Drug-Like", "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", 
+                    "Big-n-Greasy", "Shards"}
+                Name of the predifined ZINC subset to be downloaded. 
+            
+            mw_range : 2-tuple of float, optional 
+                Range of molecular weight for the downloaded molecules.
+        
+            logp_range : 2-tuple of float, optional
+                Range of logP for the downloaded molecules.
+
+        """
         for ii, screen in enumerate(self.screeners):
             print(f"Screening with pharmacophore {ii + 1}")
             if self.download:

@@ -8,22 +8,23 @@ def read_pharmagist(file_name, pharmacophore_index=None):
 
         Parameters
         ----------
-        file_name: str
+        file_name : str
             Name of the file containing the pharmacophore.
 
-        pharmacophore_index: int, (optional)
+        pharmacophore_index : int, optional
             If given, returns the pharmacophore which index is provided. 
-            Else, all the pharmcophores from the file will be returned. (Default: None)
+            Else, all the pharmcophores from the file will be returned.
 
         Returns
         -------
-        pharmacophores: list of openpharmacophore.ligand_based.LigandBasedPharmacophores
+        pharmacophores : list of openpharmacophore.LigandBasedPharmacophores
             A list of ligand based pharmacophores.
         
-        elements: list of openpharmacophore.pharmacophoric_elements
+        elements : list of openpharmacophore.PharmacophoricPoint
             A list of pharmacophoric points from a single pharmacophore.
     """
-    pharmagist_element_name = { # dictionary to map pharmagist feature names to openpharmacophore elements
+    # dictionary to map pharmagist feature names to openpharmacophore elements
+    pharmagist_element_name = { 
         "AR": "aromatic ring",
         "HYD": "hydrophobicity",
         "ACC": "hb acceptor",
@@ -66,10 +67,10 @@ def to_pharmagist(pharmacophores, file_name):
 
         Parameters
         ----------
-        pharmacophores: list of openpharmacophore.Pharmacophore or an openpharmacophore.Pharmacophore
-            Pharmacophore or pharmacophores that will be saved
+        pharmacophores : list of openpharmacophore.Pharmacophore or openpharmacophore.Pharmacophore
+            Pharmacophore or pharmacophores that will be saved.
 
-        file_name: str
+        file_name : str
             Name of the file containing the pharmacophore.
 
         Notes
@@ -85,15 +86,15 @@ def _pharmagist_file_info(pharmacophores):
 
         Parameters
         ----------
-        pharmacophores: list of openpharmacophore.Pharmacophore or an openpharmacophore.Pharmacophore
+        pharmacophores : list of openpharmacophore.Pharmacophore or openpharmacophore.Pharmacophore
             Pharmacophore or pharmacophores that will be saved
 
         Returns
         -------
-        doc: list of list
+        doc : list of list
             List where each sublist contains a pharmacophore represented as a mol2 string.
     """
-    pharmagist_element_name = { # dictionary to map openphamracohpore feature names to pharmagist 
+    pharmagist_element_name = { 
         "aromatic ring": "AR ",
         "hydrophobicity": "HYD",
         "hb acceptor": "ACC",

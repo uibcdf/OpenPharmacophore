@@ -8,29 +8,30 @@ import string
 def get_zinc_urls(subset="Lead-Like", 
                   mw_range=None, logp_range=None,
                   file_format="smi"):
-    """ Get urls for a set of molecules of the ZINC database. If filef_format is 
-        smi, the 2D set of ZINC will be used. If it is sdf the 3D set will be
-        used.
+    """ Get urls for a set of molecules of the ZINC database. 
+    
+        If file_format is smi, the 2D set of ZINC will be used. If it is sdf 
+        the 3D set will be used.
 
         Parameters
         ----------
-        subset: str
+        subset : str
             Name of the ZINC subset to be downloaded. Available subsets are "Drug-Like",
             "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
             and "Shards".
         
-        mw_range: 2-tuple of float
+        mw_range : 2-tuple of float
             Range of molecular weight for the downloaded molecules.
         
-        logp_range: 2-tuple of float
+        logp_range : 2-tuple of float
             Range of logP for the downloaded molecules.
         
-        file_format: str
+        file_format : str
             Format of the files that will be downloaded. Can be .smi or .sdf.
 
         Returns
         -------
-        url_list: list of str
+        url_list : list of str
             A list with the urls
         """
     if (mw_range is None or logp_range is None) and subset is None:
@@ -123,23 +124,23 @@ def discretize_values(value, bins, name, lower=True):
 
     Parameters
     ----------
-    value: int
+    value : int
         Value that will be disctretized.
 
-    bins: list of int
+    bins : list of int
         List containing the bins to discretize the value
     
-    name: str
+    name : str
         Name of the variable that will be discretized
     
-    lower: bool
+    lower : bool
         If True the lower bound will be assigned to value.
         Else the upper bound will be assigned.
 
     Returns
     -------
-    value: double
-        THe discretized value
+    value : double
+        The discretized value
 
     """
     for i in range(len(bins) - 1):
@@ -156,9 +157,13 @@ def discretize_values(value, bins, name, lower=True):
     return value
 
 def get_ZINC3D_url_list(tranches):
-    """Retrieves urls that matches the desired tranches given by
-       molecular weight and logp range for ZINC 3D. URLS are read 
-       from a file. 
+    """ Retrieves urls that matches the desired tranches given by
+        molecular weight and logp range for ZINC 3D. URLS are read 
+        from a file. 
+
+        tranches : list of str
+            List with the values of each tranch.
+
     """
     zinc_urls_file = pkg_resources.resource_filename('openpharmacophore',
                     "./data/zinc3d.uri")
@@ -175,31 +180,31 @@ def get_ZINC3D_url_list(tranches):
 
 
 def download_ZINC(download_path, subset, mw_range=None, logp_range=None, file_format="smi"):
-    """
-    Download a subset from ZINC database.
+    """ Download a subset from ZINC database.
 
-    Parmeters
-    ---------
-    subset: str 
+        Parameters
+        ---------
+        subset : str 
             Name of the ZINC subset to be downloaded. Available subsets are "Drug-Like",
             "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", "Big-n-Greasy"
             and "Shards".
         
-    mw_range: 2-tuple of float
-        Range of molecular weight for the downloaded molecules.
-    
-    logp_range: 2-tuple of float
-        Range of logP for the downloaded molecules.
+        mw_range : 2-tuple of float
+            Range of molecular weight for the downloaded molecules.
+        
+        logp_range : 2-tuple of float
+            Range of logP for the downloaded molecules.
 
-    download_path: str
+        download_path : str
             Name of the path where the files will be downloaded.
-    
-    file_format: str
-            Format of the files that will be downloaded. Can be .smi or .sdf.
+        
+        file_format : str
+                Format of the files that will be downloaded. Can be .smi or .sdf.
 
-    Notes
-    -----
-    Nothing is returned. Files are downloaded.
+        Notes
+        -----
+        Nothing is returned. Files are downloaded.
+
     """
     url_list = get_zinc_urls(subset, mw_range=mw_range, logp_range=logp_range, file_format=file_format)
     

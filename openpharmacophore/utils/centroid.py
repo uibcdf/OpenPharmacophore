@@ -7,19 +7,19 @@ def feature_centroid(molecule, atom_indxs, conformer_idx):
 
         Parameters
         ----------
-        molecule: :obj: rdkit.Chem.rdchem.Mol
+        molecule : rdkit.Chem.Mol
                 Molecule that contains the feature which centroid will be computed
 
-        atom_indxs: tuple of int
+        atom_indxs : tuple of int
                 Indices of the atoms that belong to the feature
 
-        conformer_idx: int 
+        conformer_idx : int 
                 Index of the conformer for which the feature centroid will be computed
 
         Returns
         -------
-        centroid: numpy.ndarray; shape: (3, )
-            3D coordinates of the centroid of the feature.
+        centroid : numpy.ndarray 
+            Array of shape (3, ) with the coordinates of the centroid of the feature.
 
     """
     

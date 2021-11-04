@@ -4,17 +4,16 @@ import re
 import datetime
 
 def from_moe(file_name):
-
     """ Loads a pharmacophore from a MOE ph4 file.
 
         Parameters
         ----------
-        file_name: str
+        file_name : str
             Name of the file containing the pharmacophore.
 
         Returns
         -------
-        points: list of openpharmacophore.pharmacophoric_elements
+        points : list of openpharmacophore.PharmacophoricPoint
             A list of pharmacophoric points.
     """
     moe_to_oph = {
@@ -112,15 +111,16 @@ def to_moe(pharmacophore, file_name):
 
         Parameters
         ----------
-        pharmacophore: obj: openpharmacophore.strucutured_based.StructuredBasedPharmacophore
-            Pharmacophore object that will be saved to a file
+        pharmacophore: openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file. Can be a Pharmacophore, 
+            LigandBasedPharmacophore or StructureBasedPharmaophore.
 
         file_name: str
             Name of the file containing the pharmacophore.
 
-         Note
+        Note
         ----
-            Nothing is returned. A new file is written.
+        Nothing is returned. A new file is written.
     """
     ph4_str = _moe_ph4_string(pharmacophore)
     with open(file_name, "w") as f:
@@ -131,15 +131,15 @@ def _moe_ph4_string(pharmacophore):
 
         Parameters
         ----------
-        pharmacophore: obj: openpharmacophore.Pharmacophore
+        pharmacophore : Pharmacophore
             Pharmacophore object that will be saved to a file.
 
-        file_name: str
+        file_name : str
             Name of the file containing the pharmacophore.
 
         Returns
         ------
-        ph4_str: str
+        ph4_str : str
             The pharmacophore string.
     """
     oph_to_moe = {
