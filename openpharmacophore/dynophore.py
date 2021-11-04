@@ -25,7 +25,7 @@ class Dynophore():
     Parameters
     ----------
 
-    trajectory : 
+    trajectory : str or mdtraj.trajectory or MDAnalysis.universe
         A str with the file path containing the trajectory, an mdtraj trajectory object, 
         or an MDAnalysis universe.
 
@@ -33,10 +33,9 @@ class Dynophore():
     ----------
 
     pharmacophores : list of openpharmacophore.StructuredBasedPharmacophore
-        List with pharmacophores for each relevant frame in the
-        trajectory. 
+        List with pharmacophores for each relevant frame in the trajectory. 
 
-    pharmacophore_indices: list of int
+    pharmacophore_indices : list of int
         Indices of the frame of the trajectory from which the pharmacophores were extracted.
         The index of each element of the list corresponds to the one in pharmacophores list.
 
@@ -61,7 +60,7 @@ class Dynophore():
         else:
             raise TypeError("Trajectory must be of type string, mdtraj.Trajectory or MdAnalysis.Universe")
         
-        self._n_frames = trajectory.n_frames
+        self._n_frames = self._trajectory.n_frames
         self._saved_ligand = False
         self._averaged_coords = False
 
@@ -69,11 +68,17 @@ class Dynophore():
         """ Get a list of pharmacophore models from a trajectory using the common hits approach
             method.
 
+            Notes
+            -----
+
             This method is based on obtaining a list of representative pharmacophore models from a 
             trajectory and then validate and score them using virtual screening. The best performant
             pharmacophore models are then returned.
 
-            See: Wieder, Marcus, Arthur Garon, Ugo Perricone, Stefan Boresch, Thomas Seidel, Anna Maria Almerico, 
+            References
+            ----------
+
+            [1] Wieder, Marcus, Arthur Garon, Ugo Perricone, Stefan Boresch, Thomas Seidel, Anna Maria Almerico, 
             and Thierry Langer. "Common hits approach: combining pharmacophore modeling and molecular dynamics 
             simulations." Journal of chemical information and modeling 57, no. 2 (2017): 365-385      
 
@@ -94,17 +99,18 @@ class Dynophore():
 
             Parameters
             ----------
-            file_name: str
-                File where the drawing will be saved. Must be a png file.
+            file_name : str
+                Name or path og the file where the drawing will be saved. Must be a png file.
 
-            img_size: 2-tuple of int, optional, default=(500,500)
-                The size of the image
+            img_size : 2-tuple of int, optional 
+                The size of the image (default=(500,500))
 
-            legend: str, optional
+            legend : str, optional
                 Image legend.
 
-            freq_threshold: double betwwn 0.0 and 1.0, optiona, default=0.2
-                The minimun frequency of a pharmacophoric point to be drawn.  
+            freq_threshold : double , optional
+                The minimun frequency of a pharmacophoric point to be drawn. Number
+                between 0.0 and 1.0 (default=0.2). 
         """
         if freq_threshold < 0.0 or freq_threshold > 1.0:
             raise ValueError("Freqency threshold must be a value between 0 and 1")    
@@ -168,11 +174,13 @@ class Dynophore():
 
     def first_and_last_pharmacophore(self):
         """ Derive a pharmacophore model for the first and last frames of a trajectory.
-        
-            See: Wieder, Marcus, Ugo Perricone, Thomas Seidel, Stefan Boresch, and Thierry Langer. 
-                 "Comparing pharmacophore models derived from crystal structures and from molecular 
-                 dynamics simulations." Monatshefte für Chemie-Chemical Monthly 147, no. 3 (2016): 
-                 553-563.
+
+            References
+            ----------
+            [1] Wieder, Marcus, Ugo Perricone, Thomas Seidel, Stefan Boresch, and Thierry Langer. 
+            "Comparing pharmacophore models derived from crystal structures and from molecular 
+            dynamics simulations." Monatshefte für Chemie-Chemical Monthly 147, no. 3 (2016): 
+            553-563.
         """
         if self._trajectory_type == "mdt":
             get_pharmacophore = self._pharmacophore_from_mdtraj
@@ -193,9 +201,9 @@ class Dynophore():
         """ Derive a unique pharmacophore model with the pharmacophoric points
             that have a frequency >= to threshold.
 
-            Parmeters
+            Parameters
             ---------
-            threshold: double
+            threshold : double
                 The value of frequency from which points are considered part of
                 the pharmacophore model.
 
@@ -204,9 +212,11 @@ class Dynophore():
             openpharmcophore.Pharmacophore
                 Pharmacophore model with the unique pharmacophoric points.
 
-            See: Wieder, Marcus, Ugo Perricone, Thomas Seidel, and Thierry Langer. "Pharmacophore models 
-                derived from molecular dynamics simulations of protein-ligand complexes: A case study." 
-                Natural product communications 11, no. 10 (2016): 1934578X1601101019.
+            References
+            ----------
+            [1] Wieder, Marcus, Ugo Perricone, Thomas Seidel, and Thierry Langer. "Pharmacophore models 
+            derived from molecular dynamics simulations of protein-ligand complexes: A case study." 
+            Natural product communications 11, no. 10 (2016): 1934578X1601101019.
         """
         if threshold < 0 or threshold > 1:
             raise ValueError("Threshold must be a number between 0 and 1")
@@ -241,7 +251,7 @@ class Dynophore():
 
             Parameters
             ----------
-            frames: list of int
+            frames : list of int
                 Indices of the frames for which pharmacophores will be derived.
 
         """
@@ -286,21 +296,22 @@ class Dynophore():
         return frequency
 
     def point_frequency_plot(self, threshold=0.0, n_bins=10, ax=None):
-        """ Plot of pharmacophoric points frequency vs time. Each pharmacophoric
-            point will appear as a different line in the plot.
+        """ Plot of pharmacophoric points frequency vs time. 
+        
+            Each pharmacophoric point will appear as a different line in the plot.
 
             Parameters
             ----------
-            ax: matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
-                An axes object where the plot will be drawn.
-
-            threshold: double (Defaulf = 0)
+            threshold : double, default=0.0
                 The value of overall frequency from which points will form part of the 
                 plot. If there are a lot of points with really low frequency, setting
                 the threshold value can help with visualization.
 
-            n_bins: int (Default = 10)
+            n_bins : int, default=10
                 Number of bins to discretize the timesteps.            
+
+            ax : matplotlib.axes._subplots.AxesSubplot, optional.
+                An axes object where the plot will be drawn.
         """
         if len(self.unique_pharmacophoric_points) == 0 or not self._averaged_coords:
             self._get_unique_pharmacophoric_points(avg_coordinates=True)
@@ -335,17 +346,29 @@ class Dynophore():
         return ax
     
     def representative_pharmacophore_models(self):
-        """ Get all representative pharmacophore models in a trajectory. That is the pharmacophore
-            models that have the same pharmacophoric points, considering only feature type and the 
-            atoms to which this points belong to. Coordinates are not taken into account.
+        """ Get all representative pharmacophore models in a trajectory. 
+            
+            Get pharmacophore models that have the same pharmacophoric points, 
+
+            Returns
+            -------
+            rpms : list of openpharmacophore.StructuredBasedPharmacophore
+                The representative pharmacophore models
+
+            Notes
+            -----
+            Pharmacophoric points are considered equal based only  on feature type and the atoms to 
+            which this points belong to. Coordinates are not taken into account.
 
             The coordinates of the pharmacophoric points are those that belong to the median energy of
             the ligand.
 
-            Returns
-            -------
-            rpms: list of openpharmacophore.StructuredBasedPharmacophore
-                The representative pharmacophore models
+            References
+            ----------
+            [1] Wieder, Marcus, Arthur Garon, Ugo Perricone, Stefan Boresch, Thomas Seidel, Anna Maria Almerico, 
+            and Thierry Langer. "Common hits approach: combining pharmacophore modeling and molecular dynamics 
+            simulations." Journal of chemical information and modeling 57, no. 2 (2017): 365-385   
+            
         """
         if len(self.unique_pharmacophoric_points) == 0 or self._averaged_coords:
             self._get_unique_pharmacophoric_points(avg_coordinates=False)
@@ -385,14 +408,14 @@ class Dynophore():
 
             Parameters
             ----------
-            rpms_indices: list of list of int
+            rpms_indices : list of list of int
                 A list where each sublist contains the indices of the representative pharmacophore
                 model. This indices correspond to the attribute pharmacophores of the Dynophore
                 class.
             
             Returns
             -------
-            rpms: list of openpharmacophore.StructuredBasedPharmacophore
+            rpms : list of openpharmacophore.StructuredBasedPharmacophore
                 The representative pharmacophore models
         """
         rpms = []
@@ -413,16 +436,17 @@ class Dynophore():
 
             Parameters
             ----------
-            file_name: str
+            file_name : str
                 Name of the file containing the trajectory.
 
             Returns
             -------
-            traj: 
+            traj : 
                 The trajectory object.  
         """
         if file_name.endswith("h5"):
             traj = mdt.load(file_name)
+            self._trajectory_type = "mdt"
         else:
             raise NotImplementedError
 
@@ -430,9 +454,15 @@ class Dynophore():
     
     def _get_unique_pharmacophoric_points(self, avg_coordinates=True):
         """ Get all unique pharmacophoric points across all the pharmacophore models 
-            derived from the trajectory. The coordinates of the unique points will 
-            be averaged. 
+            derived from the trajectory. 
+
+            Parameters
+            ----------
+            avg_coordinates : bool
+                Whether to average the coordinates of the pharmacophoric points.
             
+            Notes
+            -----
             Two points are considered equal if they have the same feature type and
             are associated with the same atom in the ligand.
         """
@@ -492,13 +522,13 @@ class Dynophore():
 
             Parameters
             ----------
-            frame_num: int
+            frame_num : int
                 The index number of the frame from which the pharmacophore will be derived.
             
-            load_mol_system: bool (Default: False)
+            load_mol_system : bool, default=False
                 If true the receptor will be stored in the pharmacophore object.
             
-            load_ligand: bool (Default: True)
+            load_ligand : bool, default=False
                 If true the ligand will be stored in the pharmacophore object.
         """
         # mdtraj trajectories cannot be passed to SringIO objects nor saved as string. So with this
@@ -531,15 +561,15 @@ class Dynophore():
         """ Derive a pharmacophore for a single frame of an MdAnalysis Universe object.
 
             Parameters
-                ----------
-                frame_num: int
-                    The index number of the frame from which the pharmacophore will be derived.
-                
-                load_mol_system: bool (Default: False)
-                    If true the receptor will be stored in the pharmacophore object.
-                
-                load_ligand: bool (Default: True)
-                    If true the ligand will be stored in the pharmacophore object.
+            ----------
+            frame_num : int
+                The index number of the frame from which the pharmacophore will be derived.
+            
+            load_mol_system: bool, default=False
+                If true the receptor will be stored in the pharmacophore object.
+            
+            load_ligand: bool, default=False
+                If true the ligand will be stored in the pharmacophore object.
         """
         if not isinstance(frame_num, int):
             raise TypeError("Frame number must be an integer")
@@ -553,6 +583,8 @@ class Dynophore():
         
         return pharmacophore
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}(n_pharmacophores={self.n_pharmacophores}; n_frames={self._n_frames})"
 
     
     

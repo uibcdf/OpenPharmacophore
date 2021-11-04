@@ -8,24 +8,28 @@ def generate_conformers(molecule, n_conformers, random_seed=-1, alignment=False)
     
         Parameters
         ----------
-        molecule: :obj: rdkit.Chem.rdchem.Mol
-            Molecule for which conformers will be generated
+        molecule : rdkit.Chem.Mol
+            Molecule for which conformers will be generated.
         
         n_conformers: int
-            number of conformers to generate
+            Number of conformers to generate
 
-        random_seed: float or int 
-            random seed to use
+        random_seed : float or int, optional 
+            Random seed to use.
 
-        alignment: bool
-            If true generated conformers will be aligned (Default: False)
+        alignment : bool, optional
+            If true generated conformers will be aligned (Default: False).
         
         Returns
         -------
-        molecule: :obj: rdkit.Chem.rdchem.Mol
-            Molecule with conformers
+        molecule : rdkit.Chem.Mol
+            Molecule with conformers.
     
     """
+    if not isinstance(n_conformers, int):
+        raise TypeError("n_conformers must be an integer")
+    if n_conformers < 0:
+        raise ValueError("n_conformers must be greater than 0")
     molecule = Chem.AddHs(molecule) # Add hydrogens to generate realistic geometries
     cids = AllChem.EmbedMultipleConfs(molecule, numConfs=n_conformers, randomSeed=random_seed)
     
@@ -39,16 +43,17 @@ def conformer_energy(molecule, conformer_id=0, forcefield="UFF"):
 
         Parameters
         ----------
-        molecule: rdkit.Chem.mol
-            The molecule which energy will be calculated
+        molecule : rdkit.Chem.mol
+            The molecule which energy will be calculated.
 
-        forcefield: str, optional, default "UFF".
-            The forcefield that will be used
+        forcefield : {"UFF", "MMFF"}, optional.
+            The forcefield that will be used to calculate the energy 
+            (default="UFF").
 
         Returns
         -------
         double
-            The energy of the molecule
+            The energy of the molecule.
     """
     if molecule.GetNumConformers() == 0:
         raise NoConformersError("Molecule must have at least one conformer")

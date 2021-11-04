@@ -9,20 +9,20 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
         Parameters
         ----------
-        pharmacophore_file: str
+        pharmacophore_file : str
             name of the file containing the pharmacophore
 
-        load_mol_sys: bool
-            If true loads the molecular system associated to the pharmacophore (Default: False)
+        load_mol_sys : bool
+            If true loads the molecular system associated to the pharmacophore (Default: False).
 
         Returns
         -------
-        points: list of openpharmacophore.pharmacophoric_elements
-            A list of pharmacophoric elements
+        points : list of openpharmacophore.PharmacophoricPoint
+            A list of pharmacophoric points.
         
-        molecular_system: :obj:`molsysmt.MolSys`
+        molecular_system : rdkit.Chem.mol
             The molecular system associated with the pharmacophore. If there is no molecular system or
-            if load_mol_sys is set to false, None is returned
+            if load_mol_sys is set to false, None is returned.
     """
     points = []
     molecular_system = None
@@ -93,20 +93,21 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
     return points, molecular_system, ligand
 
 def to_pharmer(pharmacophore, file_name):
-    """ Save a pharmacophore as a pharmer file (json file)
+    """ Save a pharmacophore as a pharmer file (json file).
 
         Parameters
         ----------
 
-        pharmacophore: obj: openpharmacophore.StructuredBasedPharmacophore or openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file
+        pharmacophore : openpharmacophore.Pharmacophore
+            Pharmacophore object that will be saved to a file. Can be a Pharmacophore,
+            StructuredBasedPharmacophore or LigandBasedPharmacophore. 
 
-        file_name: str
+        file_name : str
             Name of the file that will contain the pharmacophore
 
         Note
         ----
-            Nothing is returned. A new file is written.
+        Nothing is returned. A new file is written.
     """
     pharmacophore_dict = _pharmer_dict(pharmacophore)
     
@@ -118,14 +119,13 @@ def _pharmer_dict(pharmacophore):
 
         Parameters
         ----------
-
-        pharmacophore: obj: openpharmacophore.StructuredBasedPharmacophore or openpharmacophore.Pharmacophore
+        pharmacophore : openpharmacophore.Pharmacophore
             Pharmacophore object wich elements will be used to construct the dictionary
 
         Returns
         -------
-            pharmacophore_dict: dict
-                Dictionary with the necessary info to construct a .json pharmer file. 
+        pharmacophore_dict : dict
+            Dictionary with the necessary info to construct a .json pharmer file. 
     """
     pharmer_element_name = { # dictionary to map openpharmacophore feature names to pharmer feature names
         "aromatic ring": "Aromatic",
@@ -167,6 +167,8 @@ def _pharmer_dict(pharmacophore):
 
     pharmacophore_dict = {}
     pharmacophore_dict["points"] = points
+
+    #TODO: save molecular system
 
     return pharmacophore_dict
     

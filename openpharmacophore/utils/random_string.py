@@ -6,12 +6,12 @@ def random_string(lenght):
 
         Parameters
         ----------
-        lenght: int
+        lenght : int
             Lenght of the resulting string
 
         Returns
         -------
-        str 
+        result_str : str 
             The random string
     """
     if not isinstance(lenght, int):

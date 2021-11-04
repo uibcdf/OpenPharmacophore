@@ -1,4 +1,4 @@
-from openpharmacophore.utils.alignment import align_set_of_ligands
+from openpharmacophore.utils.align_ligands import align_set_of_ligands
 from openpharmacophore.utils.centroid import feature_centroid
 from openpharmacophore.utils.ligand_features import rdkit_to_point
 import numpy as np
@@ -14,22 +14,22 @@ def get_feature_clusters(feat_coords, eps, min_samples):
     Parameters
     ----------
 
-    feat_coords: dict
+    feat_coords : dict
         Dictionary containing 3D coordinates for each feature type. Dictionary keys 
         are feature name and values are an numpy array of coordinates 
         
-    eps: float
+    eps : float
         The maximum distance between two pharmacophoric points for one to be considered 
         as in the neighborhood of the other. (Default: 2)
 
-    min_samples: float between 0 and 1
+    min_samples : float
         Percentages of ligands that must contain a pharmacophoric point to be considered as a core point. 
-        (Default 0.75)
+        Must be a number between 0 and 1
     
     Returns
     ----------
 
-    clusters: dict
+    clusters : dict
         Dictionary with centroid of each cluster of features. Keys are feature name
         and values is a list of coordinates
 
@@ -65,31 +65,31 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
     Parameters
     ----------
 
-    ligands: :obj: list of rdkit.Chem.rdchem.Mol rdkit.Chem.SmilesMolSupplier or rdkit.Chem.SDMolSupplier
+    ligands : list of rdkit.Chem.rdchem.Mol or rdkit.Chem.SmilesMolSupplier or rdkit.Chem.SDMolSupplier
             List of ligands.
 
-    radius: float
-        Lenght of the radius of the parmacohporic points (Default: 1)
+    radius : float, optional
+        Lenght of the radius in angstroms of the parmacohporic points (Default: 1)
 
-    eps: float
+    eps : float, optional
         The maximum distance between two pharmacophoric points for one to be considered 
-        as in the neighborhood of the other. (Default: 2)
+        as in the neighborhood of the other (default=2).
 
-    min_samples: float between 0 and 1
+    min_samples : float
         Percentages of ligands that must contain a pharmacophoric point to be considered as a core point. 
-        (Default 0.75)
+        Must be anumber betwwen 0 and 1 (default=0.75).
     
-    feat_list: list of str (optional)
+    feat_list : list of str, optional
             List of features that will be used to compute the pharmacophore.
             
-    feat_def: dict
+    feat_def : dict
             Definitions of the pharmacophoric points. 
             Dictionary which keys are SMARTS strings and values are feature names.
 
     Returns
-    ----------
+    --------
 
-    pharmacophoric_points: list of openpharmacophore.pharmacophoric_elements
+    pharmacophoric_points : list of openpharmacophore.PharmacophoricPoints
         The pharmacophoric points of the common pharmacophore.
 
     aligned_ligands: list of rdkit.Chem.Mol

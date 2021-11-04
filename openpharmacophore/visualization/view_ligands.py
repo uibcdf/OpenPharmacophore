@@ -6,11 +6,12 @@ def view_ligands(molecules):
 
     Parameters
     -----------
-    molecules: an rdkit.Chem.rdchem.Mol or a list of rdkit.Chem.rdchem.Mol
+    molecules : rdkit.Chem.Mol or list of rdkit.Chem.rdchem.Mol
+        The molecules that will be visualized.
 
     Returns
     ----------
-    view: an nglview.widget.NGLWidget
+    view: nglview.widget.NGLWidget
     """
     if not isinstance(molecules, list):
         molecules = [molecules]

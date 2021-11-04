@@ -30,26 +30,26 @@ class StructuredBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
+    elements : list of openpharmacophore.PharmacophoricPoint
         List of pharmacophoric elements
 
     molecular_system : rdkit.Chem.mol
-        The protein from which this pharmacophore was extracted.
+        The protein-ligand complex from which this pharmacophore was extracted.
 
     Attributes
     ----------
 
-    elements : :obj:`list` of :obj:`openpharmacophore.pharmacophoric_point.PharmacophoricPoint`
+    elements : list of openpharmacophore.PharmacophoricPoint
         List of pharmacophoric elements
 
     n_elements : int
         Number of pharmacophoric elements
 
-    extractor : :obj:`openpharmacophore.extractors`
-        Extractor object used to elucidate the pharmacophore
-
     molecular_system : rdkit.Chem.mol
         The protein from which this pharmacophore was extracted.
+    
+    ligand : rdkit.Chem.mol
+        The ligand from the protein-ligand complex.
 
     """
 
@@ -60,29 +60,27 @@ class StructuredBasedPharmacophore(Pharmacophore):
     
     @classmethod
     def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit", load_mol_system=True, load_ligand=True):
-        """ Class method to obtain a pharmacophore from a pdb file containing
-            a protein-ligand complex. 
+        """ Class method to obtain a pharmacophore from a pdb file containing a protein-ligand complex. 
             
-            Only the interactions of a single lignad will be computed in case 
-            the protein structure contains more than one ligand. The id of the 
-            ligand can be passed as a string, or if it is not passed a list of 
-            the ligands will appear and the user will be asked to enter whicho
-            one shoul be used.  
+            Only the interactions of a single lignad will be computed in case  the protein structure contains 
+            more than one ligand. The id of the ligand can be passed as a string, or if it is not passed a 
+            list of  the ligands will appear and the user will be asked to enter which one should be used.  
 
         Parameters
         ----------
-        pdb: str
+        pdb : str
             PDB id or path to the pdb file containing the protein-ligand complex.
         
-        radius: float
-            Radius of the spheres of the pharmacophoric points. (Default: 1.0)
+        radius : float, optional
+            Radius in angstroms of the pharmacophoric points. (Default: 1.0)
         
-        ligand_id: str (optional)
+        ligand_id : str, optional
             Id of the ligand for which the pharmacophore will be computed.
         
         Returns
         -------
-        An openpharmacophore.StructuredBasedPharmacophore with the elements 
+        openpharmacophore.StructuredBasedPharmacophore
+            The pharmacophore extracted from the protein-ligand complex.
 
         """
         if isinstance(pdb, str):
@@ -149,8 +147,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
             # match those of the rdkit molecule. rdkit is zero indexed while pybel indices start at 1. So 1 needs to
             # be substracted from each index
             for point in pharmacophoric_points:
-                indices = [i - 1 for i in point.get_indices()]
-                point.set_indices(indices)
+                indices = [i - 1 for i in point.atoms_inxs]
+                point.atoms_inxs = indices
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
@@ -161,8 +159,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         Parameters
         ---------
-        file_name: str
-            Name of the file containing the pharmacophore
+        file_name : str
+            Name of the file containing the pharmacophore.
 
         """
         fextension = file_name.split(".")[-1]
@@ -175,16 +173,16 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
     @staticmethod
     def _fetch_pdb(pdb_id):
-        """ Fetch a protein estructure from PDB.
+        """ Fetch a protein structure from the Protein Data Bank.
             
             Parameters
             ----------
-            pdb_id: str of len 4
+            pdb_id : str of len 4
                 The id of the protein structure.
             
             Returns
             -------
-            pdb_str: str
+            pdb_str : str
                 The pdb as a string.
         """
         url = 'http://files.rcsb.org/download/{}.pdb'.format(pdb_id)
@@ -200,26 +198,26 @@ class StructuredBasedPharmacophore(Pharmacophore):
     @staticmethod
     def _protein_ligand_interactions(pdb, as_string):
         """Static method to calculate protein-ligand interactions for each ligand in
-            the pdb file
+            the pdb file.
 
         Parameters
         ----------
-        pdb: str
+        pdb : str
             File or string containing the protein-ligand complex.
 
-        as_string: bool
+        as_string : bool
             Variable to know if the pdb passed is a string or a file.
 
         Returns
         -------
-        all_interactions: dict
-            Dictionary which keys are ligand Ids and values are all the interaction data 
+        all_interactions : dict
+            Dictionary which keys are ligand ids and values are all the interaction data 
             for that ligand. 
         
-        pdb_string: str
+        pdb_string : str
             The corrected pdb stucture as a string.
 
-        ligands: dict
+        ligands : dict
              Dictionary which keys are ligand Ids and values are pybel molecules
         """
         mol_system = PDBComplex()
@@ -248,21 +246,20 @@ class StructuredBasedPharmacophore(Pharmacophore):
     
     @staticmethod
     def _sb_pharmacophore_points(interactions, radius, ligand, hydrophobics="rdkit"):
-        """Static method to obtain a list of pharmacophoric points
-           for the protein-ligand complex.
+        """Static method to obtain a list of pharmacophoric points for the protein-ligand complex.
 
         Parameters
         ----------
-        interacions: plip.srtucture.preparation.PLInteraction
+        interacions : plip.structure.preparation.PLInteraction
             object containing all interacion data for a single ligand and a protein.
         
-        radius: float 
+        radius : float 
             Radius of the spheres of the pharmacophoric points.
 
-        ligand: rdkit.Chem.mol
+        ligand : rdkit.Chem.mol
             The ligand in from the protein-ligand complex.
         
-        hydrophobics: str
+        hydrophobics : {"plip", "rdkit"}
             Can be "plip" or "rdkit". If the former is chosen the hydrophobic points will
             be retrieved from the interactions plip calculates. Else smarts patterns from
             rdkit will be used. 
@@ -386,17 +383,16 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
     @staticmethod
     def _plip_hydrophobics(hydrophobics, radius):
-        """ Groups plip hydrophobic points that are to close into a single
-            point.
+        """ Groups plip hydrophobic points that are to close into a single point.
 
             Parameters
             ----------
-            hydrophobics: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
+            hydrophobics : list of openpharmacophore.PharmacophoricPoint
                 List with the hydrophobic points.
 
             Returns
             -------
-            grouped_points: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
+            grouped_points : list of openpharmacophore.PharmacophoricPoint
                 List with the grouped points.
         """
         grouped_points = []
@@ -439,15 +435,15 @@ class StructuredBasedPharmacophore(Pharmacophore):
             
             Parmaeters
             ----------
-            ligand: rdkit.Chem.mol
+            ligand : rdkit.Chem.mol
                 The ligand from the protein-ligand complex  
 
-            radius: float
+            radius : float
                 The radius of the hydrophobic points.
 
             Returns
             ---------
-            points: list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
+            points : list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
                 List with the hydrophobic points.
         """
         hydrophobic_smarts = [
@@ -473,19 +469,21 @@ class StructuredBasedPharmacophore(Pharmacophore):
             return [] 
 
     def draw(self, file_name, img_size=(500,500), legend=""):
-        """ Draw a 2d representation of the pharmacophore. This is a drawing of the
-            ligand with the pharmacophoric features highlighted.
+        """ Draw a 2d representation of the pharmacophore. 
+        
+            This is a drawing of the ligand with the pharmacophoric features highlighted.
 
             Parameters
             ----------
-            file_name: str
+            file_name : str
                 File where the drawing will be saved. Must be a png file.
 
-            img_size: 2-tuple of int, optional, default=(500,500)
-                The size of the image
+            img_size : 2-tuple of int, optional
+                The size of the image. (Default=(500,500))
 
-            legend: str, optional
+            legend : str, optional
                 Image legend.
+
         """
         if self.ligand is None:
             raise Exception("Cannot draw pharmacophore if there is no ligand")
@@ -538,14 +536,13 @@ class StructuredBasedPharmacophore(Pharmacophore):
         drawing.WriteDrawingText(file_name)
 
     def show(self, palette='openpharmacophore'):
-
-        """Showing the pharmacophore model together with the molecular system from with it was
-        extracted as a new view (NGLWidget) from NGLView.
+        """ Show the pharmacophore model together with the molecular system from with it was
+            extracted.
 
         Parameters
         ----------
-        palette: :obj: `str`, dict
-            Color palette name or dictionary. (Default: 'openpharmacophore')
+        palette : str, dict
+            Color palette name or dictionary. (Default='openpharmacophore')
 
         Returns
         -------
@@ -583,11 +580,12 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         Parameters
         ----------
-        pharmacophore: obj: openpharmacophore.StructuredBasedPharmacophore or openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file
-
         file_name: str
             Name of the file that will contain the pharmacophore
+
+        save_mol_system: bool
+            Wheter to save the molecular system or just the pharmacophoric points.
+            (default=True)
 
         Note
         ----

@@ -7,11 +7,12 @@ def view_conformers(molecule):
 
     Parameters
     -----------
-    molecule: an rdkit.Chem.rdchem.Mol
+    molecule : rdkit.Chem.Mol
+        The molecules whcih conformers will be visualized
 
     Returns
     ----------
-    view: an nglview.widget.NGLWidget
+    view : nglview.widget.NGLWidget
     """
     view = nv.NGLWidget()
     for conformer in range(molecule.GetNumConformers()):

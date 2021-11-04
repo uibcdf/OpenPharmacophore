@@ -13,10 +13,10 @@ class PharmacophoricPoint():
 
         This class will replace the other classes.
 
-        Parameters:
-        ----------
+        Parameters
+        -----------
 
-        feat_type: str
+        feat_type : str
             The feature type of the point. This can be hb donor, hb acceptor, aromatic ring
             hydrophobic, positive charge, negative charge, excluded volume.
 
@@ -26,17 +26,17 @@ class PharmacophoricPoint():
         radius : Quantity (dimensionality:{'[L]':1}; value:float)
             Radius of the pharmacophoric sphere.
         
-        direction : list, tuple, ndarray; shape:(3,)
+        direction : array_like; shape:(3,)
             Vector direction as a three dimensional vector. If the pharmacophoric point doesn't have
-            direction is set to None.
+            direction is set to None. It must be of length or shape 3.
         
-        atoms_inxs: list, set or tuple of int
+        atoms_inxs : list, set or tuple of int
             The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted. A list, set or tupple can be passed. 
 
         Attributes
         ----------
-        feature_name: str
+        feature_name : str
             The feature type of the point. This can be hb donor, hb acceptor, aromatic ring
             hydrophobic, positive charge, negative charge, excluded volume.
 
@@ -49,14 +49,14 @@ class PharmacophoricPoint():
         direction : list, tuple, ndarray; shape:(3,)
             Unit vector.
         
-        has_direction: bool
-            True if the point has direction.
+        has_direction : bool
+            Whether the pharmacophoric point has direction.
 
-        element_name: str
+        element_name : str
             The name of the element contains the feature type and wheter the point is a sphere or a sphere
             and vector.
         
-        atoms_inxs: set of int
+        atoms_inxs : set of int
             A set of the indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted.  
 
@@ -111,19 +111,21 @@ class PharmacophoricPoint():
         
         
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
-        """Adding the element representation to an NGLview view
+        """ Adding the pharmacophoric point to an NGLview view.
 
         Parameters
         ----------
-        view : NGLView.widget object
+        view : NGLView.widget
             NGLview object where the point representations is added.
-        color_palette : str or dict, default: 'openpharmacophore'
+        color_palette : str or dict, default='openpharmacophore'
             Color palette to show the point representation.
         color : str or list
             Color to show the point representation as HEX or RGB code.
+        opacity : float
+            The level of opacity. Must be a number between 0 and 1.
 
-        Note
-        ----
+        Notes
+        -----
         This method does not return a new view but modifies the input object.
 
         """
@@ -159,59 +161,6 @@ class PharmacophoricPoint():
 
             view.shape.add_arrow(center, end_arrow, color, arrow_radius)
             view.update_representation(component=n_components+1, repr_index=0, opacity=0.9)
-
-    def get_element_name(self):
-        """ Get full element name
-
-            Returns
-            -------
-            str
-                The name of the element
-        """
-        return self.element_name
-
-    def get_direction(self):
-        """ Get the pharmacophoric point direction.
-
-            Returns
-            -------
-            numpy.ndarray; shape(3,)
-                The direction vector.
-        """
-        if not self.has_direction:
-            raise ValueError("This pharmacophoric point has no direction vector")
-        return self.direction
-
-    def get_center(self, unit="angstroms"):
-        """ Get the pharmacophoric point centroid.
-
-            Returns
-            -------
-            numpy.ndarray; shape(3,)
-                Array with the centroid x, y and z coordinates.
-        """
-        return puw.get_value(self.center, to_unit=unit)
-
-    def get_radius(self, unit="angstroms"):
-        """ Get the pharmacophoric point radius.
-
-            Returns
-            -------
-            float
-                The radius of the pharmacophoric point.
-        """
-        return puw.get_value(self.radius, to_unit=unit)
-    
-    def get_indices(self):
-        """ Get the indices of the atoms corresponding to the pharmacophoric
-            point.
-
-            Returns
-            -------
-            list of int
-                The atom indexes.
-        """
-        return self.atoms_inxs
     
     @staticmethod
     def get_valid_features():
@@ -226,27 +175,6 @@ class PharmacophoricPoint():
             "excluded volume",
             "included volume",
         ]
-    
-    def set_center(self, center):
-        """ Update center attribute
-        """
-        self.center = center
-    
-    def set_direction(self, direction):
-        """ Update direction attribute
-        """
-        self.direction = direction
-
-    def set_radius(self, radius):
-        """ Update radius attribute
-        """
-        self.radius = radius
-
-    def set_indices(self, indices):
-        """ Update the atoms_inxs attribute
-        """
-        self.atoms_inxs.clear()
-        self.atoms_inxs = set(indices)
     
     def is_equal(self, other):
         """ Compare equality of two pharmacophoric points based on atoms indices.
@@ -273,16 +201,32 @@ class PharmacophoricPoint():
                 return radius_eq and center_eq
         return False
 
-    def __repr__(self):
+    def __str__(self):
         center = np.around(puw.get_value(self.center, "angstroms"), 4)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
         x, y, z = center[0], center[1], center[2]
         if self.has_direction:
             direction = np.around(self.direction, 4)
             xd, yd, zd = direction[0], direction[1], direction[2]
-            return f"{self.element_name}(center: ({x}, {y}, {z}); radius: {radius}; direction: ({xd}, {yd}, {zd}))"
+            return f"{self.element_name}(center=({x}, {y}, {z}); radius={radius}; direction=({xd}, {yd}, {zd}))"
         else:
-            return f"{self.element_name}(center: ({x}, {y}, {z}); radius: {radius})"
+            return f"{self.element_name}(center=({x}, {y}, {z}); radius={radius})"
+
+    def __repr__(self):
+        center = np.around(puw.get_value(self.center, "angstroms"), 2)
+        radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
+        x, y, z = center[0], center[1], center[2]
+        if self.has_direction:
+            direction = np.around(self.direction, 4)
+            xd, yd, zd = direction[0], direction[1], direction[2]
+            return (f"{self.__class__.__name__}("
+                    f"feat_type=({self.feature_name}) " 
+                    f"center=({x}, {y}, {z}); radius: {radius}; " 
+                    f"direction=({xd}, {yd}, {zd}))")
+        else:
+            return (f"{self.__class__.__name__}("
+                    f"feat_type=({self.feature_name}) " 
+                    f"center=({x}, {y}, {z}); radius={radius};")
 
 
 class UniquePharmacophoricPoint(PharmacophoricPoint):

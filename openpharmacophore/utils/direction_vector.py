@@ -6,25 +6,25 @@ def donor_acceptor_direction_vector(molecule, feat_type, atom_indx, coords, conf
 
         Parameters
         ----------
-        molecule: :obj: rdkit.Chem.rdchem.Mol
-                Molecule that contains the feature which direction vector will be computed
+        molecule : rdkit.Chem.rdchem.Mol
+                Molecule that contains the feature which direction vector will be computed.
 
-        feat_type: str
-                Type of feature. Wheter is donor or acceptor
+        feat_type : str
+                Type of feature. Wheter is donor or acceptor.
 
-        atom_indx: int
-                Index of the H bond acceptor or donor atom
+        atom_indx : int
+                Index of the H bond acceptor or donor atom.
 
-        coords: numpy.ndarray; shape(3,)
-                Coordiantes of the H bond acceptor or donor atom
+        coords : numpy.ndarray; shape(3,)
+                Coordiantes of the H bond acceptor or donor atom.
 
-        conformer_idx: int 
-                Index of the conformer for which the direction vector will be computed
+        conformer_idx : int 
+                Index of the conformer for which the direction vector will be computed.
 
         Returns
         -------
-        direction: numpy.ndarray; shape(3,)
-                Coordinates of the direction vector
+        direction : numpy.ndarray; shape(3,)
+                Coordinates of the direction vector.
 
     """
     direction = np.zeros((3,)) 
@@ -42,24 +42,23 @@ def donor_acceptor_direction_vector(molecule, feat_type, atom_indx, coords, conf
     
 
 def aromatic_direction_vector(molecule, atom_indxs, conformer_idx):
-    """
-        Compute the direction vector for an aromatic feature 
+    """ Compute the direction vector for an aromatic feature. 
 
         Parameters
         ----------
-        molecule: :obj: rdkit.Chem.rdchem.Mol
-                Molecule that contains the feature which direction vector will be computed
+        molecule : rdkit.Chem.rdchem.Mol
+                Molecule that contains the feature which direction vector will be computed.
 
-        atom_indxs: tuple of int
-                Indices of the aromatic atoms
+        atom_indxs : tuple of int
+                Indices of the aromatic atoms.
 
-        conformer_idx: int 
-                Index of the conformer for which the direction vector will be computed
+        conformer_idx : int 
+                Index of the conformer for which the direction vector will be computed.
 
         Returns
         -------
-        direction: numpy.ndarray; shape(3,)
-                Coordinates of the direction vector
+        direction : numpy.ndarray; shape(3,)
+                Coordinates of the direction vector.
 
     """
     coords = np.zeros((3, 3)) # Take just the first three atoms

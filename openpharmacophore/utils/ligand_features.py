@@ -9,27 +9,25 @@ import numpy as np
 import os
 
 def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
-    """
-        Get pharmacophoric points for a list of ligands using rdkit chemical feature definition. 
+    """ Get pharmacophoric points for a list of ligands using rdkit chemical feature definition. 
 
         Parameters
         ----------
-        ligands: :obj: list of rdkit.Chem.rdchem.Mol
+        ligands : list of rdkit.Chem.Mol
             List of ligands. Each ligand needs to have at least one conformer.
         
-        radius: float
-            Lenght of the radius of the parmacohporic points. Required if point type is 'spheres' or
-            'spheres_vectors'.
+        radius : float
+            Lenght of the radius in angstroms of the parmacohporic points.
 
-        feat_list: list of str
+        feat_list : list of str
             List of features that will be used to compute the pharmacophore.
 
-        direction_vector: bool
+        direction_vector : bool
             If true aromatic, donor and acceptors points will have direction.
         
         Returns
         -------
-        points: dict
+        points : dict
             Nested dictionary with the following structure:
 
             {ligand_id: 
@@ -96,31 +94,29 @@ def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
     return points
 
 def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vector=False):
-    """
-        Get pharmacophoric points for a list of ligands using custom smarts feature definition. 
+    """ Get pharmacophoric points for a list of ligands using custom smarts feature definition. 
 
         Parameters
         ----------
-        ligands: :obj: list of rdkit.Chem.rdchem.Mol
+        ligands: list of rdkit.Chem.Mol
             List of ligands. Each ligand needs to have at least one conformer.
         
-        radius: float
-            Lenght of the radius of the parmacohporic points. Required if point type is 'spheres' or
-            'spheres_vectors'.
+        radius : float
+            Lenght of the radius in angstroms of the parmacohporic points.
 
-        feat_list: list of str
+        feat_list : list of str
             List of features that will be used to compute the pharmacophore.
         
-        feat_def: dict
+        feat_def : dict
             Definitions of the pharmacophoric points. 
             Dictionary which keys are SMARTS strings and values are feature names.
         
-        direction_vector: bool
+        direction_vector : bool
             If true aromatic, donor and acceptors points will have direction.
 
         Returns
         -------
-        points: dict
+        points : dict
             Nested dictionary with the following structure:
 
             {ligand_id: 
@@ -184,29 +180,28 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vec
 
 
 def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None):
-    """
-        Get pharmacophoric points for each ligand in a list of ligands. If a ligand has 
-        more than one conformer, pharamcophoric points will be computed for each one.  
+    """ Get pharmacophoric points for each ligand in a list of ligands. 
+    
+        If a ligand has more than one conformer, pharamcophoric points will be computed for each one.  
 
         Parameters
         ----------
-        ligands: list of rdkit.Chem.Mol or a single rdkit.Chem.Mol 
+        ligands : list of rdkit.Chem.Mol or rdkit.Chem.Mol 
             List of ligands or a single ligand. Each ligand needs to have at least one conformer.
         
-        radius: float
-            Lenght of the radius of the parmacohporic points. Required if point type is 'spheres' or
-            'spheres_vectors'.
+        radius : float
+            Lenght of the radius in angstroms of the parmacohporic points. 
 
-        feat_list: list of str (optional)
+        feat_list : list of str (optional)
             List of features that will be used to compute the pharmacophore.
 
-        feat_def: dict (optional)
+        feat_def : dict (optional)
             Definitions of the pharmacophoric points. 
             Dictionary which keys are SMARTS strings and values are feature names.
 
         Returns
         -------
-        points: dict
+        points : dict
             Nested dictionary with the following structure:
 
             {ligand_id: 
@@ -236,26 +231,26 @@ def ligands_pharmacophoric_points(ligands, radius, feat_list=None, feat_def=None
 
     
 def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=None):
-    """Transform an rdkit feature point to an openpharmacophore pharmacophoric point.
+    """ Transform an rdkit feature point to an openpharmacophore pharmacophoric point.
 
         Parameters
         ----------
-        feat_name: str
+        feat_name : str
             rdkit name of the feature point.
 
-        coords: numpy.ndarray; shape: (3, )
+        coords : numpy.ndarray; shape: (3, )
             3D coordinates of the centroid of the feature.
         
-        radius: float
+        radius : float
             Lenght of the radius of the parmacohporic points. 
 
-        direction: list, tuple, numpy.ndarray; shape:(3,)
+        direction : list, tuple, numpy.ndarray; shape:(3,)
             Unit vector. 
 
         Returns
         -------
-        point: an openpharmacophore.pharmacophoric_point.PharmacophoricPoint
-    
+        openpharmacophore.PharmacophoricPoint
+            The pharmacophoric point.
     """
 
     points = {
@@ -267,12 +262,10 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=
         "NegIonizable": "negative charge",
     }
 
-    point = PharmacophoricPoint(
+    return PharmacophoricPoint(
         feat_type=points[feat_name],
         center=puw.quantity(coords, "angstroms"),
         radius=puw.quantity(radius, "angstroms"),
         direction=direction,
         atoms_inxs=atom_indices
     )
-
-    return point

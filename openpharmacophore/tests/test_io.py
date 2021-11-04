@@ -113,7 +113,7 @@ def test_to_pharmer(two_element_pharmacophore):
 
 def test_load_mol2_file():
     fname = "./openpharmacophore/data/ligands/ace.mol2"
-    molecules = load_mol2_file(fname=fname)
+    molecules = load_mol2_file(file_name=fname)
 
     assert len(molecules) == 3
     assert molecules[0].GetNumAtoms() == 14

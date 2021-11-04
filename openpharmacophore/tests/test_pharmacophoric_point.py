@@ -15,8 +15,8 @@ def test_PharmacophoricPoint():
 
     assert donor_1.has_direction == False
     assert donor_1.element_name == "HbDonorSphere"
-    assert np.allclose(donor_1.get_center(), np.array([1.0, 1.0, 1.0]))
-    assert np.allclose(donor_1.get_radius(), 1.0)
+    assert np.allclose(puw.get_value(donor_1.center, "angstroms"), np.array([1.0, 1.0, 1.0]))
+    assert np.allclose(puw.get_value(donor_1.radius, "angstroms"), 1.0)
     assert atom_inxs == (3, 4, 5, 6) 
 
     feat_name = "aromatic ring"
@@ -29,9 +29,9 @@ def test_PharmacophoricPoint():
     assert ring.has_direction == True
     assert ring.element_name == "AromaticRingSphereAndVector"
     assert ring.atoms_inxs is None
-    assert np.allclose(ring.get_center(), np.array([1.5, -2.0, 3.2]))
-    assert np.allclose(ring.get_radius(), 1.5) 
-    assert np.allclose(ring.get_direction(), 
+    assert np.allclose(puw.get_value(ring.center, "angstroms"), np.array([1.5, -2.0, 3.2]))
+    assert np.allclose(puw.get_value(ring.radius, "angstroms"), 1.5) 
+    assert np.allclose(ring.direction, 
             np.array([[1.0, 1.0, 1.0]]) / np.linalg.norm(np.array([1.0, 1.0, 1.0])))
 
     assert donor_1 != ring
