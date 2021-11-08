@@ -3,9 +3,9 @@ from openpharmacophore import __documentation_web__
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from openpharmacophore._private_tools.exceptions import PointWithNoColorError
 # Third Party
-from uibcdf_stdlib.colors import convert as convert_color_code
-from uibcdf_stdlib.input_arguments import check_input_argument
-from uibcdf_stdlib.exceptions import InputArgumentError
+from openpharmacophore._private_toolscolors import convert as convert_color_code
+from openpharmacophore._private_tools.input_arguments import check_input_argument
+from openpharmacophore._private_tools.exceptions import InputArgumentError
 import numpy as np
 import pyunitwizard as puw
 

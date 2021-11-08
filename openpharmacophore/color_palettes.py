@@ -1,4 +1,4 @@
-from uibcdf_stdlib.exceptions import InputArgumentError
+from ._private_tools.exceptions import InputArgumentError
 from matplotlib.colors import to_rgb
 """Module with objects and methods to choose and define the color code to represent pharmacophoric
 features when a pharmacophore is shown.
