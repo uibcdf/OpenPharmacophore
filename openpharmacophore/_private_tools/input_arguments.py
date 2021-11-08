@@ -1,6 +1,12 @@
 import pyunitwizard as puw
 import numpy as np
-from .lists_and_tuples import is_list_or_tuple
+
+def is_list_or_tuple(obj):
+
+    if type(obj) in [list, tuple]:
+        return True
+    else:
+        return False
 
 def check_input_argument(argument, argument_type, shape=None, dtype_name=None, dimensionality=None,
                          value_type=None, unit=None):
