@@ -1,13 +1,16 @@
+# OpenPharmcophore
 from openpharmacophore import Pharmacophore
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat, OpenPharmacophoreException
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError
 from openpharmacophore.utils.ligand_features import ligands_pharmacophoric_points
 from openpharmacophore.visualization.view_ligands import view_ligands
 from openpharmacophore.algorithms.dbscan import dbscan_pharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+# Third Party
+import nglview as nv
 from rdkit import Chem
 from rdkit.Chem.Draw import rdMolDraw2D
-import nglview as nv
+# Standard Library
 from collections import defaultdict
 import copy
 from io import BytesIO
@@ -76,7 +79,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                 The image in bytes. To visualize use a function such as Image from IPython.display.
         """
         if len(self.ligands) == 0:
-            raise OpenPharmacophoreException("This pharmacophore contains no ligands. Cannot be drawn.")
+            raise NoLigandsError("This pharmacophore contains no ligands. Cannot be drawn.")
 
         if not isinstance(n_per_row, int):
             raise TypeError("n_per_row must be of type int")

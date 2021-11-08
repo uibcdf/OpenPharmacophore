@@ -1,10 +1,12 @@
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat
+# OpenPharmacophore
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError
 from openpharmacophore.pharmacophoric_point import UniquePharmacophoricPoint
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
 from openpharmacophore import Pharmacophore
 from openpharmacophore.utils.random_string import random_string
 from openpharmacophore.utils.conformers import conformer_energy
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+# Third Party
 import matplotlib.pyplot as plt
 import MDAnalysis as mda
 from MDAnalysis.lib.util import NamedStream
@@ -13,8 +15,9 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem.Draw import rdMolDraw2D
 from tqdm.auto import tqdm
-import copy
+# Standard Library
 from collections import defaultdict
+import copy
 import bisect
 from io import StringIO
 import os
@@ -120,7 +123,7 @@ class Dynophore():
 
         # Extract a ligand
         if self.pharmacophores[0].ligand is None:
-            raise Exception("Ligand could not be extracted")
+            raise NoLigandsError("Ligand could not be extracted")
         ligand = copy.deepcopy(self.pharmacophores[0].ligand)
         ligand.RemoveAllConformers()
 

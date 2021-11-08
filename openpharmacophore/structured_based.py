@@ -1,9 +1,12 @@
-from openpharmacophore._private_tools.exceptions import FetchError, InvalidFileFormat
-from openpharmacophore import Pharmacophore, pharmacophore
+# OpenPharmacophore
+from openpharmacophore._private_tools.exceptions import (FetchError, InvalidFileFormat, 
+     NoLigandsError, OpenPharmacophoreIOError)
+from openpharmacophore import Pharmacophore
 from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.utils import ligand_features
+# Third Party
 from MDAnalysis.lib.util import NamedStream
 import numpy as np
 import nglview as nv
@@ -11,6 +14,7 @@ from plip.structure.preparation import PDBComplex
 import pyunitwizard as puw
 from rdkit import Chem, RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
+# Standard Library
 from collections import defaultdict
 import copy
 from io import StringIO, BytesIO
@@ -93,7 +97,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 pdb = StructuredBasedPharmacophore._fetch_pdb(pdb)
                 as_string = True
             else:
-                raise Exception("Invalid file or PDB id")
+                raise OpenPharmacophoreIOError("Invalid file or PDB id")
         elif isinstance(pdb, NamedStream):
             as_string = True
             pdb = pdb.getvalue()
@@ -486,7 +490,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         """
         if self.ligand is None:
-            raise Exception("Cannot draw pharmacophore if there is no ligand")
+            raise NoLigandsError("Cannot draw pharmacophore if there is no ligand")
         
         if not file_name.endswith(".png"):
             raise InvalidFileFormat("File must be a png.")
@@ -595,11 +599,11 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         if save_mol_system:
             if self.molecular_system is not None:
-                receptor = Chem.MolToPDBBlock(pharmacophore.molecular_system)
+                receptor = Chem.MolToPDBBlock(self.molecular_system)
                 pharmacophore_dict["receptor"] = receptor
 
             if self.ligand is not None:
-                ligand = Chem.MolToPDBBlock(pharmacophore.ligand)
+                ligand = Chem.MolToPDBBlock(self.ligand)
                 pharmacophore_dict["ligand"] = ligand
 
         with open(file_name, "w") as outfile:

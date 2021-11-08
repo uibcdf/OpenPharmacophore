@@ -1,4 +1,4 @@
-from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileError
+from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileFormat
 from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, read_pharmagist,
  to_ligandscout, to_moe, to_pharmagist, to_pharmer)
 from openpharmacophore import PharmacophoricPoint
@@ -66,7 +66,7 @@ class Pharmacophore():
             points = read_pharmagist(file_name, pharmacophore_index=ph_index)
         
         else:
-            raise InvalidFileError(f"Invalid file type, \"{file_name}\" is not a supported file format")
+            raise InvalidFileFormat(f"Invalid file format, \"{file_name}\" is not a supported file format")
         
         return cls(elements=points)    
         

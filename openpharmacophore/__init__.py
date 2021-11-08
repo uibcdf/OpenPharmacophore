@@ -10,8 +10,8 @@ __version__ = versions['version']
 __git_revision__ = versions['full-revisionid']
 del get_versions, versions
 
-__documentation_web__ = 'https://www.uibcdf.org/OpenPharmacophore'
-__github_web__ = 'https://github.com/uibcdf/OpenPharmacophore'
+__documentation_web__ = 'https://www.uibcdf.org/openpharmacophore'
+__github_web__ = 'https://github.com/uibcdf/openpharmacophore'
 __github_issues_web__ = __github_web__ + '/issues'
 
 # Add imports here

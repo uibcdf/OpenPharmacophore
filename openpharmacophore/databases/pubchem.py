@@ -1,4 +1,4 @@
-from openpharmacophore._private_tools.exceptions import FetchError
+from openpharmacophore._private_tools.exceptions import FetchError, OpenPharmacophoreValueError
 import pandas as pd
 from tqdm.auto import tqdm
 from io import StringIO
@@ -266,7 +266,7 @@ def get_compound_assay_summary(compound_id, form="dataframe", attempts=10):
     elif form == "dict":
         format = "JSON"
     else:
-        raise Exception("{} is not a valid form".format(form))
+        raise OpenPharmacophoreValueError("{} is not a valid form".format(form))
     
     compound_url = base_url + "/compound/cid/{}/assaysummary/{}".format(compound_id, format)
     data = _get_data(compound_url, attempts)
@@ -369,7 +369,7 @@ def get_target_assays(identifier, identifier_type, attempts=10):
     identifier_type = identifier_type.lower()
     valid_identifiers = ["genesymbol", "geneid", "gi"]
     if identifier_type not in valid_identifiers:
-        raise Exception("{} is not a valid identifier type")
+        raise OpenPharmacophoreValueError("{} is not a valid identifier type")
 
     target_url = base_url + "/assay/target/{}/{}/description/JSON".format(identifier_type, identifier)
     data = _get_data(target_url, attempts)
