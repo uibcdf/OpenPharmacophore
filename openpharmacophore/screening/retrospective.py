@@ -1,13 +1,14 @@
 from openpharmacophore import VirtualScreening
 from openpharmacophore.databases import chembl, pubchem
+from openpharmacophore._private_tools.exceptions import BadShapeError, OpenPharmacophoreValueError
 import matplotlib.pyplot as plt
 import numpy as np
 from rdkit import Chem
 
 class RetrospectiveScreening(VirtualScreening):
-    """ Class for performing retrospective virtual screening. This
-        class expects molecules classified as actives and inactives. 
-
+    """ Class for performing retrospective virtual screening. 
+    
+        This class expects molecules classified as actives and inactives. 
         With this class pharmacophore models can be validated.
 
     Parameters
@@ -43,7 +44,7 @@ class RetrospectiveScreening(VirtualScreening):
         self.from_bioactivity_data(smiles, activity)
 
     def from_bioactivity_data(self, smiles, activity):
-        """Retrospective screening from a set of molecules classified as active or inactive.
+        """ Retrospective screening from a set of molecules classified as active or inactive.
         
             Parameters
             ----------
@@ -55,13 +56,13 @@ class RetrospectiveScreening(VirtualScreening):
             activity : numpy.ndarray 
                 Array with the labels of each molecule; 1 corresponds to an active molecule
                 and 0 to an inactive one. An array of rank 1 where the first dimension is 
-                equal to the len of the molecules list is expected. 
+                equal to the length of the smiles list is expected. 
         
         """
         if len(activity.shape) > 1:
-            raise ValueError("Expected array of rank 1")
+            raise BadShapeError("activity must be an array of rank 1")
         if len(smiles) != activity.shape[0]:
-            raise ValueError("smiles and activity must contain the same number of entries")
+            raise OpenPharmacophoreValueError("smiles and activity must contain the same number of entries")
 
         self.n_actives = np.sum(activity)
         self.n_inactives = activity.shape[0] - self.n_actives
@@ -110,7 +111,7 @@ class RetrospectiveScreening(VirtualScreening):
             return base * height
 
         if self.scoring_metric == "SSD":
-            raise NotImplementedError()
+            raise NotImplementedError
 
         scores = [x[0] for x in self.matches]
         scores = np.array(scores)
@@ -156,13 +157,16 @@ class RetrospectiveScreening(VirtualScreening):
 
         return area
 
-    def ROC_plot(self, ax=None, identity_line=True):
+    def ROC_plot(self, ax=None, label="", random_line=True):
         """ Plot the ROC curve. 
         
             Parameters
             ----------
             ax : matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
                 An axes object where the plot will be drawn.
+
+            random_line : bool, default=True
+                Whether to plot the line corresponding to a random classifier.
 
             Returns
             ----------
@@ -176,7 +180,7 @@ class RetrospectiveScreening(VirtualScreening):
         """
 
         if self.scoring_metric == "SSD":
-            raise NotImplementedError()
+            raise NotImplementedError
 
         scores = [x[0] for x in self.matches]
         scores = np.array(scores)
@@ -219,16 +223,134 @@ class RetrospectiveScreening(VirtualScreening):
 
         if ax is None:
             fig, ax = plt.subplots()
-        ax.plot(x, y)
-        if identity_line:
-            ax.plot([0, 1], [0, 1], color="black", linestyle="dashed")
-        ax.set_xlabel("False positive rate")
-        ax.set_ylabel("True positive rate")   
+        ax.plot(x, y, label=label)
+        if random_line:
+            ax.plot([0, 1], [0, 1], color="black", linestyle="dashed", label="Random")
+        
+        ax.set_xlabel("Sensitivity")
+        ax.set_ylabel("1 - Specificity")
+        if label or random_line:
+            ax.legend()   
 
         return ax
 
-    def enrichment_factor(self):
-        pass
+    def enrichment_factor(self, percentage):
+        """ Calculate enrichment factor for the x% of the screened database 
+
+            Parameters
+            ----------
+            percentage : float
+                Percentage of the screened database. Must be between 0 and 100
+            
+            Returns
+            -------
+            float
+                The enrichment factor
+        """
+        if percentage < 0 or percentage > 100:
+            raise OpenPharmacophoreValueError("percentage must be a number between 0 and 100")
+
+        screened_percentage, percentage_actives_found = self._enrichment_data()
+        screened_percentage = np.array(screened_percentage)
+        percentage_actives_found = np.array(percentage_actives_found)
+
+        indices_screen_per = screened_percentage <= percentage / 100
+        max_enrichment_idx = np.argsort(screened_percentage[indices_screen_per])[-1]
+
+        return percentage_actives_found[max_enrichment_idx] * 100
+
+    def ideal_enrichment_factor(self, percentage):
+        """ Calculate ideal enrichment factor for the x% of the screened database 
+
+            Parameters
+            ----------
+            percentage : float
+                Percentage of the screened database. Must be between 0 and 100
+            
+            Returns
+            -------
+            float
+                The idal enrichment factor"""
     
-    def enrichment_plot(self):
-        pass
+        percentage = percentage / 100
+
+        n_molecules = self.bioactivities.shape[0]
+        ratio_actives = self.n_actives / n_molecules
+        if percentage <= ratio_actives:
+            return (100 / ratio_actives) * percentage
+        else:
+            return 100.0
+    
+    def enrichment_plot(self, ax=None, label="", random_line=True, ideal=False):
+        """ Create an enrichment plot 
+            
+            Parameters
+            ----------
+            ax : matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
+                An axes object where the plot will be drawn.
+
+            random_line : bool, default=True
+                Whether to plot the line corresponding to a random classifier.
+
+            ideal : bool, defaul=False
+                Whether to plot the ideal enrichmnent curve
+            
+            Returns
+            ----------
+            ax : matplotlib.axes._subplots.AxesSubplot, optional (Default = None)
+                An axes object whith the plot.
+        
+        """
+        screened_percentage, percentage_actives_found = self._enrichment_data()
+        n_molecules = self.bioactivities.shape[0]
+
+        if ax is None:
+            fig, ax = plt.subplots()
+        ax.plot(screened_percentage, percentage_actives_found, label=label)
+        if random_line:
+            ax.plot([0, 1], [0, 1], color="black", linestyle="dashed", label="Random")
+        if ideal:
+            n_molecules = self.bioactivities.shape[0]
+            ratio_actives = self.n_actives / n_molecules
+            ax.plot([0, ratio_actives, 1], [0, 1, 1], color="red", linestyle="dashed", label="Ideal")
+        
+        ax.set_xlabel("% Database Screened")
+        ax.set_ylabel("% Actives")   
+        ax.legend()
+
+        return ax
+    
+    def _enrichment_data(self):
+        """ Get enrichment data necessary for enrichment plot and enrichment factor calculation.
+
+            Returns
+            --------
+            screened_percentage : list of float
+                The percentage of the database screened.
+            
+            percentage_actives_found: list of float
+                The percentage of actives found.
+
+        """
+        scores = [x[0] for x in self.matches]
+        scores = np.array(scores)
+
+        # Sort scores in descending order and then sort labels
+        indices = np.argsort(scores)[::-1]
+        scores = np.sort(scores)[::-1] 
+        bioactivities = self.bioactivities[indices]
+
+        n_molecules = bioactivities.shape[0]
+        n_actives = self.n_actives
+
+        # Calculate % number of active molecules found in the x% of the screened database
+        percentage_actives_found = [0]
+        screened_percentage = [0]
+        actives_counter = 0
+        for ii in range(n_molecules):
+            if bioactivities[ii] == 1:
+                actives_counter += 1
+            percentage_actives_found.append(actives_counter / n_actives)
+            screened_percentage.append(ii / n_molecules)
+        
+        return screened_percentage, percentage_actives_found

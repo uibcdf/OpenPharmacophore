@@ -4,7 +4,7 @@ from openpharmacophore.databases.zinc import get_zinc_urls
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.utils.random_string import random_string
 from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
-from openpharmacophore._private_tools.exceptions import OpenPharmacophoreException
+from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError
 # Third party
 import pandas as pd
 from rdkit import RDConfig, Chem, RDLogger, DataStructs
@@ -114,8 +114,8 @@ class VirtualScreening():
         # Values of the scoring that was used for screening. Examples: SSD, 
         # tanimoto similarity
         if self.n_matches == 0:
-            raise OpenPharmacophoreException("""There were no matches in this screen or no database has been screened. 
-            Cannot get results.""")
+            raise NoMatchesError("There were no matches in this screen or no database has been screened." 
+                                 "Cannot get results.")
     
         score_vals = [i[0] for i in self.matches]
         smiles = [Chem.MolToSmiles(i[2]) for i in self.matches]
@@ -605,7 +605,7 @@ class VirtualScreening():
         ligands = list(ligands)
         ligands = [lig for lig in ligands if lig is not None]
         if len(ligands) == 0:
-            raise Exception("Molecules couldn´t be loaded")
+            raise OpenPharmacophoreIOError("Molecules couldn´t be loaded")
         
         return ligands
     
