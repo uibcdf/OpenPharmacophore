@@ -1,14 +1,16 @@
 from openpharmacophore._private_tools.exceptions import MissingParameters
 from tqdm.auto import tqdm
+from rdkit import Chem
 import os
 import pkg_resources
 import requests
+import tempfile
 import string
 
 def get_zinc_urls(subset="Lead-Like", 
                   mw_range=None, logp_range=None,
                   file_format="smi"):
-    """ Get urls for a set of molecules of the ZINC database. 
+    """ Get a list of urls for a set of molecules of the ZINC database. 
     
         If file_format is smi, the 2D set of ZINC will be used. If it is sdf 
         the 3D set will be used.
@@ -179,7 +181,7 @@ def get_ZINC3D_url_list(tranches):
     return url_list
 
 
-def download_ZINC(download_path, subset, mw_range=None, logp_range=None, file_format="smi"):
+def download_zinc_subset(download_path, subset, mw_range=None, logp_range=None, file_format="smi"):
     """ Download a subset from ZINC database.
 
         Parameters
@@ -223,3 +225,35 @@ def download_ZINC(download_path, subset, mw_range=None, logp_range=None, file_fo
         file_path = os.path.join(download_path, file_name)
         with open(file_path, "wb") as file:
             file.write(r.content)
+
+def download_zinc(url, file_path=""):
+    """Download a zinc file and return a list of rdkit molecules
+
+       Parameters
+       ----------
+       url : str
+         The url of the file.
+    
+       Returns
+       -------
+       list of rdkit.Chem.Mol
+         List of molecules.
+        
+    """
+    
+    res = requests.get(url)
+    if res.status_code != requests.codes.ok:
+        raise IOError("Failed to download from ZINC")
+    
+    if not file_path:
+        with tempfile.NamedTemporaryFile() as fp:
+            fp.write(res.content)
+            fp.seek(0)
+            molecules = Chem.SmilesMolSupplier(fp.name, delimiter=' ', titleLine=True)
+    else:
+        with open(file_path, "wb") as fp:
+            fp.write(res.content)
+            molecules = Chem.SmilesMolSupplier(file_path, delimiter=' ', titleLine=True)
+    
+    len(molecules)
+    return list(molecules)

@@ -24,7 +24,7 @@ import openpharmacophore
 # -- Project information -----------------------------------------------------
 
 project = 'OpenPharmacophore'
-copyright = ('2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors.'
+copyright = ('2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. '
         'Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5')
 
 author = 'UIBCDF Lab and contributors'
