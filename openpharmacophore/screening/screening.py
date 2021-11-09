@@ -20,6 +20,7 @@ from operator import itemgetter
 import os
 from queue import Queue
 import requests
+import tempfile
 import threading
 import time
 
@@ -199,30 +200,20 @@ class VirtualScreening():
 
         """
         self.db = "ZINC"
-        if not download_path:
-            delete_files = True
-            download_path = "./tmp" + random_string(10)
-        else:
-            delete_files = False
-
-        if not os.path.isdir(download_path):    
+        if download_path:
+            temp_files = False
+            if not os.path.isdir(download_path):    
                 os.mkdir(download_path)
+        else:
+            temp_files = True
 
         urls = get_zinc_urls(subset=subset, mw_range=mw_range, logp_range=logp_range) 
         n_files = len(urls)
 
         # Start the thread to process files
-        threading.Thread(target=self._process_files, daemon=True, args=[delete_files, n_files]).start()
-        files = self.download_zinc_subset(urls, download_path)
+        threading.Thread(target=self._process_files, daemon=True, args=[n_files]).start()
+        self._download_zinc_subset(urls, download_path, temp_files=temp_files)
         self._file_queue.join()
-
-        if delete_files:
-            try:
-                os.rmdir(download_path)
-            except:
-                pass
-        else:
-            return files
         
     def screen_chembl(self, download_path):
         """ Screen ChemBl database"""
@@ -289,13 +280,16 @@ class VirtualScreening():
         """
         pass
 
-    def _download_zinc_file(self, url, download_path):
+    def _download_zinc_file(self, url, download_path, temp_file):
         """Download a single file form ZINC.
            
            Parameters
            ----------
            url : str
                 URL of the file that will be downloaded.
+            
+           temp_file : bool
+                Whether to use a tempfile.
 
            download_path : str
                 Path where the file will be stored
@@ -306,14 +300,20 @@ class VirtualScreening():
             print("Could not fetch file from {}".format(url))
             return 
 
-        file_name =  url[-8:]
-        file_path = os.path.join(download_path, file_name)
-        with open(file_path, "wb") as file:
-            file.write(res.content)
-        
-        return file_path
+        if not temp_file:
+            file_name =  url[-8:]
+            file_path = os.path.join(download_path, file_name)
+            with open(file_path, "wb") as file:
+                file.write(res.content)
+            
+            return file_path
+        else:
+            fp = tempfile.NamedTemporaryFile()
+            fp.write(res.content)
+            
+            return fp
 
-    def download_zinc_subset(self, urls, download_path):
+    def _download_zinc_subset(self, urls, download_path, temp_files=False):
         """ Download a subset from ZINC database.
 
            Parameters
@@ -325,19 +325,24 @@ class VirtualScreening():
                 Path where the file will be stored
         """
         print("Downloading from ZINC...")
-        files = []
-        file_path = self._download_zinc_file(urls[0], download_path)
-        if file_path is not None:
-            self._file_queue.put(file_path) 
-            files.append(file_path)
-
-        for url in tqdm(urls[1:]):
-            file_path = self._download_zinc_file(url, download_path)
+        if not temp_files:
+            file_path = self._download_zinc_file(urls[0], download_path, temp_file=False)
             if file_path is not None:
-                self._file_queue.put(file_path)
-                files.append(file_path)
+                self._file_queue.put(file_path) 
 
-        return files
+            for url in tqdm(urls[1:]):
+                file_path = self._download_zinc_file(url, download_path, temp_file=False)
+                if file_path is not None:
+                    self._file_queue.put(file_path)
+
+        else:
+            fp = self._download_zinc_file(urls[0], download_path, temp_file=True)
+            self._file_queue.put(fp) 
+            
+            for url in tqdm(urls[1:]):
+                fp = self._download_zinc_file(url, download_path, temp_file=True)
+                self._file_queue.put(fp)
+   
     
     def _align_molecules(self, molecules, verbose=0, sort=True, pbar=False):
         """ Align a list of molecules to a given pharmacophore.
@@ -569,19 +574,23 @@ class VirtualScreening():
         
         return report_str
 
-    def _load_molecules_file(self, file_name, **kwargs):
+    def _load_molecules_file(self, file_name, fextension="", **kwargs):
         """ Load a file of molecules into a list of rdkit molecules.
 
             Parameters
             ----------
             file_name : str
-                Name of the file that will be loaded
+                Name of the file that will be loaded.
+            
+            fextension : str
+                The extension of the file. Must be passed if file argument is a temporary file.
             
             Returns
             -------
             list of rdkit.Chem.mol
         """
-        fextension = file_name.split(".")[-1]
+        if not fextension:
+            fextension = file_name.split(".")[-1]
         
         if fextension == "smi":
             if kwargs:
@@ -609,7 +618,7 @@ class VirtualScreening():
         
         return ligands
     
-    def _process_files(self, delete_files, n_files):
+    def _process_files(self, n_files):
         """ Process a file queue. 
 
             For each downloaded file, converts it into a list of rdkit molecules
@@ -617,9 +626,9 @@ class VirtualScreening():
 
             Parameters
             ----------
-            delete_files : bool
-                If true, files will be deleted after processing.
-
+            temp_files : bool
+                True if temporary files were stored in the file queue.
+                
             n_files : int
                 Number of files that will be downloaded.
 
@@ -630,10 +639,13 @@ class VirtualScreening():
         pbar = tqdm(total=n_files)
         while True:
             file = self._file_queue.get()
-            mols = self._load_molecules_file(file)
+            if isinstance(file, tempfile._TemporaryFileWrapper):
+                file.seek(0)
+                mols = self._load_molecules_file(file.name, fextension="smi")
+                file.close()
+            else:
+                mols = self._load_molecules_file(file)
             self._screen_fn(mols)
-            if delete_files:
-                os.remove(file)
             pbar.update()
             self._file_queue.task_done()
 

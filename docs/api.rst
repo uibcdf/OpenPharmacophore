@@ -67,7 +67,8 @@ Zinc
 ****
 .. autosummary::
    :toctree: _autosummary
-
+    
+   openpharmacophore.databases.zinc.download_zinc_subset
 
 PubChem
 *******
@@ -87,12 +88,4 @@ ChemBl
    openpharmacophore.databases.chembl.get_ro5_dataset
 
 
-
-Demonstration
--------------
-
-.. autosummary::
-   :toctree: _autosummary
-
-   openpharmacophore.demo
 

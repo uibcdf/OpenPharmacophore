@@ -17,12 +17,25 @@ requirements:
 
   run:
     - python
+    - numpy
+    - pyunitwizard
+    - pandas
+    - mdtraj
+    - mdanalysis
+    - nglview
+    - plip
+    - matplotlib
+    - rdkit
+    - requests
+    - scikit-learn
+    - tqdm
+
 
 about:
   home: https://uibcdf.org
   license: MIT License
   summary: ""
   description: |
-    This library provides some useful methods and classes to...
+    A library to work with pharmacophores.
   dev_url: https://github.com/uibcdf/OpenPharmacophore
   doc_url: https://uibcdf.org/OpenPharmacophore
