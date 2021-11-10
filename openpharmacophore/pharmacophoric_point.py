@@ -1,10 +1,9 @@
 # OpenPharmacophore
 from openpharmacophore import __documentation_web__
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore._private_tools.exceptions import PointWithNoColorError
+from openpharmacophore._private_tools.exceptions import IsNotStringError, PointWithNoColorError
 from openpharmacophore._private_tools.colors import convert as convert_color_code
-from openpharmacophore._private_tools.input_arguments import check_input_argument
-from openpharmacophore._private_tools.exceptions import InputArgumentError
+from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
 import numpy as np
 import pyunitwizard as puw
@@ -46,7 +45,7 @@ class PharmacophoricPoint():
         radius : Quantity (dimensionality:{'[L]':1}; value:float)
             Radius of the pharmacophoric sphere.
 
-        direction : list, tuple, ndarray; shape:(3,)
+        direction : ndarray; shape:(3,)
             Unit vector.
         
         has_direction : bool
@@ -63,14 +62,17 @@ class PharmacophoricPoint():
     
     """
     def __init__(self, feat_type, center, radius, direction=None, atoms_inxs=None):
-
-        #: InputArgumentError shouldn't need arguments
-        if not check_input_argument(center, 'quantity', dimensionality={'[L]':1}, value_type=[list, tuple, np.ndarray]):
-            raise InputArgumentError('center', 'SphereAndVector', __documentation_web__)
-        if not check_input_argument(radius, 'quantity', dimensionality={'[L]':1}, value_type=[float, int]):
-            raise InputArgumentError('radius', 'SphereAndVector', __documentation_web__)
+        
+        # Validate Center
+        validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
+        # Validate Radius
+        validate_input_quantity(radius, {"[L]" : 1}, "center")
+        # Validate direction
+        if direction is not None:
+            validate_input_array_like(direction, shape=(3,), name="direction")
+              
         if not isinstance(feat_type, str):
-            raise ValueError("feat_type must be a string")
+            raise IsNotStringError("feat_type must be a string")
         
         feature_to_char = {
             "hb acceptor": "A",
@@ -92,8 +94,6 @@ class PharmacophoricPoint():
         self.short_name = feature_to_char[feat_type]
         self.element_name = "".join([n.capitalize() for n in self.feature_name.split()])
         if direction is not None:
-            if not check_input_argument(direction, [tuple, list, np.ndarray], shape=(3,)):
-                raise InputArgumentError('direction', 'SphereAndVector', __documentation_web__)
             self.direction = direction/np.linalg.norm(direction)
             self.has_direction = True
             self.element_name += "SphereAndVector"

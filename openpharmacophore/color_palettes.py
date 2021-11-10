@@ -1,4 +1,3 @@
-from ._private_tools.exceptions import InputArgumentError
 from matplotlib.colors import to_rgb
 """Module with objects and methods to choose and define the color code to represent pharmacophoric
 features when a pharmacophore is shown.
@@ -75,12 +74,12 @@ def get_color_from_palette_for_feature(feature_name, color_palette='openpharmaco
         try:
             color_palette = globals()[color_palette]
         except:
-            raise InputArgumentError('color_palette')
+            raise TypeError('color_palette')
 
     try:
         color = to_rgb(color_palette[feature_name])
     except:
-        raise InputArgumentError('feature_name')
+        raise TypeError('feature_name')
 
     return color
 

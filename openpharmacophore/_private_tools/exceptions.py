@@ -14,13 +14,6 @@ class MissingParameters(OpenPharmacophoreException):
         self.message = message
         super().__init__(self.message)
 
-class FetchError(OpenPharmacophoreException):
-    """ Exception raised when fetching a file.
-    """
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
 
 ## Exceptions derived from value errors
 
@@ -67,7 +60,39 @@ class InvalidFileFormat(OpenPharmacophoreValueError):
     """
     pass
 
+class WrongDimensionalityError(OpenPharmacophoreValueError):
+    """ Exception raised when a quantity has the wrong dimensionality"""
+    pass
+
+## Exceptions derived from type errors
+
+class OpenPharmacophoreTypeError(TypeError):
+    """ Base exception for openpharmacophore type errors"""
+    def __init__(self, message, documentation_web=None):
+        self.message = message
+        if documentation_web is not None:
+            message += f" Check the online documentation for more information {documentation_web}"
+        super().__init__(self.message)
+
+class IsNotStringError(OpenPharmacophoreTypeError):
+    """ Exception raised when passing an invalid argument to a function or class that expected a string"""
+    pass
+
+class IsNotQuantityError(OpenPharmacophoreTypeError):
+    """ Exception raised when passing an invalid argument to a function or class that expected a quantity"""
+    pass
+
+class QuantityDataTypeError(OpenPharmacophoreTypeError):
+    """ Exception raised when passing a quantity has an invalid data type"""
+    pass
+
+class NotArrayLikeError(OpenPharmacophoreTypeError):
+    """ Exception raised when passing an invalid argument to a function or class that expected an 
+        array like parameter."""
+    pass
+
 ## Exceptions derived from IO errors
+
 class OpenPharmacophoreIOError(IOError):
     """ Base exception for openpharmacophore IO related errors"""
     def __init__(self, message, documentation_web=None):
@@ -76,29 +101,22 @@ class OpenPharmacophoreIOError(IOError):
             message += f" Check the online documentation for more information {documentation_web}"
         super().__init__(self.message)
 
-############# To be removed #########################
+class FetchError(OpenPharmacophoreIOError):
+    """ Exception raised when fetching a file.
+    """
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
-class NotImplementedError(NotImplementedError):
+
+## Not Implemented Exceptions
+
+class OpenPharmacophoreNotImplementedError(NotImplementedError):
 
     def __init__(self, message=None, issues_web=None):
-
         if message is None:
             if issues_web is not None:
                 message = ('It has not been implemeted yet. Write a new issue in'
                 '{} asking for it.'.format(issues_web))
 
         super().__init__(message)
-
-class InputArgumentError(NotImplementedError):
-
-    def __init__(self, argument, method, documentation_web=None):
-
-        message = ('Invalid value for input argument "{}" in method or class "{}".'
-                'Check the online documentation for more information.'.format(argument, method))
-
-        if documentation_web is not None:
-            message = message[:-1] + ': {}'.format(documentation_web)
-
-        super().__init__(message)
-
-

@@ -1,62 +1,98 @@
-import pyunitwizard as puw
+from openpharmacophore._private_tools.exceptions import (
+    BadShapeError, QuantityDataTypeError, WrongDimensionalityError, 
+    IsNotQuantityError, NotArrayLikeError)
 import numpy as np
+import pint
+import pyunitwizard as puw
 
-def is_list_or_tuple(obj):
 
-    if type(obj) in [list, tuple]:
-        return True
-    else:
-        return False
+def validate_input_quantity(quantity, dimensionality, name, 
+                            dtype=(float, int, np.int64, np.float32), 
+                            shape=None):
+    """ Check whether a quantity is of the correct dimenstionality, shape and data type
 
-def check_input_argument(argument, argument_type, shape=None, dtype_name=None, dimensionality=None,
-                         value_type=None, unit=None):
+        Parameters
+        ----------
+        quantity : obj
+            The quantity object that will be validated.
+        
+        dimensionality : dict
+            A dictionary with the expected dimensionality of the quantity.
+        
+        name : str
+            The name or label of the quantity that is being validated.
+            
+        dtype : tuple, optional
+            The type or types that the quantity is expected to have
+        
+        shape :  tuple, optional
+            The shape that the quantity is expected to have. If the quantity is a scalar
+            this argument shouldn't be passed.
+            
+        Raises
+        -------
+        IsNotQuantityError
+        
+        WrongDimensionalityError
+        
+        QuantityDataTypeError
+        
+        BadShapeError
+        
+    """
+    if not isinstance(quantity, pint.Quantity):
+        raise IsNotQuantityError(f"{name} is not a quantity")    
+    
+    quantity_dim = {dim: val for dim, val in puw.get_dimensionality(quantity).items() if val != 0}
 
-    if not is_list_or_tuple(argument_type):
-        argument_type = [argument_type]
+    if quantity_dim != dimensionality:
+        raise WrongDimensionalityError(f"{name} has dimensionality {quantity_dim}. Expected {dimensionality}.")
 
-    if not is_list_or_tuple(value_type):
-        value_type = [value_type]
-
-    output=False
-
-    for aux_argument_type in argument_type:
-        if aux_argument_type is 'ndarray':
-            aux_argument_type=np.ndarray
-        for aux_value_type in value_type:
-            aux_output = _check_single_input_argument(argument, aux_argument_type, shape=shape,
-                    dtype_name=dtype_name, dimensionality=dimensionality, value_type=aux_value_type, unit=unit)
-            if aux_output:
-                output=True
-                break
-        if aux_output:
-            output=True
-            break
-
-    return output
-
-def _check_single_input_argument(argument, argument_type, shape=None, dtype_name=None,
-                                 dimensionality=None, value_type=None, unit=None):
-
-    if argument_type is 'quantity':
-
-        output = puw.check(argument, dimensionality=dimensionality, value_type=value_type,
-                           shape=shape, dtype_name=dtype_name, unit=unit)
-
-    else:
-
-        output = (type(argument)==argument_type)
-
-        if output:
-            if shape is not None:
-                output = (np.shape(argument)==tuple(shape))
-
-        if output:
-            if dtype_name is not None:
-                try:
-                    aux_dtype_name=argument.dtype.name
-                    output = (aux_dtype_name==dtype_name)
-                except:
-                    output = False
-
-    return output
-
+    quantity_val = puw.get_value(quantity)
+    if dtype is not None:
+        if isinstance(quantity_val, np.ndarray):
+            quantity_val = quantity_val[0]
+        if not isinstance(quantity_val, dtype):
+            raise QuantityDataTypeError(f"{name} has data type {type(quantity_val)}. Expected {dtype}.")
+    
+    if shape is not None and isinstance(quantity_val, np.ndarray):
+        quantity_shape = quantity_val.shape
+        if quantity_shape != shape:
+            raise BadShapeError(f"{name} has shape {quantity_shape}. Expected Shape {shape}")
+        
+def validate_input_array_like(array, shape, name, types=(list, tuple, np.ndarray)):
+    """ Check whether an array-like object has the correct type, shape or length and data type.
+    
+        Parameters
+        ----------
+        array : obj
+            The array-like object
+        
+        shape : tuple
+            The shape or lenght of the array
+        
+        name : str
+            The name or label of the array-like object
+        
+        types : tuple, default=(list, tuple, np.ndarray)
+            The valid array-like types.
+        
+        Raises
+        ------
+        NotArrayLikeError
+        
+        BadShapeError
+    
+    """
+    if not isinstance(array, types):
+        raise NotArrayLikeError(f"{name} has an invalid data type. Expected {types}")
+    
+    if isinstance(array, np.ndarray):
+        array_shape = array.shape
+        if array_shape != shape:
+            raise BadShapeError(f"{name} has shape {array_shape}. Expected Shape {shape}")
+    elif isinstance(array, (list, tuple, set)):
+        array_length = len(array)
+        if array_length != shape[0]:
+            raise BadShapeError(f"{name} has shape {array_length}. Expected Shape {shape}")
+        
