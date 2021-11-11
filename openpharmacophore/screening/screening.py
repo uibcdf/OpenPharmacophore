@@ -1,10 +1,10 @@
 # Open Pharmacophore
-from openpharmacophore import Pharmacophore, StructuredBasedPharmacophore, LigandBasedPharmacophore
 from openpharmacophore.databases.zinc import get_zinc_urls
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.utils.random_string import random_string
 from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError
+from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore
 # Third party
 import pandas as pd
 from rdkit import RDConfig, Chem, RDLogger, DataStructs
@@ -15,6 +15,7 @@ from rdkit.Chem.Pharm3D import EmbedLib
 from tqdm.auto import tqdm
 # Standard library
 import bisect
+from collections import namedtuple
 import json
 from operator import itemgetter
 import os
@@ -59,37 +60,17 @@ class VirtualScreening():
     """
     def __init__(self, pharmacophore, **kwargs):
        
-       if (isinstance(pharmacophore, Pharmacophore) 
-        or isinstance(pharmacophore, StructuredBasedPharmacophore)
-        or isinstance(pharmacophore, LigandBasedPharmacophore)):
+       if is_3d_pharmacophore(pharmacophore):
             self.scoring_metric = "SSD"
             self._screen_fn = self._align_molecules
-
        elif isinstance(pharmacophore, DataStructs.SparseBitVect): # For pharmacophore fingerprints
             self.scoring_metric = "Similarity"
-
-            if kwargs:
-                if "similarity" in kwargs:
-                    if kwargs["similarity"] != "tanimoto" and kwargs["similarity"] != "dice":
-                        raise NotImplementedError
-                    self.similiarity_fn = kwargs["similarity"]
-                else:
-                    self.similiarity_fn = "tanimoto"
-
-                if "sim_cutoff" in kwargs:
-                    if kwargs["sim_cutoff"] < 0 and kwargs["sim_cutoff"] > 1:
-                        raise ValueError("Similarity cutoff value must lie between 0 and 1")
-                    self.similarity_cutoff = kwargs["sim_cutoff"]
-                else:
-                    self.similarity_cutoff = 0.2
-            else:
-                self.similiarity_fn = "tanimoto"
-                self.similarity_cutoff = 0.2
-
+            self.similarity_fn, self.similarity_cutoff = check_virtual_screening_kwargs(**kwargs)
             self._factory = Gobbi_Pharm2D.factory
             self._screen_fn = self._fingerprint_similarity
        else:
-        raise TypeError("pharmacophore must be of type Pharmacophore or StructuredBasedPharmacophore or LigandBasedPharmacophore")
+          raise TypeError("pharmacophore must be of type Pharmacophore, StructuredBasedPharmacophore, "
+                "LigandBasedPharmacophore, or rdkit.DataStructs.SparseBitVect")
 
        self.db = ""
        self.matches = []
@@ -255,20 +236,19 @@ class VirtualScreening():
         elif os.path.isfile(path):
             file = path
             molecules = self._load_molecules_file(file, **kwargs)
-            self._screen_fn(molecules)
-            print("File scanned!")
+            self._screen_fn(molecules, pbar=True)
 
         else:
-            raise IOError("{} is not a valid file/directory".format(path))
+            raise OpenPharmacophoreIOError("{} is not a valid file/directory".format(path))
     
-    def screen_mol_list(self, molecules, **kwargs):
+    def screen_mol_list(self, molecules):
         """Screen a list of molecules
 
            Parameters
            ----------
            molecules: list of rdkit.Chem.mol
         """
-        self._screen_fn(molecules, **kwargs)
+        self._screen_fn(molecules, pbar=True)
 
     def _download_chembl_file(self, download_path):
         """Download a single file form ChemBl.
@@ -344,7 +324,7 @@ class VirtualScreening():
                 self._file_queue.put(fp)
    
     
-    def _align_molecules(self, molecules, verbose=0, sort=True, pbar=False):
+    def _align_molecules(self, molecules, pbar=False):
         """ Align a list of molecules to a given pharmacophore.
 
         Parameters
@@ -354,9 +334,6 @@ class VirtualScreening():
 
         verbose : int
             Level of verbosity.
-
-        sort : bool
-            If true, the list of matched molecules will be sorted in ascending order.
         
         pbar : bool
             If true, a progress bar will be displayed. 
@@ -373,12 +350,11 @@ class VirtualScreening():
         fdef = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
         featFactory = ChemicalFeatures.BuildFeatureFactory(fdef)
         
+        Match = namedtuple("Match", ["score", "id", "mol"])
+        
         if pbar:
             progress_bar = tqdm(total=self.n_molecules)
-        for i, mol in enumerate(molecules):
-
-            if verbose == 1 and i % 100 == 0 and i != 0:
-                print(f"Screened {i} molecules. Number of matches: {self.n_matches}; Number of fails: {self.n_fails}")
+        for mol in molecules:
 
             bounds_matrix = rdDistGeom.GetMoleculeBoundsMatrix(mol)
             # Check if the molecule features can match with the pharmacophore.
@@ -392,15 +368,11 @@ class VirtualScreening():
                                                                                                 rdkit_pharmacophore, 
                                                                                                 useDownsampling=True)
                 if failed:
-                    if verbose == 2:
-                        print(f"Couldn't embed molecule {i}")
                     self.n_fails += 1
                     if pbar:
                         progress_bar.update()
                     continue
             else:
-                if verbose == 2:
-                    print(f"Couldn't match molecule {i}")
                 self.n_fails += 1
                 if pbar:
                     progress_bar.update()
@@ -412,9 +384,6 @@ class VirtualScreening():
                 # embeddings is a list of molecules with a single conformer
                 b_matrix, embeddings, num_fail = EmbedLib.EmbedPharmacophore(mol_H, atom_match, rdkit_pharmacophore, count=10)
             except Exception as e:
-                if verbose == 2:
-                    print(e)
-                    print (f"Bounds smoothing failed for molecule {i}")
                 self.n_fails += 1
                 if pbar:
                     progress_bar.update()
@@ -431,35 +400,28 @@ class VirtualScreening():
                 mol_id = mol.GetProp("_Name")
             except:
                 mol_id = None
-            matched_mol = (SSDs[best_fit_index], mol_id, embeddings[best_fit_index])
-            if sort:
-                # Append to list in ordered manner
-                try:
-                    bisect.insort(self.matches, matched_mol) 
-                    self.n_matches += 1
-                except:
-                    # Case when a molecule is repeated. It will throw an error since bisect
-                    # cannot compare molecules.
-                    self.n_molecules -= 1
-                    if pbar:
-                        progress_bar.update()
-                    continue
-            else:
-                self.matches.append(matched_mols)
-            
+            matched_mol = Match(SSDs[best_fit_index], mol_id, embeddings[best_fit_index]) 
+            # Append to list in ordered manner
+            try:
+                bisect.insort(self.matches, matched_mol) 
+                self.n_matches += 1
+            except:
+                # Case when a molecule is repeated. It will throw an error since bisect
+                # cannot compare molecules.
+                self.n_molecules -= 1
+                if pbar:
+                    progress_bar.update()
+                continue
             if pbar:
                 progress_bar.update()
 
-    def _fingerprint_similarity(self, molecules, sort=True, pbar=False):
+    def _fingerprint_similarity(self, molecules, pbar=False):
         """ Compute fingerprints and similarity values for a list of molecules. 
 
         Parameters
         ----------
         molecules : list of rdkit.Chem.mol
             List of molecules whose similarity to the pharmacophoric fingerprint will be calculated.
-        
-        sort : bool
-            If true, the list of matcehd molecules will be sorted in ascending order.
         
         pbar : bool
             If true, a progress bar will be displayed. 
@@ -469,13 +431,13 @@ class VirtualScreening():
         Does not return anything. The attributes matches, n_matches, and n_fails are updated.
 
         """
-        if self.similiarity_fn == "tanimoto":
+        if self.similarity_fn == "tanimoto":
             similarity_fn = DataStructs.TanimotoSimilarity
-        elif self.similiarity_fn == "dice":
+        elif self.similarity_fn == "dice":
             similarity_fn = DataStructs.DiceSimilarity
-        else:
-            raise NotImplementedError
-
+       
+        Match = namedtuple("Match", ["score", "id", "mol"])
+       
         if pbar:
             progress_bar = tqdm(total=len(molecules))
         for mol in molecules:
@@ -488,19 +450,16 @@ class VirtualScreening():
                     mol_id = mol.GetProp("_Name")
                 except:
                     mol_id = None
-                matched_mol = (similarity, mol_id, mol)
-                if sort:
-                    # Append to list in ordered manner
-                    try:
-                        bisect.insort(self.matches, matched_mol)
-                        self.n_matches += 1
-                    except:
-                        # Case when a molecule is repeated. It will throw an error since bisect
-                        # cannot compare molecules.
-                        self.n_molecules -= 1
-                        continue
-                else:
-                    self.matches.append(matched_mol)
+                matched_mol = Match(similarity, mol_id, mol)
+                # Append to list in ordered manner
+                try:
+                    bisect.insort(self.matches, matched_mol)
+                    self.n_matches += 1
+                except:
+                    # Case when a molecule is repeated. It will throw an error since bisect
+                    # cannot compare molecules.
+                    self.n_molecules -= 1
+                    continue
             else:
                 self.n_fails += 1 
             
@@ -648,7 +607,11 @@ class VirtualScreening():
             self._screen_fn(mols)
             pbar.update()
             self._file_queue.task_done()
-
+            
+    def __repr__(self):
+        return (f"{self.__class__.__name__}(n_matches={self.n_matches}; "
+               f"n_fails={self.n_fails})")
+        
 class ZincMultiScreening():
     """ Class to perform screening of ZINC with multiple pharmacophores.
     

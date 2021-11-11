@@ -1,11 +1,23 @@
-from openpharmacophore import VirtualScreening
+# OpenPharmacophore
 from openpharmacophore.databases import chembl, pubchem
-from openpharmacophore._private_tools.exceptions import BadShapeError, OpenPharmacophoreValueError
+from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
+from openpharmacophore._private_tools.exceptions import BadShapeError, MissingParameters, OpenPharmacophoreValueError
+from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore
+# Third Party
 import matplotlib.pyplot as plt
 import numpy as np
-from rdkit import Chem
+from rdkit import Chem, RDConfig, DataStructs
+from rdkit.Chem import ChemicalFeatures, rdDistGeom
+from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
+from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
+from rdkit.Chem.Pharm3D import EmbedLib
+from tqdm.auto import tqdm
+# Standard library
+from collections import namedtuple
+from operator import itemgetter
+import os
 
-class RetrospectiveScreening(VirtualScreening):
+class RetrospectiveScreening():
     """ Class for performing retrospective virtual screening. 
     
         This class expects molecules classified as actives and inactives. 
@@ -19,13 +31,27 @@ class RetrospectiveScreening(VirtualScreening):
 
     """
     def __init__(self, pharmacophore, **kwargs):
-        super().__init__(pharmacophore=pharmacophore, **kwargs)
+        
+        if is_3d_pharmacophore(pharmacophore):
+            self.scoring_metric = "SSD"
+            self._screen_fn = self._align_molecules
+        elif isinstance(pharmacophore, DataStructs.SparseBitVect): # For pharmacophore fingerprints
+            self.scoring_metric = "Similarity"
+            self.similarity_fn, _ = check_virtual_screening_kwargs(**kwargs)
+            self.similarity_cutoff = 0.0
+            self._factory = Gobbi_Pharm2D.factory
+            self._screen_fn = self._fingerprint_similarity
+        else:
+            raise TypeError("pharmacophore must be of type Pharmacophore, StructuredBasedPharmacophore, "
+                "LigandBasedPharmacophore, or rdkit.DataStructs.SparseBitVect")
+        
         self.n_actives = 0
         self.n_inactives = 0
         self.bioactivities = None
-        if self.scoring_metric == "Similarity":
-            self.similarity_cutoff = 0.0
-
+        self.molecules = []
+        self.n_molecules = 0
+        self.pharmacophore = pharmacophore
+             
     def from_chembl_target_id(self, target_id, pIC50_threshold=6.3):
         """ Retrospective screening from bioactivity data fetched from chembl.
            
@@ -66,7 +92,6 @@ class RetrospectiveScreening(VirtualScreening):
 
         self.n_actives = np.sum(activity)
         self.n_inactives = activity.shape[0] - self.n_actives
-        self.n_molecules = len(smiles) 
         self.bioactivities = activity
 
         molecules = []
@@ -74,8 +99,13 @@ class RetrospectiveScreening(VirtualScreening):
             mol = Chem.MolFromSmiles(smi)
             mol.SetProp("_Name", str(id))
             molecules.append(mol)
-       
-        self._screen_fn(molecules, sort=False)
+
+        if self.scoring_metric == "Similarity":
+            self._fingerprint_similarity(molecules)
+        elif self.scoring_metric == "SSD":
+            self._align_molecules(molecules)
+        else:
+            raise NotImplementedError
 
     def from_pubchem_bioassay_id(self, bioassay_id):
         """ Retrospective screening from a pubchem bioassay.
@@ -89,6 +119,49 @@ class RetrospectiveScreening(VirtualScreening):
         smiles, activity = pubchem_client.get_assay_training_data(bioassay_id)
         self.db = "Pubchem"
         self.from_bioactivity_data(smiles, activity)
+
+    def confusion_matrix(self, threshold=None):
+        """ Compute a confusion matrix
+        
+            Parameters
+            ----------
+            threshold : float, optional
+                The scoring value from which a molecule will be considered as active.
+                Required if the screening was done with fingerprints.
+            
+            Returns
+            -------
+            cf_matrix: np.ndarray of shape (2, 2)
+                The confusion matrix.
+
+        """
+        if self.scoring_metric == "Similarity" and threshold is None:
+            raise MissingParameters("Expected a threshold value.")
+        
+        if self.scoring_metric == "SSD":
+            threshold = 0.0
+            
+        true_positives = 0
+        true_negatives = 0
+        false_positives = 0
+        false_negatives = 0
+        
+        for ii, mol in enumerate(self.molecules):
+            if self.bioactivities[ii] == 1 and mol.score > threshold:
+                true_positives += 1
+            elif self.bioactivities[ii] == 1 and mol.score <= threshold:
+                false_negatives += 1
+            elif self.bioactivities[ii] == 0 and mol.score > threshold:
+                false_positives += 1
+            elif self.bioactivities[ii] == 0 and mol.score <= threshold:
+                true_negatives += 1
+        
+        cf_matrix = np.array([[true_positives, false_positives],
+                              [false_negatives, true_negatives]])
+        
+        assert np.sum(cf_matrix, axis=None) == self.n_molecules
+        
+        return cf_matrix
 
     def AUC(self):
         """ Calculate ROC area under the curve.
@@ -110,10 +183,7 @@ class RetrospectiveScreening(VirtualScreening):
             height = abs(y1 + y2) / 2
             return base * height
 
-        if self.scoring_metric == "SSD":
-            raise NotImplementedError
-
-        scores = [x[0] for x in self.matches]
+        scores = [x[0] for x in self.molecules]
         scores = np.array(scores)
 
         # Sort scores in descending order and then sort labels
@@ -179,10 +249,7 @@ class RetrospectiveScreening(VirtualScreening):
 
         """
 
-        if self.scoring_metric == "SSD":
-            raise NotImplementedError
-
-        scores = [x[0] for x in self.matches]
+        scores = [x[0] for x in self.molecules]
         scores = np.array(scores)
 
         # Sort scores in descending order and then sort labels
@@ -319,7 +386,7 @@ class RetrospectiveScreening(VirtualScreening):
         ax.legend()
 
         return ax
-    
+     
     def _enrichment_data(self):
         """ Get enrichment data necessary for enrichment plot and enrichment factor calculation.
 
@@ -332,7 +399,7 @@ class RetrospectiveScreening(VirtualScreening):
                 The percentage of actives found.
 
         """
-        scores = [x[0] for x in self.matches]
+        scores = [x[0] for x in self.molecules]
         scores = np.array(scores)
 
         # Sort scores in descending order and then sort labels
@@ -354,3 +421,92 @@ class RetrospectiveScreening(VirtualScreening):
             screened_percentage.append(ii / n_molecules)
         
         return screened_percentage, percentage_actives_found
+    
+    def _align_molecules(self, molecules):
+        """ Align a list of molecules to a given pharmacophore.
+
+        Parameters
+        ----------
+        molecules : list of rdkit.Chem.mol
+            List of molecules to align.
+
+        Note
+        -------
+        Does not return anything. The attribute molecules is updated with the scored molecules.
+        """
+        self.n_molecules += len(molecules)
+
+        rdkit_pharmacophore, radii = self.pharmacophore.to_rdkit()
+        apply_radii_to_bounds(radii, rdkit_pharmacophore)
+
+        fdef = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
+        featFactory = ChemicalFeatures.BuildFeatureFactory(fdef)
+        
+        MolScore = namedtuple("MolScore", ["score", "id", "mol"])
+        
+        for mol in tqdm(molecules):
+
+            bounds_matrix = rdDistGeom.GetMoleculeBoundsMatrix(mol)
+            can_match, all_matches = EmbedLib.MatchPharmacophoreToMol(mol, featFactory, rdkit_pharmacophore)
+            if can_match:
+                failed, _ , matched_mols, _ = EmbedLib.MatchPharmacophore(all_matches, 
+                                                                          bounds_matrix,
+                                                                          rdkit_pharmacophore, 
+                                                                          useDownsampling=True)
+                if failed:
+                    matched_mol = MolScore(0.0, mol.GetProp("_Name"), mol)
+                    self.molecules.append(matched_mol)
+                    continue
+            else:
+                matched_mol = MolScore(0.0, mol.GetProp("_Name"), mol)
+                self.molecules.append(matched_mol)
+                continue
+            atom_match = [list(x.GetAtomIds()) for x in matched_mols]
+            
+            try:
+                mol_H = Chem.AddHs(mol)
+                _, embeddings, _ = EmbedLib.EmbedPharmacophore(mol_H, atom_match, rdkit_pharmacophore, count=10)
+            except:
+                continue
+            
+            SSDs = transform_embeddings(rdkit_pharmacophore, embeddings, atom_match) 
+            if len(SSDs) == 0:
+                matched_mol = MolScore(0.0, mol.GetProp("_Name"), mol)
+                self.molecules.append(matched_mol)
+                continue
+            best_fit_index = min(enumerate(SSDs), key=itemgetter(1))[0]
+            
+            score = 1 / SSDs[best_fit_index]
+            matched_mol = MolScore(score, mol.GetProp("_Name"), embeddings[best_fit_index])
+            self.molecules.append(matched_mol)
+    
+    def _fingerprint_similarity(self, molecules):
+        """ Compute fingerprints and similarity values for a list of molecules. 
+
+        Parameters
+        ----------
+        molecules : list of rdkit.Chem.mol
+            List of molecules whose similarity to the pharmacophoric fingerprint will be calculated.
+        
+        Note
+        -----
+        Does not return anything. The attribute molecules is updated with the scored molecules.
+
+        """
+        if self.similarity_fn == "tanimoto":
+            similarity_fn = DataStructs.TanimotoSimilarity
+        elif self.similarity_fn == "dice":
+            similarity_fn = DataStructs.DiceSimilarity
+       
+        self.n_molecules = len(molecules)
+        MolScore = namedtuple("MolScore", ["score", "id", "mol"])
+        
+        for mol in tqdm(molecules):
+            fingerprint = Gen2DFingerprint(mol, self._factory)
+            similarity = similarity_fn(self.pharmacophore, fingerprint)
+            mol_id = mol.GetProp("_Name")
+            matched_mol = MolScore(similarity, mol_id, mol)
+            self.molecules.append(matched_mol)
+          
+    def __repr__(self):
+        return f"{self.__class__.__name__}(n_molecules={self.n_molecules})"
