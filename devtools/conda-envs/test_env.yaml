@@ -5,17 +5,18 @@ channels:
 - ambermd
 - defaults
 dependencies:
-- plip
-- uibcdf_stdlib
 - pyunitwizard
-- molsysmt
-- openmm
+- pandas
+- mdtraj
+- mdanalysis
 - nglview
+- plip
 - matplotlib
 - rdkit
+- requests
+- scikit-learn
+- tqdm
 - pytest
 - pip
 - pytest-cov
 - codecov
-- pip:
-  - chembl_webresource_client==0.10.7

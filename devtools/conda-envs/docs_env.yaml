@@ -5,21 +5,20 @@ channels:
 - ambermd
 - defaults
 dependencies:
-- plip
-- uibcdf_stdlib
 - pyunitwizard
-- molsysmt
-- openmm
+- pandas
+- mdtraj
+- mdanalysis
 - nglview
+- plip
 - matplotlib
 - rdkit
-- pip
+- requests
+- scikit-learn
+- tqdm
 - sphinx
 - sphinx_rtd_theme
 - sphinxcontrib-bibtex
 - nbsphinx
 - recommonmark
 - sphinx-markdown-tables
-- jupyterlab
-- pip:
-  - chembl_webresource_client==0.10.7
