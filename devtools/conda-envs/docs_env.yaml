@@ -16,8 +16,7 @@ dependencies:
 - requests
 - scikit-learn
 - tqdm
-- pip:
-  - chembl_webresource_client==0.10.7
+- chembl_webresource_client
 - sphinx
 - sphinx_rtd_theme
 - sphinxcontrib-bibtex
