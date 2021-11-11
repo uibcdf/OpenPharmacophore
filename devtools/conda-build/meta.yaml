@@ -22,6 +22,8 @@ requirements:
   - requests
   - scikit-learn
   - tqdm
+  - pip:
+    - chembl_webresource_client==0.10.7
 about:
   home: https://uibcdf.org
   license: MIT License
