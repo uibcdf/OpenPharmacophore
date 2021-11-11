@@ -5,10 +5,14 @@ channels:
 - ambermd
 - defaults
 dependencies:
-- uibcdf_stdlib
 - pyunitwizard
-- molsysmt
-- openmm
+- pandas
+- mdtraj
+- mdanalysis
 - nglview
+- plip
 - matplotlib
 - rdkit
+- requests
+- scikit-learn
+- tqdm

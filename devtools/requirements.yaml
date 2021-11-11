@@ -1,98 +1,68 @@
-production:
-  channels:
-    - uibcdf/label/dev
-    - uibcdf
-    - conda-forge
-    - ambermd
+setup:
+  channels: &setup_channels
     - defaults
-  dependencies:
-    - uibcdf_stdlib
-    - pyunitwizard
-    - molsysmt
-    - openmm
-    - nglview
-    - matplotlib
+  dependencies: &setup_dependencies
+    - python
+    - setuptools
+    - numpy
 
-development:
-  channels:
+production:
+  channels: &production_channels
     - uibcdf/label/dev
     - uibcdf
     - conda-forge
     - ambermd
-    - defaults
-  dependencies:
-    - uibcdf_stdlib
+    - *setup_channels
+  dependencies: &production_dependencies
     - pyunitwizard
-    - molsysmt
-    - openmm
-    - jupyterlab
+    - pandas
+    - mdtraj
+    - mdanalysis
     - nglview
+    - plip
     - matplotlib
-    - pytest
-    - pip
-    - pytest-cov
-    - codecov
-    - sphinx
-    - sphinx_rtd_theme
-    - sphinxcontrib-bibtex
-    - nbsphinx
-    - recommonmark
-    - sphinx-markdown-tables
+    - rdkit
+    - requests
+    - scikit-learn
+    - tqdm
 
 test:
-  channels:
-    - uibcdf/label/dev
-    - uibcdf
-    - conda-forge
-    - ambermd
-    - defaults
-  dependencies:
-    - uibcdf_stdlib
-    - pyunitwizard
-    - molsysmt
-    - openmm
-    - nglview
-    - matplotlib
+  channels: &test_channels
+    - *production_channels
+  dependencies: &test_dependencies
+    - *production_dependencies
     - pytest
     - pip
     - pytest-cov
     - codecov
 
 docs:
-  channels:
-    - uibcdf/label/dev
-    - uibcdf
-    - conda-forge
-    - ambermd
-    - defaults
-  dependencies:
-    - uibcdf_stdlib
-    - pyunitwizard
-    - molsysmt
-    - openmm
-    - nglview
-    - matplotlib
+  channels: &docs_channels
+    - *production_channels
+  dependencies: &docs_dependencies
+    - *production_dependencies
     - sphinx
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
     - nbsphinx
     - recommonmark
     - sphinx-markdown-tables
-    - jupyterlab
 
-setup:
+development:
   channels:
-    - defaults
+    - *production_channels
   dependencies:
-    - setuptools
-    - numpy
-    - versioneer
+    - *production_dependencies
+    - *test_dependencies
+    - *docs_dependencies
+    - pyyaml
 
 conda-build:
   channels:
     - conda-forge
-    - defaults
+    - *setup_channels
   dependencies:
+    - *setup_dependencies
     - anaconda-client
     - conda-build
 
