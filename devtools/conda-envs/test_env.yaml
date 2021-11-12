@@ -16,6 +16,7 @@ dependencies:
 - requests
 - scikit-learn
 - tqdm
+- chembl_webresource_client
 - pytest
 - pip
 - pytest-cov
