@@ -121,6 +121,4 @@ docs/_autosummary/
 
 # Other
 .DS_store
-
-# Trajectories
-*.h5
+.vscode/

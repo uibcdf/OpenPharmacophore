@@ -1,4 +1,7 @@
-from chembl_webresource_client.new_client import new_client
+try:
+    from chembl_webresource_client.new_client import new_client
+except:
+    pass
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm

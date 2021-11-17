@@ -1,7 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore import __documentation_web__
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore._private_tools.exceptions import IsNotStringError, PointWithNoColorError
+from openpharmacophore._private_tools.exceptions import IsNotStringError, OpenPharmacophoreTypeError, PointWithNoColorError
 from openpharmacophore._private_tools.colors import convert as convert_color_code
 from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
@@ -31,7 +31,7 @@ class PharmacophoricPoint():
         
         atoms_inxs : list, set or tuple of int
             The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
-            they were extracted. A list, set or tupple can be passed. 
+            they were extracted. A list, set or tuple can be passed. 
 
         Attributes
         ----------
@@ -63,17 +63,21 @@ class PharmacophoricPoint():
     """
     def __init__(self, feat_type, center, radius, direction=None, atoms_inxs=None):
         
-        # Validate Center
+        # Validate center
         validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
-        # Validate Radius
+        # Validate radius
         validate_input_quantity(radius, {"[L]" : 1}, "center")
         # Validate direction
         if direction is not None:
             validate_input_array_like(direction, shape=(3,), name="direction")
-              
+        # Validate feat type
         if not isinstance(feat_type, str):
             raise IsNotStringError("feat_type must be a string")
-        
+        # Validate atoms_inxs
+        if atoms_inxs is not None:
+            if not isinstance(atoms_inxs, (list, set, tuple)):
+                raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
+            
         feature_to_char = {
             "hb acceptor": "A",
             "hb donor": "D",
@@ -236,7 +240,7 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
         Inherits from PharmacophoricPoint.
 
     """
-    def __init__(self, point):
+    def __init__(self, point, pharmacophore_index):
         super().__init__(point.feature_name, 
                         point.center, 
                         point.radius, 
@@ -244,4 +248,4 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
                         atoms_inxs=point.atoms_inxs)
         self.count = 1 # To keep the count of each point when working with multiple pharmacophores.
         self.frequency = 0.0
-        self.timesteps = [] 
+        self.timesteps = [pharmacophore_index] 

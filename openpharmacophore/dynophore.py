@@ -1,9 +1,8 @@
 # OpenPharmacophore
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError, OpenPharmacophoreTypeError
 from openpharmacophore.pharmacophoric_point import UniquePharmacophoricPoint
 from openpharmacophore.structured_based import StructuredBasedPharmacophore
 from openpharmacophore import Pharmacophore
-from openpharmacophore.utils.random_string import random_string
 from openpharmacophore.utils.conformers import conformer_energy
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third Party
@@ -13,6 +12,7 @@ from MDAnalysis.lib.util import NamedStream
 import mdtraj as mdt
 import numpy as np
 import pandas as pd
+import pyunitwizard as puw
 from rdkit.Chem.Draw import rdMolDraw2D
 from tqdm.auto import tqdm
 # Standard Library
@@ -20,7 +20,7 @@ from collections import defaultdict
 import copy
 import bisect
 from io import StringIO
-import os
+import tempfile
 
 class Dynophore():
     """ Class to store and compute dynamic pharmacophores
@@ -52,18 +52,21 @@ class Dynophore():
         self.n_pharmacophores = 0
         self.unique_pharmacophoric_points = []
 
+        # TODO: Load other types of file, including using a topology and tajectory
         if isinstance(trajectory, str):
             self._trajectory = self._load_trajectory_file(trajectory)
         elif isinstance(trajectory, mdt.Trajectory):
             self._trajectory_type = "mdt"
             self._trajectory = trajectory
+            self._n_frames = self._trajectory.n_frames
         elif isinstance(trajectory, mda.Universe):
             self._trajectory_type = "mda"
             self._trajectory = trajectory
+            self._n_frames = trajectory.trajectory.n_frames
         else:
             raise TypeError("Trajectory must be of type string, mdtraj.Trajectory or MdAnalysis.Universe")
         
-        self._n_frames = self._trajectory.n_frames
+        
         self._saved_ligand = False
         self._averaged_coords = False
 
@@ -208,7 +211,7 @@ class Dynophore():
             ---------
             threshold : double
                 The value of frequency from which points are considered part of
-                the pharmacophore model.
+                the pharmacophore model. Must be a value between 0 and 1-
 
             Returns
             -------
@@ -263,10 +266,11 @@ class Dynophore():
         elif self._trajectory_type == "mda":
             get_pharmacophore = self._pharmacohore_from_mdanalysis
         
-        self.pharmacophores = []
-        for i in tqdm(frames):
-            self.pharmacophores.append(get_pharmacophore(i, load_ligand=load_ligand))
-            self.pharmacophore_indices.append(i)
+        self.pharmacophores.clear()
+        self.pharmacophore_indices.clear()
+        for ii in tqdm(frames):
+            self.pharmacophores.append(get_pharmacophore(ii, load_ligand=load_ligand))
+            self.pharmacophore_indices.append(ii)
         self.n_pharmacophores = len(self.pharmacophores)
     
     def pharmacophoric_point_frequency(self):
@@ -296,6 +300,7 @@ class Dynophore():
         })
         frequency.sort_values(by=["Frequency"], ascending=False, inplace=True)
         frequency.reset_index(inplace=True)
+        frequency.drop(columns=["index"], inplace=True)
         return frequency
 
     def point_frequency_plot(self, threshold=0.0, n_bins=10, ax=None):
@@ -349,16 +354,16 @@ class Dynophore():
         return ax
     
     def representative_pharmacophore_models(self):
-        """ Get all representative pharmacophore models in a trajectory. 
+        """ Get all representative pharmacophore models (RPM) in a trajectory. 
             
-            Get pharmacophore models that have the same pharmacophoric points, 
+            RPMs are pharmacophore models that have the same pharmacophoric points, 
 
             Returns
             -------
             rpms : list of openpharmacophore.StructuredBasedPharmacophore
                 The representative pharmacophore models
 
-            Notes
+            Note
             -----
             Pharmacophoric points are considered equal based only  on feature type and the atoms to 
             which this points belong to. Coordinates are not taken into account.
@@ -377,6 +382,22 @@ class Dynophore():
             self._get_unique_pharmacophoric_points(avg_coordinates=False)
             self._averaged_coords = False
         
+        rpms_indices = self._get_rpms_indices()
+        
+        return self._pharmacophores_from_ligand_median_energy(rpms_indices)
+
+    def _get_rpms_indices(self):
+        """ Get the indices of the representative pharmacophore models.
+        
+            If an empty list is returned it means that all pharmacophore models in the trajectory are different.
+        
+            Returns
+            --------
+            rpms_indices : list of list of int
+                A list where each sublist contains the indices of each representative pharmacophore
+                model. This indices correspond to the attribute pharmacophores of the Dynophore
+                class.
+        """
         # Compute a matrix where each row represents a feature vector of a pharmacophore
         n_pharmacophores = self.n_pharmacophores
         n_features = len(self.unique_pharmacophoric_points) 
@@ -403,8 +424,9 @@ class Dynophore():
             if len(rpm) > 2:
                 rpms_indices.append(rpm)
         
-        return self._pharmacophores_from_ligand_median_energy(rpms_indices)
-
+        
+        return rpms_indices
+       
     def _pharmacophores_from_ligand_median_energy(self, rpms_indices):
         """ Get the representative pharmacophore models that correspond to the pharmacophore
             with ligand median energy.
@@ -412,7 +434,7 @@ class Dynophore():
             Parameters
             ----------
             rpms_indices : list of list of int
-                A list where each sublist contains the indices of the representative pharmacophore
+                A list where each sublist contains the indices of each representative pharmacophore
                 model. This indices correspond to the attribute pharmacophores of the Dynophore
                 class.
             
@@ -474,29 +496,30 @@ class Dynophore():
 
         if self.n_pharmacophores == 0:
             self.pharmacophores_from_frames(list(range(0, self._n_frames)))
+        
         all_points = []
-        for i, pharmacophore in enumerate(self.pharmacophores):
+        for ii, pharmacophore in enumerate(self.pharmacophores):
             for pharmacophoric_point in pharmacophore.elements:
-                pharmacophoric_point.pharmacophore_index = i
+                pharmacophoric_point.pharmacophore_index = ii
                 all_points.append(pharmacophoric_point)
         
         self.unique_pharmacophoric_points.clear()
-        count = 0
         # Get all unique parmacophoric points while also updating the count, 
-        # timesteps where they appear and calculatinf the average centroid.
+        # timesteps where they appear and calculating the average centroid.
         for point in all_points:
             is_unique = True
             for unique_p in self.unique_pharmacophoric_points:
                 if point.is_equal(unique_p):
-                    count += 1
-                    unique_p.count += 1
-                    unique_p.timesteps.append(point.pharmacophore_index)
+                    timestep = point.pharmacophore_index
+                    if not timestep in unique_p.timesteps:
+                        unique_p.timesteps.append(timestep)
+                        unique_p.count += 1
                     if avg_coordinates:
                         unique_p.center += point.center
                     is_unique = False
                     break
             if is_unique:
-                self.unique_pharmacophoric_points.append(UniquePharmacophoricPoint(point))
+                self.unique_pharmacophoric_points.append(UniquePharmacophoricPoint(point, point.pharmacophore_index))
         
         names = []
         for point in self.unique_pharmacophoric_points:
@@ -519,7 +542,6 @@ class Dynophore():
                         point.feature_name = full_name
                         break
 
-        
     def _pharmacophore_from_mdtraj(self, frame_num, load_mol_system=False, load_ligand=False):
         """ Derive a pharmacophore for a single frame of an mdtraj Trajectory object.
 
@@ -535,29 +557,30 @@ class Dynophore():
                 If true the ligand will be stored in the pharmacophore object.
         """
         # mdtraj trajectories cannot be passed to SringIO objects nor saved as string. So with this
-        # method, temporary pdb files will be created thath can be read by the StructuredBasedPharmacophore 
+        # method, temporary pdb files will be created that can be read by the StructuredBasedPharmacophore 
         # class.
         if not isinstance(frame_num, int):
-            raise TypeError("Frame number must be an integer")
-        temp_filename = "./temp" + random_string(10) + ".pdb"
+            raise OpenPharmacophoreTypeError("Frame number must be an integer")
         frame = self._trajectory[frame_num]
-        frame.save_pdb(temp_filename)
-
+        
+        with tempfile.NamedTemporaryFile() as original_file:
+            frame.save_pdb(original_file.name)
+            original_file.seek(0) 
+            lines_original = original_file.readlines()
+                
         # The pdb mdtraj generates needs to be edited so that pybel can read it.
         # The third line that contains "MODEL" needs to be removed for the structured 
         # based pharmacophore to work.
-        with open(temp_filename, "r+") as f:
-            d = f.readlines()
-            f.seek(0)
-            for i in d:
-                if  not i.startswith("MODEL"):
-                    f.write(i)
-            f.truncate()
-        pharmacophore = StructuredBasedPharmacophore.from_pdb(temp_filename, 
-            radius=1.0, ligand_id=None, hydrophobics="plip", 
-            load_mol_system=load_mol_system, load_ligand=load_ligand)
+        with tempfile.NamedTemporaryFile() as modified_file:
+            for line in lines_original:
+                if not line.startswith(b'MODEL'):
+                    modified_file.write(line)
+            modified_file.truncate()
+            modified_file.seek(0)
+            pharmacophore = StructuredBasedPharmacophore.from_pdb(modified_file.name, 
+                    radius=1.0, ligand_id=None, hydrophobics="plip", 
+                load_mol_system=load_mol_system, load_ligand=load_ligand)
         
-        os.remove(temp_filename)
         return pharmacophore
     
     def _pharmacohore_from_mdanalysis(self, frame_num, load_mol_system=False, load_ligand=False):
@@ -575,7 +598,7 @@ class Dynophore():
                 If true the ligand will be stored in the pharmacophore object.
         """
         if not isinstance(frame_num, int):
-            raise TypeError("Frame number must be an integer")
+            raise OpenPharmacophoreTypeError("Frame number must be an integer")
         stream = StringIO()
         pdb_stream = NamedStream(stream, "output.pdb")
         atoms = self._trajectory.select_atoms("all")
