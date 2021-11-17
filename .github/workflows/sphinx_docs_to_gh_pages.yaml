@@ -13,6 +13,14 @@ jobs:
     name: Sphinx docs to gh-pages
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Additional info about the build
+        shell: bash
+        run: |
+          uname -a
+
       - name: Make conda environment
         uses: conda-incubator/setup-miniconda@v2    # https://github.com/conda-incubator/setup-miniconda
         with:
@@ -21,10 +29,19 @@ jobs:
           auto-update-conda: false
           auto-activate-base: false
           show-channel-urls: true
-      - name: Installing the library
+
+      - name: Install package
+        # conda setup requires this special shell
         shell: bash -l {0}
         run: |
-          python setup.py install
+           python setup.py develop
+           conda list
+
+      - name: Checking version
+        shell: bash -l {0}
+        run: |
+           echo 'import openpharmacophore; print(openpharmacophore.__version__)' | python
+
       - name: Running the Sphinx to gh-pages Action
         uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.0-beta.1
 
