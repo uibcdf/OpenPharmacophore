@@ -1,6 +1,5 @@
 from openpharmacophore import Dynophore, StructuredBasedPharmacophore, PharmacophoricPoint, dynophore, pharmacophore
 import MDAnalysis
-from MDAnalysis.tests.datafiles import PSF, DCD
 import mdtraj
 import numpy as np
 import pyunitwizard as puw
@@ -14,7 +13,8 @@ def mdtraj_trajectory():
 
 @pytest.fixture
 def mdanalysis_universe():
-    universe = MDAnalysis.Universe(PSF, DCD)
+    universe = MDAnalysis.Universe("./openpharmacophore/data/pdb/er_alpha.pdb",
+                                   "./openpharmacophore/data/trajectories/er_alpha.xyz")
     return universe
 
 def test_init_dynophore(mdtraj_trajectory, mdanalysis_universe):
