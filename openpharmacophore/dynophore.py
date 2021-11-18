@@ -577,7 +577,7 @@ class Dynophore():
                     modified_file.write(line)
             modified_file.truncate()
             modified_file.seek(0)
-            pharmacophore = StructuredBasedPharmacophore.from_pdb(modified_file.name, 
+            pharmacophore = StructuredBasedPharmacophore.from_pdb(modified_file, 
                     radius=1.0, ligand_id=None, hydrophobics="plip", 
                 load_mol_system=load_mol_system, load_ligand=load_ligand)
         

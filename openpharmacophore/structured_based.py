@@ -21,6 +21,7 @@ from io import StringIO, BytesIO
 import json
 import requests
 import re
+import tempfile
 import warnings
 
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
@@ -96,11 +97,13 @@ class StructuredBasedPharmacophore(Pharmacophore):
             elif pattern.match(pdb):
                 pdb = StructuredBasedPharmacophore._fetch_pdb(pdb)
                 as_string = True
-            # For tempfile.TemporaryFile
-            elif pdb.startswith("/tmp/"):
-                as_string = False
             else:
                 raise OpenPharmacophoreIOError("Invalid file or PDB id")
+        # For tempfile.TemporaryFile
+        elif isinstance(pdb, tempfile._TemporaryFileWrapper):
+                as_string = False
+                pdb = pdb.name
+        # For mdanalysis streams
         elif isinstance(pdb, NamedStream):
             as_string = True
             pdb = pdb.getvalue()
@@ -178,6 +181,10 @@ class StructuredBasedPharmacophore(Pharmacophore):
             raise InvalidFileFormat(f"Invalid file type, \"{file_name}\" is not a supported file format")
         
         return cls(points, receptor, ligand)    
+
+    @classmethod
+    def _from_tempfile(cls):
+        pass
 
     @staticmethod
     def _fetch_pdb(pdb_id):
