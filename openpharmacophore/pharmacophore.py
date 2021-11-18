@@ -305,6 +305,19 @@ class Pharmacophore():
         rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
         return rdkit_pharmacophore, radii
     
+    def __eq__(self, other):
+        """ Check equality between pharmacophores.
+
+            Assumes that pharmacophoric points are sorted equally in both pharmacophores.
+        """
+        if isinstance(other, type(self)):
+            if self.n_elements == other.n_elements:
+                for ii in range(self.n_elements):
+                    if not self.elements[ii] == other.elements[ii]:
+                        return False
+                return True
+        return False
+    
     def __repr__(self):
         return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
 

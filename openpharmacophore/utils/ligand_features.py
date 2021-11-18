@@ -2,10 +2,11 @@ from openpharmacophore._private_tools.exceptions import NoConformersError
 from openpharmacophore.utils.centroid import feature_centroid
 from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
+import numpy as np
 import pyunitwizard as puw
 from rdkit import RDConfig, Chem
 from rdkit.Chem import ChemicalFeatures
-import numpy as np
+from collections import defaultdict
 import os
 
 def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
@@ -51,7 +52,7 @@ def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
             raise NoConformersError(n_conformers)
 
         ligand_id = "ligand_" + str(i)
-        points[ligand_id] = {}
+        points[ligand_id] = defaultdict(list)
 
         feats = factory.GetFeaturesForMol(ligand)
         
@@ -87,8 +88,6 @@ def rdkit_points(ligands, radius, feat_list=None, direction_vector=False):
                 point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction, atom_indices=atom_idxs)
                 conformer_id = "conformer_" + str(conformer_idx)
 
-                if conformer_id not in points[ligand_id]:
-                    points[ligand_id][conformer_id] = []
                 points[ligand_id][conformer_id].append(point)
                 
     return points
@@ -138,7 +137,7 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vec
             raise NoConformersError(n_conformers)
         
         ligand_id = "ligand_" + str(i)
-        points[ligand_id] = {}
+        points[ligand_id] = defaultdict(list)
 
         for feat, feat_name in feat_def.items():
             if feat_name not in feat_list:
@@ -172,8 +171,6 @@ def custom_definition_points(ligands, radius, feat_list, feat_def, direction_vec
                 point = rdkit_to_point(feat_name, coords, radius=radius, direction=direction, atom_indices=atom_idxs)
                 conformer_id = "conformer_" + str(conformer_idx)
 
-                if conformer_id not in points[ligand_id]:
-                    points[ligand_id][conformer_id] = []
                 points[ligand_id][conformer_id].append(point)
 
     return points

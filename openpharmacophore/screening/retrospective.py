@@ -38,7 +38,6 @@ class RetrospectiveScreening():
         elif isinstance(pharmacophore, DataStructs.SparseBitVect): # For pharmacophore fingerprints
             self.scoring_metric = "Similarity"
             self.similarity_fn, _ = check_virtual_screening_kwargs(**kwargs)
-            self.similarity_cutoff = 0.0
             self._factory = Gobbi_Pharm2D.factory
             self._screen_fn = self._fingerprint_similarity
         else:
@@ -163,71 +162,24 @@ class RetrospectiveScreening():
         
         return cf_matrix
 
-    def AUC(self):
+    def auc(self):
         """ Calculate ROC area under the curve.
         
             Returns
             -------
-            area : float
+            float
                 The value of the area under the curve.
 
             References
             ----------
             Fawcett, T. An Introduction to ROC Analysis. Pattern Recognition Letters 2006, 27, 861−874
         """
-        def trapezoid_area(x1, x2, y1, y2):
-            """ Calculate the area of a trapezoid.
-            """
-            base = abs(x1 - x2)
-            # average height
-            height = abs(y1 + y2) / 2
-            return base * height
-
         scores = [x[0] for x in self.molecules]
         scores = np.array(scores)
 
-        # Sort scores in descending order and then sort labels
-        indices = np.argsort(scores)[::-1]
-        scores = np.sort(scores)[::-1] 
-        labels = self.bioactivities[indices]
+        return self._get_auc(scores, self.bioactivities)
 
-        n_positives = self.n_actives
-        n_negatives = self.n_inactives
-
-        false_positives = 0
-        true_positives = 0
-        false_pos_prev = 0
-        true_pos_prev = 0
-
-        area = 0
-        score_prev = -10000000
-
-        i = 0
-        while i < labels.shape[0]:
-
-            if scores[i] != score_prev:
-                area += trapezoid_area(false_positives, false_pos_prev, 
-                                        true_positives, true_pos_prev)
-                score_prev = scores[i]
-                false_pos_prev = false_positives
-                true_pos_prev = true_positives
-            
-            if labels[i] == 1:
-                true_positives += 1
-            else:
-                false_positives += 1
-
-            i += 1
-
-        area += trapezoid_area(n_negatives, false_pos_prev, n_positives, true_pos_prev)
-        # Scale area from n_negatives * n_positives onto the unit square
-        area = area / (n_negatives * n_positives)
-
-        assert area >= 0 and area <= 1
-
-        return area
-
-    def ROC_plot(self, ax=None, label="", random_line=True):
+    def roc_plot(self, ax=None, label="", random_line=True):
         """ Plot the ROC curve. 
         
             Parameters
@@ -248,61 +200,27 @@ class RetrospectiveScreening():
             Fawcett, T. An Introduction to ROC Analysis. Pattern Recognition Letters 2006, 27, 861−874
 
         """
-
         scores = [x[0] for x in self.molecules]
         scores = np.array(scores)
-
-        # Sort scores in descending order and then sort labels
-        indices = np.argsort(scores)[::-1]
-        scores = np.sort(scores)[::-1] 
-        labels = self.bioactivities[indices]
-
-        n_positives = self.n_actives
-        n_negatives = self.n_inactives
-        
-        false_positives = 0
-        true_positives = 0
-        x = []
-        y = []
-        score_prev = -10000000
-
-        # Calculate points for the ROC plot
-        i = 0
-        while i < labels.shape[0]:
-
-            if scores[i] != score_prev:
-                x.append(false_positives/n_negatives)
-                y.append(true_positives/n_positives)
-                score_prev = scores[i]
-
-            if labels[i] == 1:
-                true_positives += 1
-            else:
-                false_positives += 1
-
-            i += 1
-
-        # Append point (1, 1)
-        x.append(false_positives/n_negatives)
-        y.append(true_positives/n_positives)
+        fpr, tpr = self._roc_points(scores, self.bioactivities)
 
         # Plot the curve
 
         if ax is None:
             fig, ax = plt.subplots()
-        ax.plot(x, y, label=label)
+        ax.plot(fpr, tpr, label=label)
         if random_line:
             ax.plot([0, 1], [0, 1], color="black", linestyle="dashed", label="Random")
         
-        ax.set_xlabel("Sensitivity")
-        ax.set_ylabel("1 - Specificity")
+        ax.set_ylabel("Sensitivity")
+        ax.set_xlabel("1 - Specificity")
         if label or random_line:
             ax.legend()   
 
         return ax
 
     def enrichment_factor(self, percentage):
-        """ Calculate enrichment factor for the x% of the screened database 
+        """ Get enrichment factor for the x% of the screened database 
 
             Parameters
             ----------
@@ -316,15 +234,12 @@ class RetrospectiveScreening():
         """
         if percentage < 0 or percentage > 100:
             raise OpenPharmacophoreValueError("percentage must be a number between 0 and 100")
+        
+        scores = [x[0] for x in self.molecules]
+        scores = np.array(scores)
 
-        screened_percentage, percentage_actives_found = self._enrichment_data()
-        screened_percentage = np.array(screened_percentage)
-        percentage_actives_found = np.array(percentage_actives_found)
-
-        indices_screen_per = screened_percentage <= percentage / 100
-        max_enrichment_idx = np.argsort(screened_percentage[indices_screen_per])[-1]
-
-        return percentage_actives_found[max_enrichment_idx] * 100
+        return self._calculate_enrichment_factor(scores, self.bioactivities, percentage)
+       
 
     def ideal_enrichment_factor(self, percentage):
         """ Calculate ideal enrichment factor for the x% of the screened database 
@@ -368,7 +283,10 @@ class RetrospectiveScreening():
                 An axes object whith the plot.
         
         """
-        screened_percentage, percentage_actives_found = self._enrichment_data()
+        scores = [x[0] for x in self.molecules]
+        scores = np.array(scores)
+        
+        screened_percentage, percentage_actives_found = self._enrichment_data(scores, self.bioactivities)
         n_molecules = self.bioactivities.shape[0]
 
         if ax is None:
@@ -386,9 +304,78 @@ class RetrospectiveScreening():
         ax.legend()
 
         return ax
-     
-    def _enrichment_data(self):
+    
+    @staticmethod
+    def _roc_points(scores, labels):
+        """ Calculate points to plot an ROC curve.
+        
+            Parameters
+            ----------
+            scores : np.ndarray of shape(n_samples,)
+                The score of each sample.
+            
+            labels : np.ndarray of shape(n_samples,)
+                The ground truth.
+            
+            Returns
+            -------
+            false_positive_rate : list of float
+                A list with the values of false positive rate.
+            
+            true_positive_rate : list of float
+                A list with the values of true positive rate.
+        """
+        if len(scores.shape) > 1 or len(labels.shape) > 1:
+            raise BadShapeError("scores and labels must be an array of rank one.")
+        if scores.shape[0] != labels.shape[0]:
+            raise BadShapeError("scores and labels must have the same shape.")
+        # Sort scores in descending order and then sort labels
+        indices = np.argsort(scores)[::-1]
+        scores = np.sort(scores)[::-1] 
+        labels = labels[indices]
+
+        n_positives = np.sum(labels)
+        n_negatives = labels.shape[0] - n_positives
+        
+        false_positives = 0
+        true_positives = 0
+        false_positive_rate = []
+        true_positive_rate = []
+        score_prev = -10000000
+
+        # Calculate points for the ROC plot
+        i = 0
+        while i < labels.shape[0]:
+
+            if scores[i] != score_prev:
+                false_positive_rate.append(false_positives/n_negatives)
+                true_positive_rate.append(true_positives/n_positives)
+                score_prev = scores[i]
+
+            if labels[i] == 1:
+                true_positives += 1
+            else:
+                false_positives += 1
+
+            i += 1
+
+        # Append point (1, 1)
+        false_positive_rate.append(false_positives/n_negatives)
+        true_positive_rate.append(true_positives/n_positives)
+        
+        return false_positive_rate, true_positive_rate
+    
+    @staticmethod
+    def _enrichment_data(scores, labels):
         """ Get enrichment data necessary for enrichment plot and enrichment factor calculation.
+        
+            Parameters
+            ----------
+            scores : np.ndarray of shape(n_samples,)
+                The score of each sample.
+            
+            labels : np.ndarray of shape(n_samples,)
+                The ground truth.
 
             Returns
             --------
@@ -399,29 +386,130 @@ class RetrospectiveScreening():
                 The percentage of actives found.
 
         """
-        scores = [x[0] for x in self.molecules]
-        scores = np.array(scores)
-
+        if len(scores.shape) > 1 or len(labels.shape) > 1:
+            raise BadShapeError("scores and labels must be an array of rank one.")
+        if scores.shape[0] != labels.shape[0]:
+            raise BadShapeError("scores and labels must have the same shape.")
         # Sort scores in descending order and then sort labels
         indices = np.argsort(scores)[::-1]
         scores = np.sort(scores)[::-1] 
-        bioactivities = self.bioactivities[indices]
+        bioactivities = labels[indices]
 
         n_molecules = bioactivities.shape[0]
-        n_actives = self.n_actives
+        n_actives = np.sum(bioactivities)
 
         # Calculate % number of active molecules found in the x% of the screened database
-        percentage_actives_found = [0]
-        screened_percentage = [0]
+        percentage_actives_found = []
+        screened_percentage = []
         actives_counter = 0
         for ii in range(n_molecules):
             if bioactivities[ii] == 1:
                 actives_counter += 1
             percentage_actives_found.append(actives_counter / n_actives)
-            screened_percentage.append(ii / n_molecules)
+            screened_percentage.append((ii + 1) / n_molecules)
         
         return screened_percentage, percentage_actives_found
     
+    @staticmethod
+    def _calculate_enrichment_factor(scores, labels, percentage):
+        """ Calculate enrichment factor for the x% of the screened database 
+
+            Parameters
+            ----------
+            scores : np.ndarray of shape(n_samples,)
+                The score of each sample.
+            
+            labels : np.ndarray of shape(n_samples,)
+                The ground truth.
+            
+            percentage : float
+                Percentage of the screened database. Must be between 0 and 100
+            
+            Returns
+            -------
+            float
+                The enrichment factor
+        """
+        screened_percentage, percentage_actives_found = RetrospectiveScreening._enrichment_data(scores, labels)
+        screened_percentage = np.array(screened_percentage)
+        percentage_actives_found = np.array(percentage_actives_found)
+
+        indices_screen_per = screened_percentage <= percentage / 100
+        max_enrichment_idx = np.argsort(screened_percentage[indices_screen_per])[-1]
+
+        return percentage_actives_found[max_enrichment_idx] * 100    
+    
+    @staticmethod
+    def _get_auc(scores, labels):
+        """ Compute the area under the ROC curve.
+        
+            Parameters
+            ----------
+            scores : np.ndarray of shape(n_samples,)
+                The score of each sample.
+            
+            labels : np.ndarray of shape(n_samples,)
+                The ground truth.
+
+            Returns
+            --------
+            area : float
+                The area under the curve.
+        """
+        if len(scores.shape) > 1 or len(labels.shape) > 1:
+            raise BadShapeError("scores and labels must be an array of rank one.")
+        if scores.shape[0] != labels.shape[0]:
+            raise BadShapeError("scores and labels must have the same shape.")
+        # Sort scores in descending order and then sort labels
+        indices = np.argsort(scores)[::-1]
+        scores = np.sort(scores)[::-1] 
+        labels = labels[indices]
+
+        n_positives = np.sum(labels)
+        n_negatives = labels.shape[0] - n_positives
+
+        false_positives = 0
+        true_positives = 0
+        false_pos_prev = 0
+        true_pos_prev = 0
+
+        area = 0
+        score_prev = -10000000
+
+        i = 0
+        while i < labels.shape[0]:
+
+            if scores[i] != score_prev:
+                area += RetrospectiveScreening._trapezoid_area(false_positives, false_pos_prev, 
+                                        true_positives, true_pos_prev)
+                score_prev = scores[i]
+                false_pos_prev = false_positives
+                true_pos_prev = true_positives
+            
+            if labels[i] == 1:
+                true_positives += 1
+            else:
+                false_positives += 1
+
+            i += 1
+
+        area += RetrospectiveScreening._trapezoid_area(n_negatives, false_pos_prev, n_positives, true_pos_prev)
+        # Scale area from n_negatives * n_positives onto the unit square
+        area = area / (n_negatives * n_positives)
+
+        assert area >= 0 and area <= 1
+        
+        return area
+    
+    @staticmethod
+    def _trapezoid_area(x1, x2, y1, y2):
+        """ Calculate the area of a trapezoid.
+        """
+        base = abs(x1 - x2)
+        # average height
+        height = abs(y1 + y2) / 2
+        return base * height
+
     def _align_molecules(self, molecules):
         """ Align a list of molecules to a given pharmacophore.
 

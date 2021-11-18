@@ -21,6 +21,7 @@ from io import StringIO, BytesIO
 import json
 import requests
 import re
+import tempfile
 import warnings
 
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
@@ -98,6 +99,11 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 as_string = True
             else:
                 raise OpenPharmacophoreIOError("Invalid file or PDB id")
+        # For tempfile.TemporaryFile
+        elif isinstance(pdb, tempfile._TemporaryFileWrapper):
+                as_string = False
+                pdb = pdb.name
+        # For mdanalysis streams
         elif isinstance(pdb, NamedStream):
             as_string = True
             pdb = pdb.getvalue()
@@ -151,15 +157,16 @@ class StructuredBasedPharmacophore(Pharmacophore):
             # match those of the rdkit molecule. rdkit is zero indexed while pybel indices start at 1. So 1 needs to
             # be substracted from each index
             for point in pharmacophoric_points:
-                indices = [i - 1 for i in point.atoms_inxs]
+                indices = {i - 1 for i in point.atoms_inxs}
                 point.atoms_inxs = indices
 
         return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
     @classmethod
     def from_file(cls, file_name, load_mol_sys=True):
-        """
-        Class method to load an structured based pharmacophore from a file.
+        """ Class method to load an structured based pharmacophore from a file.
+        
+        Currently supports only json format from pharmer.
 
         Parameters
         ---------
@@ -174,6 +181,10 @@ class StructuredBasedPharmacophore(Pharmacophore):
             raise InvalidFileFormat(f"Invalid file type, \"{file_name}\" is not a supported file format")
         
         return cls(points, receptor, ligand)    
+
+    @classmethod
+    def _from_tempfile(cls):
+        pass
 
     @staticmethod
     def _fetch_pdb(pdb_id):
@@ -289,7 +300,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 ligand_center = np.array(interaction.ligandring.center)
                 protein_center = np.array(interaction.proteinring.center)
                 direction = protein_center - ligand_center
-                atom_indices = [atom.idx for atom in interaction.ligandring.atoms]
+                atom_indices = {atom.idx for atom in interaction.ligandring.atoms}
                 aromatic = PharmacophoricPoint(
                     feat_type="aromatic ring",
                     center=puw.quantity(ligand_center, "angstroms"),
@@ -303,7 +314,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 if hydrophobics != "plip":
                     continue
                 center = puw.quantity(interaction.ligatom.coords, "angstroms")
-                atom_inx = [interaction.ligatom.idx]
+                atom_inx = {interaction.ligatom.idx}
                 hydrophobic = PharmacophoricPoint(
                     feat_type="hydrophobicity",
                     center=center,
@@ -317,7 +328,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 if interaction.protispos:
                     # The ligand has a negative charge
                     center = puw.quantity(interaction.negative.center, "angstroms")
-                    atom_indices = [atom.idx for atom in interaction.negative.atoms]
+                    atom_indices = {atom.idx for atom in interaction.negative.atoms}
                     charge_sphere = PharmacophoricPoint(
                         feat_type="negative charge",
                         center=center,
@@ -327,7 +338,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 else:
                     # The ligand has a positive charge
                     center = puw.quantity(interaction.positive.center, "angstroms")
-                    atom_indices = [atom.idx for atom in interaction.positive.atoms]
+                    atom_indices = {atom.idx for atom in interaction.positive.atoms}
                     charge_sphere = PharmacophoricPoint(
                         feat_type="positive charge",
                         center=center,
@@ -340,7 +351,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 if interaction.protisdon:
                     # The ligand has an acceptor atom
                     ligand_acceptor_center = np.array(interaction.a.coords)
-                    ligand_acceptor_inx = [interaction.a.idx]
+                    ligand_acceptor_inx = {interaction.a.idx}
                     protein_donor_center = np.array(interaction.d.coords)
                     direction = ligand_acceptor_center - protein_donor_center 
                     acceptor = PharmacophoricPoint(
@@ -354,7 +365,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 else:
                     # The ligand has a donor atom
                     ligand_donor_center = np.array(interaction.d.coords)
-                    ligand_donor_inx = [interaction.d.idx]
+                    ligand_donor_inx = {interaction.d.idx}
                     protein_acceptor_center = np.array(interaction.a.coords)
                     direction = protein_acceptor_center - ligand_donor_center
                     donor = PharmacophoricPoint(

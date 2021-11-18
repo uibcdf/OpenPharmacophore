@@ -1,6 +1,4 @@
-from openpharmacophore import PharmacophoricPoint
-from openpharmacophore import Pharmacophore
-from openpharmacophore import VirtualScreening
+from openpharmacophore import PharmacophoricPoint, Pharmacophore, VirtualScreening, RetrospectiveScreening, pharmacophore
 import numpy as np
 import pytest
 import pyunitwizard as puw
@@ -10,7 +8,7 @@ from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
 from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
 import os
 
-### Tests for VitualScreening class with s standard pharmacophore###
+### Tests for VitualScreening class with standard pharmacophore ###
 
 @pytest.fixture
 def mock_screening_results():
@@ -110,9 +108,8 @@ def test_load_molecules_file(file_name):
     for lig in ligands:
         assert isinstance(lig, Chem.Mol)
 
-
-def test_screen_db_from_dir_3D():
-
+@pytest.fixture
+def four_element_pharmacophore():
     elements = [
         PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -132,8 +129,11 @@ def test_screen_db_from_dir_3D():
         center=puw.quantity([1.56433333333334, 7.06399999999999, 3.135], "angstroms"),
         radius=puw.quantity(1.0, "angstroms"))
     ]
-    pharmacophore = Pharmacophore(elements)
+    return Pharmacophore(elements)
 
+def test_screen_db_from_dir_3D(four_element_pharmacophore):
+
+    pharmacophore = four_element_pharmacophore
     file_path = "./openpharmacophore/data/ligands/mols.smi"
 
     screener = VirtualScreening(pharmacophore)
@@ -147,15 +147,18 @@ def test_screen_db_from_dir_3D():
         assert id is None
         assert isinstance(mol, Chem.Mol)
 
-### Tests for VirtrualScreening class with a fingerprint###
-def test_screen_db_from_dir_2D():
-    file_path = "./openpharmacophore/data/ligands/mols.smi"
+@pytest.fixture
+def pharmacophore_fingerprint():
     mol = Chem.MolFromSmiles("Cc1cccc(c2n[nH]cc2c3ccc4ncccc4n3)n1")
-
     factory = Gobbi_Pharm2D.factory
-    fingerprint = Gen2DFingerprint(mol, factory)
+    return Gen2DFingerprint(mol, factory)
 
-    screener = VirtualScreening(fingerprint, similarity="tanimoto", sim_cutoff=0.6)
+
+### Tests for VirtualScreening class with a pharmacophore fingerprint ###
+def test_screen_db_from_dir_2D(pharmacophore_fingerprint):
+    file_path = "./openpharmacophore/data/ligands/mols.smi"
+   
+    screener = VirtualScreening(pharmacophore_fingerprint, similarity="tanimoto", sim_cutoff=0.6)
     screener.screen_db_from_dir(file_path, titleLine=False)
     assert screener.n_molecules == 5
     assert screener.n_matches == 1
@@ -164,3 +167,144 @@ def test_screen_db_from_dir_2D():
     assert screener.matches[0][0] == 1.0
     assert screener.matches[0][1] is None
     assert isinstance(screener.matches[0][2], Chem.Mol)
+
+
+## Tests for Retrospective Screening ##
+def test_init_retrospective_screening(four_element_pharmacophore, pharmacophore_fingerprint):
+    
+    pharmacophore = four_element_pharmacophore
+    fingerprint = pharmacophore_fingerprint
+    
+    screener_3d = RetrospectiveScreening(pharmacophore)
+    assert screener_3d.scoring_metric == "SSD"
+    assert screener_3d._screen_fn.__name__ == "_align_molecules"
+    
+    screener_2d = RetrospectiveScreening(fingerprint, similarity="dice")
+    assert screener_2d.scoring_metric == "Similarity"
+    assert screener_2d._screen_fn.__name__ == "_fingerprint_similarity"
+    assert screener_2d.similarity_fn == "dice"
+
+def test_from_bioactivity_data():
+    pass
+
+
+@pytest.fixture
+def scores_and_labels():
+    # Example test set 1  
+    scores_1 = np.array([0.90, 0.80, 0.70, 0.60, 0.55,
+                      0.54, 0.53, 0.52, 0.51, 0.505,
+                      0.40, 0.39, 0.38, 0.37, 0.36,
+                      0.35, 0.34, 0.33, 0.30, 0.10])
+
+    labels_1 = np.array([1, 1, 0, 1, 1,
+                       1, 0, 0, 1, 0,
+                       1, 0, 1, 0, 0,
+                       0, 1, 0, 1, 0])
+    
+    scores_and_labels_1 = (scores_1, labels_1)
+    
+    scores_2 = np.array([0.99999, 0.99999, 0.99993, 0.99986, 0.99964,
+                       0.99955, 0.68139, 0.50961, 0.48880, 0.44951])
+
+    labels_2 = np.array([1, 1, 1, 1, 1,
+                       1, 0, 0, 0, 0,])
+    
+    scores_and_labels_2 = (scores_2, labels_2)
+    
+    return scores_and_labels_1, scores_and_labels_2
+
+def test_auc(scores_and_labels):
+    scores_and_labels_1, scores_and_labels_2 = scores_and_labels
+    
+    scores_1, labels_1 = scores_and_labels_1
+    auc = RetrospectiveScreening._get_auc(scores_1, labels_1)
+    assert auc == 0.68
+    
+    scores_2, labels_2 = scores_and_labels_2
+    auc = RetrospectiveScreening._get_auc(scores_2, labels_2)
+    assert auc == 1.0
+
+def test_roc_points(scores_and_labels):
+    scores_and_labels_1, scores_and_labels_2 = scores_and_labels
+    
+    scores_1, labels_1 = scores_and_labels_1
+    expected_fpr = [0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 0.1, 
+                    0.2, 0.3, 0.3, 0.4, 0.4, 0.5, 0.5, 
+                    0.6, 0.7, 0.8, 0.8, 0.9, 0.9, 1.0]
+    expected_tpr = [0.0, 0.1, 0.2, 0.2, 0.3, 0.4, 0.5, 
+                    0.5, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 
+                    0.8, 0.8, 0.8, 0.9, 0.9, 1.0, 1.0]
+    
+    fpr, tpr = RetrospectiveScreening._roc_points(scores_1, labels_1)
+    assert fpr == expected_fpr
+    assert tpr == expected_tpr
+    
+    scores_2, labels_2 = scores_and_labels_2
+    expected_fpr = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.5, 0.75, 1.0]
+    expected_tpr = [0.0, 0.3333333333333333, 0.5, 0.6666666666666666, 
+                    0.8333333333333334, 1.0, 1.0, 1.0, 1.0, 1.0]
+    
+    fpr, tpr = RetrospectiveScreening._roc_points(scores_2, labels_2)
+    assert fpr == expected_fpr
+    assert tpr == expected_tpr
+
+@pytest.fixture
+def dataset_for_enrichment_tests():
+    """ Load a dataset of the egfr bioassay with the bioactivity of each
+        molecule as well as the scores of maccs and morgan fingerprints.
+    """
+    dataset = pd.read_csv("./openpharmacophore/data/bioassays/egfr_bioassay.csv")
+    maccs = dataset["tanimoto_maccs"].to_numpy()
+    morgan = dataset["tanimoto_morgan"].to_numpy()
+    bioactivity = dataset["activity"].to_numpy()
+    
+    return maccs, morgan, bioactivity
+    
+def test_enrichment_data(dataset_for_enrichment_tests):
+    maccs_score, morgan_score, bioactivity = dataset_for_enrichment_tests
+    
+    # Tests for enrichment data with maccs fingerprints
+    enrichment_df = pd.read_csv("./openpharmacophore/data/bioassays/enrichment_data.csv")
+    screen_percent_expected = enrichment_df["macss_per_screen"].to_numpy()
+    screen_percent, actives_percent = RetrospectiveScreening._enrichment_data(maccs_score, bioactivity)
+    screen_percent = np.array(screen_percent)
+    assert len(screen_percent) == len(screen_percent_expected)
+    assert np.allclose(screen_percent, screen_percent_expected)
+    assert screen_percent.shape[0] == len(actives_percent)
+    
+    # Tests for enrichment data with morgan fingerprints
+    screen_percent_expected = enrichment_df["morgan_per_screen"].to_numpy()
+    screen_percent, actives_percent = RetrospectiveScreening._enrichment_data(morgan_score, bioactivity)
+    screen_percent = np.array(screen_percent)
+    assert len(screen_percent) == len(screen_percent_expected)
+    assert np.allclose(screen_percent, screen_percent_expected)
+    assert screen_percent.shape[0] == len(actives_percent)
+    
+def test__calculate_enrichment_factor(dataset_for_enrichment_tests):
+    maccs_score, morgan_score, bioactivity = dataset_for_enrichment_tests
+    
+    # Maccs enrichment factor
+    expected_enrichment = 7.318982387475538
+    enrichment_factor = RetrospectiveScreening._calculate_enrichment_factor(maccs_score, bioactivity, 5)
+    assert expected_enrichment == enrichment_factor
+    # Morgan enrichment factor
+    expected_enrichment = 7.9060665362035225
+    enrichment_factor = RetrospectiveScreening._calculate_enrichment_factor(morgan_score, bioactivity, 5)
+    assert expected_enrichment == enrichment_factor
+    
+
+def test_ideal_enrichment_factor(pharmacophore_fingerprint, dataset_for_enrichment_tests):
+    # Mock pharmacophore
+    pharmacophore = pharmacophore_fingerprint
+    vs = RetrospectiveScreening(pharmacophore)
+    
+    _, _, bioactivity = dataset_for_enrichment_tests
+    vs.bioactivities = bioactivity
+    vs.n_actives = np.sum(bioactivity)
+    
+    ideal_ef = vs.ideal_enrichment_factor(5)
+    assert ideal_ef == 8.855185909980431
+
+def test_confussion_matrix():
+    pass
+
