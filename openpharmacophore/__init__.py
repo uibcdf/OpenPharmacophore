@@ -23,4 +23,5 @@ from .structured_based import StructuredBasedPharmacophore
 from .screening.screening import VirtualScreening
 from .screening.retrospective import RetrospectiveScreening
 from .dynophore import Dynophore as Dynophore
+
 from . import demo as demo

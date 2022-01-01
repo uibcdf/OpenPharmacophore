@@ -1,4 +1,5 @@
-## General Exceptions
+## General Exceptions ##
+#########################################
 class OpenPharmacophoreException(Exception):
     """ Base exception for openpharmacophore """
     def __init__(self, message, documentation_web=None):
@@ -15,7 +16,8 @@ class MissingParameters(OpenPharmacophoreException):
         super().__init__(self.message)
 
 
-## Exceptions derived from value errors
+## Exceptions derived from value errors ##
+#########################################
 
 class OpenPharmacophoreValueError(ValueError):
     """ Base value error exception for OpenPharmacophore
@@ -64,7 +66,42 @@ class WrongDimensionalityError(OpenPharmacophoreValueError):
     """ Exception raised when a quantity has the wrong dimensionality"""
     pass
 
-## Exceptions derived from type errors
+## ZincClient Exceptions
+class InvalidZincIdError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidCatalogError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidAvailabilityError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidBioactiveError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidBiogenicError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidReactivityError(OpenPharmacophoreValueError):
+    pass
+
+class NegativeCountError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidSubsetError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidMolecularWeightRangeError(OpenPharmacophoreValueError):
+    pass
+
+class InvalidLogPRangeError(OpenPharmacophoreValueError):
+    pass
+
+class InvaludUrlTypeError(OpenPharmacophoreValueError):
+    pass
+
+## Exceptions derived from type errors ##
+#########################################
 
 class OpenPharmacophoreTypeError(TypeError):
     """ Base exception for openpharmacophore type errors"""
@@ -91,7 +128,12 @@ class NotArrayLikeError(OpenPharmacophoreTypeError):
         array like parameter."""
     pass
 
-## Exceptions derived from IO errors
+## ZincClient Exceptions
+class CountTypeError(OpenPharmacophoreTypeError):
+    pass
+
+## Exceptions derived from IO errors ##
+#########################################
 
 class OpenPharmacophoreIOError(IOError):
     """ Base exception for openpharmacophore IO related errors"""
@@ -108,8 +150,20 @@ class FetchError(OpenPharmacophoreIOError):
         self.message = message
         super().__init__(self.message)
 
+## ZincClient Exceptions
+class DownloadError(OpenPharmacophoreIOError):
+    """ Exception raised when failing to download a file from ZINC"""
+    pass
 
-## Not Implemented Exceptions
+class ZincNotFoundError(OpenPharmacophoreIOError):
+    pass
+
+class ZincTimeoutError(OpenPharmacophoreIOError):
+    pass
+
+
+## Not Implemented Exceptions ##
+#########################################
 
 class OpenPharmacophoreNotImplementedError(NotImplementedError):
 
