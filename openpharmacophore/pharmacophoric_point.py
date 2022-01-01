@@ -8,6 +8,17 @@ from openpharmacophore._private_tools.input_arguments import validate_input_arra
 import numpy as np
 import pyunitwizard as puw
 
+feature_to_char = {
+            "hb acceptor": "A",
+            "hb donor": "D",
+            "aromatic ring": "R",
+            "hydrophobicity": "H",
+            "positive charge": "P",
+            "negative charge": "N",
+            "excluded volume": "E",
+            "included volume": "I",
+        }
+
 class PharmacophoricPoint():
     """ Class to store pharmacophoric points of any feature type. This class can
         store spheres or sphere and vector pharmacophoric points.
@@ -78,17 +89,6 @@ class PharmacophoricPoint():
             if not isinstance(atoms_inxs, (list, set, tuple)):
                 raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
             
-        feature_to_char = {
-            "hb acceptor": "A",
-            "hb donor": "D",
-            "aromatic ring": "R",
-            "hydrophobicity": "H",
-            "positive charge": "P",
-            "negative charge": "N",
-            "excluded volume": "E",
-            "included volume": "I",
-        }
-
         if feat_type not in list(feature_to_char.keys()):
             raise ValueError(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
 
@@ -249,3 +249,12 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
         self.count = 1 # To keep the count of each point when working with multiple pharmacophores.
         self.frequency = 0.0
         self.timesteps = [pharmacophore_index] 
+
+
+def distance_bewteen_pharmacophoric_points(p1, p2):
+    """ Compute the distance in angstroms between two pharmacophoric points."""
+    
+    p1_center = puw.get_value(p1.center, "angstroms")
+    p2_center = puw.get_value(p2.center, "angstroms")
+    
+    return np.linalg.norm(p1_center - p2_center)

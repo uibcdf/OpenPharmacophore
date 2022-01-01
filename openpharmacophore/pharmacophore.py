@@ -1,9 +1,13 @@
+# OpenPharmacophore
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileFormat
 from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, read_pharmagist,
  to_ligandscout, to_moe, to_pharmagist, to_pharmer)
 from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
 from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+# Third party
 import nglview as nv
+import numpy as np
 import pyunitwizard as puw
 from rdkit import Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
@@ -304,6 +308,30 @@ class Pharmacophore():
 
         rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
         return rdkit_pharmacophore, radii
+    
+    def distance_matrix(self):
+        """ Compute the distance matrix of the pharmacophore.
+        
+            Returns
+            -------
+            dis_matrix : np.ndarray of shape(n_elements, n_elements)
+                The distance matrix.
+        """
+        n_elements = self.n_elements
+        dis_matrix = np.zeros((n_elements, n_elements))
+        
+        for ii in range(n_elements):
+            for jj in range(ii, n_elements):
+                if ii == jj:
+                    dis_matrix[ii, jj] = 0
+                else:
+                    distance = distance_bewteen_pharmacophoric_points(
+                            self.elements[ii],
+                            self.elements[jj])
+                    dis_matrix[ii, jj] = distance
+                    dis_matrix[jj, ii] = distance
+        
+        return dis_matrix
     
     def __eq__(self, other):
         """ Check equality between pharmacophores.

@@ -1,6 +1,7 @@
 from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.utils.direction_vector import aromatic_direction_vector, donor_acceptor_direction_vector
 from openpharmacophore.utils.load_custom_feats import load_smarts_fdef
+from openpharmacophore.algorithms.discretize import discretize
 from openpharmacophore import utils
 from openpharmacophore.utils.ligand_features import ligands_pharmacophoric_points, rdkit_to_point
 from rdkit import Chem
@@ -129,3 +130,14 @@ def test_donor_acceptor_direction_vector(benzoic_acid):
     assert acceptor_vector.shape[0] == 3
     assert np.all(np.around(np.array([0.7275082, 0.87517266, 0.7830512]), 2) == np.around(donor_vector, 2))
     assert np.all(np.around(np.array([-0.62292014, 0.7957192 , 0.73807555]), 2) == np.around(acceptor_vector, 2))
+    
+    
+def test_discretize():
+    bins = np.arange(0, 10, 1.0)
+    
+    assert discretize(5.99999, bins) == 6.0
+    assert discretize(6.0, bins) == 6.0
+    assert discretize(5.5, bins) == 5.0
+    assert discretize(5.4, bins) == 5.0
+    assert discretize(5.6, bins) == 6.0
+    

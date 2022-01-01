@@ -1,8 +1,7 @@
 # Open Pharmacophore
-from openpharmacophore.databases.zinc import get_zinc_urls
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.utils.random_string import random_string
-from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
+from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError
 from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore
 # Third party
@@ -19,11 +18,6 @@ from collections import namedtuple
 import json
 from operator import itemgetter
 import os
-from queue import Queue
-import requests
-import tempfile
-import threading
-import time
 
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
 
@@ -78,7 +72,6 @@ class VirtualScreening():
        self.n_matches = 0
        self.n_molecules = 0
        self.pharmacophore = pharmacophore
-       self._file_queue = Queue()
     
     def get_screening_results(self, form="dataframe"):
         """ Get the results of the screen on a dataframe or a dictionaty
@@ -152,54 +145,6 @@ class VirtualScreening():
                 f.write(json_str)
         else:
             raise NotImplementedError
-
-    def screen_ZINC(self, subset, mw_range=None, logp_range=None, download_path=""):
-        """ Screen a subset of ZINC database. 
-        
-            The subset can be one of ZINC predefined subsets. Alternatively a subset with a custom molecular 
-            weight and logP range can be screened.
-            
-            Parameters
-            ---------
-            subset : {"Drug-Like", "Lead-Like", "Lugs", "Goldilocks", "Fragments", "Flagments", 
-                    "Big-n-Greasy", "Shards"}
-                Name of the predifined ZINC subset to be downloaded. 
-            
-            mw_range : 2-tuple of float, optional 
-                Range of molecular weight for the downloaded molecules.
-        
-            logp_range : 2-tuple of float, optional
-                Range of logP for the downloaded molecules.
-
-            download_path : str, default="" 
-                Directory where files will be saved. If None, files will be deleted 
-                after processing.
-            
-            Note
-            -----
-            If mw_range argument is passed, logp_range must also be passed.
-
-        """
-        self.db = "ZINC"
-        if download_path:
-            temp_files = False
-            if not os.path.isdir(download_path):    
-                os.mkdir(download_path)
-        else:
-            temp_files = True
-
-        urls = get_zinc_urls(subset=subset, mw_range=mw_range, logp_range=logp_range) 
-        n_files = len(urls)
-
-        # Start the thread to process files
-        threading.Thread(target=self._process_files, daemon=True, args=[n_files]).start()
-        self._download_zinc_subset(urls, download_path, temp_files=temp_files)
-        self._file_queue.join()
-        
-    def screen_chembl(self, download_path):
-        """ Screen ChemBl database"""
-        self.db = "ChemBL"
-        pass
         
     def screen_db_from_dir(self, path, file_extensions=None, **kwargs):
         """ Screen a database of molecules contained in one or more files. 
@@ -249,80 +194,6 @@ class VirtualScreening():
            molecules: list of rdkit.Chem.mol
         """
         self._screen_fn(molecules, pbar=True)
-
-    def _download_chembl_file(self, download_path):
-        """Download a single file form ChemBl.
-           
-           Parameters
-           ----------
-           download_path: str
-                Path where the file will be stored
-        """
-        pass
-
-    def _download_zinc_file(self, url, download_path, temp_file):
-        """Download a single file form ZINC.
-           
-           Parameters
-           ----------
-           url : str
-                URL of the file that will be downloaded.
-            
-           temp_file : bool
-                Whether to use a tempfile.
-
-           download_path : str
-                Path where the file will be stored
-        """
-        res = requests.get(url, allow_redirects=True)
-
-        if res.status_code != requests.codes.ok:
-            print("Could not fetch file from {}".format(url))
-            return 
-
-        if not temp_file:
-            file_name =  url[-8:]
-            file_path = os.path.join(download_path, file_name)
-            with open(file_path, "wb") as file:
-                file.write(res.content)
-            
-            return file_path
-        else:
-            fp = tempfile.NamedTemporaryFile()
-            fp.write(res.content)
-            
-            return fp
-
-    def _download_zinc_subset(self, urls, download_path, temp_files=False):
-        """ Download a subset from ZINC database.
-
-           Parameters
-           ----------
-           urls : list of str
-                List with the URLs of the files that will be downloaded.
-
-           download_path : str
-                Path where the file will be stored
-        """
-        print("Downloading from ZINC...")
-        if not temp_files:
-            file_path = self._download_zinc_file(urls[0], download_path, temp_file=False)
-            if file_path is not None:
-                self._file_queue.put(file_path) 
-
-            for url in tqdm(urls[1:]):
-                file_path = self._download_zinc_file(url, download_path, temp_file=False)
-                if file_path is not None:
-                    self._file_queue.put(file_path)
-
-        else:
-            fp = self._download_zinc_file(urls[0], download_path, temp_file=True)
-            self._file_queue.put(fp) 
-            
-            for url in tqdm(urls[1:]):
-                fp = self._download_zinc_file(url, download_path, temp_file=True)
-                self._file_queue.put(fp)
-   
     
     def _align_molecules(self, molecules, pbar=False):
         """ Align a list of molecules to a given pharmacophore.
@@ -573,40 +444,9 @@ class VirtualScreening():
         ligands = list(ligands)
         ligands = [lig for lig in ligands if lig is not None]
         if len(ligands) == 0:
-            raise OpenPharmacophoreIOError("Molecules couldn´t be loaded")
+            raise OpenPharmacophoreIOError("Molecules couldn't be loaded")
         
         return ligands
-    
-    def _process_files(self, n_files):
-        """ Process a file queue. 
-
-            For each downloaded file, converts it into a list of rdkit molecules
-            and then applies the screening function to each. 
-
-            Parameters
-            ----------
-            temp_files : bool
-                True if temporary files were stored in the file queue.
-                
-            n_files : int
-                Number of files that will be downloaded.
-
-        """
-        # Sleep a little so that the download bar appears first.
-        time.sleep(2)
-        print("Processing files...")
-        pbar = tqdm(total=n_files)
-        while True:
-            file = self._file_queue.get()
-            if isinstance(file, tempfile._TemporaryFileWrapper):
-                file.seek(0)
-                mols = self._load_molecules_file(file.name, fextension="smi")
-                file.close()
-            else:
-                mols = self._load_molecules_file(file)
-            self._screen_fn(mols)
-            pbar.update()
-            self._file_queue.task_done()
             
     def __repr__(self):
         return (f"{self.__class__.__name__}(n_matches={self.n_matches}; "

@@ -90,8 +90,52 @@ def test_to_rdkit(three_element_pharmacophore):
     assert np.allclose(ring_2.GetPos().y, 1.0)
     assert np.allclose(ring_2.GetPos().z, 2.0)
 
-def test_add_to_NGLView():
-    pass
-
-def test_show():
-    pass
+def test_distance_matrix():
+    
+    radius = puw.quantity(1.0, "angstroms")
+    points = [
+        PharmacophoricPoint(feat_type="hb acceptor",
+                            center=puw.quantity([1, 0, -5], "angstroms"),
+                            radius=radius),
+        PharmacophoricPoint(feat_type="hb donor",
+                            center=puw.quantity([2, 1, 0], "angstroms"),
+                            radius=radius),
+        PharmacophoricPoint(feat_type="aromatic ring",
+                            center=puw.quantity([-3, 2, -1], "angstroms"),
+                            radius=radius),
+    ]
+    
+    pharmacophore = Pharmacophore(elements=points)
+    distance_matrix = pharmacophore.distance_matrix()
+    
+    assert distance_matrix.shape == (3, 3)
+    assert np.allclose(distance_matrix, 
+                       np.array([[0, np.sqrt(27), 6],
+                                 [np.sqrt(27), 0, np.sqrt(27)],
+                                 [6, np.sqrt(27), 0]])
+                       )
+    
+    points = [
+        PharmacophoricPoint(feat_type="hb acceptor",
+                            center=puw.quantity([1, 2, 3], "angstroms"),
+                            radius=radius),
+        PharmacophoricPoint(feat_type="negative charge",
+                            center=puw.quantity([0, 0, 0], "angstroms"),
+                            radius=radius),
+        PharmacophoricPoint(feat_type="positive charge",
+                            center=puw.quantity([-1, 0, -1], "angstroms"),
+                            radius=radius),
+        PharmacophoricPoint(feat_type="aromatic ring",
+                            center=puw.quantity([2, -1, 1], "angstroms"),
+                            radius=radius),
+    ]
+    
+    sq = np.sqrt
+    pharmacophore = Pharmacophore(elements=points)
+    distance_matrix = pharmacophore.distance_matrix()
+    assert distance_matrix.shape == (4, 4)
+    assert np.allclose(distance_matrix,
+                       np.array([[0, sq(14), sq(24), sq(14)],
+                                 [sq(14), 0, sq(2), sq(6)],
+                                 [sq(24), sq(2), 0, sq(14)],
+                                 [sq(14), sq(6), sq(14), 0]]))
