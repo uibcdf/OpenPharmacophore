@@ -62,6 +62,12 @@ class InvalidFileFormat(OpenPharmacophoreValueError):
     """
     pass
 
+class InvalidSimilarityFunction(OpenPharmacophoreValueError):
+    """ Exception raised when passing an invalid similarity function to the VirtualScreening
+        construtor.
+    """
+    pass
+
 class WrongDimensionalityError(OpenPharmacophoreValueError):
     """ Exception raised when a quantity has the wrong dimensionality"""
     pass
