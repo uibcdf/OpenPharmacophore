@@ -1,4 +1,4 @@
-from openpharmacophore import PharmacophoricPoint, Pharmacophore, VirtualScreening, RetrospectiveScreening, pharmacophore
+from openpharmacophore import PharmacophoricPoint, Pharmacophore, VirtualScreening, RetrospectiveScreening, MultiProcessVirtualScreening
 import numpy as np
 import pytest
 import pyunitwizard as puw
@@ -7,7 +7,8 @@ from rdkit import Chem
 from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
 from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
 
-### Tests for VitualScreening class with standard pharmacophore ###
+### Tests for VitualScreening class ###
+#######################################
 
 @pytest.fixture
 def mock_screening_results():
@@ -56,7 +57,7 @@ def test_get_report(mock_screening_results):
     assert expected_report == report_str.split()
 
 @pytest.mark.parametrize("form", ["dict", "dataframe"])
-def test_get__screening_results(form, mock_screening_results):
+def test_get_screening_results(form, mock_screening_results):
     screener = mock_screening_results
     results = screener.get_screening_results(form=form)
 
@@ -142,9 +143,25 @@ def test_screen_mol_file(pharmacophore_fingerprint, four_element_pharmacophore):
         assert id is None
         assert isinstance(mol, Chem.Mol)
 
-
+def test_get_files():
+    
+    path_to_files = "./openpharmacophore/data/ligands"
+    file_queue = MultiProcessVirtualScreening._get_files(path_to_files)
+    file_list = []
+    for ii in range(file_queue.qsize()):
+        file_list.append(file_queue.get())
+    
+    assert len(file_list) == 5
+    assert "./openpharmacophore/data/ligands/ace.mol2" in file_list
+    assert "./openpharmacophore/data/ligands/BAAAML.smi" in file_list
+    assert "./openpharmacophore/data/ligands/clique_detection.smi" in file_list
+    assert "./openpharmacophore/data/ligands/er_alpha_ligands.sdf" in file_list
+    assert "./openpharmacophore/data/ligands/mols.smi" in file_list
+    
 
 ## Tests for Retrospective Screening ##
+#######################################
+
 def test_init_retrospective_screening(four_element_pharmacophore, pharmacophore_fingerprint):
     
     pharmacophore = four_element_pharmacophore

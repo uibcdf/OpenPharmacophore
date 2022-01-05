@@ -93,6 +93,13 @@ def mol2_mol_generator(file_object):
         if not line:
             break
         
+        if not line.strip():
+            continue
+        
+        # Skip comments
+        if line.startswith("#"):
+            continue 
+        
         if '@<TRIPOS>MOLECULE' not in line:
             mol2_block = "@<TRIPOS>MOLECULE\n"
             mol2_block += line
@@ -103,6 +110,6 @@ def mol2_mol_generator(file_object):
              if '@<TRIPOS>MOLECULE' in line or len(line) == 0:
                  break
              mol2_block += line
-             
+        
         yield Chem.MolFromMol2Block(mol2_block)
         

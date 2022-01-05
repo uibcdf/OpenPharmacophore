@@ -1,5 +1,4 @@
 # OpenPharmacophore
-from openpharmacophore import pharmacophore
 from openpharmacophore.io.mol_suppliers import smiles_mol_generator, smi_has_header_and_id, mol2_mol_generator
 from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError, OpenPharmacophoreNotImplementedError, OpenPharmacophoreTypeError
@@ -350,9 +349,11 @@ class VirtualScreening():
 
         factory : 
         
-        similarity_fn :
+        similarity_fn : function
+            The similarity function that will be applied to the molecule. Can be tanimoto or dice.
         
-        sim_cutoff : 
+        sim_cutoff : float between 0 and 1
+            The cutoff value from which a molecule will be considered a match.
         
         sort : bool, default=False
             Whether to sort the list with the matches.
@@ -499,7 +500,7 @@ class MultiProcessVirtualScreening(VirtualScreening):
         valid_formats = ("smi", "txt", "sdf", "mol2", "db2")
           
         if not os.path.isdir(path):
-            raise OpenPharmacophoreIOError("{} is not a valid file/directory".format(path)) 
+            raise OpenPharmacophoreIOError("{} is not a valid directory".format(path)) 
         
         exclude_prefixes = ('__', '.')
         
@@ -573,7 +574,7 @@ class MultiProcessVirtualScreening(VirtualScreening):
                 return list(matches).sort(key=lambda x: x.score), n_molecules.value
             
     def _screen_files(self, file_queue, n_molecules, screen_fn, args):
-        """ Perform virtual screening using molecular alignment algorithm to a queue of files.
+        """ Perform virtual screening to a set of molecules contained in a queue of files.
 
             Parameters
             ----------

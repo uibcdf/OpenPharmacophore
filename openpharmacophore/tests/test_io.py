@@ -326,7 +326,36 @@ def test_smi_has_header_and_id():
     assert has_id == True
     
 def test_mol2_mol_generator():
-    pass
+    mol2_file = "./openpharmacophore/data/ligands/ace.mol2"
+    
+    molecules = []
+    with open(mol2_file, "r") as fp:
+        for mol in mol2_mol_generator(fp):
+            molecules.append(mol)
+            
+    assert len(molecules) == 3
+    assert molecules[0].GetNumAtoms() == 14
+    assert molecules[1].GetNumAtoms() == 25
+    assert molecules[2].GetNumAtoms() == 29
 
 def test_smiles_mol_generator():
-    pass
+    
+    smi_file = "./openpharmacophore/data/ligands/mols.smi"
+    
+    n_molecules = 0
+    with open(smi_file, "r") as fp:
+        for mol in smiles_mol_generator(fp, header=False, mol_id=False):
+            n_molecules += 1  
+            assert isinstance(mol, Chem.Mol)
+    
+    assert n_molecules == 5
+    
+    smi_file = "./openpharmacophore/data/ligands/BAAAML.smi"
+    
+    n_molecules = 0
+    with open(smi_file, "r") as fp:
+        for mol in smiles_mol_generator(fp, header=True, mol_id=True):
+            n_molecules += 1 
+            assert isinstance(mol, Chem.Mol)
+            
+    assert n_molecules == 23

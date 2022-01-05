@@ -20,7 +20,7 @@ from .pharmacophoric_point import PharmacophoricPoint
 from .pharmacophore import Pharmacophore
 from .ligand_based import LigandBasedPharmacophore
 from .structured_based import StructuredBasedPharmacophore
-from .screening.screening import VirtualScreening
+from .screening.screening import VirtualScreening, MultiProcessVirtualScreening
 from .screening.retrospective import RetrospectiveScreening
 from .dynophore import Dynophore as Dynophore
 from .databases.zinc_client import ZincClient
