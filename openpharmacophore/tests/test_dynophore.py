@@ -1,4 +1,4 @@
-from openpharmacophore import Dynophore, StructuredBasedPharmacophore, PharmacophoricPoint, dynophore, pharmacophore
+from openpharmacophore import Dynophore, StructuredBasedPharmacophore, PharmacophoricPoint
 import MDAnalysis
 import mdtraj
 import numpy as np

@@ -1,4 +1,4 @@
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint
 import numpy as np
 import pyunitwizard as puw
 
@@ -14,7 +14,6 @@ def test_PharmacophoricPoint():
                 direction=np.array([1.0, 1.0, 1.0]), atoms_inxs=atom_inxs)
 
     assert donor_1.has_direction == False
-    assert donor_1.element_name == "HbDonorSphere"
     assert np.allclose(puw.get_value(donor_1.center, "angstroms"), np.array([1.0, 1.0, 1.0]))
     assert np.allclose(puw.get_value(donor_1.radius, "angstroms"), 1.0)
     assert atom_inxs == (3, 4, 5, 6) 
@@ -27,7 +26,6 @@ def test_PharmacophoricPoint():
 
     ring = PharmacophoricPoint(feat_name, center, radius, direction, atom_inxs)
     assert ring.has_direction == True
-    assert ring.element_name == "AromaticRingSphereAndVector"
     assert ring.atoms_inxs is None
     assert np.allclose(puw.get_value(ring.center, "angstroms"), np.array([1.5, -2.0, 3.2]))
     assert np.allclose(puw.get_value(ring.radius, "angstroms"), 1.5) 

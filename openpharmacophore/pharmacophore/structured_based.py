@@ -3,9 +3,9 @@ from openpharmacophore._private_tools.exceptions import (FetchError, InvalidFile
      NoLigandsError, OpenPharmacophoreIOError)
 from openpharmacophore import Pharmacophore
 from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
-from openpharmacophore.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.utils import ligand_features
+from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor
 # Third Party
 from MDAnalysis.lib.util import NamedStream
 import numpy as np
@@ -64,7 +64,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.ligand = ligand
     
     @classmethod
-    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="rdkit", load_mol_system=True, load_ligand=True):
+    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="smarts", load_mol_system=True, load_ligand=True):
         """ Class method to obtain a pharmacophore from a pdb file containing a protein-ligand complex. 
             
             Only the interactions of a single lignad will be computed in case  the protein structure contains 
@@ -260,7 +260,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return all_interactions, pdb_string, ligands
     
     @staticmethod
-    def _sb_pharmacophore_points(interactions, radius, ligand, hydrophobics="rdkit"):
+    def _sb_pharmacophore_points(interactions, radius, ligand, hydrophobics="smarts"):
         """Static method to obtain a list of pharmacophoric points for the protein-ligand complex.
 
         Parameters
@@ -274,10 +274,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         ligand : rdkit.Chem.mol
             The ligand in from the protein-ligand complex.
         
-        hydrophobics : {"plip", "rdkit"}
-            Can be "plip" or "rdkit". If the former is chosen the hydrophobic points will
-            be retrieved from the interactions plip calculates. Else smarts patterns from
-            rdkit will be used. 
+        hydrophobics : {"plip", "smarts"}
+            Can be "plip" or "smarts". If the former is chosen the hydrophobic points will
+            be retrieved from the interactions plip calculates. Else smarts patterns will be used. 
 
         Returns
         -------
@@ -390,9 +389,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         if len(hydrophobic_points) > 1:
             hydrophobic_points = StructuredBasedPharmacophore._plip_hydrophobics(hydrophobic_points, radius)
        
-        if hydrophobics == "rdkit":
+        if hydrophobics == "smarts":
             radius = puw.get_value(radius, "angstroms")
-            hydrophobic_points = StructuredBasedPharmacophore._rdkit_hydrophobics(ligand, radius)
+            hydrophobic_points = StructuredBasedPharmacophore._smarts_hydrophobics(ligand, radius)
         
         return points_filtered + hydrophobic_points
 
@@ -445,8 +444,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return grouped_points
 
     @staticmethod
-    def _rdkit_hydrophobics(ligand, radius):
-        """ Get hydrophobic points usign rdkit feature definitions
+    def _smarts_hydrophobics(ligand, radius):
+        """ Get hydrophobic points usign smarts feature definitions
             
             Parmaeters
             ----------
@@ -458,30 +457,13 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
             Returns
             ---------
-            points : list of openpharmacophore.pharmacophoric_point.PharmacophoricPoint
+            points : list of openpharmacophore.PharmacophoricPoint
                 List with the hydrophobic points.
         """
-        hydrophobic_smarts = [
-        "[$([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(**[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]",
-        "[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]",
-        "[C&r3]1~[C&r3]~[C&r3]1",
-        "[C&r4]1~[C&r4]~[C&r4]~[C&r4]1",
-        "[C&r5]1~[C&r5]~[C&r5]~[C&r5]~[C&r5]1",
-        "[C&r6]1~[C&r6]~[C&r6]~[C&r6]~[C&r6]~[C&r6]1",
-        "[C&r7]1~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]1",
-        "[C&r8]1~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]1",
-        "[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]",
-        "[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]",
-        "[$([CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]",
-        "[$([S]~[#6])&!$(S~[!#6])]",
-        ]
-
-        smarts_dict = {smarts : "Hydrophobe" for smarts in hydrophobic_smarts}
-        points_dict = ligand_features.ligands_pharmacophoric_points(ligand, radius, feat_list=None, feat_def=smarts_dict)
-        if "conformer_0" in points_dict["ligand_0"]:
-            return points_dict["ligand_0"]["conformer_0"]
-        else:     
-            return [] 
+        hydrophobic_point_extractor = PharmacophoricPointExtractor(default_radius=radius, features=["hydrophobicity"])
+        points = hydrophobic_point_extractor(ligand, 0)
+        
+        return points
 
     def draw(self, file_name, img_size=(500,500), legend=""):
         """ Draw a 2d representation of the pharmacophore. 

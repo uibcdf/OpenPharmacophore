@@ -1,11 +1,12 @@
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import LigandBasedPharmacophore
+from openpharmacophore import StructuredBasedPharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.io.moe import from_moe, _moe_ph4_string
 from openpharmacophore.io.ligandscout import from_ligandscout, _ligandscout_xml_tree
-from openpharmacophore.io.pharmagist import read_pharmagist, _pharmagist_file_info
+from openpharmacophore.io.pharmagist import _pharmagist_file_info
+from openpharmacophore.io.load_pharmagist import read_pharmagist
 from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.ligand_based import LigandBasedPharmacophore
-from openpharmacophore.structured_based import StructuredBasedPharmacophore
 from openpharmacophore.io.mol_files import load_molecules_file
 from openpharmacophore.io.mol_suppliers import smi_has_header_and_id, mol2_mol_generator, smiles_mol_generator
 import numpy as np

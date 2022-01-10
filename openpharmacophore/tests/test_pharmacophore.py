@@ -1,5 +1,4 @@
-from openpharmacophore.pharmacophore import Pharmacophore
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
+from openpharmacophore import Pharmacophore, PharmacophoricPoint
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import pytest

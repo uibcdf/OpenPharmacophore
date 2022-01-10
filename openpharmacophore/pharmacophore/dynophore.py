@@ -1,10 +1,10 @@
 # OpenPharmacophore
 from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError, OpenPharmacophoreTypeError
-from openpharmacophore.pharmacophoric_point import UniquePharmacophoricPoint
-from openpharmacophore.structured_based import StructuredBasedPharmacophore
+from openpharmacophore.pharmacophore.pharmacophoric_point import UniquePharmacophoricPoint
+from openpharmacophore import StructuredBasedPharmacophore
 from openpharmacophore import Pharmacophore
 from openpharmacophore.utils.conformers import conformer_energy
-from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third Party
 import matplotlib.pyplot as plt
 import MDAnalysis as mda

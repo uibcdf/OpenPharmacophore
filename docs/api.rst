@@ -17,7 +17,7 @@ Features colorpalettes
 .. autosummary::
    :toctree: _autosummary
 
-   openpharmacophore.color_palettes.get_color_from_palette_for_feature
+   openpharmacophore.pharmacophore.color_palettes.get_color_from_palette_for_feature
 
 
 Pharmacophores

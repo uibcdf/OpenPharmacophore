@@ -16,13 +16,11 @@ __github_issues_web__ = __github_web__ + '/issues'
 
 # Add imports here
 from ._pyunitwizard import puw as _puw
-from .pharmacophoric_point import PharmacophoricPoint
-from .pharmacophore import Pharmacophore
-from .ligand_based import LigandBasedPharmacophore
-from .structured_based import StructuredBasedPharmacophore
+from .pharmacophore.pharmacophoric_point import PharmacophoricPoint
+from .pharmacophore.pharmacophore import Pharmacophore
+from .pharmacophore.ligand_based import LigandBasedPharmacophore
+from .pharmacophore.structured_based import StructuredBasedPharmacophore
 from .screening.screening import VirtualScreening, MultiProcessVirtualScreening
 from .screening.retrospective import RetrospectiveScreening
-from .dynophore import Dynophore as Dynophore
+from .pharmacophore.dynophore import Dynophore
 from .databases.zinc_client import ZincClient
-
-from . import demo as demo

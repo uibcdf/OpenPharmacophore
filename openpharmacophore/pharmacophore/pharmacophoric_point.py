@@ -1,7 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore import __documentation_web__
-from openpharmacophore.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore._private_tools.exceptions import IsNotStringError, OpenPharmacophoreTypeError, PointWithNoColorError
+from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore._private_tools.exceptions import InvaludFeatureType, OpenPharmacophoreTypeError, PointWithNoColorError
 from openpharmacophore._private_tools.colors import convert as convert_color_code
 from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
@@ -9,10 +9,10 @@ import numpy as np
 import pyunitwizard as puw
 
 feature_to_char = {
-            "hb acceptor": "A",
-            "hb donor": "D",
-            "aromatic ring": "R",
-            "hydrophobicity": "H",
+            "hb acceptor":     "A",
+            "hb donor":        "D",
+            "aromatic ring":   "R",
+            "hydrophobicity":  "H",
             "positive charge": "P",
             "negative charge": "N",
             "excluded volume": "E",
@@ -61,10 +61,6 @@ class PharmacophoricPoint():
         
         has_direction : bool
             Whether the pharmacophoric point has direction.
-
-        element_name : str
-            The name of the element contains the feature type and wheter the point is a sphere or a sphere
-            and vector.
         
         atoms_inxs : set of int
             A set of the indices of the atoms corresponding to the pharmacophoic point in the molecule from which
@@ -83,28 +79,26 @@ class PharmacophoricPoint():
             validate_input_array_like(direction, shape=(3,), name="direction")
         # Validate feat type
         if not isinstance(feat_type, str):
-            raise IsNotStringError("feat_type must be a string")
+            raise InvaludFeatureType("feat_type must be a string")
         # Validate atoms_inxs
         if atoms_inxs is not None:
             if not isinstance(atoms_inxs, (list, set, tuple)):
                 raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
             
         if feat_type not in list(feature_to_char.keys()):
-            raise ValueError(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
+            raise InvaludFeatureType(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
 
         self.center = puw.standardize(center)
         self.radius = puw.standardize(radius)
         self.feature_name = feat_type
         self.short_name = feature_to_char[feat_type]
-        self.element_name = "".join([n.capitalize() for n in self.feature_name.split()])
+
         if direction is not None:
             self.direction = direction/np.linalg.norm(direction)
             self.has_direction = True
-            self.element_name += "SphereAndVector"
         else:
             self.direction = None
             self.has_direction = False
-            self.element_name += "Sphere"
         
         if atoms_inxs is not None:
             self.atoms_inxs = set(atoms_inxs)
@@ -112,6 +106,7 @@ class PharmacophoricPoint():
             self.atoms_inxs = None
         
         self.pharmacophore_index = 0
+        self.count = 1
         
         
     def add_to_NGLView(self, view, feature_name=None, color_palette='openpharmacophore', color=None, opacity=0.5):
@@ -205,17 +200,6 @@ class PharmacophoricPoint():
                 return radius_eq and center_eq
         return False
 
-    def __str__(self):
-        center = np.around(puw.get_value(self.center, "angstroms"), 4)
-        radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
-        x, y, z = center[0], center[1], center[2]
-        if self.has_direction:
-            direction = np.around(self.direction, 4)
-            xd, yd, zd = direction[0], direction[1], direction[2]
-            return f"{self.element_name}(center=({x}, {y}, {z}); radius={radius}; direction=({xd}, {yd}, {zd}))"
-        else:
-            return f"{self.element_name}(center=({x}, {y}, {z}); radius={radius})"
-
     def __repr__(self):
         center = np.around(puw.get_value(self.center, "angstroms"), 2)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
@@ -224,13 +208,13 @@ class PharmacophoricPoint():
             direction = np.around(self.direction, 4)
             xd, yd, zd = direction[0], direction[1], direction[2]
             return (f"{self.__class__.__name__}("
-                    f"feat_type=({self.feature_name}) " 
+                    f"feat_type={self.feature_name}; " 
                     f"center=({x}, {y}, {z}); radius: {radius}; " 
                     f"direction=({xd}, {yd}, {zd}))")
         else:
             return (f"{self.__class__.__name__}("
-                    f"feat_type=({self.feature_name}) " 
-                    f"center=({x}, {y}, {z}); radius={radius};")
+                    f"feat_type={self.feature_name}; " 
+                    f"center=({x}, {y}, {z}); radius={radius})")
 
 
 class UniquePharmacophoricPoint(PharmacophoricPoint):
@@ -252,7 +236,22 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
 
 
 def distance_bewteen_pharmacophoric_points(p1, p2):
-    """ Compute the distance in angstroms between two pharmacophoric points."""
+    """ Compute the distance in angstroms between two pharmacophoric points.
+    
+        Parameters
+        ----------
+        p1 : openpharmacophore.pharmacophoric_point
+            A pharmacophoric point
+
+        p2 : openpharmacophore.pharmacophoric_point
+            A pharmacophoric point
+        
+        Returns
+        -------
+        float
+            The distance between the pharmacophoric points
+    """
+    
     
     p1_center = puw.get_value(p1.center, "angstroms")
     p2_center = puw.get_value(p2.center, "angstroms")
