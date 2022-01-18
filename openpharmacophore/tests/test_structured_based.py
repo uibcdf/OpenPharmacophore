@@ -1,5 +1,5 @@
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.structured_based import StructuredBasedPharmacophore as SBP
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import StructuredBasedPharmacophore as SBP
 from openpharmacophore.utils.conformers import generate_conformers
 import numpy as np
 import pytest
@@ -7,13 +7,11 @@ import pyunitwizard as puw
 from rdkit import Chem
 import os
 
-from openpharmacophore.utils.conformers import generate_conformers
-
 @pytest.mark.parametrize("file_name,ligand_id,hydrophobics", [
     ("1ncr", "W11:A:7001", "plip"),
     ("2hz1", None, "plip"),
     ("2hzi", "JIN:A:600", "plip"),
-    ("1qku", "EST:A:600", "rdkit")
+    ("1qku", "EST:A:600", "smarts")
 ])
 def test_from_pdb(file_name, ligand_id, hydrophobics):
     pdbs_path = "./openpharmacophore/data/pdb/"
@@ -273,16 +271,16 @@ def test_sb_pharmacophore_points(file_name):
                 n_hydrophobics += 1
         assert n_hydrophobics == 3
     
-def test_rdkit_hydrophobics():
+def test_smarts_hydrophobics():
     
     ligand = Chem.MolFromSmiles("CC1=CC(=CC(=C1OCCCC2=CC(=NO2)C)C)C3=NOC(=N3)C(F)(F)F")
     ligand = generate_conformers(ligand, 1, random_seed=1)
-    hydrophobics = SBP()._rdkit_hydrophobics(ligand, 1.0)
+    hydrophobics = SBP()._smarts_hydrophobics(ligand, 1.0)
 
-    assert len(hydrophobics) == 2
+    assert len(hydrophobics) == 3
     
     hyd_1 = hydrophobics[0]
-    hyd_2 = hydrophobics[1]
+    hyd_2 = hydrophobics[2]
     hyd_2_center = puw.get_value(hyd_2.center, "angstroms")
     hyd_2_radius = puw.get_value(hyd_2.radius, "angstroms")
     assert hyd_1 == PharmacophoricPoint(

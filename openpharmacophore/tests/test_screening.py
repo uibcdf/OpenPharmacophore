@@ -1,4 +1,4 @@
-from openpharmacophore import PharmacophoricPoint, Pharmacophore, VirtualScreening, RetrospectiveScreening, pharmacophore
+from openpharmacophore import PharmacophoricPoint, Pharmacophore, VirtualScreening, RetrospectiveScreening, MultiProcessVirtualScreening
 import numpy as np
 import pytest
 import pyunitwizard as puw
@@ -6,9 +6,9 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem.Pharm2D import Gobbi_Pharm2D
 from rdkit.Chem.Pharm2D.Generate import Gen2DFingerprint
-import os
 
-### Tests for VitualScreening class with standard pharmacophore ###
+### Tests for VitualScreening class ###
+#######################################
 
 @pytest.fixture
 def mock_screening_results():
@@ -21,7 +21,6 @@ def mock_screening_results():
     screener.n_matches = 3
     screener.n_fails = 60000 - 3
     screener.scoring_metric = "Similarity"
-    screener.db = "ChemBl"
 
     screener.matches = [
         (0.6542, "CHEMBL22796", Chem.MolFromSmiles("CCCCc1nn(CCC)c(C(=O)O)c1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1")),
@@ -49,7 +48,7 @@ def test_get_report(mock_screening_results):
 
         Top 3 molecules:
 
-        ChemBlID     Similarity
+           ID        Similarity
         -------       ------
         CHEMBL907     0.8974
         CHEMBL431887  0.7833
@@ -58,15 +57,15 @@ def test_get_report(mock_screening_results):
     assert expected_report == report_str.split()
 
 @pytest.mark.parametrize("form", ["dict", "dataframe"])
-def test_get__screening_results(form, mock_screening_results):
+def test_get_screening_results(form, mock_screening_results):
     screener = mock_screening_results
     results = screener.get_screening_results(form=form)
 
     if form == "dict":
         assert isinstance(results, dict)
         assert len(results) == 5
-        assert "ChemBl_id" in results
-        assert results["ChemBl_id"] == ["CHEMBL22796",
+        assert "Id" in results
+        assert results["Id"] == ["CHEMBL22796",
                             "CHEMBL431887", "CHEMBL907"]
         assert results["Smiles"] == ["CCCCc1nn(CCC)c(C(=O)O)c1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1",
             "CCCCc1nn(CC)c(C(=O)O)c1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1",
@@ -78,8 +77,8 @@ def test_get__screening_results(form, mock_screening_results):
 
     else:
         assert isinstance(results, pd.DataFrame)
-        assert list(results.columns) == ['ChemBl_id', 'Smiles', 'Similarity', 'Mol_weight', 'logP']
-        assert results["ChemBl_id"].to_list() == ["CHEMBL22796",  "CHEMBL431887", "CHEMBL907"]
+        assert list(results.columns) == ['Id', 'Smiles', 'Similarity', 'Mol_weight', 'logP']
+        assert results["Id"].to_list() == ["CHEMBL22796",  "CHEMBL431887", "CHEMBL907"]
         assert results["Smiles"].to_list() == ["CCCCc1nn(CCC)c(C(=O)O)c1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1",
             "CCCCc1nn(CC)c(C(=O)O)c1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1",
             "CCCCc1nc(Cl)c(C(=O)O)n1Cc1ccc(-c2ccccc2-c2nn[nH]n2)cc1"
@@ -87,26 +86,6 @@ def test_get__screening_results(form, mock_screening_results):
         assert np.allclose(results["Mol_weight"].to_numpy(), np.array([444.54, 430.51, 436.90]))
         assert np.allclose(results["logP"].to_numpy(), np.array([4.7718, 4.3817, 4.4727]))
         assert np.allclose(results["Similarity"].to_numpy(), np.array([0.6542, 0.7833, 0.8974]))
-
-@pytest.mark.parametrize("file_name", [
-    "ace.mol2",
-    "clique_detection.smi"
-])
-def test_load_molecules_file(file_name):
-    pharmacophore = Pharmacophore()
-    screener = VirtualScreening(pharmacophore)
-    file_path = os.path.join("./openpharmacophore/data/ligands", file_name)
-    
-    if file_name.endswith(".smi"):
-        ligands = screener._load_molecules_file(file_name=file_path, titleLine=False)
-        assert len(ligands) == 5
-    elif file_name.endswith(".mol2"):
-        ligands = screener._load_molecules_file(file_name=file_path)
-        assert len(ligands) == 3
-
-    assert isinstance(ligands, list)
-    for lig in ligands:
-        assert isinstance(lig, Chem.Mol)
 
 @pytest.fixture
 def four_element_pharmacophore():
@@ -131,13 +110,30 @@ def four_element_pharmacophore():
     ]
     return Pharmacophore(elements)
 
-def test_screen_db_from_dir_3D(four_element_pharmacophore):
 
-    pharmacophore = four_element_pharmacophore
+@pytest.fixture
+def pharmacophore_fingerprint():
+    mol = Chem.MolFromSmiles("Cc1cccc(c2n[nH]cc2c3ccc4ncccc4n3)n1")
+    factory = Gobbi_Pharm2D.factory
+    return Gen2DFingerprint(mol, factory)
+
+
+def test_screen_mol_file(pharmacophore_fingerprint, four_element_pharmacophore):
     file_path = "./openpharmacophore/data/ligands/mols.smi"
-
+   
+    screener = VirtualScreening(pharmacophore_fingerprint, similarity="tanimoto", sim_cutoff=0.6)
+    screener.screen_mol_file(file_path)
+    assert screener.n_molecules == 5
+    assert screener.n_matches == 1
+    assert screener.n_fails == 4
+    assert len(screener.matches) == 1
+    assert screener.matches[0][0] == 1.0
+    assert screener.matches[0][1] is None
+    assert isinstance(screener.matches[0][2], Chem.Mol)
+    
+    pharmacophore = four_element_pharmacophore
     screener = VirtualScreening(pharmacophore)
-    screener.screen_db_from_dir(file_path, titleLine=False)
+    screener.screen_mol_file(file_path)
 
     assert screener.n_molecules == 5
     assert screener.n_matches == 4
@@ -147,29 +143,25 @@ def test_screen_db_from_dir_3D(four_element_pharmacophore):
         assert id is None
         assert isinstance(mol, Chem.Mol)
 
-@pytest.fixture
-def pharmacophore_fingerprint():
-    mol = Chem.MolFromSmiles("Cc1cccc(c2n[nH]cc2c3ccc4ncccc4n3)n1")
-    factory = Gobbi_Pharm2D.factory
-    return Gen2DFingerprint(mol, factory)
-
-
-### Tests for VirtualScreening class with a pharmacophore fingerprint ###
-def test_screen_db_from_dir_2D(pharmacophore_fingerprint):
-    file_path = "./openpharmacophore/data/ligands/mols.smi"
-   
-    screener = VirtualScreening(pharmacophore_fingerprint, similarity="tanimoto", sim_cutoff=0.6)
-    screener.screen_db_from_dir(file_path, titleLine=False)
-    assert screener.n_molecules == 5
-    assert screener.n_matches == 1
-    assert screener.n_fails == 4
-    assert len(screener.matches) == 1
-    assert screener.matches[0][0] == 1.0
-    assert screener.matches[0][1] is None
-    assert isinstance(screener.matches[0][2], Chem.Mol)
-
+def test_get_files():
+    
+    path_to_files = "./openpharmacophore/data/ligands"
+    file_queue = MultiProcessVirtualScreening._get_files(path_to_files)
+    file_list = []
+    for ii in range(5):
+        file_list.append(file_queue.get())
+    
+    assert len(file_list) == 5
+    assert "./openpharmacophore/data/ligands/ace.mol2" in file_list
+    assert "./openpharmacophore/data/ligands/BAAAML.smi" in file_list
+    assert "./openpharmacophore/data/ligands/clique_detection.smi" in file_list
+    assert "./openpharmacophore/data/ligands/er_alpha_ligands.sdf" in file_list
+    assert "./openpharmacophore/data/ligands/mols.smi" in file_list
+    
 
 ## Tests for Retrospective Screening ##
+#######################################
+
 def test_init_retrospective_screening(four_element_pharmacophore, pharmacophore_fingerprint):
     
     pharmacophore = four_element_pharmacophore
@@ -182,7 +174,6 @@ def test_init_retrospective_screening(four_element_pharmacophore, pharmacophore_
     screener_2d = RetrospectiveScreening(fingerprint, similarity="dice")
     assert screener_2d.scoring_metric == "Similarity"
     assert screener_2d._screen_fn.__name__ == "_fingerprint_similarity"
-    assert screener_2d.similarity_fn == "dice"
 
 def test_from_bioactivity_data():
     pass

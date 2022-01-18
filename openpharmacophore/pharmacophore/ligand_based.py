@@ -1,11 +1,11 @@
-# OpenPharmcophore
+# OpenPharmacophore
 from openpharmacophore import Pharmacophore
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError
-from openpharmacophore.utils.ligand_features import ligands_pharmacophoric_points
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError, OpenPharmacophoreTypeError
+from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor, oph_featuredefinition
 from openpharmacophore.visualization.view_ligands import view_ligands
 from openpharmacophore.algorithms.dbscan import dbscan_pharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
-from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third Party
 import nglview as nv
 from rdkit import Chem
@@ -49,11 +49,10 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     """
 
-    def __init__(self, elements=[], ligands=[], feat_def=None):
+    def __init__(self, elements=[], ligands=[]):
         super().__init__(elements=elements)
         self.ligands = ligands
-        self.feature_def = feat_def
-
+ 
     def draw(self, n_per_row, lig_indices=None, subimage_size=(250, 200), legends=None):
         """ Get a 2D representation of the ligands with the pharmacophoric points highlighted.
             
@@ -97,6 +96,8 @@ class LigandBasedPharmacophore(Pharmacophore):
         n_cols = n_per_row
         img_size = (subimage_size[0] * n_cols, subimage_size[1] * n_rows)
         res = Image.new("RGB", img_size, (255, 255, 255))
+        
+        extractor = PharmacophoricPointExtractor()
 
         for ii, lig in enumerate(ligand_list):
             
@@ -109,8 +110,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                 legend = ""
 
             ligand = copy.deepcopy(lig)
-            ligand_pharmacophore_points = ligands_pharmacophoric_points(ligand, radius=1.0, feat_list=None, feat_def=self.feature_def)
-            ligand_pharmacophore_points = ligand_pharmacophore_points["ligand_0"]["conformer_0"]
+            ligand_pharmacophore_points = extractor(ligand, 0)
 
             ligand.RemoveAllConformers()
             ligand = Chem.RemoveHs(ligand)
@@ -163,6 +163,18 @@ class LigandBasedPharmacophore(Pharmacophore):
         res.save(bio, format="PNG")
         return bio.getvalue()
 
+    @classmethod
+    def single_ligand_pharmacophore(cls, ligand, radius=1.0, features=None, featdef=oph_featuredefinition()):
+        """ Get a pharmacophore from a single ligand.
+
+            Parameters
+            ----------
+            ligand : rdkit.chem.mol
+                A ligand.
+        """
+        extractor = PharmacophoricPointExtractor(featdef=featdef, default_radius=radius, features=features)
+        pharmacophore_points = extractor(ligand, 0)
+        return cls(pharmacophore_points, [ligand])
         
     @classmethod
     def from_ligand_list(cls, ligands, method, radius=1.0, feat_list=None, feat_def=None):
@@ -195,7 +207,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         """
         if not isinstance(ligands, list):
-            raise TypeError("Ligands must be of type list")
+            raise OpenPharmacophoreTypeError("Ligands must be of type list")
         
         if method == "dbscan":
             points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list, feat_def=feat_def)

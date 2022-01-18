@@ -581,17 +581,13 @@ class RetrospectiveScreening():
         Does not return anything. The attribute molecules is updated with the scored molecules.
 
         """
-        if self.similarity_fn == "tanimoto":
-            similarity_fn = DataStructs.TanimotoSimilarity
-        elif self.similarity_fn == "dice":
-            similarity_fn = DataStructs.DiceSimilarity
        
         self.n_molecules = len(molecules)
         MolScore = namedtuple("MolScore", ["score", "id", "mol"])
         
         for mol in tqdm(molecules):
             fingerprint = Gen2DFingerprint(mol, self._factory)
-            similarity = similarity_fn(self.pharmacophore, fingerprint)
+            similarity = self.similarity_fn(self.pharmacophore, fingerprint)
             mol_id = mol.GetProp("_Name")
             matched_mol = MolScore(similarity, mol_id, mol)
             self.molecules.append(matched_mol)

@@ -1,11 +1,52 @@
+from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.utils.align_ligands import align_set_of_ligands
-from openpharmacophore.utils.centroid import feature_centroid
-from openpharmacophore.utils.ligand_features import rdkit_to_point
+from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor
 import numpy as np
 from sklearn.cluster import DBSCAN
 from rdkit import Chem, RDConfig
 from rdkit.Chem import ChemicalFeatures
+import pyunitwizard as puw
 import os
+
+def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=None):
+    """ Transform an rdkit feature point to an openpharmacophore pharmacophoric point.
+
+        Parameters
+        ----------
+        feat_name : str
+            rdkit name of the feature point.
+
+        coords : numpy.ndarray; shape: (3, )
+            3D coordinates of the centroid of the feature.
+        
+        radius : float
+            Lenght of the radius of the parmacohporic points. 
+
+        direction : list, tuple, numpy.ndarray; shape:(3,)
+            Unit vector. 
+
+        Returns
+        -------
+        openpharmacophore.PharmacophoricPoint
+            The pharmacophoric point.
+    """
+
+    points = {
+        "Acceptor": "hb acceptor",
+        "Donor": "hb donor",
+        "Aromatic": "aromatic ring",
+        "Hydrophobe": "hydrophobicity",
+        "PosIonizable": "positive charge",
+        "NegIonizable": "negative charge",
+    }
+
+    return PharmacophoricPoint(
+        feat_type=points[feat_name],
+        center=puw.quantity(coords, "angstroms"),
+        radius=puw.quantity(radius, "angstroms"),
+        direction=direction,
+        atoms_inxs=atom_indices
+    )
 
 def get_feature_clusters(feat_coords, eps, min_samples):
     """
@@ -124,7 +165,7 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
                 for f in feats:
                     atom_idxs = f.GetAtomIds()
                     if len(atom_idxs) > 1: # Aromatic, hydrophobic, positive or negative feature
-                        coords = feature_centroid(ligand, atom_idxs, 0)
+                        coords = PharmacophoricPointExtractor._feature_centroid(ligand, atom_idxs, 0)
                     else: # Donor or acceptor feature
                         position = ligand.GetConformer(0).GetAtomPosition(atom_idxs[0])
                         coords = np.zeros((3,))
@@ -145,7 +186,7 @@ def dbscan_pharmacophore(ligands, radius=1, eps=2, min_samples=0.75, feat_list=N
                         coords[1] = position.y
                         coords[2] = position.z
                     elif len(atom_idxs) > 1: # Aromatic, hydrophobic, positive or negative feature
-                        coords = feature_centroid(ligand, atom_idxs, 0)      
+                        coords = PharmacophoricPointExtractor._feature_centroid(ligand, atom_idxs, 0)      
                  
                     feat_coords[feature].append((coords.tolist()))
         feat_coords[feature] = np.array(feat_coords[feature])

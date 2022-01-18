@@ -1,7 +1,7 @@
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from openpharmacophore._private_tools.exceptions import NoConformersError
+from openpharmacophore._private_tools.exceptions import NoConformersError, OpenPharmacophoreTypeError, OpenPharmacophoreValueError
 
 def generate_conformers(molecule, n_conformers, random_seed=-1, alignment=False):
     """Generate conformers for a molecule
@@ -27,9 +27,9 @@ def generate_conformers(molecule, n_conformers, random_seed=-1, alignment=False)
     
     """
     if not isinstance(n_conformers, int):
-        raise TypeError("n_conformers must be an integer")
+        raise OpenPharmacophoreTypeError("n_conformers must be an integer")
     if n_conformers < 0:
-        raise ValueError("n_conformers must be greater than 0")
+        raise OpenPharmacophoreValueError("n_conformers must be greater than 0")
     molecule = Chem.AddHs(molecule) # Add hydrogens to generate realistic geometries
     cids = AllChem.EmbedMultipleConfs(molecule, numConfs=n_conformers, randomSeed=random_seed)
     

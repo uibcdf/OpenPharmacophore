@@ -1,11 +1,13 @@
 # OpenPharmacophore
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileFormat
-from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, read_pharmagist,
+from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout,
  to_ligandscout, to_moe, to_pharmagist, to_pharmer)
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
-from openpharmacophore.color_palettes import get_color_from_palette_for_feature
+from openpharmacophore.algorithms.discretize import discretize
+from openpharmacophore.pharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
+from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third party
+import networkx as nx
 import nglview as nv
 import numpy as np
 import pyunitwizard as puw
@@ -13,6 +15,9 @@ from rdkit import Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
+# Standard library
+import copy
+import itertools
 
 class Pharmacophore():
     """ Native object for pharmacophores.
@@ -61,13 +66,6 @@ class Pharmacophore():
            
         elif fextension == "pml":
             points = from_ligandscout(file_name)
-
-        elif fextension == "mol2":
-            if kwargs:
-                ph_index = kwargs["index"]
-            else:
-                ph_index = 0
-            points = read_pharmagist(file_name, pharmacophore_index=ph_index)
         
         else:
             raise InvalidFileFormat(f"Invalid file format, \"{file_name}\" is not a supported file format")
@@ -309,6 +307,57 @@ class Pharmacophore():
         rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
         return rdkit_pharmacophore, radii
     
+    def to_nx_graph(self, dmin=2.0, dmax=13.0, bin_size=1.0):
+        """ Obtain a networkx graph representation of the pharmacophore.
+        
+            The pharmacophore graph is a graph whose nodes are pharmacophoric features and
+            its edges are the euclidean distance between those features. The distance is 
+            discretized into bins so more molecules can match the pharmacophore.
+        
+            Parameters
+            ----------
+            dmin : float
+                The minimun distance in angstroms from which two pharmacophoric points are considered different.
+            
+            dmax : flaot
+                The maximum distance in angstroms between pharmacohoric points.
+                
+            bin_size : float
+                The size of the bins that will be used to bin the distances.
+        
+            Returns
+            -------
+            pharmacophore_graph : networkx.Graph
+                The pharmacophore graph
+        """
+        pharmacophore_graph = nx.Graph()
+        bins = np.arange(dmin, dmax, bin_size)
+        # We keep track of feature counts to avoid repeated nodes
+        feat_count = {
+            "A" : 0,
+            "D" : 0,
+            "R" : 0,
+            "H" : 0,
+            "P" : 0,
+            "N" : 0,
+            "E" : 0,
+            "I" : 0,
+        }
+        # First update the names with the count of each feature
+        elements = copy.deepcopy(self.elements)
+        for element in elements:
+            feat_count[element.short_name] += 1
+            element.short_name += str(feat_count[element.short_name])            
+        # Now we can add edges without repeating the nodes
+        for points in itertools.combinations(elements, 2):
+            distance = distance_bewteen_pharmacophoric_points(points[0], points[1])
+            binned_distance = discretize(distance, bins)
+            pharmacophore_graph.add_edge(points[0].short_name,
+                                         points[1].short_name,
+                                         dis=binned_distance)
+        
+        return pharmacophore_graph
+    
     def distance_matrix(self):
         """ Compute the distance matrix of the pharmacophore.
         
@@ -332,6 +381,29 @@ class Pharmacophore():
                     dis_matrix[jj, ii] = distance
         
         return dis_matrix
+    
+    def feature_count(self):
+        """ Count the number of features ot the same kind in the pharmacophore.
+        
+            Returns
+            -------
+            counter : dict
+                Dictionary with the count of each feature
+        """
+        counter = {
+            "aromatic ring":   0,
+            "hydrophobicity":  0,
+            "hb acceptor":     0,
+            "hb donor":        0,
+            "positive charge": 0,
+            "negative charge": 0,
+        }
+
+        for element in self.elements:
+            counter[element.feature_name] += 1
+            
+        return counter
+
     
     def __eq__(self, other):
         """ Check equality between pharmacophores.

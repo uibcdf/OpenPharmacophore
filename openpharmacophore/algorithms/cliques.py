@@ -1,4 +1,4 @@
-from openpharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
+from openpharmacophore.pharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
 from openpharmacophore.algorithms.discretize import discretize, double_bin_pharmacophore_graph
 from openpharmacophore._private_tools.exceptions import OpenPharmacophoreValueError
 import numpy as np

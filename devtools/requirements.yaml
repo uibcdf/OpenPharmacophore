@@ -26,6 +26,7 @@ production:
     - scikit-learn
     - tqdm
     - chembl_webresource_client
+    - networkx
 
 
 test:

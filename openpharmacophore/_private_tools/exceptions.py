@@ -62,8 +62,23 @@ class InvalidFileFormat(OpenPharmacophoreValueError):
     """
     pass
 
+class InvalidSimilarityFunction(OpenPharmacophoreValueError):
+    """ Exception raised when passing an invalid similarity function to the VirtualScreening
+        construtor.
+    """
+    pass
+
 class WrongDimensionalityError(OpenPharmacophoreValueError):
     """ Exception raised when a quantity has the wrong dimensionality"""
+    pass
+
+class InvalidFeatureType(OpenPharmacophoreValueError):
+    """ Exception raised when trying to instansiate a PharmacophoricPoint with
+        a wrong feature type.
+    """
+    pass
+
+class NegativeRadiusError(OpenPharmacophoreValueError):
     pass
 
 ## ZincClient Exceptions
@@ -110,10 +125,6 @@ class OpenPharmacophoreTypeError(TypeError):
         if documentation_web is not None:
             message += f" Check the online documentation for more information {documentation_web}"
         super().__init__(self.message)
-
-class IsNotStringError(OpenPharmacophoreTypeError):
-    """ Exception raised when passing an invalid argument to a function or class that expected a string"""
-    pass
 
 class IsNotQuantityError(OpenPharmacophoreTypeError):
     """ Exception raised when passing an invalid argument to a function or class that expected a quantity"""

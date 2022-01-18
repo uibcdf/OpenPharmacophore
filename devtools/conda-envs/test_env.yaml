@@ -12,6 +12,7 @@ dependencies:
 - nglview
 - plip
 - matplotlib
+- networkx
 - rdkit
 - requests
 - scikit-learn

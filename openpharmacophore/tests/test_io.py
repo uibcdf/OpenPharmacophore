@@ -1,14 +1,18 @@
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import LigandBasedPharmacophore
+from openpharmacophore import StructuredBasedPharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.io.moe import from_moe, _moe_ph4_string
 from openpharmacophore.io.ligandscout import from_ligandscout, _ligandscout_xml_tree
-from openpharmacophore.io.pharmagist import read_pharmagist, _pharmagist_file_info
+from openpharmacophore.io.pharmagist import _pharmagist_file_info
+from openpharmacophore.io.load_pharmagist import read_pharmagist
 from openpharmacophore.io.pharmer import from_pharmer, _pharmer_dict
-from openpharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.ligand_based import LigandBasedPharmacophore
-from openpharmacophore.structured_based import StructuredBasedPharmacophore
+from openpharmacophore.io.mol_files import load_molecules_file
+from openpharmacophore.io.mol_suppliers import smi_has_header_and_id, mol2_mol_generator, smiles_mol_generator
 import numpy as np
 import pyunitwizard as puw
 import pytest
+from rdkit import Chem
 import datetime
 import os
 import xml.etree.ElementTree as ET
@@ -289,3 +293,70 @@ def test_to_moe(three_element_pharmacophore):
 
     assert pharmacophore_str == expected_str
 
+
+@pytest.mark.parametrize("file_name", [
+    "ace.mol2",
+    "clique_detection.smi"
+])
+def test_load_molecules_file(file_name):
+    
+    file_path = os.path.join("./openpharmacophore/data/ligands", file_name)
+    
+    if file_name.endswith(".smi"):
+        ligands = load_molecules_file(file_name=file_path, titleLine=False)
+        assert len(ligands) == 5
+    elif file_name.endswith(".mol2"):
+        ligands = load_molecules_file(file_name=file_path)
+        assert len(ligands) == 3
+
+    assert isinstance(ligands, list)
+    for lig in ligands:
+        assert isinstance(lig, Chem.Mol)
+        
+
+def test_smi_has_header_and_id():
+    
+    file = "./openpharmacophore/data/ligands/mols.smi"
+    has_header, has_id = smi_has_header_and_id(file)
+    assert has_header == False
+    assert has_id == False
+    
+    file = "./openpharmacophore/data/ligands/BAAAML.smi"
+    has_header, has_id = smi_has_header_and_id(file)
+    assert has_header == True
+    assert has_id == True
+    
+def test_mol2_mol_generator():
+    mol2_file = "./openpharmacophore/data/ligands/ace.mol2"
+    
+    molecules = []
+    with open(mol2_file, "r") as fp:
+        for mol in mol2_mol_generator(fp):
+            molecules.append(mol)
+            
+    assert len(molecules) == 3
+    assert molecules[0].GetNumAtoms() == 14
+    assert molecules[1].GetNumAtoms() == 25
+    assert molecules[2].GetNumAtoms() == 29
+
+def test_smiles_mol_generator():
+    
+    smi_file = "./openpharmacophore/data/ligands/mols.smi"
+    
+    n_molecules = 0
+    with open(smi_file, "r") as fp:
+        for mol in smiles_mol_generator(fp, header=False, mol_id=False):
+            n_molecules += 1  
+            assert isinstance(mol, Chem.Mol)
+    
+    assert n_molecules == 5
+    
+    smi_file = "./openpharmacophore/data/ligands/BAAAML.smi"
+    
+    n_molecules = 0
+    with open(smi_file, "r") as fp:
+        for mol in smiles_mol_generator(fp, header=True, mol_id=True):
+            n_molecules += 1 
+            assert isinstance(mol, Chem.Mol)
+            
+    assert n_molecules == 23
