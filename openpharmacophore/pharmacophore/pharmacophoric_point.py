@@ -1,7 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore import __documentation_web__
 from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
-from openpharmacophore._private_tools.exceptions import InvaludFeatureType, OpenPharmacophoreTypeError, PointWithNoColorError
+from openpharmacophore._private_tools.exceptions import InvalidFeatureType, OpenPharmacophoreTypeError, PointWithNoColorError, NegativeRadiusError
 from openpharmacophore._private_tools.colors import convert as convert_color_code
 from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
@@ -73,20 +73,22 @@ class PharmacophoricPoint():
         # Validate center
         validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
         # Validate radius
-        validate_input_quantity(radius, {"[L]" : 1}, "center")
+        validate_input_quantity(radius, {"[L]" : 1}, "radius")
+        if puw.get_value(radius, "angstroms") < 0:
+            raise NegativeRadiusError("radius must be a positive quantity")
         # Validate direction
         if direction is not None:
             validate_input_array_like(direction, shape=(3,), name="direction")
         # Validate feat type
         if not isinstance(feat_type, str):
-            raise InvaludFeatureType("feat_type must be a string")
+            raise InvalidFeatureType("feat_type must be a string")
         # Validate atoms_inxs
         if atoms_inxs is not None:
             if not isinstance(atoms_inxs, (list, set, tuple)):
                 raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
             
         if feat_type not in list(feature_to_char.keys()):
-            raise InvaludFeatureType(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
+            raise InvalidFeatureType(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
 
         self.center = puw.standardize(center)
         self.radius = puw.standardize(radius)

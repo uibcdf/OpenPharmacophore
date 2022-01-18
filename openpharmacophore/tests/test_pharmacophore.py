@@ -2,6 +2,7 @@ from openpharmacophore import Pharmacophore, PharmacophoricPoint
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError
 import pyunitwizard as puw
 import pytest
+import networkx as nx
 import numpy as np
 from rdkit.Chem import Pharm3D
 
@@ -138,3 +139,20 @@ def test_distance_matrix():
                                  [sq(14), 0, sq(2), sq(6)],
                                  [sq(24), sq(2), 0, sq(14)],
                                  [sq(14), sq(6), sq(14), 0]]))
+
+def test_to_nx_graph(three_element_pharmacophore):
+    
+    graph = three_element_pharmacophore.to_nx_graph()
+    assert isinstance(graph, nx.Graph)
+    assert graph.number_of_nodes() == 3
+    assert graph.number_of_edges() == 3
+
+    edges = list(graph.edges)
+    assert ("A1", "R1") in edges
+    assert ("A1", "R2") in edges
+    assert ("R1", "R2") in edges
+    
+    assert graph["A1"]["R1"]["dis"] == 4.0
+    assert graph["A1"]["R2"]["dis"] == 2.0
+    assert graph["R1"]["R2"]["dis"] == 3.0
+    

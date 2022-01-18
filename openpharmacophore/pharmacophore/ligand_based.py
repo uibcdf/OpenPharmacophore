@@ -164,7 +164,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         return bio.getvalue()
 
     @classmethod
-    def single_ligand_pharmacophore(cls, ligand, radius=1.0, features=[], featdef=oph_featuredefinition()):
+    def single_ligand_pharmacophore(cls, ligand, radius=1.0, features=None, featdef=oph_featuredefinition()):
         """ Get a pharmacophore from a single ligand.
 
             Parameters

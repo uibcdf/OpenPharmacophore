@@ -72,10 +72,13 @@ class WrongDimensionalityError(OpenPharmacophoreValueError):
     """ Exception raised when a quantity has the wrong dimensionality"""
     pass
 
-class InvaludFeatureType(OpenPharmacophoreValueError):
+class InvalidFeatureType(OpenPharmacophoreValueError):
     """ Exception raised when trying to instansiate a PharmacophoricPoint with
         a wrong feature type.
     """
+    pass
+
+class NegativeRadiusError(OpenPharmacophoreValueError):
     pass
 
 ## ZincClient Exceptions
