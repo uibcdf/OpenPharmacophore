@@ -148,7 +148,7 @@ def test_get_files():
     path_to_files = "./openpharmacophore/data/ligands"
     file_queue = MultiProcessVirtualScreening._get_files(path_to_files)
     file_list = []
-    for ii in range(file_queue.qsize()):
+    for ii in range(5):
         file_list.append(file_queue.get())
     
     assert len(file_list) == 5
