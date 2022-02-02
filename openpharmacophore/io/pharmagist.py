@@ -58,7 +58,7 @@ def _pharmagist_file_info(pharmacophores):
     for pharmacophore in pharmacophores:
         lines = ["@<TRIPOS>MOLECULE\n", "@<TRIPOS>ATOM\n"] # list to store all lines for a single pharmacophore
         line = ""
-        for i, element in enumerate(pharmacophore.elements):
+        for i, element in enumerate(pharmacophore.pharmacophoric_points):
             element_inx = str(i + 1)
             line += element_inx.rjust(7)
             try:

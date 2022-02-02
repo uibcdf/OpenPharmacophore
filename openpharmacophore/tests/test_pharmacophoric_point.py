@@ -32,15 +32,15 @@ def test_PharmacophoricPoint():
     # Test feature type
     with pytest.raises(exc.InvalidFeatureType, match="is not a valid feature type"):
         PharmacophoricPoint(feat_type="rubber duck", center=center, radius=radius)
-    with pytest.raises(exc.OpenPharmacophoreTypeError, match="atoms_inxs must be"):
-        PharmacophoricPoint(feat_type="hb donor", center=center, radius=radius, atoms_inxs=1)
+    with pytest.raises(exc.OpenPharmacophoreTypeError, match="atom_indices must be"):
+        PharmacophoricPoint(feat_type="hb donor", center=center, radius=radius, atom_indices=1)
 
     feat_name = "hb donor"
     atom_inxs = (3, 4, 5, 6)
 
     donor_1 = PharmacophoricPoint(feat_name, center, radius, None, atom_inxs)
     donor_2 = PharmacophoricPoint(feat_name, center, radius, 
-                direction=np.array([1.0, 1.0, 1.0]), atoms_inxs=atom_inxs)
+                direction=np.array([1.0, 1.0, 1.0]), atom_indices=atom_inxs)
 
     assert donor_1.has_direction == False
     assert np.allclose(puw.get_value(donor_1.center, "angstroms"), np.array([1.0, 1.0, 1.0]))
@@ -55,7 +55,7 @@ def test_PharmacophoricPoint():
 
     ring = PharmacophoricPoint(feat_name, center, radius, direction, atom_inxs)
     assert ring.has_direction == True
-    assert ring.atoms_inxs is None
+    assert ring.atom_indices is None
     assert np.allclose(puw.get_value(ring.center, "angstroms"), np.array([1.5, -2.0, 3.2]))
     assert np.allclose(puw.get_value(ring.radius, "angstroms"), 1.5) 
     assert np.allclose(ring.direction, 

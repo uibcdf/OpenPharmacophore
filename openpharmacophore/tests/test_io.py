@@ -26,13 +26,13 @@ def two_element_pharmacophore():
         center=puw.quantity([1,0,0], "angstroms"), 
         radius=radius,
         direction=[0, 0, 1],
-        atoms_inxs=None
+        atom_indices=None
         )
     acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
         center=puw.quantity([1,2,2], "angstroms"), 
         radius=radius)
-    pharmacophore = StructuredBasedPharmacophore(elements=[ring, acceptor])
+    pharmacophore = StructuredBasedPharmacophore(pharmacophoric_points=[ring, acceptor])
     return pharmacophore
 
 @pytest.fixture
@@ -43,7 +43,7 @@ def three_element_pharmacophore():
         center=puw.quantity([1,0,0], "angstroms"), 
         radius=radius,
         direction=[0, 0, 1],
-        atoms_inxs=None
+        atom_indices=None
     )
     acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -55,7 +55,7 @@ def three_element_pharmacophore():
         feat_type="excluded volume",
         center=puw.quantity([2,1,2], "angstroms"), 
         radius=radius)
-    pharmacophore = StructuredBasedPharmacophore(elements=[ring, acceptor, excluded])
+    pharmacophore = StructuredBasedPharmacophore(pharmacophoric_points=[ring, acceptor, excluded])
     return pharmacophore
 
 def test_from_pharmer():
@@ -137,10 +137,10 @@ def test_read_pharmagist(fname, index):
     if index is None:
         assert isinstance(result[0], LigandBasedPharmacophore)
         if fname == "elastase.mol2":
-            assert result[0].n_elements == 4
+            assert result[0].n_pharmacophoric_points == 4
             assert len(result) == 8
         else:
-            assert result[0].n_elements == 9
+            assert result[0].n_pharmacophoric_points == 9
             assert len(result) == 6
     else:
         assert len(result) == 4

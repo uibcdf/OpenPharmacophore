@@ -23,28 +23,28 @@ class Pharmacophore():
     """ Native object for pharmacophores.
 
     Openpharmacophore native class to store pharmacophoric models. A pharmacophore can be constructed 
-    from a list of elements or from a file.
+    from a list of pharmacophoric_points or from a file.
 
     Parameters
     ----------
 
-    elements : list openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric points
 
     Attributes
     ----------
 
-    elements : list openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric pharmacophoric_points
 
-    n_elements : int
-        Number of pharmacophoric elements
+    n_pharmacophoric_points : int
+        Number of pharmacophoric points
 
     """
-    def __init__(self, elements=[]):
+    def __init__(self, pharmacophoric_points=[]):
 
-        self.elements = elements
-        self.n_elements = len(elements)
+        self.pharmacophoric_points = pharmacophoric_points
+        self.n_pharmacophoric_points = len(pharmacophoric_points)
     
     @classmethod
     def from_file(cls, file_name, **kwargs):
@@ -70,7 +70,7 @@ class Pharmacophore():
         else:
             raise InvalidFileFormat(f"Invalid file format, \"{file_name}\" is not a supported file format")
         
-        return cls(elements=points)    
+        return cls(pharmacophoric_points=points)    
         
     def add_to_NGLView(self, view, palette='openpharmacophore'):
         """Add the pharmacophore representation to a view (NGLWidget) from NGLView.
@@ -90,7 +90,7 @@ class Pharmacophore():
         Nothing is returned. The `view` object is modified in place.
         """
         first_element_index = len(view._ngl_component_ids)
-        for ii, element in enumerate(self.elements):
+        for ii, element in enumerate(self.pharmacophoric_points):
             # Add Spheres
             center = puw.get_value(element.center, to_unit="angstroms").tolist()
             radius = puw.get_value(element.radius, to_unit="angstroms")
@@ -134,31 +134,32 @@ class Pharmacophore():
 
         return view
 
-    def add_element(self, pharmacophoric_element):
-        """Add a new element to the pharmacophore.
+    def add_element(self, pharmacophoric_point):
+        """Add a new element to the pharmacophore in an ordered manner. pharmacophoric_points of the 
+           pharmacophore are sorted by feature type.
 
         Parameters
         ----------
-        pharmacophoric_element : openpharmacophore.PharmacophricPoint
+        pharmacophoric_point : openpharmacophore.PharmacophricPoint
             The pharmacophoric point that will be added.
 
         Note
         ------
             The pharmacophoric element given as input argument is added to the pharmacophore
-            as a new entry of the list `elements`.
+            as a new entry of the list `pharmacophoric_points`.
 
         """
-
-        self.elements.append(pharmacophoric_element)
-        self.n_elements +=1
+        # bisect.insort(self.pharmacophoric_points, pharmacophoric_point, key=lambda p : p.short_name)
+        self.pharmacophoric_points.append(pharmacophoric_point)
+        self.n_pharmacophoric_points +=1
     
-    def remove_elements(self, element_indices):
-        """ Remove elements from the pharmacophore.
+    def remove_pharmacophoric_points(self, element_indices):
+        """ Remove pharmacophoric_points from the pharmacophore.
 
         Parameters
         ----------
         element_indices : int or list of int
-            Indices of the elements to be removed. Can be a list of integers if multiple elements will be
+            Indices of the pharmacophoric_points to be removed. Can be a list of integers if multiple pharmacophoric_points will be
             removed or a single integer to remove one element.
 
         Note
@@ -166,15 +167,15 @@ class Pharmacophore():
             The pharmacophoric element given as input argument is removed from the pharmacophore.
         """
         if isinstance(element_indices, int):
-            self.elements.pop(element_indices)
-            self.n_elements -=1
+            self.pharmacophoric_points.pop(element_indices)
+            self.n_pharmacophoric_points -=1
         elif isinstance(element_indices, list):
-            new_elements = [element for i, element in enumerate(self.elements) if i not in element_indices]
-            self.elements = new_elements
-            self.n_elements = len(self.elements)
+            new_pharmacophoric_points = [element for i, element in enumerate(self.pharmacophoric_points) if i not in element_indices]
+            self.pharmacophoric_points = new_pharmacophoric_points
+            self.n_pharmacophoric_points = len(self.pharmacophoric_points)
 
     def remove_feature(self, feat_type):
-        """ Remove an especific feature type from the pharmacophore elements list
+        """ Remove an especific feature type from the pharmacophore pharmacophoric_points list
 
         Parameters
         ----------
@@ -183,18 +184,18 @@ class Pharmacophore():
 
         Note
         -----
-            The pharmacophoric elements of the feature type given as input argument 
+            The pharmacophoric pharmacophoric_points of the feature type given as input argument 
             are removed from the pharmacophore.
         """
         feats = PharmacophoricPoint.get_valid_features()
         if feat_type not in feats:
             raise InvalidFeatureError(f"Cannot remove feature. \"{feat_type}\" is not a valid feature type")
 
-        temp_elements = [element for element in self.elements if element.feature_name != feat_type]
-        if len(temp_elements) == self.n_elements: # No element was removed
+        temp_pharmacophoric_points = [element for element in self.pharmacophoric_points if element.feature_name != feat_type]
+        if len(temp_pharmacophoric_points) == self.n_pharmacophoric_points: # No element was removed
             raise InvalidFeatureError(f"Cannot remove feature. The pharmacophore does not contain any {feat_type}")
-        self.elements = temp_elements
-        self.n_elements = len(self.elements)
+        self.pharmacophoric_points = temp_pharmacophoric_points
+        self.n_pharmacophoric_points = len(self.pharmacophoric_points)
     
     def _reset(self):
         """Private method to reset all attributes to default values.
@@ -203,8 +204,8 @@ class Pharmacophore():
         ----
         Nothing is returned. All attributes are set to default values.
         """
-        self.elements.clear()
-        self.n_elements = 0
+        self.pharmacophoric_points.clear()
+        self.n_pharmacophoric_points = 0
         self.extractor = None
         self.molecular_system = None
 
@@ -269,9 +270,9 @@ class Pharmacophore():
         return to_moe(self, file_name=file_name)
     
     def to_rdkit(self):
-        """ Returns an rdkit pharmacophore with the elements from the original pharmacophore. 
+        """ Returns an rdkit pharmacophore with the pharmacophoric_points from the original pharmacophore. 
             
-            rdkit pharmacophores do not store the elements radii, so they are returned as well.
+            rdkit pharmacophores do not store the pharmacophoric_points radii, so they are returned as well.
 
             Returns
             -------
@@ -293,7 +294,7 @@ class Pharmacophore():
         points = []
         radii = []
 
-        for element in self.elements:
+        for element in self.pharmacophoric_points:
             feat_name = rdkit_element_name[element.feature_name]
             center = puw.get_value(element.center, to_unit="angstroms")
             center = Geometry.Point3D(center[0], center[1], center[2])
@@ -344,12 +345,12 @@ class Pharmacophore():
             "I" : 0,
         }
         # First update the names with the count of each feature
-        elements = copy.deepcopy(self.elements)
-        for element in elements:
+        pharmacophoric_points = copy.deepcopy(self.pharmacophoric_points)
+        for element in pharmacophoric_points:
             feat_count[element.short_name] += 1
             element.short_name += str(feat_count[element.short_name])            
         # Now we can add edges without repeating the nodes
-        for points in itertools.combinations(elements, 2):
+        for points in itertools.combinations(pharmacophoric_points, 2):
             distance = distance_bewteen_pharmacophoric_points(points[0], points[1])
             binned_distance = discretize(distance, bins)
             pharmacophore_graph.add_edge(points[0].short_name,
@@ -363,20 +364,20 @@ class Pharmacophore():
         
             Returns
             -------
-            dis_matrix : np.ndarray of shape(n_elements, n_elements)
+            dis_matrix : np.ndarray of shape(n_pharmacophoric_points, n_pharmacophoric_points)
                 The distance matrix.
         """
-        n_elements = self.n_elements
-        dis_matrix = np.zeros((n_elements, n_elements))
+        n_pharmacophoric_points = self.n_pharmacophoric_points
+        dis_matrix = np.zeros((n_pharmacophoric_points, n_pharmacophoric_points))
         
-        for ii in range(n_elements):
-            for jj in range(ii, n_elements):
+        for ii in range(n_pharmacophoric_points):
+            for jj in range(ii, n_pharmacophoric_points):
                 if ii == jj:
                     dis_matrix[ii, jj] = 0
                 else:
                     distance = distance_bewteen_pharmacophoric_points(
-                            self.elements[ii],
-                            self.elements[jj])
+                            self.pharmacophoric_points[ii],
+                            self.pharmacophoric_points[jj])
                     dis_matrix[ii, jj] = distance
                     dis_matrix[jj, ii] = distance
         
@@ -399,7 +400,7 @@ class Pharmacophore():
             "negative charge": 0,
         }
 
-        for element in self.elements:
+        for element in self.pharmacophoric_points:
             counter[element.feature_name] += 1
             
         return counter
@@ -411,14 +412,14 @@ class Pharmacophore():
             Assumes that pharmacophoric points are sorted equally in both pharmacophores.
         """
         if isinstance(other, type(self)):
-            if self.n_elements == other.n_elements:
-                for ii in range(self.n_elements):
-                    if not self.elements[ii] == other.elements[ii]:
+            if self.n_pharmacophoric_points == other.n_pharmacophoric_points:
+                for ii in range(self.n_pharmacophoric_points):
+                    if not self.pharmacophoric_points[ii] == other.pharmacophoric_points[ii]:
                         return False
                 return True
         return False
     
     def __repr__(self):
-        return f"{self.__class__.__name__}(n_elements: {self.n_elements})"
+        return f"{self.__class__.__name__}(n_pharmacophoric_points: {self.n_pharmacophoric_points})"
 
     

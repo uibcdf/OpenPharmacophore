@@ -140,7 +140,7 @@ class Dynophore():
             if up.frequency < freq_threshold:
                 continue
 
-            indices = up.atoms_inxs
+            indices = up.atom_indices
             update_freq = True
             for idx in indices:
 
@@ -250,7 +250,7 @@ class Dynophore():
         if len(self.unique_pharmacophoric_points) == 0 or not self._averaged_coords:
             self._get_unique_pharmacophoric_points(avg_coordinates=True)
         points = [point for point in self.unique_pharmacophoric_points if point.feature_name in unique_points]
-        return Pharmacophore(elements=points)
+        return Pharmacophore(pharmacophoric_points=points)
 
     def pharmacophores_from_frames(self, frames, load_ligand=True):
         """ Get pharmacophores for the specified frames in a trajectory
@@ -291,7 +291,7 @@ class Dynophore():
         for point in self.unique_pharmacophoric_points:
             names.append(point.feature_name)
             frequencies.append(point.frequency)
-            indices.append(point.atoms_inxs)
+            indices.append(point.atom_indices)
 
         frequency = pd.DataFrame().from_dict({
             "Feature Name": names,
@@ -403,7 +403,7 @@ class Dynophore():
         n_features = len(self.unique_pharmacophoric_points) 
         feature_matrix = np.zeros((n_pharmacophores, n_features), dtype=np.int32)
         for ii, pharmacophore in enumerate(self.pharmacophores):
-            for point in pharmacophore.elements:
+            for point in pharmacophore.pharmacophoric_points:
                 for jj, unique_point in enumerate(self.unique_pharmacophoric_points):
                     if point.is_equal(unique_point):
                         feature_matrix[ii, jj] = 1
@@ -499,7 +499,7 @@ class Dynophore():
         
         all_points = []
         for ii, pharmacophore in enumerate(self.pharmacophores):
-            for pharmacophoric_point in pharmacophore.elements:
+            for pharmacophoric_point in pharmacophore.pharmacophoric_points:
                 pharmacophoric_point.pharmacophore_index = ii
                 all_points.append(pharmacophoric_point)
         

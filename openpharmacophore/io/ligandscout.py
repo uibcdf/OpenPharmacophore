@@ -15,13 +15,13 @@ def from_ligandscout(file_name):
         Returns
         -------
         points : list of openpharmacophore.PharmacophoricPoints
-            A list of pharmacophoric elements.
+            A list of pharmacophoric pharmacophoric_points.
         
     """
     tree = ET.parse(file_name)
     pharmacophore = tree.getroot()
 
-    ligandscout_to_oph = { # dictionary to map ligandscout features to openpharmacophore elements
+    ligandscout_to_oph = { # dictionary to map ligandscout features to openpharmacophore pharmacophoric_points
         "PI": "positive charge",
         "NI": "negative charge",
         "HBD": "hb donor", 
@@ -156,7 +156,7 @@ def _ligandscout_xml_tree(pharmacophore):
     document.set("name", "pharmacophore.pml")
     document.set("pharmacophoreType", "LIGAND_SCOUT")
 
-    for i, element in enumerate(pharmacophore.elements):
+    for i, element in enumerate(pharmacophore.pharmacophoric_points):
         try:
             feat_name = feature_mapper[element.feature_name].name
         except: # skip features not supported by ligandscout

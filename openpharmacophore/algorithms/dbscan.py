@@ -45,7 +45,7 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=
         center=puw.quantity(coords, "angstroms"),
         radius=puw.quantity(radius, "angstroms"),
         direction=direction,
-        atoms_inxs=atom_indices
+        atom_indices=atom_indices
     )
 
 def get_feature_clusters(feat_coords, eps, min_samples):

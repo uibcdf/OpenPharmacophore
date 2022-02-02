@@ -19,10 +19,10 @@ def read_pharmagist(file_name, pharmacophore_index=None):
         pharmacophores : list of openpharmacophore.LigandBasedPharmacophores
             A list of ligand based pharmacophores.
         
-        elements : list of openpharmacophore.PharmacophoricPoint
+        pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
             A list of pharmacophoric points from a single pharmacophore.
     """
-    # dictionary to map pharmagist feature names to openpharmacophore elements
+    # dictionary to map pharmagist feature names to openpharmacophore pharmacophoric_points
     pharmagist_element_name = { 
         "AR": "aromatic ring",
         "HYD": "hydrophobicity",
@@ -57,5 +57,5 @@ def read_pharmagist(file_name, pharmacophore_index=None):
         pharmacophores = [LigandBasedPharmacophore(ph) for ph in pharmacophores]
         return pharmacophores
 
-    elements = pharmacophores[pharmacophore_index]
-    return elements
+    pharmacophoric_points = pharmacophores[pharmacophore_index]
+    return pharmacophoric_points

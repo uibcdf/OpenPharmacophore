@@ -40,7 +40,7 @@ class PharmacophoricPoint():
             Vector direction as a three dimensional vector. If the pharmacophoric point doesn't have
             direction is set to None. It must be of length or shape 3.
         
-        atoms_inxs : list, set or tuple of int
+        atom_indices : list, set or tuple of int
             The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted. A list, set or tuple can be passed. 
 
@@ -62,13 +62,13 @@ class PharmacophoricPoint():
         has_direction : bool
             Whether the pharmacophoric point has direction.
         
-        atoms_inxs : set of int
+        atom_indices : set of int
             A set of the indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted.  
 
     
     """
-    def __init__(self, feat_type, center, radius, direction=None, atoms_inxs=None):
+    def __init__(self, feat_type, center, radius, direction=None, atom_indices=None):
         
         # Validate center
         validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
@@ -82,10 +82,10 @@ class PharmacophoricPoint():
         # Validate feat type
         if not isinstance(feat_type, str):
             raise InvalidFeatureType("feat_type must be a string")
-        # Validate atoms_inxs
-        if atoms_inxs is not None:
-            if not isinstance(atoms_inxs, (list, set, tuple)):
-                raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
+        # Validate atom_indices
+        if atom_indices is not None:
+            if not isinstance(atom_indices, (list, set, tuple)):
+                raise OpenPharmacophoreTypeError("atom_indices must be a list, set or tuple of int")
             
         if feat_type not in list(feature_to_char.keys()):
             raise InvalidFeatureType(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
@@ -102,10 +102,10 @@ class PharmacophoricPoint():
             self.direction = None
             self.has_direction = False
         
-        if atoms_inxs is not None:
-            self.atoms_inxs = set(atoms_inxs)
+        if atom_indices is not None:
+            self.atom_indices = set(atom_indices)
         else:
-            self.atoms_inxs = None
+            self.atom_indices = None
         
         self.pharmacophore_index = 0
         self.count = 1
@@ -180,7 +180,7 @@ class PharmacophoricPoint():
     def is_equal(self, other):
         """ Compare equality of two pharmacophoric points based on atoms indices.
         """
-        if self.short_name == other.short_name and self.atoms_inxs == other.atoms_inxs:
+        if self.short_name == other.short_name and self.atom_indices == other.atom_indices:
                 return True
         return False
 
@@ -231,7 +231,7 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
                         point.center, 
                         point.radius, 
                         direction=None, 
-                        atoms_inxs=point.atoms_inxs)
+                        atom_indices=point.atom_indices)
         self.count = 1 # To keep the count of each point when working with multiple pharmacophores.
         self.frequency = 0.0
         self.timesteps = [pharmacophore_index] 

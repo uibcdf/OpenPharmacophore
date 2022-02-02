@@ -35,8 +35,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : list of openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric pharmacophoric_points
 
     molecular_system : rdkit.Chem.mol
         The protein-ligand complex from which this pharmacophore was extracted.
@@ -44,11 +44,11 @@ class StructuredBasedPharmacophore(Pharmacophore):
     Attributes
     ----------
 
-    elements : list of openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric pharmacophoric_points
 
-    n_elements : int
-        Number of pharmacophoric elements
+    n_pharmacophoric_points : int
+        Number of pharmacophoric pharmacophoric_points
 
     molecular_system : rdkit.Chem.mol
         The protein from which this pharmacophore was extracted.
@@ -58,8 +58,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
     """
 
-    def __init__(self, elements=[], molecular_system=None, ligand=None):
-        super().__init__(elements=elements)
+    def __init__(self, pharmacophoric_points=[], molecular_system=None, ligand=None):
+        super().__init__(pharmacophoric_points=pharmacophoric_points)
         self.molecular_system = molecular_system
         self.ligand = ligand
     
@@ -157,10 +157,10 @@ class StructuredBasedPharmacophore(Pharmacophore):
             # match those of the rdkit molecule. rdkit is zero indexed while pybel indices start at 1. So 1 needs to
             # be substracted from each index
             for point in pharmacophoric_points:
-                indices = {i - 1 for i in point.atoms_inxs}
-                point.atoms_inxs = indices
+                indices = {i - 1 for i in point.atom_indices}
+                point.atom_indices = indices
 
-        return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
+        return cls(pharmacophoric_points=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
     
     @classmethod
     def from_file(cls, file_name, load_mol_sys=True):
@@ -288,7 +288,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         # List with all interactions
         interactions = interactions.all_itypes
-        # list of pharmacophoric_elements
+        # list of pharmacophoric_pharmacophoric_points
         points = []
         # list oh hydrophobic points
         hydrophobic_points = [] 
@@ -305,7 +305,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     center=puw.quantity(ligand_center, "angstroms"),
                     radius=radius,
                     direction=direction,
-                    atoms_inxs=atom_indices
+                    atom_indices=atom_indices
                 )
                 points.append(aromatic)
 
@@ -319,7 +319,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     center=center,
                     radius=radius,
                     direction=None,
-                    atoms_inxs=atom_inx
+                    atom_indices=atom_inx
                 )
                 hydrophobic_points.append(hydrophobic)
             
@@ -332,7 +332,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         feat_type="negative charge",
                         center=center,
                         radius=radius,
-                        atoms_inxs=atom_indices
+                        atom_indices=atom_indices
                     ) 
                 else:
                     # The ligand has a positive charge
@@ -342,7 +342,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         feat_type="positive charge",
                         center=center,
                         radius=radius,
-                        atoms_inxs=atom_indices
+                        atom_indices=atom_indices
                     ) 
                 points.append(charge_sphere)
             
@@ -358,7 +358,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         center=puw.quantity(ligand_acceptor_center, "angstroms"),
                         radius=radius,
                         direction=direction,
-                        atoms_inxs=ligand_acceptor_inx
+                        atom_indices=ligand_acceptor_inx
                     )
                     points.append(acceptor)
                 else:
@@ -372,7 +372,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         center=puw.quantity(ligand_donor_center, "angstroms"),
                         radius=radius,
                         direction=direction,
-                        atoms_inxs=ligand_donor_inx
+                        atom_indices=ligand_donor_inx
                     )
                     points.append(donor)
             else:
@@ -415,7 +415,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             if hyd1 in skip:
                 continue
             centroid = hyd1.center
-            indices = hyd1.atoms_inxs
+            indices = hyd1.atom_indices
             count = 0
             hyd1_center = puw.get_value(hyd1.center, "angstroms")
 
@@ -428,7 +428,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
                 if distance <= 2.5:
                     centroid += hyd2.center
-                    indices.union(hyd2.atoms_inxs)
+                    indices.union(hyd2.atom_indices)
                     count += 1
                     skip.append(hyd2)
             if count > 0:
@@ -439,7 +439,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 center=centroid, 
                 radius=radius,
                 direction=None,
-                atoms_inxs=indices))
+                atom_indices=indices))
         
         return grouped_points
 
@@ -497,9 +497,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         atom_highlights = defaultdict(list)
         highlight_radius = {}
 
-        for point in self.elements:
+        for point in self.pharmacophoric_points:
 
-            indices = point.atoms_inxs
+            indices = point.atom_indices
             for idx in indices:
                 
                 atoms.append(idx)

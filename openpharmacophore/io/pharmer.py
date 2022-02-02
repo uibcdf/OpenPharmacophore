@@ -120,7 +120,7 @@ def _pharmer_dict(pharmacophore):
         Parameters
         ----------
         pharmacophore : openpharmacophore.Pharmacophore
-            Pharmacophore object wich elements will be used to construct the dictionary
+            Pharmacophore object wich pharmacophoric_points will be used to construct the dictionary
 
         Returns
         -------
@@ -138,7 +138,7 @@ def _pharmer_dict(pharmacophore):
         "negative charge": "NegativeIon",
     }
     points = []
-    for element in pharmacophore.elements:
+    for element in pharmacophore.pharmacophoric_points:
         point_dict = {}
         temp_center = puw.get_value(element.center, to_unit='angstroms')
         point_dict["name"] = pharmer_element_name[element.feature_name]

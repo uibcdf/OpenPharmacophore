@@ -155,10 +155,10 @@ def _moe_ph4_string(pharmacophore):
     ph4_str = "#moe:ph4que" + " " + str(now.year) + "." + str(now.month) + "\n"
     ph4_str += "#pharmacophore 5 tag t value *\n"
     ph4_str += "scheme t Unified matchsize i 0 title t s $\n"
-    ph4_str += f"#feature {len(pharmacophore.elements)} expr tt color ix x r y r z r r r ebits ix gbits ix\n"
+    ph4_str += f"#feature {len(pharmacophore.pharmacophoric_points)} expr tt color ix x r y r z r r r ebits ix gbits ix\n"
 
     excluded_spheres = []
-    for element in pharmacophore.elements:
+    for element in pharmacophore.pharmacophoric_points:
         if element.feature_name == "excluded volume":
             excluded_spheres.append(element)
             continue

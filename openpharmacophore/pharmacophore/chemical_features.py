@@ -209,7 +209,7 @@ class PharmacophoricPointExtractor():
                 center=puw.quantity(coords, "angstroms"),
                 radius=puw.quantity(radius, "angstroms"),
                 direction=direction,
-                atoms_inxs=atom_indices
+                atom_indices=atom_indices
             )
     
     @staticmethod                

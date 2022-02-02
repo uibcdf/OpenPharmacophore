@@ -40,19 +40,19 @@ class PharmacophoreGraph():
         if delta < 0 or delta > 0.5:
             raise OpenPharmacophoreValueError("delta should be a number between 0 and 0.5")
         
-        n_elements = pharmacophore.n_elements
-        adj_matrix = np.empty((n_elements, n_elements), dtype=object)
+        n_pharmacophoric_points = pharmacophore.n_pharmacophoric_points
+        adj_matrix = np.empty((n_pharmacophoric_points, n_pharmacophoric_points), dtype=object)
         
         bins = np.arange(dmin, dmax, bin_size) 
        
-        for ii in range(n_elements):
-            for jj in range(ii, n_elements):
+        for ii in range(n_pharmacophoric_points):
+            for jj in range(ii, n_pharmacophoric_points):
                 if ii == jj:
-                    adj_matrix[ii, jj] = pharmacophore.elements[jj].short_name
+                    adj_matrix[ii, jj] = pharmacophore.pharmacophoric_points[jj].short_name
                 else:
                     distance = distance_bewteen_pharmacophoric_points(
-                            pharmacophore.elements[ii],
-                            pharmacophore.elements[jj])
+                            pharmacophore.pharmacophoric_points[ii],
+                            pharmacophore.pharmacophoric_points[jj])
                     
                     if delta == 0.0:
                         binned_distance = discretize(distance, bins)

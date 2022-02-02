@@ -25,7 +25,7 @@ class LigandBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : list of openpharmacophore.PharamacoporicPoint
+    pharmacophoric_points : list of openpharmacophore.PharamacoporicPoint
         List of pharmacophoric points.
 
     ligands : list of rdkit.Chem.Mol
@@ -38,10 +38,10 @@ class LigandBasedPharmacophore(Pharmacophore):
     Attributes
     ----------
 
-    elements : list of openpharmacophore.PharamacophoricPoint
+    pharmacophoric_points : list of openpharmacophore.PharamacophoricPoint
         List of pharmacophoric points.
 
-    n_elements : int
+    n_pharmacophoric_points : int
         Number of pharmacophoric points.
 
     ligands : list of rdkit.Chem.mol
@@ -49,8 +49,8 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     """
 
-    def __init__(self, elements=[], ligands=[]):
-        super().__init__(elements=elements)
+    def __init__(self, pharmacophoric_points=[], ligands=[]):
+        super().__init__(pharmacophoric_points=pharmacophoric_points)
         self.ligands = ligands
  
     def draw(self, n_per_row, lig_indices=None, subimage_size=(250, 200), legends=None):
@@ -122,7 +122,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
             for point in ligand_pharmacophore_points:
 
-                indices = point.atoms_inxs
+                indices = point.atom_indices
                 for idx in indices:
                     
                     atoms.append(idx)
@@ -202,7 +202,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         Note
         -------
-        Nothing is returned. The pharmacophore elements are updated with those derived from the list of ligands.
+        Nothing is returned. The pharmacophore pharmacophoric_points are updated with those derived from the list of ligands.
         The molecular system is updated with the set of ligands.
 
         """
@@ -214,7 +214,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         else:
             raise NotImplementedError
 
-        return cls(elements=points, ligands=ligands, feat_def=feat_def)
+        return cls(pharmacophoric_points=points, ligands=ligands, feat_def=feat_def)
 
     @classmethod
     def from_ligand_file(cls, file_name, method, radius=1, feat_list=None, feat_def=None):
@@ -244,7 +244,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         Note
         -------
-        Nothing is returned. The pharmacophore elements are updated with those calculated from the file of ligands.
+        Nothing is returned. The pharmacophore pharmacophoric_points are updated with those calculated from the file of ligands.
         The molecular system is updated with the set of ligands and the extractor is updated accoirding to the method used.
 
         """
@@ -270,7 +270,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                                                         radius=radius, 
                                                         feat_list=feat_list, 
                                                         feat_def=feat_def)
-        return cls(elements=tmp_pharmacophore.elements, ligands=tmp_pharmacophore.ligands, feat_def=feat_def)
+        return cls(pharmacophoric_points=tmp_pharmacophore.pharmacophoric_points, ligands=tmp_pharmacophore.ligands, feat_def=feat_def)
 
     def show(self, show_ligands=True, palette="openpharmacophore"):
         """ Visualize the pharmacophore model. 

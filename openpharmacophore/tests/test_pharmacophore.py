@@ -9,7 +9,7 @@ from rdkit.Chem import Pharm3D
 
 @pytest.fixture
 def three_element_pharmacophore():
-    """Returns as pharmacophore with three elements"""
+    """Returns as pharmacophore with three pharmacophoric_points"""
     hb_acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
         center=puw.quantity([1,0,0], "angstroms"),
@@ -25,7 +25,7 @@ def three_element_pharmacophore():
         center=puw.quantity([0, 1, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    pharmacophore = Pharmacophore(elements=[hb_acceptor, ring_1, ring_2])
+    pharmacophore = Pharmacophore(pharmacophoric_points=[hb_acceptor, ring_1, ring_2])
     return pharmacophore
 
 def test_add_element(three_element_pharmacophore):
@@ -35,13 +35,13 @@ def test_add_element(three_element_pharmacophore):
         radius=puw.quantity(1.0, "angstroms")
     )
     three_element_pharmacophore.add_element(hydrophobic)
-    assert three_element_pharmacophore.n_elements == 4
-    assert isinstance(three_element_pharmacophore.elements[3], PharmacophoricPoint)
-    assert three_element_pharmacophore.elements[3].feature_name == "hydrophobicity"
+    assert three_element_pharmacophore.n_pharmacophoric_points == 4
+    assert isinstance(three_element_pharmacophore.pharmacophoric_points[3], PharmacophoricPoint)
+    assert three_element_pharmacophore.pharmacophoric_points[3].feature_name == "hydrophobicity"
 
 def test_remove_element(three_element_pharmacophore):
-    three_element_pharmacophore.remove_elements(0)
-    assert three_element_pharmacophore.n_elements == 2
+    three_element_pharmacophore.remove_pharmacophoric_points(0)
+    assert three_element_pharmacophore.n_pharmacophoric_points == 2
 
 @pytest.mark.parametrize('feat_type,exception', [
     ("aromatic ring", None), ("hydrophobicity", InvalidFeatureError)
@@ -52,13 +52,13 @@ def test_remove_feature(three_element_pharmacophore, feat_type, exception):
     except(InvalidFeatureError) as e:
         assert e.message == "Cannot remove feature. The pharmacophore does not contain any hydrophobicity"
     else:
-        assert three_element_pharmacophore.n_elements == 1
-        assert three_element_pharmacophore.elements[0].feature_name != "aromatic ring"
+        assert three_element_pharmacophore.n_pharmacophoric_points == 1
+        assert three_element_pharmacophore.pharmacophoric_points[0].feature_name != "aromatic ring"
 
 def test_reset(three_element_pharmacophore):
     three_element_pharmacophore._reset()
-    assert three_element_pharmacophore.n_elements == 0
-    assert len(three_element_pharmacophore.elements) == 0
+    assert three_element_pharmacophore.n_pharmacophoric_points == 0
+    assert len(three_element_pharmacophore.pharmacophoric_points) == 0
     assert three_element_pharmacophore.extractor is None
     assert three_element_pharmacophore.molecular_system is None
 
@@ -105,7 +105,7 @@ def test_distance_matrix():
                             radius=radius),
     ]
     
-    pharmacophore = Pharmacophore(elements=points)
+    pharmacophore = Pharmacophore(pharmacophoric_points=points)
     distance_matrix = pharmacophore.distance_matrix()
     
     assert distance_matrix.shape == (3, 3)
@@ -131,7 +131,7 @@ def test_distance_matrix():
     ]
     
     sq = np.sqrt
-    pharmacophore = Pharmacophore(elements=points)
+    pharmacophore = Pharmacophore(pharmacophoric_points=points)
     distance_matrix = pharmacophore.distance_matrix()
     assert distance_matrix.shape == (4, 4)
     assert np.allclose(distance_matrix,

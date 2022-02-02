@@ -21,7 +21,7 @@ def three_element_pharmacophore():
                         radius=radius),
     ]
 
-    return Pharmacophore(elements=points)
+    return Pharmacophore(pharmacophoric_points=points)
 
 @pytest.fixture
 def four_element_pharmacophore():
@@ -42,7 +42,7 @@ def four_element_pharmacophore():
                             radius=radius),
     ]
     
-    return Pharmacophore(elements=points)
+    return Pharmacophore(pharmacophoric_points=points)
 
 def test_adjacency_matrix(three_element_pharmacophore, four_element_pharmacophore):
     

@@ -107,7 +107,7 @@ def get_bioactivity_dataframe(target_chembl_id):
     # Clean bioactivities_df
     bioactivities_df = bioactivities_df.dropna(axis=0, how="any")
     bioactivities_df = bioactivities_df[bioactivities_df["Units"] == "nM"]
-    # Remove duplicate elements. Keep the mean of the IC50
+    # Remove duplicate pharmacophoric_points. Keep the mean of the IC50
     bioactivities_df = bioactivities_df.groupby("ChemblID").mean().reset_index()
 
     # Get compounds smiles
