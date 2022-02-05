@@ -21,6 +21,7 @@ import copy
 import bisect
 from io import StringIO
 import tempfile
+from typing import List, Tuple, Optional
 
 class Dynophore():
     """ Class to store and compute dynamic pharmacophores
@@ -98,7 +99,8 @@ class Dynophore():
 
         pass
 
-    def draw(self, file_name, img_size=(500,500), legend="", freq_threshold=0.2):
+    def draw(self, file_name: str, img_size: Tuple[int, int] = (500,500), 
+            legend: str = "", freq_threshold: float = 0.2) -> None:
         """ Draw a 2d representation of the dynamic pharmacophore. This is a drawing of the
             ligand with the pharmacophoric features highlighted and the frequency if each
             one. 
@@ -178,7 +180,7 @@ class Dynophore():
         drawing.FinishDrawing()
         drawing.WriteDrawingText(file_name)
 
-    def first_and_last_pharmacophore(self):
+    def first_and_last_pharmacophore(self) -> None:
         """ Derive a pharmacophore model for the first and last frames of a trajectory.
 
             References
@@ -203,13 +205,13 @@ class Dynophore():
         self.pharmacophore_indices = [0, last_frame_index]
         self.n_pharmacophores = 2
 
-    def pharmacophore_by_frequency(self, threshold):
+    def pharmacophore_by_frequency(self, threshold: float) -> Pharmacophore:
         """ Derive a unique pharmacophore model with the pharmacophoric points
             that have a frequency >= to threshold.
 
             Parameters
             ---------
-            threshold : double
+            threshold : float
                 The value of frequency from which points are considered part of
                 the pharmacophore model. Must be a value between 0 and 1-
 
@@ -233,14 +235,14 @@ class Dynophore():
         points = [p for p in self.unique_pharmacophoric_points if p.frequency >= threshold]
         return Pharmacophore(points)
 
-    def pharmacophore_from_unique_points(self, unique_points):
+    def pharmacophore_from_unique_points(self, unique_points: List[str]) -> Pharmacophore:
         """ Get a pharmacophore which consists of the passed unique pharmacophoric
             points.
 
             Parameters
             ----------
             unique_points: list of str
-                List with the name if the unique pharmacophoric points.
+                List with the name of the unique pharmacophoric points.
 
             Returns
             -------
@@ -252,7 +254,7 @@ class Dynophore():
         points = [point for point in self.unique_pharmacophoric_points if point.feature_name in unique_points]
         return Pharmacophore(pharmacophoric_points=points)
 
-    def pharmacophores_from_frames(self, frames, load_ligand=True):
+    def pharmacophores_from_frames(self, frames: List[int], load_ligand: bool = True) -> None:
         """ Get pharmacophores for the specified frames in a trajectory
 
             Parameters
@@ -273,7 +275,7 @@ class Dynophore():
             self.pharmacophore_indices.append(ii)
         self.n_pharmacophores = len(self.pharmacophores)
     
-    def pharmacophoric_point_frequency(self):
+    def pharmacophoric_point_frequency(self) -> pd.DataFrame:
         """ Get a dataframe with all unique pharmacophoric points and its frequency.
 
             Returns
@@ -303,7 +305,8 @@ class Dynophore():
         frequency.drop(columns=["index"], inplace=True)
         return frequency
 
-    def point_frequency_plot(self, threshold=0.0, n_bins=10, ax=None):
+    def point_frequency_plot(self, threshold: float = 0.0, n_bins: int = 10, 
+            ax: Optional[plt.Axes] = None):
         """ Plot of pharmacophoric points frequency vs time. 
         
             Each pharmacophoric point will appear as a different line in the plot.
@@ -353,7 +356,7 @@ class Dynophore():
 
         return ax
     
-    def representative_pharmacophore_models(self):
+    def representative_pharmacophore_models(self) -> List[StructuredBasedPharmacophore]:
         """ Get all representative pharmacophore models (RPM) in a trajectory. 
             
             RPMs are pharmacophore models that have the same pharmacophoric points, 
@@ -386,7 +389,7 @@ class Dynophore():
         
         return self._pharmacophores_from_ligand_median_energy(rpms_indices)
 
-    def _get_rpms_indices(self):
+    def _get_rpms_indices(self) -> List[List[int]]:
         """ Get the indices of the representative pharmacophore models.
         
             If an empty list is returned it means that all pharmacophore models in the trajectory are different.
@@ -427,7 +430,7 @@ class Dynophore():
         
         return rpms_indices
        
-    def _pharmacophores_from_ligand_median_energy(self, rpms_indices):
+    def _pharmacophores_from_ligand_median_energy(self, rpms_indices)-> List[List[int]]:
         """ Get the representative pharmacophore models that correspond to the pharmacophore
             with ligand median energy.
 
@@ -456,7 +459,7 @@ class Dynophore():
         return rpms
 
             
-    def _load_trajectory_file(self, file_name):
+    def _load_trajectory_file(self, file_name: str) -> mdt.Trajectory:
         """ Load a trajectory file from a MD simulation
 
             Parameters
@@ -477,7 +480,7 @@ class Dynophore():
 
         return traj
     
-    def _get_unique_pharmacophoric_points(self, avg_coordinates=True):
+    def _get_unique_pharmacophoric_points(self, avg_coordinates: bool = True) -> None:
         """ Get all unique pharmacophoric points across all the pharmacophore models 
             derived from the trajectory. 
 
@@ -542,7 +545,8 @@ class Dynophore():
                         point.feature_name = full_name
                         break
 
-    def _pharmacophore_from_mdtraj(self, frame_num, load_mol_system=False, load_ligand=False):
+    def _pharmacophore_from_mdtraj(self, frame_num: int, load_mol_system: bool=False, 
+                                load_ligand: bool=False) -> StructuredBasedPharmacophore:
         """ Derive a pharmacophore for a single frame of an mdtraj Trajectory object.
 
             Parameters
@@ -583,7 +587,8 @@ class Dynophore():
         
         return pharmacophore
     
-    def _pharmacohore_from_mdanalysis(self, frame_num, load_mol_system=False, load_ligand=False):
+    def _pharmacohore_from_mdanalysis(self, frame_num: int, load_mol_system: bool = False, 
+                                    load_ligand: bool = False) -> StructuredBasedPharmacophore:
         """ Derive a pharmacophore for a single frame of an MdAnalysis Universe object.
 
             Parameters
@@ -609,7 +614,7 @@ class Dynophore():
         
         return pharmacophore
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(n_pharmacophores={self.n_pharmacophores}; n_frames={self._n_frames})"
 
     

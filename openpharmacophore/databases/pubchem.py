@@ -5,10 +5,11 @@ from io import StringIO
 import json
 import requests
 import time
-  
+from typing import List, Dict, Tuple
+
 base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
-def _get_data(url, attempts=5):
+def _get_data(url: str, attempts: int = 5) -> requests.Response.content:
     """ Downloads data from a given url.
         
         Parameters
@@ -21,7 +22,7 @@ def _get_data(url, attempts=5):
 
         Returns
         ----------
-        requests.response.content
+        requests.Response.content
             The content of the response
     """
     if attempts <= 0:
@@ -41,7 +42,7 @@ def _get_data(url, attempts=5):
     return res.content
     
 
-def get_assay_compounds_id(assay_id, attempts=10):
+def get_assay_compounds_id(assay_id: int, attempts: int = 10) -> List[int]:
     """ Get compounds id for tested compounds in an assay
 
         Parameters
@@ -65,7 +66,7 @@ def get_assay_compounds_id(assay_id, attempts=10):
 
     return ids_dict["InformationList"]["Information"][0]["CID"]
 
-def get_assay_description(assay_id, summary=True, attempts=10):
+def get_assay_description(assay_id: int, summary: bool =True, attempts: int = 10) -> Dict[str, str]:
     """ Get the description of an assay in JSON format.
 
         Parameters
@@ -73,10 +74,10 @@ def get_assay_description(assay_id, summary=True, attempts=10):
         assay_id : int
             The id of the bioassay.
         
-        summary : bool, optional
+        summary : bool
             If true returns a summary of the description of the assay (default=True).  
 
-        attempts : int, optional
+        attempts : int
             number of times to try to download the data in case of failure
             (default=10). 
 
@@ -133,7 +134,7 @@ def get_assay_results(assay_id, form="dataframe", attempts=10):
     elif format == "JSON":
         return json.loads(data.content)
     
-def get_assay_target_info(assay_id, attempts=10):
+def get_assay_target_info(assay_id: int, attempts: int = 10) -> Dict[str, str]:
     """ Get target information of an assay.
 
         Parameters
@@ -277,7 +278,7 @@ def get_compound_assay_summary(compound_id, form="dataframe", attempts=10):
     elif format == "JSON":
         return json.loads(data.content)
 
-def get_compound_id(name, attempts=10):
+def get_compound_id(name: str, attempts: int = 10) -> str:
     """ Get pubchem compound id for a given compound name.
 
         Parameters
@@ -327,7 +328,7 @@ def get_compound_description(compound_identifier, attempts=10):
     data = _get_data(compound_url, attempts)
     return json.loads(data)
 
-def get_compound_smiles(compound_id, attempts=10):
+def get_compound_smiles(compound_id: int, attempts: int = 10) -> str:
     """ Get smiles for a given compound. 
 
         Parameters
@@ -350,7 +351,7 @@ def get_compound_smiles(compound_id, attempts=10):
     smiles = data.decode("utf-8").rstrip()
     return smiles
 
-def get_target_assays(identifier, identifier_type, attempts=10):
+def get_target_assays(identifier: str, identifier_type: str, attempts: int = 10) -> pd.DataFrame:
     """ Get assay ids and name for a given target
 
         Parameters

@@ -1,6 +1,7 @@
 from rdkit import Chem
+from typing import List
 
-def load_mol2_file(file_name):
+def load_mol2_file(file_name: str) -> List[Chem.Mol]:
     """ Load molecules from a mol2 file.
 
         Parameters

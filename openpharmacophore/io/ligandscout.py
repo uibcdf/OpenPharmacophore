@@ -1,15 +1,17 @@
 from openpharmacophore import PharmacophoricPoint
-from collections import namedtuple
-import xml.etree.ElementTree as ET
-import pyunitwizard as puw
+from openpharmacophore.algorithms.bisection import insort_right
 import numpy as np
+import pyunitwizard as puw
+from collections import namedtuple
+from typing import List
+import xml.etree.ElementTree as ET
 
-def from_ligandscout(file_name): 
+def from_ligandscout(file_name: str) -> List[PharmacophoricPoint]: 
     """ Loads a pharmacophore from a ligandscout pml file.
 
         Parameters
         ----------
-        pharmacophore_file : str
+        file_name : str
             Name of the file containing the pharmacophore.
 
         Returns
@@ -45,7 +47,7 @@ def from_ligandscout(file_name):
             point = PharmacophoricPoint(feat_type=ligandscout_to_oph[feat_name],
                         center=puw.quantity([x, y, z], "angstroms"),
                         radius=puw.quantity(radius, "angstroms"))
-            points.append(point)
+            insort_right(points, point, key=lambda p: p.short_name)
 
         elif element.tag == "vector":
             feat_name = element.attrib["name"]
@@ -66,7 +68,7 @@ def from_ligandscout(file_name):
                         center=puw.quantity([x_1, y_1, z_1], "angstroms"),
                         radius=puw.quantity(radius_1, "angstroms"),
                         direction=[x_2, y_2, z_2])
-            points.append(point)
+            insort_right(points, point, key=lambda p: p.short_name)
 
         elif element.tag == "plane":
             feat_name = element.attrib["name"]
@@ -89,7 +91,7 @@ def from_ligandscout(file_name):
                         center=puw.quantity(center, "angstroms"),
                         radius=puw.quantity(radius_1, "angstroms"),
                         direction=[x_2, y_2, z_2])
-            points.append(point)
+            insort_right(points, point, key=lambda p: p.short_name)
 
         elif element.tag == "volume":
             feat_name = element.attrib["type"]
@@ -103,35 +105,16 @@ def from_ligandscout(file_name):
                     feat_type=ligandscout_to_oph[feat_name],
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms"))
-            points.append(point)
+            insort_right(points, point, key=lambda p: p.short_name)
 
     return points
 
-def to_ligandscout(pharmacophore, file_name):
-    """ Save a pharmacophore as a ligandscout file (pml file)
-
-        Parameters
-        ----------
-        pharmacophore : openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file. Can be a Pharmacophore, 
-            LigandBasedPharmacophore or StructureBasedPharmaophore.
-
-        file_name : str
-            Name of the file that will contain the pharmacophore.
-
-        Note
-        ----
-        Nothing is returned. A new file is written.
-    """
-    tree, _ = _ligandscout_xml_tree(pharmacophore)
-    tree.write(file_name, encoding="UTF-8", xml_declaration=True)
-
-def _ligandscout_xml_tree(pharmacophore):
+def _ligandscout_xml_tree(pharmacophoric_points: List[PharmacophoricPoint]) -> ET.ElementTree:
     """ Get an xml element tree necesary to create a ligandscout pharmacophore.
 
         Parameters
         ----------
-        pharmacophore : openpharmacophore.Pharmacophore
+        pharmacophoric_points : openpharmacophore.Pharmacophore
             Pharmacophore object that will be saved to a file.
 
         Returns
@@ -156,7 +139,7 @@ def _ligandscout_xml_tree(pharmacophore):
     document.set("name", "pharmacophore.pml")
     document.set("pharmacophoreType", "LIGAND_SCOUT")
 
-    for i, element in enumerate(pharmacophore.pharmacophoric_points):
+    for i, element in enumerate(pharmacophoric_points):
         try:
             feat_name = feature_mapper[element.feature_name].name
         except: # skip features not supported by ligandscout

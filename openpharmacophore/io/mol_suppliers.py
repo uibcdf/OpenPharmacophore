@@ -1,6 +1,8 @@
 from rdkit import Chem
+from typing import Optional, Tuple, Iterator
 
-def smiles_mol_generator(file_object, delimiter=None, header=True, mol_id=True):
+def smiles_mol_generator(file_object, delimiter: bool = None, 
+                        header: bool = True, mol_id: bool = True) -> Iterator[Chem.Mol]:
     """ A molecule generator for smi and txt files.
 
         Parameters
@@ -37,7 +39,7 @@ def smiles_mol_generator(file_object, delimiter=None, header=True, mol_id=True):
             mol.SetProp("_Name", splitted_line[1])
         yield mol
         
-def smi_has_header_and_id(file_path, delimiter=None):
+def smi_has_header_and_id(file_path: str, delimiter: Optional[str] = None) -> Tuple[bool, bool]:
     """ Function to check if a smi or txt file has a header and/or also contains the ids or name of
         the molecules.
         
@@ -74,7 +76,7 @@ def smi_has_header_and_id(file_path, delimiter=None):
         
     return has_header, has_id
 
-def mol2_mol_generator(file_object):
+def mol2_mol_generator(file_object) -> Iterator[Chem.Mol]:
     """ A molecule generator for mol2 files.
 
         Parameters

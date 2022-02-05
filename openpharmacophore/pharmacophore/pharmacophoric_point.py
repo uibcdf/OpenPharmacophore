@@ -7,6 +7,9 @@ from openpharmacophore._private_tools.input_arguments import validate_input_arra
 # Third Party
 import numpy as np
 import pyunitwizard as puw
+from pint import Quantity
+# Standard library
+from typing import List, Optional, TypeVar, Sequence
 
 feature_to_char = {
             "hb acceptor":     "A",
@@ -18,6 +21,8 @@ feature_to_char = {
             "excluded volume": "E",
             "included volume": "I",
         }
+
+ArrayLike = TypeVar("ArrayLike", list, np.ndarray)
 
 class PharmacophoricPoint():
     """ Class to store pharmacophoric points of any feature type. This class can
@@ -68,7 +73,8 @@ class PharmacophoricPoint():
 
     
     """
-    def __init__(self, feat_type, center, radius, direction=None, atom_indices=None):
+    def __init__(self, feat_type: str, center: Quantity, radius: Quantity, 
+                direction: Optional[ArrayLike] = None, atom_indices: Optional[Sequence] = None) -> None:
         
         # Validate center
         validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
@@ -164,7 +170,7 @@ class PharmacophoricPoint():
             view.update_representation(component=n_components+1, repr_index=0, opacity=0.9)
     
     @staticmethod
-    def get_valid_features():
+    def get_valid_features() -> List[str]:
         """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
         return [
             "hb acceptor",
@@ -177,14 +183,14 @@ class PharmacophoricPoint():
             "included volume",
         ]
     
-    def is_equal(self, other):
+    def is_equal(self, other: "PharmacophoricPoint") -> bool:
         """ Compare equality of two pharmacophoric points based on atoms indices.
         """
         if self.short_name == other.short_name and self.atom_indices == other.atom_indices:
                 return True
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other: "PharmacophoricPoint") -> bool:
         """ Compare equality of two pharmacophoric points based on their 3D coordinates,
             directionality and radius.
         """
@@ -202,7 +208,7 @@ class PharmacophoricPoint():
                 return radius_eq and center_eq
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         center = np.around(puw.get_value(self.center, "angstroms"), 2)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
         x, y, z = center[0], center[1], center[2]
@@ -226,7 +232,7 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
         Inherits from PharmacophoricPoint.
 
     """
-    def __init__(self, point, pharmacophore_index):
+    def __init__(self, point: PharmacophoricPoint, pharmacophore_index: int) -> None:
         super().__init__(point.feature_name, 
                         point.center, 
                         point.radius, 
@@ -237,7 +243,7 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
         self.timesteps = [pharmacophore_index] 
 
 
-def distance_bewteen_pharmacophoric_points(p1, p2):
+def distance_bewteen_pharmacophoric_points(p1: PharmacophoricPoint, p2: PharmacophoricPoint) -> float:
     """ Compute the distance in angstroms between two pharmacophoric points.
     
         Parameters

@@ -124,27 +124,17 @@ def test_load_mol2_file():
     assert molecules[1].GetNumAtoms() == 25
     assert molecules[2].GetNumAtoms() == 29
 
-@pytest.mark.parametrize("fname,index",[
-    ("elastase.mol2", None),
-    ("elastase.mol2", 0),
-    ("streptadivin.mol2", None)
-])
-def test_read_pharmagist(fname, index):
-    path = "./openpharmacophore/data/pharmacophores/pharmagist"
-    fpath = os.path.join(path, fname)
+
+def test_read_pharmagist():
+    files_path = "./openpharmacophore/data/pharmacophores/pharmagist"
     
-    result = read_pharmagist(fpath, index)
-    if index is None:
-        assert isinstance(result[0], LigandBasedPharmacophore)
-        if fname == "elastase.mol2":
-            assert result[0].n_pharmacophoric_points == 4
-            assert len(result) == 8
-        else:
-            assert result[0].n_pharmacophoric_points == 9
-            assert len(result) == 6
-    else:
-        assert len(result) == 4
-        assert isinstance(result[0], PharmacophoricPoint)
+    elastase_file = os.path.join(files_path, "elastase.mol2")
+    pharmacophores = read_pharmagist(elastase_file) 
+    assert len(pharmacophores) == 8
+    assert len(pharmacophores[0]) == 4
+
+
+    streptadivin_file = os.path.join(files_path, "streptadivin.mol2")
 
 def test_to_pharmagist(three_element_pharmacophore):
     mol2_list = _pharmagist_file_info(three_element_pharmacophore)

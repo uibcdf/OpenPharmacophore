@@ -4,8 +4,9 @@ from rdkit.Chem import rdMolAlign
 from openpharmacophore.utils.conformers import generate_conformers
 import numpy as np
 import copy
+from typing import List, Sequence, Tuple
 
-def align_set_of_ligands(ligands):
+def align_set_of_ligands(ligands: Sequence) -> Tuple[List[Chem.Mol], List[float]]:
     """ Align a set of ligands to each other
 
         Parameters

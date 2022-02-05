@@ -13,11 +13,12 @@ import os
 import pkg_resources
 import re
 import string
+from typing import Dict, List, Optional, Tuple
 
 class ZincClient():
     """Class to interact with ZINC database."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self._base_url = "https://zinc.docking.org/"
         self._substances_url = self._base_url + "substances"
         self._catalog_url = self._base_url + "catalogs"
@@ -33,7 +34,7 @@ class ZincClient():
     
     ### Methods for downloading ###
     
-    def compound_smiles(self, zinc_id):
+    def compound_smiles(self, zinc_id: str) -> str:
         """ Get the smiles for a compound from its ZINC id.
         
             Parameters
@@ -61,7 +62,7 @@ class ZincClient():
         info = json.loads(res.content)
         return info["smiles"]
     
-    def get_catalogs(self):
+    def get_catalogs(self) -> Dict[str, str]:
         """ Get a dictionary with information about all the catalogs from ZINC.
 
             Returns
@@ -76,7 +77,7 @@ class ZincClient():
         
         return json.loads(res.content)
     
-    def _download_zinc_file(self, file_name, url):
+    def _download_zinc_file(self, file_name: str, url: str) -> None:
         """ Download a file from ZINC.
         
             Parameters
@@ -85,7 +86,7 @@ class ZincClient():
                 Name that will be given to the file.
                 
             url : str
-                THe url from which the file will be downloaded.
+                The url from which the file will be downloaded.
         """
         res = requests.get(url, allow_redirects=True)
         if res.status_code != requests.codes.ok:
@@ -98,7 +99,8 @@ class ZincClient():
         with open(file_name, "wb") as fh:
             fh.write(res.content)
             
-    def _download_batch_of_files(self, urls, download_path, fileformat, url_type, tree=True, ignore_failures=True):
+    def _download_batch_of_files(self, urls: List[str], download_path: str, fileformat: str, 
+                url_type: str, tree: bool = True, ignore_failures: bool = True) -> None:
         """ Download a set of files from ZINC.
 
             urls : list of str
@@ -168,9 +170,11 @@ class ZincClient():
             else:
                 self._download_zinc_file(file_path, url)
     
-    def download_catalog(self, file_name, catalog_name, 
-                         count=1000, availability=None, bioactive=None, 
-                         biogenic=None, reactivity=None):
+    def download_catalog(self, file_name: str, catalog_name: str, count: int = 1000, 
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Download a catalog from ZINC.
         
             Parameters
@@ -202,8 +206,11 @@ class ZincClient():
         self._download_zinc_file(file_name, url) 
        
         
-    def download_substances(self, file_name, count=1000, availability=None, 
-                         bioactive=None, biogenic=None, reactivity=None):
+    def download_substances(self, file_name: str, count: int = 1000,  
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Download a set of substances from zinc.
         
             Parameters
@@ -234,7 +241,8 @@ class ZincClient():
                                                   biogenic, reactivity)
         self._download_zinc_file(file_name, url)
         
-    def download_predifined_subset(self, download_path, subset, fileformat, tree=True, ignore_failures=True):
+    def download_predifined_subset(self, download_path: str, subset: str, fileformat: str, 
+                                tree: bool = True, ignore_failures: bool = True) -> None:
         """ Download one of ZINC's predifined subsets.
         
             Predifined substs can only be downloaded in the following formats: smi, txt, sdf, mol2 and db2.
@@ -272,8 +280,15 @@ class ZincClient():
         else:
             raise InvalidFileFormat(f"{fileformat} is not a valid fileformat")
         
-    def download_custom_subset(self, download_path, fileformat, mw_range, logp_range, tree=True, ignore_failures=True,
-                                  availability=None, bioactive=None, biogenic=None, reactivity=None):
+    def download_custom_subset(self, download_path: str, fileformat: str, 
+                         mw_range: Tuple[float, float], 
+                         logp_range: Tuple[float, float], 
+                         tree: bool = True, 
+                         ignore_failures: bool = True,         
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Download subset with a custom molecular weight range and logP range from ZINC.
         
             This method accepts all file formats as specified in the attribute fileformats.
@@ -335,8 +350,12 @@ class ZincClient():
                 raise InvalidFileFormat(f"{fileformat} is not a valid file format.")
         
     ### Methods for generating urls ###
-    def _append_filters_to_url(self, url, fileformat, count=1000, availability=None, 
-                         bioactive=None, biogenic=None, reactivity=None):
+    def _append_filters_to_url(self, url: str, fileformat: str, 
+                         count: int = 1000,
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Modifies an url by adding the specified filters, count and file format.
         
             Parameters
@@ -399,9 +418,12 @@ class ZincClient():
         url += f".{fileformat}?count={count}"
         return url
     
-    def _get_catalog_url(self, file_name, catalog_name, count=1000, 
-                         availability=None, bioactive=None, 
-                         biogenic=None, reactivity=None):
+    def _get_catalog_url(self, file_name: str, catalog_name: str, 
+                         count: int = 1000, 
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Obtain the url for downloading a catalog."""
         
         if catalog_name not in self.catalogs.keys():
@@ -417,7 +439,8 @@ class ZincClient():
         
         return url
     
-    def _urls_for_tranches_2d(self, col_list, row_list, fileformat="smi"):
+    def _urls_for_tranches_2d(self, col_list: List[str], row_list: List[str], 
+                            fileformat: str = "smi") -> List[str]:
         """ Returns a list of urls to download files in smi format for the specified tranches.
         
             Parameters
@@ -452,7 +475,8 @@ class ZincClient():
 
         return url_list
     
-    def _urls_for_tranches_3d(self, col_list, row_list, fileformat):
+    def _urls_for_tranches_3d(self, col_list: List[str], row_list: List[str], 
+                            fileformat: str) -> List[str]:
         """ Get a list of urls to download files in a 3D format for the specified tranches.
         
             Parameters
@@ -496,7 +520,9 @@ class ZincClient():
         
         return url_list
     
-    def _tranch_url_with_filters(self, tranch, availability, bioactive, biogenic, reactivity, fileformat="smi"):
+    def _tranch_url_with_filters(self, tranch: str, availability: str, 
+                                bioactive: str, biogenic: str, reactivity: str, 
+                                fileformat: str = "smi") -> str:
         """ Generate a url for a tranch with filters.
         """
         
@@ -508,7 +534,9 @@ class ZincClient():
       
         return url
     
-    def _tranche_with_filters_url_list(self, col_list, row_list, availability, bioactive, biogenic, reactivity, fileformat):
+    def _tranche_with_filters_url_list(self, col_list: List[str], row_list: List[str], 
+                                    availability: str, bioactive: str, biogenic: str, 
+                                    reactivity: str, fileformat: str) -> List[str]:
         """ Generate a list of urls for a set of tranches with filters.
         """
         # Get urls for smi files
@@ -530,7 +558,7 @@ class ZincClient():
     
     ### Methods for generating tranches ###
 
-    def _predefined_subset_tranches(self, subset):
+    def _predefined_subset_tranches(self, subset: str) -> Tuple[List[str], List[str]]:
         """ Obtain the tranches for one of ZINC's predifined subsets.
 
             Parameters
@@ -578,7 +606,8 @@ class ZincClient():
 
         return col_list, row_list
                         
-    def _mw_and_logp_tranches(self, mw_range, logp_range):
+    def _mw_and_logp_tranches(self, mw_range: Tuple[float, float], 
+                            logp_range: Tuple[float, float]) -> Tuple[List[str], List[str]]:
         """ Obtain the tranches for a custom subset with the specified molecular weight and logP
             range.
 
@@ -650,7 +679,7 @@ class ZincClient():
         return col_list, row_list
     
     ### Methods to obtain data necessary for the class to work (i.e catalog names, filter names)
-    def _get_filters(self):
+    def _get_filters(self) -> Dict[str, List[str]]:
         """Get all the filters available in ZINC.
         
            Returns
@@ -667,7 +696,7 @@ class ZincClient():
         
         return filters
 
-    def _get_catalogs_names(self):
+    def _get_catalogs_names(self) -> Dict[str, str]:
         """ Return the names and short names of all catalogs. 
             Short names are used in the url for searching.
             
@@ -688,7 +717,7 @@ class ZincClient():
     ### Auxiliary Methods ###
 
     @staticmethod
-    def discretize_values(value, bins, name, lower=True):
+    def discretize_values(value: int, bins: List[int], name: str, lower: bool = True) -> int:
         """Discretize a molecualr weight or logp value.
 
         Parameters
@@ -708,7 +737,7 @@ class ZincClient():
 
         Returns
         -------
-        value : double
+        value : int
             The discretized value.
 
         """
@@ -725,7 +754,11 @@ class ZincClient():
 
         return value
     
-    def _validate_filters(self, fileformat, availability=None, bioactive=None, biogenic=None, reactivity=None):
+    def _validate_filters(self, fileformat: str,
+                         availability: Optional[str] = None, 
+                         bioactive: Optional[str] = None, 
+                         biogenic: Optional[str] = None, 
+                         reactivity: Optional[str] = None) -> None:
         """ Validate the filters passed to the download_substances and download_catalogs methods.
         
             Parameters

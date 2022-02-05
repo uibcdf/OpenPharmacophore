@@ -2,7 +2,8 @@
 from openpharmacophore import Pharmacophore
 from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError, OpenPharmacophoreTypeError
 from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor, oph_featuredefinition
-from openpharmacophore.visualization.view_ligands import view_ligands
+from openpharmacophore.pharmacophore.pharmacophoric_point import PharmacophoricPoint
+from openpharmacophore.visualization.view_mols import view_ligands
 from openpharmacophore.algorithms.dbscan import dbscan_pharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
@@ -15,7 +16,7 @@ from collections import defaultdict
 import copy
 from io import BytesIO
 from PIL import Image
-
+from typing import Callable, List, Tuple, Optional
 
 class LigandBasedPharmacophore(Pharmacophore):
     """ Class to store and compute ligand-based pharmacophores
@@ -44,16 +45,18 @@ class LigandBasedPharmacophore(Pharmacophore):
     n_pharmacophoric_points : int
         Number of pharmacophoric points.
 
-    ligands : list of rdkit.Chem.mol
+    ligands : list of rdkit.Chem.Mol
         List of ligands from which this pharmacophore was extracted.
 
     """
 
-    def __init__(self, pharmacophoric_points=[], ligands=[]):
-        super().__init__(pharmacophoric_points=pharmacophoric_points)
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], 
+                ligands: List[Chem.Mol] = [], sorted: bool = False) -> None:
+        super().__init__(pharmacophoric_points=pharmacophoric_points, sorted=sorted)
         self.ligands = ligands
  
-    def draw(self, n_per_row, lig_indices=None, subimage_size=(250, 200), legends=None):
+    def draw(self, n_per_row: int, subimage_size: Tuple[int, int] = (250, 200), 
+            lig_indices: Optional[List[int]] = None, legends: Optional[List[str]] = None) -> bytes:
         """ Get a 2D representation of the ligands with the pharmacophoric points highlighted.
             
             Parameters
@@ -164,7 +167,8 @@ class LigandBasedPharmacophore(Pharmacophore):
         return bio.getvalue()
 
     @classmethod
-    def single_ligand_pharmacophore(cls, ligand, radius=1.0, features=None, featdef=oph_featuredefinition()):
+    def single_ligand_pharmacophore(cls, ligand: Chem.Mol, radius: float = 1.0, 
+        featdef: Callable = oph_featuredefinition(), features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Get a pharmacophore from a single ligand.
 
             Parameters
@@ -177,7 +181,8 @@ class LigandBasedPharmacophore(Pharmacophore):
         return cls(pharmacophore_points, [ligand])
         
     @classmethod
-    def from_ligand_list(cls, ligands, method, radius=1.0, feat_list=None, feat_def=None):
+    def from_ligand_list(cls, ligands: List[Chem.Mol], method: str, radius: float, 
+        feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Class Method to derive a pharmacophore model from a list of rdkit molecules. 
 
         Parameters
@@ -188,7 +193,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         method : str
             Name of method or algorithm to derive the ligand based pharmacophore.
 
-        radius : float, default=1.0
+        radius : float
             The radius in angstroms of the parmacohporic points.
         
         feat_list : list of str, optional
@@ -196,14 +201,8 @@ class LigandBasedPharmacophore(Pharmacophore):
             default features will be used: donors, acceptors, aromatic rings, hydrophobics, positive
             and negative charges.
         
-        feat_def : dict, optional
-            Definitions of the pharmacophoric features. Dictionary which keys are SMARTS strings and 
-            values are feature names. If None is passed the default rdkit definition will be used.
-
-        Note
-        -------
-        Nothing is returned. The pharmacophore pharmacophoric_points are updated with those derived from the list of ligands.
-        The molecular system is updated with the set of ligands.
+        feat_def : Callable
+            Definitions of the pharmacophoric features. 
 
         """
         if not isinstance(ligands, list):
@@ -217,8 +216,9 @@ class LigandBasedPharmacophore(Pharmacophore):
         return cls(pharmacophoric_points=points, ligands=ligands, feat_def=feat_def)
 
     @classmethod
-    def from_ligand_file(cls, file_name, method, radius=1, feat_list=None, feat_def=None):
-        """ Compute pharmacophore from a file of ligands
+    def from_ligand_file(cls, file_name: str, method: str, radius: float,
+        feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
+        """ Get a pharmacophore from a file of ligands
 
         Accepted file formats: smi, mol2, sdf, pdb 
 
@@ -241,11 +241,6 @@ class LigandBasedPharmacophore(Pharmacophore):
         feat_def : dict, optional
             Definitions of the pharmacophoric features. Dictionary which keys are SMARTS strings and 
             values are feature names. If None is passed the default rdkit definition will be used.
-
-        Note
-        -------
-        Nothing is returned. The pharmacophore pharmacophoric_points are updated with those calculated from the file of ligands.
-        The molecular system is updated with the set of ligands and the extractor is updated accoirding to the method used.
 
         """
         fextension = file_name.split(".")[-1]
@@ -272,7 +267,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                                                         feat_def=feat_def)
         return cls(pharmacophoric_points=tmp_pharmacophore.pharmacophoric_points, ligands=tmp_pharmacophore.ligands, feat_def=feat_def)
 
-    def show(self, show_ligands=True, palette="openpharmacophore"):
+    def show(self, show_ligands: bool = True, palette: str = "openpharmacophore") -> nv.NGLWidget:
         """ Visualize the pharmacophore model. 
 
         Parameters

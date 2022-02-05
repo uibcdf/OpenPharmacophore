@@ -1,8 +1,10 @@
 from openpharmacophore import PharmacophoricPoint, LigandBasedPharmacophore
+from openpharmacophore.algorithms.bisection import insort_right
 import pyunitwizard as puw
 import re
+from typing import List 
 
-def read_pharmagist(file_name, pharmacophore_index=None):
+def read_pharmagist(file_name: str) -> List[LigandBasedPharmacophore]:
     """ Loads pharmacophores from a pharmagist mol2 file.
 
         Parameters
@@ -19,8 +21,6 @@ def read_pharmagist(file_name, pharmacophore_index=None):
         pharmacophores : list of openpharmacophore.LigandBasedPharmacophores
             A list of ligand based pharmacophores.
         
-        pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
-            A list of pharmacophoric points from a single pharmacophore.
     """
     # dictionary to map pharmagist feature names to openpharmacophore pharmacophoric_points
     pharmagist_element_name = { 
@@ -48,14 +48,10 @@ def read_pharmagist(file_name, pharmacophore_index=None):
                     feat_type=feat_type,
                     center=center, 
                     radius=puw.quantity(1.0, "angstroms"))
-                points.append(element)
+                insort_right(points, element, key=lambda p: p.short_name)
             if "@<TRIPOS>BOND" in line:
                 pharmacophores.append(points)
     pharmacophores = [ph for ph in pharmacophores if len(ph) > 0] # filter empty lists
     
-    if pharmacophore_index is None:
-        pharmacophores = [LigandBasedPharmacophore(ph) for ph in pharmacophores]
-        return pharmacophores
-
-    pharmacophoric_points = pharmacophores[pharmacophore_index]
-    return pharmacophoric_points
+    pharmacophores = [LigandBasedPharmacophore(ph) for ph in pharmacophores]
+    return pharmacophores

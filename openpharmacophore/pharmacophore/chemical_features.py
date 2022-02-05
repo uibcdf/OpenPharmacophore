@@ -1,6 +1,7 @@
 # Openpharmacophore
 from openpharmacophore._private_tools.exceptions import NoConformersError, OpenPharmacophoreTypeError
 from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.algorithms.bisection import insort_right
 # Third Party
 import numpy as np
 from rdkit import RDConfig, Chem
@@ -9,6 +10,7 @@ import pyunitwizard as puw
 # Standard Library
 import os
 import pkg_resources
+from  typing import Dict, Callable, Optional, List, Sequence, Tuple
 
 rdkit_to_oph = {
         # To map rdkit feature names to openpharmacophore ones
@@ -20,7 +22,7 @@ rdkit_to_oph = {
         "NegIonizable": "negative charge",
     }
 
-def oph_featuredefinition():
+def oph_featuredefinition() -> Dict[str, str]:
     """ Load default openpharmacophore feature definition.
     
         Returns
@@ -31,7 +33,7 @@ def oph_featuredefinition():
     feat_file = pkg_resources.resource_filename("openpharmacophore", "./data/smarts_features.txt")
     return load_smarts_fdef(feat_file)
 
-def rdkit_featuredefinition():
+def rdkit_featuredefinition() -> ChemicalFeatures.MolChemicalFeatureFactory:
     """ Loads rdkit chemical feature factory.
     
         Returns
@@ -43,7 +45,7 @@ def rdkit_featuredefinition():
     fdefName = os.path.join(RDConfig.RDDataDir,'BaseFeatures.fdef')
     return ChemicalFeatures.BuildFeatureFactory(fdefName)
 
-def load_smarts_fdef(file_name):
+def load_smarts_fdef(file_name: str) -> Dict[str, str]:
     """ Load custom chemical feature definitions from a txt file.
     
         Feature definitions are SMART strings with their respective chemical feature
@@ -92,7 +94,8 @@ class PharmacophoricPointExtractor():
     """ Class to extract pharmacophoric points from a ligand."""
     
     
-    def __init__(self, featdef=oph_featuredefinition(), default_radius=1.0, directionality=False, features=None):
+    def __init__(self, featdef: Callable = oph_featuredefinition(), default_radius: float = 1.0, 
+                directionality: bool = False, features: Optional[List[str]] = None) -> None:
         self.featdef = featdef
         self.default_radius = default_radius
         self.directionality = directionality
@@ -101,12 +104,12 @@ class PharmacophoricPointExtractor():
         else:
             self.features = features
     
-    def extract_features(self, ligand, conformer_index):
+    def extract_features(self, ligand: Chem.Mol, conformer_index: int) -> List[PharmacophoricPoint]:
         """ Extract the pharmacophoric points from a ligand.
         
             Parameters
             ----------
-            ligand : rdkit.Chem.mol
+            ligand : rdkit.Chem.Mol
                 A ligand
             
             conformer_index : int
@@ -139,7 +142,7 @@ class PharmacophoricPointExtractor():
                 pharmacophoric_pnt = self.get_pharmacophoric_point(ligand, feat_name, atom_indices, 
                                                                    conformer_index, self.default_radius,
                                                                    self.directionality)
-                pharmacophoric_points.append(pharmacophoric_pnt)
+                insort_right(pharmacophoric_points, pharmacophoric_pnt, key=lambda p: p.short_name)
         else:
             # Use rdkit feature factory
             chemical_features = self.featdef.GetFeaturesForMol(ligand)
@@ -152,17 +155,18 @@ class PharmacophoricPointExtractor():
                 pharmacophoric_pnt = self.get_pharmacophoric_point(ligand, feat_name, atom_indices, 
                                                                    conformer_index, self.default_radius,
                                                                    self.directionality)
-                pharmacophoric_points.append(pharmacophoric_pnt)
+                insort_right(pharmacophoric_points, pharmacophoric_pnt, key=lambda p: p.short_name)
         
         return pharmacophoric_points
     
     @staticmethod
-    def get_pharmacophoric_point(ligand, feat_name, atom_indices, conformer_index, radius, directionality):
+    def get_pharmacophoric_point(ligand: Chem.Mol, feat_name: str, atom_indices: Sequence, 
+                                conformer_index: int, radius: float, directionality: bool) -> PharmacophoricPoint:
         """ Obtain the coordinates and if specified the direction vector and return a pharmacophoric point.
         
             Parameters
             ----------
-            ligand : rdkit.Chem.mol
+            ligand : rdkit.Chem.Mol
                 A ligand
             
             conformer_index : int
@@ -213,7 +217,7 @@ class PharmacophoricPointExtractor():
             )
     
     @staticmethod                
-    def _feature_centroid(molecule, atom_indxs, conformer_index):
+    def _feature_centroid(molecule: Chem.Mol, atom_indxs: Tuple[int], conformer_index: int) -> np.ndarray:
         """
             Get the 3D coordinates of the centroid of a feature that encompasses more than 
             one atom. This could be aromatic, hydrophobic, negative and positive features
@@ -231,8 +235,8 @@ class PharmacophoricPointExtractor():
 
             Returns
             -------
-            centroid : numpy.ndarray 
-                Array of shape (3, ) with the coordinates of the centroid of the feature.
+            centroid : numpy.ndarray of shape (3, )
+                Array with the coordinates of the centroid of the feature.
 
         """
         
@@ -249,7 +253,8 @@ class PharmacophoricPointExtractor():
         return centroid
     
     @staticmethod
-    def _donor_acceptor_direction_vector(molecule, feat_type, atom_indx, coords, conformer_idx):
+    def _donor_acceptor_direction_vector(molecule: Chem.Mol, feat_type: str, atom_indx: int, 
+                                        coords: np.ndarray, conformer_idx: int) -> np.ndarray:
         """
             Compute the direction vector for an H bond donor or H bond acceptor feature 
 
@@ -290,7 +295,7 @@ class PharmacophoricPointExtractor():
         return direction
         
     @staticmethod
-    def _aromatic_direction_vector(molecule, atom_indxs, conformer_idx):
+    def _aromatic_direction_vector(molecule: Chem.Mol, atom_indxs: Tuple[int], conformer_idx: int) -> np.ndarray:
         """ Compute the direction vector for an aromatic feature. 
 
             Parameters
@@ -324,8 +329,9 @@ class PharmacophoricPointExtractor():
 
         return direction
     
-    def __call__(self, ligand, conformer_index):
+    def __call__(self, ligand: Chem.Mol, 
+                conformer_index: int) -> Callable[[Chem.Mol, int], List[PharmacophoricPoint]]:
         return self.extract_features(ligand, conformer_index)
     
-    def __repr__(self):
+    def __repr__(self) -> str:
          return f"{self.__class__.__name__}()"

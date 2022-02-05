@@ -1,9 +1,11 @@
 from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.algorithms.bisection import insort_right
 import pyunitwizard as puw
-import re
 import datetime
+import re
+from typing import List
 
-def from_moe(file_name):
+def from_moe(file_name: str) -> List[PharmacophoricPoint]:
     """ Loads a pharmacophore from a MOE ph4 file.
 
         Parameters
@@ -56,8 +58,8 @@ def from_moe(file_name):
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
-                points.append(point_1)
-                points.append(point_2)
+                insort_right(points, point_1, key=lambda p: p.short_name)
+                insort_right(points, point_2, key=lambda p: p.short_name)
             else:
             # Regular features and
             # features with weird names i.e Cat$mDon, Acc2
@@ -72,7 +74,7 @@ def from_moe(file_name):
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 ) 
-                points.append(point)
+                insort_right(points, point, key=lambda p: p.short_name)
 
         if piece == "#volumesphere":
             # Excluded volume spheres are 10 items after #volumesphere
@@ -100,39 +102,18 @@ def from_moe(file_name):
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
-                points.append(excluded_sphere)
+                insort_right(points, excluded_sphere, key=lambda p: p.short_name)
                 count = 1
     
     return points
             
-
-def to_moe(pharmacophore, file_name):
-    """ Saves a pharmacophore to a MOE ph4 file.
-
-        Parameters
-        ----------
-        pharmacophore: openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file. Can be a Pharmacophore, 
-            LigandBasedPharmacophore or StructureBasedPharmaophore.
-
-        file_name: str
-            Name of the file containing the pharmacophore.
-
-        Note
-        ----
-        Nothing is returned. A new file is written.
-    """
-    ph4_str = _moe_ph4_string(pharmacophore)
-    with open(file_name, "w") as f:
-        f.writelines(ph4_str)
-
-def _moe_ph4_string(pharmacophore):
+def _moe_ph4_string(pharmacophoric_points: List[PharmacophoricPoint]) -> str:
     """ Returns a string with the necessary info to create a MOE ph4 file.
 
         Parameters
         ----------
-        pharmacophore : Pharmacophore
-            Pharmacophore object that will be saved to a file.
+        pharmacophoric_points : List of PharmacophoricPoint
+            List with the pharmacophoric points.
 
         file_name : str
             Name of the file containing the pharmacophore.
@@ -155,10 +136,10 @@ def _moe_ph4_string(pharmacophore):
     ph4_str = "#moe:ph4que" + " " + str(now.year) + "." + str(now.month) + "\n"
     ph4_str += "#pharmacophore 5 tag t value *\n"
     ph4_str += "scheme t Unified matchsize i 0 title t s $\n"
-    ph4_str += f"#feature {len(pharmacophore.pharmacophoric_points)} expr tt color ix x r y r z r r r ebits ix gbits ix\n"
+    ph4_str += f"#feature {len(pharmacophoric_points)} expr tt color ix x r y r z r r r ebits ix gbits ix\n"
 
     excluded_spheres = []
-    for element in pharmacophore.pharmacophoric_points:
+    for element in pharmacophoric_points:
         if element.feature_name == "excluded volume":
             excluded_spheres.append(element)
             continue

@@ -1,4 +1,5 @@
 # OpenPharmacophore
+from openpharmacophore import Pharmacophore, LigandBasedPharmacophore, StructuredBasedPharmacophore
 from openpharmacophore.databases import chembl, pubchem
 from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import BadShapeError, MissingParameters, OpenPharmacophoreValueError
@@ -16,6 +17,10 @@ from tqdm.auto import tqdm
 from collections import namedtuple
 from operator import itemgetter
 import os
+from typing import Callable, Tuple, List, Optional, TypeVar
+
+PharmacophoreType = TypeVar("PharmacophoreType", LigandBasedPharmacophore, 
+                    StructuredBasedPharmacophore, Pharmacophore, DataStructs.SparseBitVect)
 
 class RetrospectiveScreening():
     """ Class for performing retrospective virtual screening. 
@@ -25,12 +30,37 @@ class RetrospectiveScreening():
 
     Parameters
     ----------
+    pharmacophore : openpharmacophore.Pharmacophore
+        The pharmacophore that will be used to screen the database. Can be a Pharmacophore, 
+        StructuredBasedPharmacophore, LigandBasedPharmacophore or a fingerprint
 
     Attributes
     ----------
+    matches : list of 3-tuples (float, str, rdkit.Chem.Mol)
+        List of molecules that match the pharmacophore. Each tuple is formed by scoring 
+        value, the molecule id, and the molecule object.
+    
+    n_actives : int
+        Number of active molecules.
+
+    n_inactives: int
+        Number of inactives.
+
+    n_molecules: int
+        Number of molcules screened.
+    
+    n_fails : int
+        Number of molecules that cannot be matched to the pharmacophore.
+    
+    scoring_metric : str
+        Metric used to score the molecules, how well they fit to the pharmacophore.
+    
+    pharmacophore : openpharmacophore.Pharmacophore
+        The pharmacophore that will be used to screen the database. Can be a Pharmacophore, 
+        StructuredBasedPharmacophore, LigandBasedPharmacophore or a fingerprint
 
     """
-    def __init__(self, pharmacophore, **kwargs):
+    def __init__(self, pharmacophore: PharmacophoreType, **kwargs) -> None:
         
         if is_3d_pharmacophore(pharmacophore):
             self.scoring_metric = "SSD"
@@ -51,7 +81,7 @@ class RetrospectiveScreening():
         self.n_molecules = 0
         self.pharmacophore = pharmacophore
              
-    def from_chembl_target_id(self, target_id, pIC50_threshold=6.3):
+    def from_chembl_target_id(self, target_id: str, pIC50_threshold: float = 6.3) -> None:
         """ Retrospective screening from bioactivity data fetched from chembl.
            
            Parameters
@@ -68,7 +98,7 @@ class RetrospectiveScreening():
         self.db = "PubChem"
         self.from_bioactivity_data(smiles, activity)
 
-    def from_bioactivity_data(self, smiles, activity):
+    def from_bioactivity_data(self, smiles: List[Tuple[int, str]], activity: np.ndarray) -> None:
         """ Retrospective screening from a set of molecules classified as active or inactive.
         
             Parameters
@@ -106,7 +136,7 @@ class RetrospectiveScreening():
         else:
             raise NotImplementedError
 
-    def from_pubchem_bioassay_id(self, bioassay_id):
+    def from_pubchem_bioassay_id(self, bioassay_id: int) -> None:
         """ Retrospective screening from a pubchem bioassay.
 
             Parameters
@@ -119,7 +149,7 @@ class RetrospectiveScreening():
         self.db = "Pubchem"
         self.from_bioactivity_data(smiles, activity)
 
-    def confusion_matrix(self, threshold=None):
+    def confusion_matrix(self, threshold: Optional[float] = None) -> np.ndarray:
         """ Compute a confusion matrix
         
             Parameters
@@ -162,7 +192,7 @@ class RetrospectiveScreening():
         
         return cf_matrix
 
-    def auc(self):
+    def auc(self) -> Callable[[np.ndarray, np.ndarray], float]:
         """ Calculate ROC area under the curve.
         
             Returns
@@ -179,7 +209,8 @@ class RetrospectiveScreening():
 
         return self._get_auc(scores, self.bioactivities)
 
-    def roc_plot(self, ax=None, label="", random_line=True):
+    def roc_plot(self, ax: Optional[plt.Axes] = None, label: str = "", 
+                random_line: bool = True) -> plt.Axes:
         """ Plot the ROC curve. 
         
             Parameters
@@ -219,7 +250,7 @@ class RetrospectiveScreening():
 
         return ax
 
-    def enrichment_factor(self, percentage):
+    def enrichment_factor(self, percentage: float) -> float:
         """ Get enrichment factor for the x% of the screened database 
 
             Parameters
@@ -241,7 +272,7 @@ class RetrospectiveScreening():
         return self._calculate_enrichment_factor(scores, self.bioactivities, percentage)
        
 
-    def ideal_enrichment_factor(self, percentage):
+    def ideal_enrichment_factor(self, percentage: float) -> float:
         """ Calculate ideal enrichment factor for the x% of the screened database 
 
             Parameters
@@ -263,7 +294,8 @@ class RetrospectiveScreening():
         else:
             return 100.0
     
-    def enrichment_plot(self, ax=None, label="", random_line=True, ideal=False):
+    def enrichment_plot(self, ax: Optional[plt.Axes] = None, label: str = "", 
+                        random_line: bool = True, ideal: bool = False) -> plt.Axes:
         """ Create an enrichment plot 
             
             Parameters
@@ -306,7 +338,7 @@ class RetrospectiveScreening():
         return ax
     
     @staticmethod
-    def _roc_points(scores, labels):
+    def _roc_points(scores: np.ndarray, labels: np.ndarray) -> Tuple[List[float], List[float]]:
         """ Calculate points to plot an ROC curve.
         
             Parameters
@@ -366,7 +398,7 @@ class RetrospectiveScreening():
         return false_positive_rate, true_positive_rate
     
     @staticmethod
-    def _enrichment_data(scores, labels):
+    def _enrichment_data(scores: np.ndarray, labels: np.ndarray) -> Tuple[List[float], List[float]]:
         """ Get enrichment data necessary for enrichment plot and enrichment factor calculation.
         
             Parameters
@@ -411,7 +443,7 @@ class RetrospectiveScreening():
         return screened_percentage, percentage_actives_found
     
     @staticmethod
-    def _calculate_enrichment_factor(scores, labels, percentage):
+    def _calculate_enrichment_factor(scores: np.ndarray, labels: np.ndarray, percentage: float) -> float:
         """ Calculate enrichment factor for the x% of the screened database 
 
             Parameters
@@ -440,7 +472,7 @@ class RetrospectiveScreening():
         return percentage_actives_found[max_enrichment_idx] * 100    
     
     @staticmethod
-    def _get_auc(scores, labels):
+    def _get_auc(scores: np.ndarray, labels: np.ndarray) -> float:
         """ Compute the area under the ROC curve.
         
             Parameters
@@ -502,7 +534,7 @@ class RetrospectiveScreening():
         return area
     
     @staticmethod
-    def _trapezoid_area(x1, x2, y1, y2):
+    def _trapezoid_area(x1: float, x2: float, y1: float, y2: float) -> float:
         """ Calculate the area of a trapezoid.
         """
         base = abs(x1 - x2)
@@ -510,17 +542,14 @@ class RetrospectiveScreening():
         height = abs(y1 + y2) / 2
         return base * height
 
-    def _align_molecules(self, molecules):
+    def _align_molecules(self, molecules: List[Chem.Mol]) -> None:
         """ Align a list of molecules to a given pharmacophore.
 
         Parameters
         ----------
-        molecules : list of rdkit.Chem.mol
+        molecules : list of rdkit.Chem.Mol
             List of molecules to align.
 
-        Note
-        -------
-        Does not return anything. The attribute molecules is updated with the scored molecules.
         """
         self.n_molecules += len(molecules)
 
@@ -568,17 +597,13 @@ class RetrospectiveScreening():
             matched_mol = MolScore(score, mol.GetProp("_Name"), embeddings[best_fit_index])
             self.molecules.append(matched_mol)
     
-    def _fingerprint_similarity(self, molecules):
+    def _fingerprint_similarity(self, molecules: List[Chem.Mol]) -> None:
         """ Compute fingerprints and similarity values for a list of molecules. 
 
         Parameters
         ----------
-        molecules : list of rdkit.Chem.mol
+        molecules : list of rdkit.Chem.Mol
             List of molecules whose similarity to the pharmacophoric fingerprint will be calculated.
-        
-        Note
-        -----
-        Does not return anything. The attribute molecules is updated with the scored molecules.
 
         """
        
@@ -592,5 +617,5 @@ class RetrospectiveScreening():
             matched_mol = MolScore(similarity, mol_id, mol)
             self.molecules.append(matched_mol)
           
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(n_molecules={self.n_molecules})"
