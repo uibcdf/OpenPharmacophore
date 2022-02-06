@@ -51,8 +51,8 @@ class LigandBasedPharmacophore(Pharmacophore):
     """
 
     def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], 
-                ligands: List[Chem.Mol] = [], sorted: bool = False) -> None:
-        super().__init__(pharmacophoric_points=pharmacophoric_points, sorted=sorted)
+                ligands: List[Chem.Mol] = [], is_sorted: bool = False) -> None:
+        super().__init__(pharmacophoric_points=pharmacophoric_points, is_sorted=is_sorted)
         self.ligands = ligands
  
     def draw(self, n_per_row: int, subimage_size: Tuple[int, int] = (250, 200), 
@@ -272,10 +272,10 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         Parameters
         ----------
-        show_ligands: bool, default=True
+        show_ligands : bool, default=True
             If true the ligands associated to the pharmacophore molecular system will be shown. 
 
-        palette: str or dict, optional
+        palette : str or dict, optional
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns

@@ -3,7 +3,7 @@ from openpharmacophore._private_tools.exceptions import OpenPharmacophoreIOError
 from rdkit import Chem
 from typing import List
 
-def load_molecules_file(file_name: str, *kwargs) -> List[Chem.Mol]:
+def load_molecules_file(file_name: str, **kwargs) -> List[Chem.Mol]:
     """ Load a file of molecules into a list of rdkit molecules.
 
         Parameters

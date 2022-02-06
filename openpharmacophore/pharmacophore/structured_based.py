@@ -61,8 +61,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
     """
 
     def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], molecular_system: Optional[Chem.Mol] = None, 
-                ligand: Optional[Chem.Mol] = None, sorted: bool = False) -> None:
-        super().__init__(pharmacophoric_points=pharmacophoric_points, sorted=sorted)
+                ligand: Optional[Chem.Mol] = None, is_sorted: bool = False) -> None:
+        super().__init__(pharmacophoric_points=pharmacophoric_points, is_sorted=is_sorted)
         self.molecular_system = molecular_system
         self.ligand = ligand
     
