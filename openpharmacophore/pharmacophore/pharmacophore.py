@@ -48,9 +48,9 @@ class Pharmacophore():
         Number of pharmacophoric points
 
     """
-    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], sorted: bool = False) -> None:
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], is_sorted: bool = False) -> None:
 
-        if sorted or len(pharmacophoric_points) == 0:
+        if is_sorted or len(pharmacophoric_points) == 0:
             self._pharmacophoric_points = pharmacophoric_points
         else:
             self._pharmacophoric_points = sorted(pharmacophoric_points, key=lambda p: p.short_name)
@@ -131,11 +131,8 @@ class Pharmacophore():
         Returns
         -------
         nglview.NGLWidget
-            An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
-            molecular system used to elucidate it.
-
+            A nglview.NGLWidget with the 'view' of the pharmacophoric model.
         """
-
         view = nv.NGLWidget()
         self.add_to_NGLView(view, palette=palette)
 
@@ -150,6 +147,7 @@ class Pharmacophore():
                 The pharmacophoric point that will be added.
         """
         insort_right(self._pharmacophoric_points, pharmacophoric_point, key=lambda p : p.short_name)
+        self.n_pharmacophoric_points += 1
     
     def get_point(self, index: int) -> None:
         """ Get an specific pharmacophoric point from the pharmacophore. 
@@ -160,6 +158,14 @@ class Pharmacophore():
                 Index of the pharmacophoric point
         """
         return self._pharmacophoric_points[index]
+    
+    def get_all_points(self) -> List[PharmacophoricPoint]:
+        """ Returns a list with the pharmacophoric points of the pharmacophore."""
+        return copy.deepcopy(self._pharmacophoric_points)
+
+    def print_points(self) -> None:
+        """ Prints the pharmacophoric points of the pharmacophore."""
+        print(self._pharmacophoric_points)
 
     def remove_point(self, index: int) -> None:
         """Remove a pharmacophoric point from the pharmacophore.
@@ -170,7 +176,15 @@ class Pharmacophore():
     def remove_points(self, indices: List[int]) -> None:
         """ Remove a list of pharmacophoric points from the pharmacophore.
         """
-        new_pharmacophoric_points = [element for i, element in enumerate(self._pharmacophoric_points) if i not in indices]
+        for index in indices:
+            if index < 0 or index > self.n_pharmacophoric_points - 1:
+                raise IndexError
+
+        new_pharmacophoric_points = []
+        for ii, point in enumerate(self._pharmacophoric_points):
+            if ii not in indices:
+                new_pharmacophoric_points.append(point)
+         
         self._pharmacophoric_points = new_pharmacophoric_points
         self.n_pharmacophoric_points = len(self._pharmacophoric_points)
 
@@ -187,8 +201,6 @@ class Pharmacophore():
             raise InvalidFeatureError(f"Cannot remove feature. \"{feat_type}\" is not a valid feature type")
 
         temp_pharmacophoric_points = [element for element in self._pharmacophoric_points if element.feature_name != feat_type]
-        if len(temp_pharmacophoric_points) == self.n_pharmacophoric_points: # No element was removed
-            raise InvalidFeatureError(f"Cannot remove feature. The pharmacophore does not contain any {feat_type}")
         self._pharmacophoric_points = temp_pharmacophoric_points
         self.n_pharmacophoric_points = len(self._pharmacophoric_points)
     
@@ -334,6 +346,7 @@ class Pharmacophore():
                                          points[1].short_name,
                                          dis=binned_distance)
         
+        assert pharmacophore_graph.number_of_nodes() == len(pharmacophoric_points)
         return pharmacophore_graph
     
     def distance_matrix(self) -> np.ndarray:
@@ -383,7 +396,7 @@ class Pharmacophore():
         return counter
     
     def __len__(self) -> int:
-        return len(self.n_pharmacophoric_points)
+        return len(self._pharmacophoric_points)
 
     def __iter__(self) -> "Pharmacophore":
         self.count = -1
