@@ -272,8 +272,8 @@ def sample_dynamic_pharmacophore(mdtraj_trajectory, pharmacophoric_points):
                 pharmacophoric_points=[donor_1[ii], donor_2[ii - 4]]
             ))
             
-    pharmacophores[0].add_element(acceptor)
-    pharmacophores[5].add_element(hydrophobic)
+    pharmacophores[0].add_point(acceptor)
+    pharmacophores[5].add_point(hydrophobic)
     
     dynophore.pharmacophores = pharmacophores
     dynophore.n_pharmacophores = len(pharmacophores)
@@ -286,8 +286,17 @@ def test_get_unique_pharmacophoric_points(sample_dynamic_pharmacophore):
     
     assert len(dynophore.unique_pharmacophoric_points) == 5
     
+    # Acceptor
+    acceptor = dynophore.unique_pharmacophoric_points[0]
+    center = puw.get_value(acceptor.center, "angstroms")
+    assert acceptor.feature_name == "hb acceptor 1"
+    assert acceptor.atom_indices == {10}
+    assert acceptor.count == 1
+    assert acceptor.frequency == 1 / 10
+    assert np.allclose(center, np.array([-0.5, 8.5, 2.4]))
+
     # Donor 1
-    donor_1 = dynophore.unique_pharmacophoric_points[0]
+    donor_1 = dynophore.unique_pharmacophoric_points[1]
     center = puw.get_value(donor_1.center, "angstroms")
     assert donor_1.feature_name == "hb donor 1"
     assert donor_1.atom_indices == {1}
@@ -296,25 +305,6 @@ def test_get_unique_pharmacophoric_points(sample_dynamic_pharmacophore):
     assert len(donor_1.timesteps) == 10
     assert np.allclose(center, np.array([1.45, 0.45, 3.45]))
     
-    # Aromatic
-    aromatic = dynophore.unique_pharmacophoric_points[1]
-    center = puw.get_value(aromatic.center, "angstroms")
-    assert aromatic.feature_name == "aromatic ring 1"
-    assert aromatic.atom_indices == {2, 3, 4, 5, 6, 7}
-    assert aromatic.count == 4
-    assert aromatic.frequency == 4 / 10
-    assert len(aromatic.timesteps) == 4
-    assert np.allclose(center, np.array([-4.85, 1.65, -2.25]))
-    
-    # Acceptor
-    acceptor = dynophore.unique_pharmacophoric_points[2]
-    center = puw.get_value(acceptor.center, "angstroms")
-    assert acceptor.feature_name == "hb acceptor 1"
-    assert acceptor.atom_indices == {10}
-    assert acceptor.count == 1
-    assert acceptor.frequency == 1 / 10
-    assert np.allclose(center, np.array([-0.5, 8.5, 2.4]))
-
     # Donor 2
     donor_2 = dynophore.unique_pharmacophoric_points[3]
     center = puw.get_value(donor_2.center, "angstroms")
@@ -323,7 +313,7 @@ def test_get_unique_pharmacophoric_points(sample_dynamic_pharmacophore):
     assert donor_2.count == 6
     assert donor_2.frequency == 6 / 10
     assert np.allclose(center, np.array([-4.75, 1.75, -2.15]))
-    
+
     # Hydrophobic
     hydrophobic = dynophore.unique_pharmacophoric_points[4]
     center = puw.get_value(hydrophobic.center, "angstroms")
@@ -333,36 +323,51 @@ def test_get_unique_pharmacophoric_points(sample_dynamic_pharmacophore):
     assert hydrophobic.frequency == 1 / 10
     assert np.allclose(center, np.array([-0.5, 8.5, 2.4]))
 
+    # Aromatic
+    aromatic = dynophore.unique_pharmacophoric_points[2]
+    center = puw.get_value(aromatic.center, "angstroms")
+    assert aromatic.feature_name == "aromatic ring 1"
+    assert aromatic.atom_indices == {2, 3, 4, 5, 6, 7}
+    assert aromatic.count == 4
+    assert aromatic.frequency == 4 / 10
+    assert len(aromatic.timesteps) == 4
+    assert np.allclose(center, np.array([-4.85, 1.65, -2.25]))
+    
 def test_pharmacophore_by_frequency(sample_dynamic_pharmacophore):
     dynophore = sample_dynamic_pharmacophore
     
     pharmacophore = dynophore.pharmacophore_by_frequency(0.5)
     assert pharmacophore.n_pharmacophoric_points == 2
 
-    pharmacophoric_points = pharmacophore.pharmacophoric_points    
-    assert pharmacophoric_points[0].feature_name == "hb donor 1"
-    assert pharmacophoric_points[0].atom_indices == {1} 
-    assert pharmacophoric_points[1].feature_name == "hb donor 2"
-    assert pharmacophoric_points[1].atom_indices == {8}
+    assert pharmacophore[0].feature_name == "hb donor 1"
+    assert pharmacophore[0].atom_indices == {1} 
+    assert pharmacophore[1].feature_name == "hb donor 2"
+    assert pharmacophore[1].atom_indices == {8}
     
     pharmacophore = dynophore.pharmacophore_by_frequency(0.3)
     assert pharmacophore.n_pharmacophoric_points == 3
-
-    pharmacophoric_points = pharmacophore.pharmacophoric_points    
-    assert pharmacophoric_points[1].feature_name == "aromatic ring 1"
-    assert pharmacophoric_points[1].atom_indices == {2, 3, 4, 5, 6, 7} 
+    assert pharmacophore[0].feature_name == "hb donor 1"
+    assert pharmacophore[1].feature_name == "hb donor 2"
+    assert pharmacophore[2].feature_name == "aromatic ring 1"
+    assert pharmacophore[2].atom_indices == {2, 3, 4, 5, 6, 7} 
     
     pharmacophore = dynophore.pharmacophore_by_frequency(0.0)
     assert pharmacophore.n_pharmacophoric_points == 5
+    assert pharmacophore[0].feature_name == "hb acceptor 1"
+    assert pharmacophore[1].feature_name == "hb donor 1"
+    assert pharmacophore[2].feature_name == "hb donor 2"
+    assert pharmacophore[3].feature_name == "hydrophobicity 1"
+    assert pharmacophore[4].feature_name == "aromatic ring 1"
     
 def test_pharmacophore_from_unique_points(sample_dynamic_pharmacophore):
     dynophore = sample_dynamic_pharmacophore
     pharmacophore = dynophore.pharmacophore_from_unique_points(["hb donor 1", "hb donor 2", "aromatic ring 1"])
     
     assert pharmacophore.n_pharmacophoric_points == 3
-    assert pharmacophore.pharmacophoric_points[0].feature_name == "hb donor 1"
-    assert pharmacophore.pharmacophoric_points[1].feature_name == "aromatic ring 1"
-    assert pharmacophore.pharmacophoric_points[2].feature_name == "hb donor 2"
+    assert pharmacophore[0].feature_name == "hb donor 1"
+    assert pharmacophore[1].feature_name == "hb donor 2"
+    assert pharmacophore[2].feature_name == "aromatic ring 1"
+    
 
 def test_pharmacophoric_point_frequency(sample_dynamic_pharmacophore):
     dataframe = sample_dynamic_pharmacophore.pharmacophoric_point_frequency()

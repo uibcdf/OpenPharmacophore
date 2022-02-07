@@ -406,7 +406,7 @@ class Dynophore():
         n_features = len(self.unique_pharmacophoric_points) 
         feature_matrix = np.zeros((n_pharmacophores, n_features), dtype=np.int32)
         for ii, pharmacophore in enumerate(self.pharmacophores):
-            for point in pharmacophore.pharmacophoric_points:
+            for point in pharmacophore:
                 for jj, unique_point in enumerate(self.unique_pharmacophoric_points):
                     if point.is_equal(unique_point):
                         feature_matrix[ii, jj] = 1
@@ -502,7 +502,7 @@ class Dynophore():
         
         all_points = []
         for ii, pharmacophore in enumerate(self.pharmacophores):
-            for pharmacophoric_point in pharmacophore.pharmacophoric_points:
+            for pharmacophoric_point in pharmacophore:
                 pharmacophoric_point.pharmacophore_index = ii
                 all_points.append(pharmacophoric_point)
         

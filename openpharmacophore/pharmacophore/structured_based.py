@@ -10,7 +10,7 @@ from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPoin
 from MDAnalysis.lib.util import NamedStream
 import numpy as np
 import nglview as nv
-import plip
+from plip.structure.preparation import PDBComplex
 import pyunitwizard as puw
 from rdkit import Chem, RDLogger
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -164,7 +164,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 indices = {i - 1 for i in point.atom_indices}
                 point.atom_indices = indices
 
-        return cls(pharmacophoric_points=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand, sorted=False)
+        return cls(pharmacophoric_points=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand, is_sorted=False)
     
     @classmethod
     def from_file(cls, file_name: str, load_mol_sys: bool =True) -> "StructuredBasedPharmacophore":
@@ -235,7 +235,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         ligands : dict
              Dictionary which keys are ligand Ids and values are pybel molecules
         """
-        mol_system = plip.structure.preparation.PDBComplex()
+        mol_system = PDBComplex()
         mol_system.load_pdb(pdb, as_string=as_string)
         mol_system.analyze()
 
