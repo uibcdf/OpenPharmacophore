@@ -1,10 +1,22 @@
 from openpharmacophore import _puw
 from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.algorithms.bisection import insort_right
 from rdkit import Chem
 import pyunitwizard as puw
 import json
+from typing import Tuple, List, Dict, Any
 
-def from_pharmer(pharmacophore_file, load_mol_sys=False):
+
+def get_pharmer_element_properties(element, direction=False):
+        center = _puw.quantity([element['x'], element['y'], element['z']], 'angstroms')
+        radius = _puw.quantity(element['radius'], 'angstroms')
+        if direction:
+            direction = [element['svector']['x'], element['svector']['y'], element['svector']['z']]
+            return center, radius, direction
+
+        return center, radius
+
+def from_pharmer(pharmacophore_file: str, load_mol_sys: bool = False) -> Tuple[List[PharmacophoricPoint], Chem.Mol, Chem.Mol]:
     """ Loads a pharmacophore from a pharmer json file
 
         Parameters
@@ -20,29 +32,22 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
         points : list of openpharmacophore.PharmacophoricPoint
             A list of pharmacophoric points.
         
-        molecular_system : rdkit.Chem.mol
+        molecular_system : rdkit.Chem.Mol
             The molecular system associated with the pharmacophore. If there is no molecular system or
             if load_mol_sys is set to false, None is returned.
+
+        ligand : rdkit.Chem.Mol
+            The ligand associeted to the pharmacophore in case there is one. If there is no ligand None is returnde.
     """
     points = []
     molecular_system = None
     ligand = None
 
-    if type(pharmacophore_file) == str:
-        if pharmacophore_file.endswith('.json'):
-            with open(pharmacophore_file, "r") as fff:
-                pharmacophore = json.load(fff)
-        else:
-            raise NotImplementedError
-
-    def get_pharmer_element_properties(element, direction=False):
-        center = _puw.quantity([element['x'], element['y'], element['z']], 'angstroms')
-        radius = _puw.quantity(element['radius'], 'angstroms')
-        if direction:
-            direction = [element['svector']['x'], element['svector']['y'], element['svector']['z']]
-            return center, radius, direction
-
-        return center, radius
+    if pharmacophore_file.endswith('.json'):
+        with open(pharmacophore_file, "r") as fff:
+            pharmacophore = json.load(fff)
+    else:
+        raise NotImplementedError
 
     for pharmer_element in pharmacophore['points']:
         pharmer_feature_name = pharmer_element['name']
@@ -77,9 +82,9 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
 
         elif pharmer_feature_name=='InclusionSphere':
             center, radius = get_pharmer_element_properties(pharmer_element, direction=False)
-            element =PharmacophoricPoint("included volume", center, radius)
+            element = PharmacophoricPoint("included volume", center, radius)
 
-        points.append(element)
+        insort_right(points, element, key=lambda p: p.short_name)
 
     if load_mol_sys:
         has_ligand = "ligand" in pharmacophore and pharmacophore["ligand"] != ""
@@ -92,35 +97,13 @@ def from_pharmer(pharmacophore_file, load_mol_sys=False):
     
     return points, molecular_system, ligand
 
-def to_pharmer(pharmacophore, file_name):
-    """ Save a pharmacophore as a pharmer file (json file).
-
-        Parameters
-        ----------
-
-        pharmacophore : openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file. Can be a Pharmacophore,
-            StructuredBasedPharmacophore or LigandBasedPharmacophore. 
-
-        file_name : str
-            Name of the file that will contain the pharmacophore
-
-        Note
-        ----
-        Nothing is returned. A new file is written.
-    """
-    pharmacophore_dict = _pharmer_dict(pharmacophore)
-    
-    with open(file_name, "w") as outfile:
-        json.dump(pharmacophore_dict, outfile)
-
-def _pharmer_dict(pharmacophore):
+def _pharmer_dict(pharmacophoric_points: List[PharmacophoricPoint]) -> Dict[str, Any]:
     """ Returns a Dictionary with the necessary info to construct pharmer pharmacophore. 
 
         Parameters
         ----------
-        pharmacophore : openpharmacophore.Pharmacophore
-            Pharmacophore object wich elements will be used to construct the dictionary
+        pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
+            Pharmacophore points that will be used to construct the dictionary
 
         Returns
         -------
@@ -138,7 +121,7 @@ def _pharmer_dict(pharmacophore):
         "negative charge": "NegativeIon",
     }
     points = []
-    for element in pharmacophore.elements:
+    for element in pharmacophoric_points:
         point_dict = {}
         temp_center = puw.get_value(element.center, to_unit='angstroms')
         point_dict["name"] = pharmer_element_name[element.feature_name]
@@ -167,8 +150,6 @@ def _pharmer_dict(pharmacophore):
 
     pharmacophore_dict = {}
     pharmacophore_dict["points"] = points
-
-    #TODO: save molecular system
 
     return pharmacophore_dict
     

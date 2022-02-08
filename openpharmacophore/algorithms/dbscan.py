@@ -7,8 +7,10 @@ from rdkit import Chem, RDConfig
 from rdkit.Chem import ChemicalFeatures
 import pyunitwizard as puw
 import os
+from typing import Optional, Sequence
 
-def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=None):
+def rdkit_to_point(feat_name: str, coords: np.ndarray, radius: float, 
+                    direction: Optional[Sequence] = None, atom_indices: Optional[Sequence] = None) -> PharmacophoricPoint:
     """ Transform an rdkit feature point to an openpharmacophore pharmacophoric point.
 
         Parameters
@@ -45,7 +47,7 @@ def rdkit_to_point(feat_name, coords, radius=None, direction=None, atom_indices=
         center=puw.quantity(coords, "angstroms"),
         radius=puw.quantity(radius, "angstroms"),
         direction=direction,
-        atoms_inxs=atom_indices
+        atom_indices=atom_indices
     )
 
 def get_feature_clusters(feat_coords, eps, min_samples):

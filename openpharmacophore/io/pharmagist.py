@@ -58,13 +58,14 @@ def _pharmagist_file_info(pharmacophores):
     for pharmacophore in pharmacophores:
         lines = ["@<TRIPOS>MOLECULE\n", "@<TRIPOS>ATOM\n"] # list to store all lines for a single pharmacophore
         line = ""
-        for i, element in enumerate(pharmacophore.elements):
-            element_inx = str(i + 1)
-            line += element_inx.rjust(7)
+        index = 0
+        for element in pharmacophore:
             try:
                 feat_name = pharmagist_element_name[element.feature_name]
-            except:
+            except KeyError:
                 continue
+            element_inx = str(index + 1)
+            line += element_inx.rjust(7)
             line += " " + feat_name
             # Get point coordinates
             center = np.around(puw.get_value(element.center, to_unit="angstroms"), 4)
@@ -83,11 +84,13 @@ def _pharmagist_file_info(pharmacophores):
                 z = str(center[2]).ljust(6,"0").rjust(10)
             line += x + y + z + " "
             line += pharmagist_element_specs[element.feature_name].rjust(5)
-            line += str(i).rjust(5)
+            line += str(index).rjust(5)
             line += pharmagist_element_specs[element.feature_name].rjust(6)
             line += "0.0000\n".rjust(12)
             lines.append(line)
             line = ""
+            
+            index += 1
 
         lines.append("@<TRIPOS>BOND\n")
         for l in lines:

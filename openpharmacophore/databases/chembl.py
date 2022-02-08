@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 import os
 
-def get_ro5_dataset(download_dir):
+def get_ro5_dataset(download_dir: str) -> None:
     """ Download subset of molecules that do not violate Lipinky's rule of five.
     
         Molecules are stored in smi files with its smiles and ChemblId.
@@ -16,10 +16,6 @@ def get_ro5_dataset(download_dir):
         ----------
         download_dir : str
             Directory where the files will be saved.
-        
-        Notes
-        ---------
-        Nothing is returned. New files are written.
 
     """
     molecules_api = new_client.molecule
@@ -56,7 +52,7 @@ def get_ro5_dataset(download_dir):
     file.close()
 
 
-def get_bioactivity_dataframe(target_chembl_id):
+def get_bioactivity_dataframe(target_chembl_id: str) -> pd.DataFrame:
     """ Get bioactivity data for a given target.
     
         Parameters
@@ -107,7 +103,7 @@ def get_bioactivity_dataframe(target_chembl_id):
     # Clean bioactivities_df
     bioactivities_df = bioactivities_df.dropna(axis=0, how="any")
     bioactivities_df = bioactivities_df[bioactivities_df["Units"] == "nM"]
-    # Remove duplicate elements. Keep the mean of the IC50
+    # Remove duplicate pharmacophoric_points. Keep the mean of the IC50
     bioactivities_df = bioactivities_df.groupby("ChemblID").mean().reset_index()
 
     # Get compounds smiles

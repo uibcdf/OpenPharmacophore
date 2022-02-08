@@ -7,6 +7,9 @@ from openpharmacophore._private_tools.input_arguments import validate_input_arra
 # Third Party
 import numpy as np
 import pyunitwizard as puw
+from pint import Quantity
+# Standard library
+from typing import List, Optional, TypeVar, Sequence
 
 feature_to_char = {
             "hb acceptor":     "A",
@@ -18,6 +21,8 @@ feature_to_char = {
             "excluded volume": "E",
             "included volume": "I",
         }
+
+ArrayLike = TypeVar("ArrayLike", list, np.ndarray)
 
 class PharmacophoricPoint():
     """ Class to store pharmacophoric points of any feature type. This class can
@@ -40,7 +45,7 @@ class PharmacophoricPoint():
             Vector direction as a three dimensional vector. If the pharmacophoric point doesn't have
             direction is set to None. It must be of length or shape 3.
         
-        atoms_inxs : list, set or tuple of int
+        atom_indices : list, set or tuple of int
             The indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted. A list, set or tuple can be passed. 
 
@@ -62,13 +67,14 @@ class PharmacophoricPoint():
         has_direction : bool
             Whether the pharmacophoric point has direction.
         
-        atoms_inxs : set of int
+        atom_indices : set of int
             A set of the indices of the atoms corresponding to the pharmacophoic point in the molecule from which
             they were extracted.  
 
     
     """
-    def __init__(self, feat_type, center, radius, direction=None, atoms_inxs=None):
+    def __init__(self, feat_type: str, center: Quantity, radius: Quantity, 
+                direction: Optional[ArrayLike] = None, atom_indices: Optional[Sequence] = None) -> None:
         
         # Validate center
         validate_input_quantity(center, {"[L]" : 1}, "center", shape=(3,))
@@ -82,10 +88,10 @@ class PharmacophoricPoint():
         # Validate feat type
         if not isinstance(feat_type, str):
             raise InvalidFeatureType("feat_type must be a string")
-        # Validate atoms_inxs
-        if atoms_inxs is not None:
-            if not isinstance(atoms_inxs, (list, set, tuple)):
-                raise OpenPharmacophoreTypeError("atoms_inxs must be a list, set or tuple of int")
+        # Validate atom_indices
+        if atom_indices is not None:
+            if not isinstance(atom_indices, (list, set, tuple)):
+                raise OpenPharmacophoreTypeError("atom_indices must be a list, set or tuple of int")
             
         if feat_type not in list(feature_to_char.keys()):
             raise InvalidFeatureType(f"{feat_type} is not a valid feature type. Valid feature names are {list(feature_to_char.keys())}")
@@ -102,10 +108,10 @@ class PharmacophoricPoint():
             self.direction = None
             self.has_direction = False
         
-        if atoms_inxs is not None:
-            self.atoms_inxs = set(atoms_inxs)
+        if atom_indices is not None:
+            self.atom_indices = set(atom_indices)
         else:
-            self.atoms_inxs = None
+            self.atom_indices = None
         
         self.pharmacophore_index = 0
         self.count = 1
@@ -164,7 +170,7 @@ class PharmacophoricPoint():
             view.update_representation(component=n_components+1, repr_index=0, opacity=0.9)
     
     @staticmethod
-    def get_valid_features():
+    def get_valid_features() -> List[str]:
         """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
         return [
             "hb acceptor",
@@ -177,14 +183,14 @@ class PharmacophoricPoint():
             "included volume",
         ]
     
-    def is_equal(self, other):
+    def is_equal(self, other: "PharmacophoricPoint") -> bool:
         """ Compare equality of two pharmacophoric points based on atoms indices.
         """
-        if self.short_name == other.short_name and self.atoms_inxs == other.atoms_inxs:
+        if self.short_name == other.short_name and self.atom_indices == other.atom_indices:
                 return True
         return False
 
-    def __eq__(self, other):
+    def __eq__(self, other: "PharmacophoricPoint") -> bool:
         """ Compare equality of two pharmacophoric points based on their 3D coordinates,
             directionality and radius.
         """
@@ -202,7 +208,7 @@ class PharmacophoricPoint():
                 return radius_eq and center_eq
         return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         center = np.around(puw.get_value(self.center, "angstroms"), 2)
         radius = np.around(puw.get_value(self.radius, "angstroms"), 2)
         x, y, z = center[0], center[1], center[2]
@@ -226,18 +232,18 @@ class UniquePharmacophoricPoint(PharmacophoricPoint):
         Inherits from PharmacophoricPoint.
 
     """
-    def __init__(self, point, pharmacophore_index):
+    def __init__(self, point: PharmacophoricPoint, pharmacophore_index: int) -> None:
         super().__init__(point.feature_name, 
                         point.center, 
                         point.radius, 
                         direction=None, 
-                        atoms_inxs=point.atoms_inxs)
+                        atom_indices=point.atom_indices)
         self.count = 1 # To keep the count of each point when working with multiple pharmacophores.
         self.frequency = 0.0
         self.timesteps = [pharmacophore_index] 
 
 
-def distance_bewteen_pharmacophoric_points(p1, p2):
+def distance_bewteen_pharmacophoric_points(p1: PharmacophoricPoint, p2: PharmacophoricPoint) -> float:
     """ Compute the distance in angstroms between two pharmacophoric points.
     
         Parameters

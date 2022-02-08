@@ -1,9 +1,9 @@
 from rdkit import Chem
 from rdkit.Chem import AllChem
-
 from openpharmacophore._private_tools.exceptions import NoConformersError, OpenPharmacophoreTypeError, OpenPharmacophoreValueError
 
-def generate_conformers(molecule, n_conformers, random_seed=-1, alignment=False):
+def generate_conformers(molecule: Chem.Mol, n_conformers: int, 
+            random_seed: int = -1, alignment: bool = False) -> Chem.Mol:
     """Generate conformers for a molecule
     
         Parameters
@@ -37,13 +37,14 @@ def generate_conformers(molecule, n_conformers, random_seed=-1, alignment=False)
         AllChem.AlignMolConformers(molecule)
     return molecule
 
-def conformer_energy(molecule, conformer_id=0, forcefield="UFF"):
+def conformer_energy(molecule: Chem.Mol, conformer_id: int = 0, 
+                forcefield: str = "UFF") -> float:
     """ Get the energy of a conformer in a molecule using the universal forcefield (UFF) forcefield
         or the merck molecular forcefield (MMFF) forcefield.
 
         Parameters
         ----------
-        molecule : rdkit.Chem.mol
+        molecule : rdkit.Chem.Mol
             The molecule which energy will be calculated.
 
         forcefield : {"UFF", "MMFF"}, optional.
@@ -52,7 +53,7 @@ def conformer_energy(molecule, conformer_id=0, forcefield="UFF"):
 
         Returns
         -------
-        double
+        float
             The energy of the molecule.
     """
     if molecule.GetNumConformers() == 0:

@@ -29,6 +29,7 @@ def test_validate_input_array_like():
     name = "array"
     with pytest.raises(exc.NotArrayLikeError):
         validate_input_array_like({1.0}, (1,), name)
+        
     with pytest.raises(exc.BadShapeError):
         validate_input_array_like([1, 2, 3], (4,), name)
         validate_input_array_like((1, 2), (4,), name)

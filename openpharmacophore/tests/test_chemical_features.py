@@ -79,13 +79,13 @@ def test_pharmacophoric_point_extractor():
     rdkit_extractor = PharmacophoricPointExtractor(featdef=rdkit_featuredefinition())
     points = rdkit_extractor(acetic_acid, 0)
     assert len(points) == 5 
-    assert acceptor.feature_name == points[1].feature_name
-    assert np.all(acceptor.center == points[1].center)
-    assert acceptor.radius == points[1].radius
+    assert acceptor.feature_name == points[0].feature_name
+    assert np.all(acceptor.center == points[0].center)
+    assert acceptor.radius == points[0].radius
 
-    assert negative.feature_name == points[3].feature_name
-    assert np.all(negative.center == points[3].center)
-    assert negative.radius == points[3].radius
+    assert negative.feature_name == points[-1].feature_name
+    assert np.all(negative.center == points[-1].center)
+    assert negative.radius == points[-1].radius
 
 
 @pytest.fixture

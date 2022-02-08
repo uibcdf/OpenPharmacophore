@@ -89,7 +89,7 @@ def test_get_screening_results(form, mock_screening_results):
 
 @pytest.fixture
 def four_element_pharmacophore():
-    elements = [
+    pharmacophoric_points = [
         PharmacophoricPoint(
         feat_type="hb acceptor",
         center=puw.quantity([3.877, 7.014, 1.448], "angstroms"),
@@ -108,7 +108,7 @@ def four_element_pharmacophore():
         center=puw.quantity([1.56433333333334, 7.06399999999999, 3.135], "angstroms"),
         radius=puw.quantity(1.0, "angstroms"))
     ]
-    return Pharmacophore(elements)
+    return Pharmacophore(pharmacophoric_points)
 
 
 @pytest.fixture

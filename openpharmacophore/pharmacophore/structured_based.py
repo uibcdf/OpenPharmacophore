@@ -22,9 +22,11 @@ import json
 import requests
 import re
 import tempfile
+from typing import List, Optional, Tuple
 import warnings
 
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
+
 
 class StructuredBasedPharmacophore(Pharmacophore):
 
@@ -35,36 +37,38 @@ class StructuredBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    elements : list of openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric pharmacophoric_points
 
-    molecular_system : rdkit.Chem.mol
+    molecular_system : rdkit.Chem.Mol
         The protein-ligand complex from which this pharmacophore was extracted.
 
     Attributes
     ----------
 
-    elements : list of openpharmacophore.PharmacophoricPoint
-        List of pharmacophoric elements
+    pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
+        List of pharmacophoric pharmacophoric_points
 
-    n_elements : int
-        Number of pharmacophoric elements
+    n_pharmacophoric_points : int
+        Number of pharmacophoric pharmacophoric_points
 
-    molecular_system : rdkit.Chem.mol
+    molecular_system : rdkit.Chem.Mol
         The protein from which this pharmacophore was extracted.
     
-    ligand : rdkit.Chem.mol
+    ligand : rdkit.Chem.Mol
         The ligand from the protein-ligand complex.
 
     """
 
-    def __init__(self, elements=[], molecular_system=None, ligand=None):
-        super().__init__(elements=elements)
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], molecular_system: Optional[Chem.Mol] = None, 
+                ligand: Optional[Chem.Mol] = None, is_sorted: bool = False) -> None:
+        super().__init__(pharmacophoric_points=pharmacophoric_points, is_sorted=is_sorted)
         self.molecular_system = molecular_system
         self.ligand = ligand
     
     @classmethod
-    def from_pdb(cls, pdb, radius=1.0, ligand_id=None, hydrophobics="smarts", load_mol_system=True, load_ligand=True):
+    def from_pdb(cls, pdb: str, radius: float = 1.0, ligand_id: Optional[str] = None, 
+            hydrophobics:str ="smarts", load_mol_system: bool = True, load_ligand: bool = True) -> "StructuredBasedPharmacophore":
         """ Class method to obtain a pharmacophore from a pdb file containing a protein-ligand complex. 
             
             Only the interactions of a single lignad will be computed in case  the protein structure contains 
@@ -157,13 +161,13 @@ class StructuredBasedPharmacophore(Pharmacophore):
             # match those of the rdkit molecule. rdkit is zero indexed while pybel indices start at 1. So 1 needs to
             # be substracted from each index
             for point in pharmacophoric_points:
-                indices = {i - 1 for i in point.atoms_inxs}
-                point.atoms_inxs = indices
+                indices = {i - 1 for i in point.atom_indices}
+                point.atom_indices = indices
 
-        return cls(elements=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand)
+        return cls(pharmacophoric_points=pharmacophoric_points, molecular_system=molecular_system, ligand=ligand, is_sorted=False)
     
     @classmethod
-    def from_file(cls, file_name, load_mol_sys=True):
+    def from_file(cls, file_name: str, load_mol_sys: bool =True) -> "StructuredBasedPharmacophore":
         """ Class method to load an structured based pharmacophore from a file.
         
         Currently supports only json format from pharmer.
@@ -182,12 +186,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
         
         return cls(points, receptor, ligand)    
 
-    @classmethod
-    def _from_tempfile(cls):
-        pass
-
     @staticmethod
-    def _fetch_pdb(pdb_id):
+    def _fetch_pdb(pdb_id: str) -> str:
         """ Fetch a protein structure from the Protein Data Bank.
             
             Parameters
@@ -211,7 +211,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return pdb_str
         
     @staticmethod
-    def _protein_ligand_interactions(pdb, as_string):
+    def _protein_ligand_interactions(pdb: str, as_string: bool) -> Tuple[dict, str, dict]:
         """Static method to calculate protein-ligand interactions for each ligand in
             the pdb file.
 
@@ -260,7 +260,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return all_interactions, pdb_string, ligands
     
     @staticmethod
-    def _sb_pharmacophore_points(interactions, radius, ligand, hydrophobics="smarts"):
+    def _sb_pharmacophore_points(interactions, radius: float, 
+                ligand: Chem.Mol, hydrophobics: str = "smarts") -> List[PharmacophoricPoint]:
         """Static method to obtain a list of pharmacophoric points for the protein-ligand complex.
 
         Parameters
@@ -271,7 +272,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         radius : float 
             Radius of the spheres of the pharmacophoric points.
 
-        ligand : rdkit.Chem.mol
+        ligand : rdkit.Chem.Mol
             The ligand in from the protein-ligand complex.
         
         hydrophobics : {"plip", "smarts"}
@@ -288,7 +289,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
         # List with all interactions
         interactions = interactions.all_itypes
-        # list of pharmacophoric_elements
+        # list of pharmacophoric_pharmacophoric_points
         points = []
         # list oh hydrophobic points
         hydrophobic_points = [] 
@@ -305,7 +306,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     center=puw.quantity(ligand_center, "angstroms"),
                     radius=radius,
                     direction=direction,
-                    atoms_inxs=atom_indices
+                    atom_indices=atom_indices
                 )
                 points.append(aromatic)
 
@@ -319,7 +320,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                     center=center,
                     radius=radius,
                     direction=None,
-                    atoms_inxs=atom_inx
+                    atom_indices=atom_inx
                 )
                 hydrophobic_points.append(hydrophobic)
             
@@ -332,7 +333,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         feat_type="negative charge",
                         center=center,
                         radius=radius,
-                        atoms_inxs=atom_indices
+                        atom_indices=atom_indices
                     ) 
                 else:
                     # The ligand has a positive charge
@@ -342,7 +343,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         feat_type="positive charge",
                         center=center,
                         radius=radius,
-                        atoms_inxs=atom_indices
+                        atom_indices=atom_indices
                     ) 
                 points.append(charge_sphere)
             
@@ -358,7 +359,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         center=puw.quantity(ligand_acceptor_center, "angstroms"),
                         radius=radius,
                         direction=direction,
-                        atoms_inxs=ligand_acceptor_inx
+                        atom_indices=ligand_acceptor_inx
                     )
                     points.append(acceptor)
                 else:
@@ -372,7 +373,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                         center=puw.quantity(ligand_donor_center, "angstroms"),
                         radius=radius,
                         direction=direction,
-                        atoms_inxs=ligand_donor_inx
+                        atom_indices=ligand_donor_inx
                     )
                     points.append(donor)
             else:
@@ -396,7 +397,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         return points_filtered + hydrophobic_points
 
     @staticmethod
-    def _plip_hydrophobics(hydrophobics, radius):
+    def _plip_hydrophobics(hydrophobics: List[PharmacophoricPoint], radius: float) -> List[PharmacophoricPoint]:
         """ Groups plip hydrophobic points that are to close into a single point.
 
             Parameters
@@ -415,7 +416,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             if hyd1 in skip:
                 continue
             centroid = hyd1.center
-            indices = hyd1.atoms_inxs
+            indices = hyd1.atom_indices
             count = 0
             hyd1_center = puw.get_value(hyd1.center, "angstroms")
 
@@ -428,7 +429,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
 
                 if distance <= 2.5:
                     centroid += hyd2.center
-                    indices.union(hyd2.atoms_inxs)
+                    indices.union(hyd2.atom_indices)
                     count += 1
                     skip.append(hyd2)
             if count > 0:
@@ -439,17 +440,17 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 center=centroid, 
                 radius=radius,
                 direction=None,
-                atoms_inxs=indices))
+                atom_indices=indices))
         
         return grouped_points
 
     @staticmethod
-    def _smarts_hydrophobics(ligand, radius):
+    def _smarts_hydrophobics(ligand: Chem.Mol, radius: float) -> List[PharmacophoricPoint]:
         """ Get hydrophobic points usign smarts feature definitions
             
             Parmaeters
             ----------
-            ligand : rdkit.Chem.mol
+            ligand : rdkit.Chem.Mol
                 The ligand from the protein-ligand complex  
 
             radius : float
@@ -465,7 +466,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
         
         return points
 
-    def draw(self, file_name, img_size=(500,500), legend=""):
+    def draw(self, file_name: str, img_size: Tuple[int, int] = (500,500), legend: str ="") -> None:
         """ Draw a 2d representation of the pharmacophore. 
         
             This is a drawing of the ligand with the pharmacophoric features highlighted.
@@ -497,9 +498,9 @@ class StructuredBasedPharmacophore(Pharmacophore):
         atom_highlights = defaultdict(list)
         highlight_radius = {}
 
-        for point in self.elements:
+        for point in self.pharmacophoric_points:
 
-            indices = point.atoms_inxs
+            indices = point.atom_indices
             for idx in indices:
                 
                 atoms.append(idx)
@@ -532,20 +533,20 @@ class StructuredBasedPharmacophore(Pharmacophore):
         drawing.FinishDrawing()
         drawing.WriteDrawingText(file_name)
 
-    def show(self, palette='openpharmacophore'):
+    def show(self, palette: str = 'openpharmacophore') -> nv.NGLWidget:
         """ Show the pharmacophore model together with the molecular system from with it was
             extracted.
 
-        Parameters
-        ----------
-        palette : str, dict
-            Color palette name or dictionary. (Default='openpharmacophore')
+            Parameters
+            ----------
+            palette : str, dict
+                Color palette name or dictionary. (Default='openpharmacophore')
 
-        Returns
-        -------
-        nglview.NGLWidget
-            An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
-            molecular system used to elucidate it.
+            Returns
+            -------
+            nglview.NGLWidget
+                An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
+                molecular system used to elucidate it.
 
         """
         view = nv.NGLWidget()
@@ -571,24 +572,19 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.add_to_NGLView(view, palette=palette)
         return view
     
-    def to_pharmer(self, file_name, save_mol_system=True):
+    def to_pharmer(self, file_name: str, save_mol_system: bool = True) -> None:
         """ Save a pharmacophore as a pharmer file (json file). The receptor
             and ligand can also be saved.
 
-        Parameters
-        ----------
-        file_name: str
-            Name of the file that will contain the pharmacophore
+            Parameters
+            ----------
+            file_name: str
+                Name of the file that will contain the pharmacophore
 
-        save_mol_system: bool
-            Wheter to save the molecular system or just the pharmacophoric points.
-            (default=True)
-
-        Note
-        ----
-            Nothing is returned. A new file is written.
+            save_mol_system: bool, default=True
+                Wheter to save the molecular system or just the pharmacophoric points.
     """
-        pharmacophore_dict = _pharmer_dict(self)
+        pharmacophore_dict = _pharmer_dict(self.pharmacophoric_points)
 
         if save_mol_system:
             if self.molecular_system is not None:

@@ -1,4 +1,5 @@
 # OpenPharmacophore
+from openpharmacophore import Pharmacophore, LigandBasedPharmacophore, StructuredBasedPharmacophore
 from openpharmacophore.io.mol_suppliers import smiles_mol_generator, smi_has_header_and_id, mol2_mol_generator
 from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError, OpenPharmacophoreNotImplementedError, OpenPharmacophoreTypeError
@@ -18,10 +19,14 @@ import json
 from multiprocessing import Pool, Queue, Manager, Value
 from operator import itemgetter
 import os
+from typing import Callable, List, Tuple, TypeVar
 
 RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
 
 Match = namedtuple("Match", ["score", "id", "mol"]) # Named tuple to store molecules that match a pharmacophore
+PharmacophoreType = TypeVar("PharmacophoreType", LigandBasedPharmacophore, 
+                    StructuredBasedPharmacophore, Pharmacophore, DataStructs.SparseBitVect)
+Results = TypeVar("Results", pd.DataFrame, dict)
 
 class VirtualScreening():
     """ Class for performing virtual screening for a database of molecules. 
@@ -37,7 +42,7 @@ class VirtualScreening():
 
     Attributes
     ----------
-    matches : list of 3-tuples (float, str, rdkit.Chem.mol)
+    matches : list of 3-tuples (float, str, rdkit.Chem.Mol)
         List of molecules that match the pharmacophore. Each tuple is formed by scoring 
         value, the molecule id, and the molecule object.
     
@@ -52,9 +57,13 @@ class VirtualScreening():
     
     scoring_metric : str
         Metric used to score the molecules, how well they fit to the pharmacophore.
+    
+    pharmacophore : openpharmacophore.Pharmacophore
+        The pharmacophore that will be used to screen the database. Can be a Pharmacophore, 
+        StructuredBasedPharmacophore, LigandBasedPharmacophore or a fingerprint
 
     """
-    def __init__(self, pharmacophore, **kwargs):
+    def __init__(self, pharmacophore: PharmacophoreType, **kwargs) -> None:
        
        if is_3d_pharmacophore(pharmacophore):
             self.scoring_metric = "SSD"
@@ -77,7 +86,7 @@ class VirtualScreening():
        self.n_molecules = 0
        self.pharmacophore = pharmacophore
     
-    def get_screening_results(self, form="dataframe"):
+    def get_screening_results(self, form: str = "dataframe") -> Results:
         """ Get the results of the screen on a dataframe or a dictionaty
 
             Parameters
@@ -117,13 +126,13 @@ class VirtualScreening():
         else:
             raise ValueError("form must be dataframe or dict")
 
-    def print_report(self):
+    def print_report(self) -> None:
         """ Prints a summary report of the screening.
         """
         report_str = self._get_report()
         print(report_str)
 
-    def save_results_to_file(self, file_name):
+    def save_results_to_file(self, file_name: str) -> None:
         """Save the results of the screening to a file. 
         
            The file contains the matched molecules ids, smiles and SSD value. 
@@ -150,7 +159,7 @@ class VirtualScreening():
         else:
             raise NotImplementedError
         
-    def screen_db_from_dir(self, path, pbar=True):
+    def screen_db_from_dir(self, path: str, pbar: bool = True) -> None:
         """ Screen a database of molecules contained in one or more files. 
 
             Supported file formats are smi, txt, mol2, sdf.
@@ -184,12 +193,12 @@ class VirtualScreening():
         for file_path in tqdm(file_list, disable=not pbar):
             self.screen_mol_file(file_path)
             
-    def screen_mol_list(self, molecules, pbar=True):
+    def screen_mol_list(self, molecules: List[Chem.Mol], pbar: bool = True) -> None:
         """ Screen a list of molecules
 
             Parameters
             ----------
-            molecules: list of rdkit.Chem.mol
+            molecules: list of rdkit.Chem.Mol
             
             pbar : bool
                 Whether to display a progress bar
@@ -208,7 +217,7 @@ class VirtualScreening():
         self.n_matches = len(self.matches)
         self.n_fails = self.n_molecules - self.n_matches
                
-    def screen_mol_file(self, file_path, sort=True):
+    def screen_mol_file(self, file_path: str, sort: bool = True) -> None:
         """ Perform virtual screening to a file of molecules.
         
             Parameters
@@ -231,7 +240,7 @@ class VirtualScreening():
         self.n_matches = len(self.matches)
         self.n_fails = self.n_molecules - self.n_matches
     
-    def _screen_file(self, file_path, screen_fn, args):
+    def _screen_file(self, file_path: str, screen_fn: Callable, args: Tuple) -> None:
         """ Apply a a screening function to each molecule in a file.
         
             Parameters
@@ -273,7 +282,7 @@ class VirtualScreening():
 
             Parameters
             ----------
-            mol : rdkit.Chem.mol
+            mol : rdkit.Chem.Mol
                 Molecule to align.
                 
             matches : list
@@ -282,7 +291,8 @@ class VirtualScreening():
             pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
                 An rdkit pharmacophore
 
-            featFactory : 
+            featFactory : rdkit.Chem.rdMolChemicalFeatures.MolChemicalFeatureFactory
+                The feature factory.
             
             sort : bool, default=False
                 Whether to sort the list with the matches
@@ -338,7 +348,7 @@ class VirtualScreening():
 
         Parameters
         ----------
-        mol : rdkit.Chem.mol
+        mol : rdkit.Chem.Mol
            Molecule whose similarity to the pharmacophoric fingerprint will be calculated.
            
         matches : list
@@ -388,7 +398,7 @@ class VirtualScreening():
 
             Parameters
             ----------
-            molecule : rdkit.Chem.mol
+            molecule : rdkit.Chem.Mol
                 The molecule whose pharmacophore fingerprint will be computed.
             
             Returns
@@ -418,7 +428,7 @@ class VirtualScreening():
 
         return rdkit_pharmacophore
 
-    def _get_report(self):
+    def _get_report(self) -> None:
         """ Get a report of the screening results.
             
             Returns
@@ -465,14 +475,14 @@ class VirtualScreening():
         
         return report_str
 
-    def _reset(self):
+    def _reset(self) -> None:
         """ Resets the attributes of the VirtualScreening instance."""
         self.matches.clear()
         self.n_fails = 0
         self.n_matches = 0
         self.n_molecules = 0
                 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (f"{self.__class__.__name__}(n_matches={self.n_matches}; "
                f"n_fails={self.n_fails})")
         
@@ -484,7 +494,7 @@ class MultiProcessVirtualScreening(VirtualScreening):
         super().__init__(pharmacophore, **kwargs)
     
     @staticmethod
-    def _get_files(path):
+    def _get_files(path: str) -> Queue:
         """ List all files from a directory and put them in a queue.
         
             Parameters
@@ -516,7 +526,7 @@ class MultiProcessVirtualScreening(VirtualScreening):
         
         return file_queue
     
-    def screen_db_from_dir(self, path, sort=False):
+    def screen_db_from_dir(self, path: str, sort: bool = False) -> None:
         """ Screen a database of molecules contained in one or more files. 
 
             Supported file formats are smi, txt, mol2, sdf.
@@ -535,7 +545,7 @@ class MultiProcessVirtualScreening(VirtualScreening):
         self.n_matches = len(self.matches)
         self.n_fails = self.n_molecules - self.n_matches
     
-    def _multiprocess_screening(self, path, sort=False):
+    def _multiprocess_screening(self, path: str, sort: bool = False) -> Tuple[List[Match], int]:
         """ Screen a database of molecules using multiple processes. 
 
             Parameters
@@ -573,7 +583,8 @@ class MultiProcessVirtualScreening(VirtualScreening):
             else:
                 return list(matches).sort(key=lambda x: x.score), n_molecules.value
             
-    def _screen_files(self, file_queue, n_molecules, screen_fn, args):
+    def _screen_files(self, file_queue: Queue, n_molecules: Value, 
+                    screen_fn: Callable, args: tuple):
         """ Perform virtual screening to a set of molecules contained in a queue of files.
 
             Parameters
