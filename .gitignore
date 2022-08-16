@@ -122,3 +122,6 @@ docs/_autosummary/
 # Other
 .DS_store
 .vscode/
+
+# Pycharm
+.idea
