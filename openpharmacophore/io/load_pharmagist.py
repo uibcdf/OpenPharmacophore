@@ -4,6 +4,8 @@ import pyunitwizard as puw
 import re
 from typing import List 
 
+
+# TODO: there is a circular dependency when importing LigandBasedPharmacophore.
 def read_pharmagist(file_name: str) -> List[LigandBasedPharmacophore]:
     """ Loads pharmacophores from a pharmagist mol2 file.
 

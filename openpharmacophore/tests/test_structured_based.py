@@ -1,11 +1,13 @@
 from openpharmacophore import PharmacophoricPoint
 from openpharmacophore import StructuredBasedPharmacophore as SBP
 from openpharmacophore.utils.conformers import generate_conformers
+import openpharmacophore.data as data
 import numpy as np
 import pytest
 import pyunitwizard as puw
 from rdkit import Chem
 import os
+
 
 @pytest.mark.parametrize("file_name,ligand_id,hydrophobics", [
     ("1ncr", "W11:A:7001", "plip"),
@@ -14,9 +16,7 @@ import os
     ("1qku", "EST:A:600", "smarts")
 ])
 def test_from_pdb(file_name, ligand_id, hydrophobics):
-    pdbs_path = "./openpharmacophore/data/pdb/"
-    file_path = os.path.join(pdbs_path, file_name + ".pdb" )
-
+    file_path = data.pdb[file_name]
     pharmacophore = SBP().from_pdb(file_path, radius=1.0, ligand_id=ligand_id, hydrophobics=hydrophobics)
 
     if file_name == "1ncr":
@@ -204,8 +204,7 @@ def test_from_pdb(file_name, ligand_id, hydrophobics):
 ])
 def test_protein_ligand_interactions(file_name):
 
-    pdbs_path = "./openpharmacophore/data/pdb/"
-    file_path = os.path.join(pdbs_path, file_name + ".pdb" )
+    file_path = data.pdb[file_name]
 
     interactions, pdb_str, _ = SBP._protein_ligand_interactions(file_path, as_string=False)  
     assert isinstance(interactions, dict)
@@ -225,14 +224,14 @@ def test_protein_ligand_interactions(file_name):
         assert ligands[0] == "JIN:A:600"
         assert ligands[1] == "JIN:B:600"
 
+
 @pytest.mark.parametrize("file_name", [
     ("1ncr"),
     ("2hz1"),
     ("2hzi")
 ])
 def test_sb_pharmacophore_points(file_name):
-    pdbs_path = "./openpharmacophore/data/pdb/"
-    file_path = os.path.join(pdbs_path, file_name + ".pdb" )
+    file_path = data.pdb[file_name]
     all_interactions, _ , _ = SBP._protein_ligand_interactions(file_path, as_string=False) 
 
     if file_name == "1ncr":
@@ -278,7 +277,8 @@ def test_sb_pharmacophore_points(file_name):
             if point.feature_name == "hydrophobicity":
                 n_hydrophobics += 1
         assert n_hydrophobics == 3
-    
+
+
 def test_smarts_hydrophobics():
     
     ligand = Chem.MolFromSmiles("CC1=CC(=CC(=C1OCCCC2=CC(=NO2)C)C)C3=NOC(=N3)C(F)(F)F")
@@ -297,4 +297,4 @@ def test_smarts_hydrophobics():
                     radius=puw.quantity(1.0, "angstroms")
                     )
     assert np.allclose(np.around(hyd_2_center, 3), (-2.130, -0.542, -0.479), rtol=0, atol=1e-04)
-    assert np.allclose(hyd_2_radius, hyd_2_radius, rtol=0, atol=1e-03) 
+    assert np.allclose(hyd_2_radius, hyd_2_radius, rtol=0, atol=1e-03)
