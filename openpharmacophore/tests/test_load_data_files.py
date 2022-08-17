@@ -7,7 +7,8 @@ def test_all_data_dictionaries_are_populated():
     assert len(data.ligands) == 5
     assert len(data.pdb) == 5
     assert len(data.pharmacophores) == 5
-    assert len(data.trajectories) == 2
+    assert len(data.trajectories) == 1
+    assert len(data.topologies) == 1
 
 
 def test_can_load_a_file_from_each_dictionary():
@@ -27,7 +28,7 @@ def test_can_load_a_file_from_each_dictionary():
         header = fp.readline()
         assert "@<TRIPOS>" in header
 
-    topology = data.trajectories["er_alpha"]
+    topology = data.topologies["ERalpha"]
     with open(topology) as fp:
         header = fp.readline()
         assert "54437" in header

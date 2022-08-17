@@ -1,4 +1,5 @@
-from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor, load_smarts_fdef, rdkit_featuredefinition
+import openpharmacophore.pharmacophore.chemical_features as feats
+import openpharmacophore.data as data
 from openpharmacophore import PharmacophoricPoint
 from openpharmacophore import utils
 import numpy as np
@@ -6,10 +7,12 @@ from rdkit import Chem
 import pyunitwizard as puw
 import pytest
 
+
 @pytest.fixture
 def sample_molecule():
     """Returns a sample molecule for testing"""
     return Chem.MolFromSmiles("CC1=CC(=CC(=C1OCCCC2=CC(=NO2)C)C)C3=NOC(=N3)C(F)(F)F")
+
 
 def test_feature_centroid(sample_molecule):
     mol = utils.conformers.generate_conformers(molecule=sample_molecule, n_conformers=1, random_seed=1)
@@ -17,15 +20,16 @@ def test_feature_centroid(sample_molecule):
     idxs = (11, 12, 13, 14, 15)
     x, y, z = -5.256026015194413, 0.2637169048998521, -0.22204282175815981 # Known coordinates of centroid
 
-    centroid = PharmacophoricPointExtractor._feature_centroid(mol, idxs, 0)
+    centroid = feats.PharmacophoricPointExtractor._feature_centroid(mol, idxs, 0)
 
     assert round(x, 2) == round(centroid[0], 2)
     assert round(y, 2) == round(centroid[1], 2)
     assert round(z, 2) == round(centroid[2], 2)
 
+
 def test_load_smarts_fdef():
     
-    feat_def = load_smarts_fdef(file_name="openpharmacophore/data/smarts_features.txt")
+    feat_def = feats.load_smarts_fdef(file_name=data.smarts_features)
     assert len(feat_def) == 28
     
     n_donors = 0
@@ -69,14 +73,14 @@ def test_pharmacophoric_point_extractor():
     acetic_acid = Chem.MolFromSmiles("CC(=O)O")
     acetic_acid = utils.conformers.generate_conformers(acetic_acid, 1, random_seed=1, alignment=False)
     
-    extractor = PharmacophoricPointExtractor()
+    extractor = feats.PharmacophoricPointExtractor()
     points = extractor(acetic_acid, 0)
     assert len(points) == 3
     assert acceptor.feature_name == points[0].feature_name
     assert np.all(acceptor.center == points[0].center)
     assert acceptor.radius == points[0].radius
 
-    rdkit_extractor = PharmacophoricPointExtractor(featdef=rdkit_featuredefinition())
+    rdkit_extractor = feats.PharmacophoricPointExtractor(featdef=feats.rdkit_featuredefinition())
     points = rdkit_extractor(acetic_acid, 0)
     assert len(points) == 5 
     assert acceptor.feature_name == points[0].feature_name
@@ -95,13 +99,15 @@ def benzoic_acid():
     benz_acid = utils.conformers.generate_conformers(benz_acid, 1, random_seed=1, alignment=False)
     return benz_acid
 
+
 def test_aromatic_direction_vector(benzoic_acid):
 
     aromatic_atoms_inx = (0, 1, 2, 3, 4, 5)
-    direction_vector = PharmacophoricPointExtractor._aromatic_direction_vector(benzoic_acid, aromatic_atoms_inx, 0)
+    direction_vector = feats.PharmacophoricPointExtractor._aromatic_direction_vector(benzoic_acid, aromatic_atoms_inx, 0)
 
     assert direction_vector.shape[0] == 3
     assert np.all(np.around(np.array([ 0.02452289, -1.10048427,  1.20713535]), 2) == np.around(direction_vector, 2))
+
 
 def test_donor_acceptor_direction_vector(benzoic_acid):
     donor_inx = 8
@@ -109,8 +115,10 @@ def test_donor_acceptor_direction_vector(benzoic_acid):
     acceptor_inx = 7
     acceptor_center = np.array([2.6851757, -0.79323208, -0.80504238])
 
-    donor_vector = PharmacophoricPointExtractor._donor_acceptor_direction_vector(benzoic_acid, 'Donor', donor_inx, donor_center, 0)
-    acceptor_vector = PharmacophoricPointExtractor._donor_acceptor_direction_vector(benzoic_acid, 'Acceptor', acceptor_inx, acceptor_center, 0)
+    donor_vector = feats.PharmacophoricPointExtractor._donor_acceptor_direction_vector(
+        benzoic_acid, 'Donor', donor_inx, donor_center, 0)
+    acceptor_vector = feats.PharmacophoricPointExtractor._donor_acceptor_direction_vector(
+        benzoic_acid, 'Acceptor', acceptor_inx, acceptor_center, 0)
 
     assert donor_vector.shape[0] == 3
     assert acceptor_vector.shape[0] == 3
