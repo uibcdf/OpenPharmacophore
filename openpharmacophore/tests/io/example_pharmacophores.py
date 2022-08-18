@@ -54,13 +54,14 @@ def five_element_pharmacophore():
     ring_2 = oph.PharmacophoricPoint(
         feat_type="aromatic ring",
         center=puw.quantity([0, 1, 2], "angstroms"),
-        radius=puw.quantity(1.0, "angstroms")
+        radius=puw.quantity(1.0, "angstroms"),
+        direction = [0, 0, 1],
     )
     acceptor = oph.PharmacophoricPoint(
         feat_type="hb acceptor",
         center=puw.quantity([1, 2, 2], "angstroms"),
         radius=radius,
-        direction=[0, 1, 1]
+        direction=[0, 1, 1],
     )
     hb_donor = oph.PharmacophoricPoint(
         feat_type="hb donor",

@@ -219,7 +219,7 @@ class Pharmacophore():
                 Name of file to be written with the ligandscout format of the pharmacophore.
 
         """
-        tree, _ = _ligandscout_xml_tree(self._pharmacophoric_points)
+        tree = _ligandscout_xml_tree(self._pharmacophoric_points)
         tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_pharmer(self, file_name: str) -> None:
