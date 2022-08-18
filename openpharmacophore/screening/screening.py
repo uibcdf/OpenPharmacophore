@@ -2,7 +2,8 @@
 from openpharmacophore import Pharmacophore, LigandBasedPharmacophore, StructuredBasedPharmacophore
 from openpharmacophore.io.mol_suppliers import smiles_mol_generator, smi_has_header_and_id, mol2_mol_generator
 from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
-from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError, OpenPharmacophoreNotImplementedError, OpenPharmacophoreTypeError
+from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError, \
+    OpenPharmacophoreNotImplementedError, OpenPharmacophoreTypeError
 from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore
 # Third party
 import pandas as pd
@@ -16,19 +17,21 @@ from tqdm.auto import tqdm
 import bisect
 from collections import namedtuple
 import json
-from multiprocessing import Pool, Queue, Manager, Value
 from operator import itemgetter
 import os
 from typing import Callable, List, Tuple, TypeVar
 
-RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
+RDLogger.DisableLog('rdApp.*')  # Disable rdkit warnings
 
-Match = namedtuple("Match", ["score", "id", "mol"]) # Named tuple to store molecules that match a pharmacophore
-PharmacophoreType = TypeVar("PharmacophoreType", LigandBasedPharmacophore, 
-                    StructuredBasedPharmacophore, Pharmacophore, DataStructs.SparseBitVect)
+Match = namedtuple("Match", ["score", "id", "mol"])
+PharmacophoreType = TypeVar(
+    "PharmacophoreType", LigandBasedPharmacophore,
+    StructuredBasedPharmacophore, Pharmacophore, DataStructs.SparseBitVect
+)
 Results = TypeVar("Results", pd.DataFrame, dict)
 
-class VirtualScreening():
+
+class VirtualScreening:
     """ Class for performing virtual screening for a database of molecules. 
     
         The database can be fetched, loaded from files or simply passing a list of rdkit molecules.
@@ -60,32 +63,34 @@ class VirtualScreening():
     
     pharmacophore : openpharmacophore.Pharmacophore
         The pharmacophore that will be used to screen the database. Can be a Pharmacophore, 
-        StructuredBasedPharmacophore, LigandBasedPharmacophore or a fingerprint
+        StructuredBasedPharmacophore, LigandBasedPharmacophore or a fingerprint.
 
     """
+
     def __init__(self, pharmacophore: PharmacophoreType, **kwargs) -> None:
-       
-       if is_3d_pharmacophore(pharmacophore):
+
+        if is_3d_pharmacophore(pharmacophore):
             self.scoring_metric = "SSD"
             self._screen_fn = self._align_molecule
             self._factory = ChemicalFeatures.BuildFeatureFactory(os.path.join(RDConfig.RDDataDir,
-                                                                     'BaseFeatures.fdef'))
+                                                                              'BaseFeatures.fdef'))
             self.rdkit_pharmacophore = self._get_rdkit_pharmacophore(pharmacophore)
-       elif isinstance(pharmacophore, DataStructs.SparseBitVect): # For pharmacophore fingerprints
+        elif isinstance(pharmacophore, DataStructs.SparseBitVect):  # For pharmacophore fingerprints
             self.scoring_metric = "Similarity"
             self.similarity_fn, self.similarity_cutoff = check_virtual_screening_kwargs(**kwargs)
             self._factory = Gobbi_Pharm2D.factory
             self._screen_fn = self._fingerprint_similarity
-       else:
-          raise OpenPharmacophoreTypeError("pharmacophore must be of type Pharmacophore, StructuredBasedPharmacophore, "
+        else:
+            raise OpenPharmacophoreTypeError(
+                "pharmacophore must be of type Pharmacophore, StructuredBasedPharmacophore, "
                 "LigandBasedPharmacophore, or rdkit.DataStructs.SparseBitVect")
 
-       self.matches = []
-       self.n_fails = 0
-       self.n_matches = 0
-       self.n_molecules = 0
-       self.pharmacophore = pharmacophore
-    
+        self.matches = []
+        self.n_fails = 0
+        self.n_matches = 0
+        self.n_molecules = 0
+        self.pharmacophore = pharmacophore
+
     def get_screening_results(self, form: str = "dataframe") -> Results:
         """ Get the results of the screen on a dataframe or a dictionaty
 
@@ -102,9 +107,9 @@ class VirtualScreening():
         # Values of the scoring that was used for screening. Examples: SSD, 
         # tanimoto similarity
         if self.n_matches == 0:
-            raise NoMatchesError("There were no matches in this screen or no database has been screened." 
+            raise NoMatchesError("There were no matches in this screen or no database has been screened."
                                  "Cannot get results.")
-    
+
         score_vals = [i[0] for i in self.matches]
         smiles = [Chem.MolToSmiles(i[2]) for i in self.matches]
         ids = [i[1] for i in self.matches]
@@ -158,7 +163,7 @@ class VirtualScreening():
                 f.write(json_str)
         else:
             raise NotImplementedError
-        
+
     def screen_db_from_dir(self, path: str, pbar: bool = True) -> None:
         """ Screen a database of molecules contained in one or more files. 
 
@@ -173,12 +178,12 @@ class VirtualScreening():
                 Whether to display a progress bar
 
         """
-        self._reset()    
+        self._reset()
         valid_formats = ("smi", "txt", "sdf", "mol2", "db2")
-          
+
         if not os.path.isdir(path):
-            raise OpenPharmacophoreIOError("{} is not a valid directory".format(path)) 
-        
+            raise OpenPharmacophoreIOError("{} is not a valid directory".format(path))
+
         exclude_prefixes = ('__', '.')
         file_list = []
         for root, dirs, files in os.walk(path):
@@ -189,10 +194,10 @@ class VirtualScreening():
                 if not file.endswith(valid_formats):
                     continue
                 file_list.append(os.path.join(root, file))
-        
+
         for file_path in tqdm(file_list, disable=not pbar):
             self.screen_mol_file(file_path)
-            
+
     def screen_mol_list(self, molecules: List[Chem.Mol], pbar: bool = True) -> None:
         """ Screen a list of molecules
 
@@ -205,18 +210,18 @@ class VirtualScreening():
         """
         self._reset()
         self.n_molecules = len(molecules)
-        
+
         if self.scoring_metric == "SSD":
             for mol in tqdm(molecules, disable=not pbar):
                 self._align_molecule(mol, self.rdkit_pharmacophore, self.matches, self._factory, sort=True)
         else:
             for mol in tqdm(molecules, disable=not pbar):
-                self._fingerprint_similarity(mol, self.pharmacophore, self.matches, self._factory, 
+                self._fingerprint_similarity(mol, self.pharmacophore, self.matches, self._factory,
                                              self.similarity_fn, self.similarity_cutoff, sort=True)
-        
+
         self.n_matches = len(self.matches)
         self.n_fails = self.n_molecules - self.n_matches
-               
+
     def screen_mol_file(self, file_path: str, sort: bool = True) -> None:
         """ Perform virtual screening to a file of molecules.
         
@@ -235,13 +240,13 @@ class VirtualScreening():
             args = (self.pharmacophore, self.matches, self._factory, self.similarity_fn,
                     self.similarity_cutoff, sort)
             screen_fn = self._fingerprint_similarity
-        
+
         self._screen_file(file_path, screen_fn, args)
         self.n_matches = len(self.matches)
         self.n_fails = self.n_molecules - self.n_matches
-    
+
     def _screen_file(self, file_path: str, screen_fn: Callable, args: Tuple) -> None:
-        """ Apply a a screening function to each molecule in a file.
+        """ Apply a screening function to each molecule in a file.
         
             Parameters
             ----------
@@ -252,9 +257,9 @@ class VirtualScreening():
                 The function used to screen the molecules. Can be alignment or fingerprint similarity.
                 
             args : tuple
-                Tuple with the arguments needed for the screening function.
+                A tuple with the arguments needed for the screening function.
         """
-       
+
         if file_path.endswith(("smi", "txt")):
             has_header, has_id = smi_has_header_and_id(file_path)
             with open(file_path, "r") as fp:
@@ -273,8 +278,8 @@ class VirtualScreening():
         else:
             file_extension = file_path.split(".")[-1]
             raise OpenPharmacophoreNotImplementedError(f"{file_extension} format is currently unsupported.")
-      
-    @staticmethod       
+
+    @staticmethod
     def _align_molecule(mol, pharmacophore, matches, featFactory, sort=False):
         """ Align a molecule to a given pharmacophore.
         
@@ -304,10 +309,8 @@ class VirtualScreening():
         # all_matches is a list of tuples where each tuple contains the chemical features
         if can_match:
             # Match the molecule to the pharmacophore without aligning it
-            failed, bounds_matrix_matched, matched_mols, match_details = EmbedLib.MatchPharmacophore(all_matches, 
-                                                                                            bounds_matrix,
-                                                                                            pharmacophore, 
-                                                                                            useDownsampling=True)
+            failed, bounds_matrix_matched, matched_mols, match_details = EmbedLib.MatchPharmacophore(
+                all_matches, bounds_matrix, pharmacophore, useDownsampling=True)
             if failed:
                 return
         else:
@@ -375,7 +378,7 @@ class VirtualScreening():
         """
         fingerprint = Gen2DFingerprint(mol, factory)
         similarity = similarity_fn(pharmacophore_fp, fingerprint)
-        
+
         if similarity >= sim_cutoff:
             try:
                 mol_id = mol.GetProp("_Name")
@@ -390,7 +393,7 @@ class VirtualScreening():
                     bisect.insort(matches, matched_mol)
                 except:
                     return
-            else:      
+            else:
                 matches.append(matched_mol)
 
     def _get_pharmacophore_fingerprint(self, molecule):
@@ -438,16 +441,16 @@ class VirtualScreening():
         """
         report_str = "Virtual Screening Results\n"
         report_str += "-------------------------\n"
-        report_str += "\nMolecules scanned: " 
+        report_str += "\nMolecules scanned: "
         report_str += "{:,}".format(self.n_molecules).rjust(36)
-        report_str += "\nMolecules matched to pharmacophore: " 
+        report_str += "\nMolecules matched to pharmacophore: "
         report_str += f"{self.n_matches:,}".rjust(19)
-        report_str += "\nMolecules that didn't match the pharmacophore: " 
+        report_str += "\nMolecules that didn't match the pharmacophore: "
         report_str += "{:,}".format(self.n_fails).rjust(8)
         if self.n_matches > 0:
             report_str += f"\nLowest  {self.scoring_metric} value: "
             report_str += str(round(self.matches[0][0], 4)).rjust(10)
-            report_str += f"\nHighest {self.scoring_metric} value: " 
+            report_str += f"\nHighest {self.scoring_metric} value: "
             report_str += str((round(self.matches[-1][0], 4))).rjust(10)
             # Calculate mean
             mean = 0
@@ -455,24 +458,24 @@ class VirtualScreening():
             for i in range(N):
                 mean += self.matches[i][0]
             mean /= N
-            report_str += f"\nAverage {self.scoring_metric} value: " 
-            report_str += str(round(mean, 4)).rjust(10)         
+            report_str += f"\nAverage {self.scoring_metric} value: "
+            report_str += str(round(mean, 4)).rjust(10)
             # Print top 5 molecules or less if there are less than 5
             if self.n_matches < 5:
                 n_top_mols = min(self.n_matches, 5)
             else:
-                n_top_mols = 5                
-            report_str += "\n\nTop {} molecules:\n".format(n_top_mols)           
+                n_top_mols = 5
+            report_str += "\n\nTop {} molecules:\n".format(n_top_mols)
             report_str += "\n   ID   " + f"{self.scoring_metric}".rjust(12)
             report_str += "\n-------".ljust(12) + "------\n".rjust(10)
             for i in range(n_top_mols):
                 if self.scoring_metric == "Similarity":
                     i = -(i + 1)
-                id = str(self.matches[i][1])
+                id_ = str(self.matches[i][1])
                 score = str(round(self.matches[i][0], 4))
-                report_str += id.ljust(12)
+                report_str += id_.ljust(12)
                 report_str += score.rjust(8) + "\n"
-        
+
         return report_str
 
     def _reset(self) -> None:
@@ -481,150 +484,7 @@ class VirtualScreening():
         self.n_fails = 0
         self.n_matches = 0
         self.n_molecules = 0
-                
+
     def __repr__(self) -> str:
         return (f"{self.__class__.__name__}(n_matches={self.n_matches}; "
-               f"n_fails={self.n_fails})")
-        
-class MultiProcessVirtualScreening(VirtualScreening):
-    """ Class to perform virtual screening using multiple cores."""
-    
-    
-    def __init__(self, pharmacophore, **kwargs):
-        super().__init__(pharmacophore, **kwargs)
-    
-    @staticmethod
-    def _get_files(path: str) -> Queue:
-        """ List all files from a directory and put them in a queue.
-        
-            Parameters
-            ----------
-            path : str
-                The path of the files.
-            
-            Returns
-            -------
-            file_queue : multiprocessing.Queue
-                The file queue.
-        """
-        valid_formats = ("smi", "txt", "sdf", "mol2", "db2")
-          
-        if not os.path.isdir(path):
-            raise OpenPharmacophoreIOError("{} is not a valid directory".format(path)) 
-        
-        exclude_prefixes = ('__', '.')
-        
-        file_queue = Queue()
-        for root, dirs, files in os.walk(path):
-            # Ignore hidden folders and files
-            files = [f for f in files if not f.startswith(exclude_prefixes)]
-            dirs[:] = [d for d in dirs if not d.startswith(exclude_prefixes)]
-            for file in files:
-                if not file.endswith(valid_formats):
-                    continue
-                file_queue.put(os.path.join(root, file))
-        
-        return file_queue
-    
-    def screen_db_from_dir(self, path: str, sort: bool = False) -> None:
-        """ Screen a database of molecules contained in one or more files. 
-
-            Supported file formats are smi, txt, mol2, sdf.
-
-            Parameters
-            ----------
-            path : str
-                The path to the directory that contains the molecules.
-                
-            sort : bool, default=False
-                Whether to sort the molecules matched to the pharmacophore by score. 
-
-        """
-        self._reset()
-        self.matches, self.n_molecules = self._multiprocess_screening(path, sort)
-        self.n_matches = len(self.matches)
-        self.n_fails = self.n_molecules - self.n_matches
-    
-    def _multiprocess_screening(self, path: str, sort: bool = False) -> Tuple[List[Match], int]:
-        """ Screen a database of molecules using multiple processes. 
-
-            Parameters
-            ----------
-            path : str
-                The path to the directory that contains the molecules.
-                
-            sort : bool, default=False
-                Whether to sort the molecules matched to the pharmacophore by score. 
-
-        """
-        file_queue = self._get_files(path)
-        print("Started Virtual Screening")
-        
-        with Manager() as manager:
-        
-            matches = manager.list()
-            n_molecules = Value("i", 0)
-            
-            if self.scoring_metric == "SSD":
-                args = (self.rdkit_pharmacophore, matches, self._factory, sort)
-                screen_fn = self._align_molecule
-            else:
-                args = (self.pharmacophore, matches, self._factory, self.similarity_fn,
-                        self.similarity_cutoff, sort)
-                screen_fn = self._fingerprint_similarity
-            
-            pool = Pool(None, self._screen_files, (file_queue, n_molecules, screen_fn, args))
-            pool.close()
-            pool.join()
-            
-            if not sort:
-                return list(matches), n_molecules.value
-
-            else:
-                return list(matches).sort(key=lambda x: x.score), n_molecules.value
-            
-    def _screen_files(self, file_queue: Queue, n_molecules: Value, 
-                    screen_fn: Callable, args: tuple):
-        """ Perform virtual screening to a set of molecules contained in a queue of files.
-
-            Parameters
-            ----------
-            file_queue : multiprocessing.Queue
-                The file queue.
-            
-            n_molecules : multiprocessing.Value
-                A counter for the total number of molecules screened.
-                
-            screen_fn : function
-                The function used to screen the molecules. Can be alignment or fingerprint similarity.
-                
-            args : tuple
-                Tuple with the arguments needed for the screening function.
-        
-        """
-        while not file_queue.empty():
-            file_path = file_queue.get()
-
-            if file_path.endswith(("smi", "txt")):
-                has_header, has_id = smi_has_header_and_id(file_path)
-                with open(file_path, "r") as fp:
-                    for mol in smiles_mol_generator(fp, header=has_header, mol_id=has_id):
-                        screen_fn(mol, *args)
-                        with n_molecules.get_lock():
-                            n_molecules.value += 1  
-                        
-            elif file_path.endswith("mol2"):
-                with open(file_path, "r") as fp:
-                    for mol in mol2_mol_generator(fp):
-                        screen_fn(mol, *args)
-                        with n_molecules.get_lock():
-                            n_molecules.value += 1  
-                            
-            elif file_path.endswith("sdf"):
-                for mol in Chem.SDMolSupplier(file_path):
-                    screen_fn(mol, *args)
-                    with n_molecules.get_lock():
-                            n_molecules.value += 1  
-            else:
-                file_extension = file_path.split(".")[-1] 
-                raise OpenPharmacophoreNotImplementedError(f"{file_extension} format is currently unsupported.")
+                f"n_fails={self.n_fails})")

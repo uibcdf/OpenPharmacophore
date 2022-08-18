@@ -149,8 +149,8 @@ class Pharmacophore():
         insort_right(self._pharmacophoric_points, pharmacophoric_point, key=lambda p : p.short_name)
         self.n_pharmacophoric_points += 1
     
-    def get_point(self, index: int) -> None:
-        """ Get an specific pharmacophoric point from the pharmacophore. 
+    def get_point(self, index: int) -> PharmacophoricPoint:
+        """ Get a specific pharmacophoric point from the pharmacophore.
 
             Parameters
             ----------
