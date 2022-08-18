@@ -49,7 +49,7 @@ def test_from_pharmer():
                        np.array([19.985, -19.404402, 22.8422]))
 
 
-def test_to_pharmer():
+def test_to_pharmer_with_two_element_pharmacophore():
     pharmer = io.pharmer._pharmer_dict(two_element_pharmacophore())
 
     # Expected output from to_pharmer
@@ -97,11 +97,11 @@ def test_to_pharmer():
     pharmer = io.pharmer._pharmer_dict(five_element_pharmacophore())
     aromatic_2 = {}
     aromatic_2["name"] = "Aromatic"
-    aromatic_2["hasvec"] = False
+    aromatic_2["hasvec"] = True
     aromatic_2["svector"] = {}
-    aromatic_2["svector"]["x"] = 1
-    aromatic_2["svector"]["y"] = 0
-    aromatic_2["svector"]["z"] = 0
+    aromatic_2["svector"]["x"] = 0.0
+    aromatic_2["svector"]["y"] = 0.0
+    aromatic_2["svector"]["z"] = 1.0
     aromatic_2["x"] = 0.0
     aromatic_2["y"] = 0.9999999999999999
     aromatic_2["z"] = 1.9999999999999998

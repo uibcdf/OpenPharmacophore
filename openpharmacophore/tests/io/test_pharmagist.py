@@ -1,14 +1,17 @@
+from openpharmacophore import Pharmacophore
 import openpharmacophore.io as io
 import openpharmacophore.data as data
-import pytest
 from example_pharmacophores import three_element_pharmacophore, five_element_pharmacophore
 
 
-@pytest.mark.skip(reason="There is a circular dependency when importing read_pharmagist. Fixing it later")
 def test_read_pharmagist():
     streptadivin_file = data.pharmacophores["streptadivin"]
-    pharmacophores_ = io.read_pharmagist(streptadivin_file)
+    pharmacophores_ = io.load_pharmacophores(streptadivin_file)
+    pharmacophores_ = [Pharmacophore(ph) for ph in pharmacophores_]
     assert len(pharmacophores_) == 6
+    for pharma in pharmacophores_:
+        assert isinstance(pharma, Pharmacophore)
+
     assert len(pharmacophores_[0]) == 9
     assert len(pharmacophores_[1]) == 10
     assert len(pharmacophores_[2]) == 16
@@ -17,7 +20,10 @@ def test_read_pharmagist():
     assert len(pharmacophores_[5]) == 13
 
     elastase_file = data.pharmacophores["elastase"]
-    pharmacophores_ = io.read_pharmagist(elastase_file)
+    pharmacophores_ = io.load_pharmacophores(elastase_file)
+    pharmacophores_ = [Pharmacophore(ph) for ph in pharmacophores_]
+    for pharma in pharmacophores_:
+        assert isinstance(pharma, Pharmacophore)
     assert len(pharmacophores_) == 8
     assert len(pharmacophores_[0]) == 4
     assert len(pharmacophores_[1]) == 21

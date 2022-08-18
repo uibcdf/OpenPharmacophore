@@ -1,5 +1,10 @@
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.algorithms import bisection
 import pyunitwizard as puw
 import numpy as np
+import re
+from typing import List
+
 
 def to_pharmagist(pharmacophores, file_name):
     """ Save pharmacophores to pharmagist mol2 format
@@ -7,7 +12,7 @@ def to_pharmagist(pharmacophores, file_name):
         Parameters
         ----------
         pharmacophores : list of openpharmacophore.Pharmacophore or openpharmacophore.Pharmacophore
-            Pharmacophore or pharmacophores that will be saved.
+            The pharmacophores that will be saved.
 
         file_name : str
             Name of the file containing the pharmacophore.
@@ -20,13 +25,14 @@ def to_pharmagist(pharmacophores, file_name):
     with open(file_name, "w") as f:
         f.writelines(doc)
 
+
 def _pharmagist_file_info(pharmacophores):
     """ Get necessary info to create a pharmagist mol2 file to store pharmacophores.
 
         Parameters
         ----------
-        pharmacophores : list of openpharmacophore.Pharmacophore or openpharmacophore.Pharmacophore
-            Pharmacophore or pharmacophores that will be saved
+        pharmacophores : list of Pharmacophore or Pharmacophore
+            The pharmacophores that will be saved
 
         Returns
         -------
@@ -97,3 +103,52 @@ def _pharmagist_file_info(pharmacophores):
             doc.append(l)
         
     return doc
+
+
+def load_pharmacophores(file_name: str) -> List[List[PharmacophoricPoint]]:
+    """ Loads pharmacophores from a pharmagist mol2 file.
+
+        Parameters
+        ----------
+        file_name : str
+            Name of the file containing the pharmacophore.
+
+        Returns
+        -------
+        pharmacophores : list of openpharmacophore.PharmacophoricPoint
+            A list of ligand based pharmacophores.
+
+    """
+    # dictionary to map pharmagist feature names to openpharmacophore pharmacophoric_points
+    pharmagist_element_name = {
+        "AR": "aromatic ring",
+        "HYD": "hydrophobicity",
+        "ACC": "hb acceptor",
+        "DON": "hb donor",
+        "CAT": "positive charge",
+        "ANI": "negative charge",
+    }
+
+    # This list will store a list with the pharmacophoric points for each pharmacophore
+    pharmacophores = []
+    pattern = r"[A-Z]{2,3} "
+    with open(file_name, "r") as f:
+        for line in f.readlines():
+            match = re.search(pattern, line)
+            if "@<TRIPOS>ATOM" in line:
+                points = []
+            if match:
+                point_line = [p for p in line.split(" ") if p != ""]
+                feat_type = pharmagist_element_name[point_line[1]]
+                center = [float(coord) for coord in point_line[2: 5]]  # convert coordinates to float
+                center = puw.quantity(center, "angstroms")
+                element = PharmacophoricPoint(
+                    feat_type=feat_type,
+                    center=center,
+                    radius=puw.quantity(1.0, "angstroms"))
+                bisection.insort_right(points, element, key=lambda p: p.short_name)
+            if "@<TRIPOS>BOND" in line:
+                pharmacophores.append(points)
+    pharmacophores = [ph for ph in pharmacophores if len(ph) > 0]  # filter empty lists
+
+    return pharmacophores
