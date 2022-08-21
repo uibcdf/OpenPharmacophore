@@ -28,6 +28,7 @@ openpharmacophore = {
     'aromatic ring': '#F1C40F', # Yellow
 }
 
+
 def get_color_from_palette_for_feature(feature_name, color_palette='openpharmacophore'):
     """ Get the color code of a pharmacophoric feature from a color palette.
 

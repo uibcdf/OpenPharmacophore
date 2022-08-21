@@ -7,6 +7,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 import os
 
+
 def get_ro5_dataset(download_dir: str) -> None:
     """ Download subset of molecules that do not violate Lipinky's rule of five.
     
@@ -27,9 +28,9 @@ def get_ro5_dataset(download_dir: str) -> None:
     # Number of molecules per file
     n_molecules = 10000
     print("Downloading molecules...")
-    
+
     file_number = 1
-    file_name =  f"mols_{file_number:02d}.smi"
+    file_name = f"mols_{file_number:02d}.smi"
     file = open(os.path.join(download_dir, file_name), "w")
 
     counter = 0
@@ -39,9 +40,9 @@ def get_ro5_dataset(download_dir: str) -> None:
         if counter % n_molecules == 0 and counter != 0:
             file.close()
             file_number += 1
-            file_name =  f"mols_{file_number:02d}.smi"
+            file_name = f"mols_{file_number:02d}.smi"
             file = open(os.path.join(download_dir, file_name), "w")
-            
+
         if mol["molecule_structures"] is not None:
             counter += 1
             mol_id = mol["molecule_chembl_id"]
@@ -95,7 +96,7 @@ def get_bioactivity_dataframe(target_chembl_id: str) -> pd.DataFrame:
     bioactivities_dict = {
         "ChemblID": mol_chembl_id,
         "IC50": IC50,
-        "Units": units 
+        "Units": units
     }
 
     bioactivities_df = pd.DataFrame().from_dict(bioactivities_dict)
@@ -108,9 +109,9 @@ def get_bioactivity_dataframe(target_chembl_id: str) -> pd.DataFrame:
 
     # Get compounds smiles
     compounds = compounds_api.filter(
-            molecule_chembl_id__in=list(bioactivities_df["ChemblID"])
-        ).only("molecule_chembl_id", 
-            "molecule_structures")
+        molecule_chembl_id__in=list(bioactivities_df["ChemblID"])
+    ).only("molecule_chembl_id",
+           "molecule_structures")
 
     comp_id = []
     smiles = []
@@ -127,16 +128,17 @@ def get_bioactivity_dataframe(target_chembl_id: str) -> pd.DataFrame:
 
     compounds_df = pd.DataFrame.from_dict(compounds_dict)
     bioactivities_df = pd.merge(
-                bioactivities_df,
-                compounds_df,
-                on="ChemblID",
-            )
+        bioactivities_df,
+        compounds_df,
+        on="ChemblID",
+    )
     bioactivities_df["pIC50"] = bioactivities_df.apply(
-        lambda x: 9 - np.log10(x.IC50), 
+        lambda x: 9 - np.log10(x.IC50),
         axis=1)
     bioactivities_df = bioactivities_df.drop("IC50", axis=1)
 
     return bioactivities_df
+
 
 def get_assay_bioactivity_data(target_chembl_id, pIC50_threshold=6.3):
     """ Get bioactivity data and the compounds in an assay. 
@@ -158,12 +160,13 @@ def get_assay_bioactivity_data(target_chembl_id, pIC50_threshold=6.3):
     """
     bioactivities_df = get_bioactivity_dataframe(target_chembl_id=target_chembl_id)
     bioactivities_df["activity"] = bioactivities_df["pIC50"].apply(
-        lambda x: 1 if x >=  pIC50_threshold else 0)
-    
+        lambda x: 1 if x >= pIC50_threshold else 0)
+
     molecules = list(zip(bioactivities_df["ChemblID"].tolist(), bioactivities_df["Smiles"].tolist()))
     bioactivity = bioactivities_df["activity"].to_numpy()
 
     return molecules, bioactivity
+
 
 def get_actives_and_inactives(target_chembl_id, pIC50_threshold=6.3):
     """ Get a list of active and inactive compounds for a given target.
