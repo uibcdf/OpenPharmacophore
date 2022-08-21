@@ -22,11 +22,9 @@ import itertools
 import json
 from typing import List, Dict, Tuple
 
-class Pharmacophore():
-    """ Native object for pharmacophores.
 
-    Openpharmacophore native class to store pharmacophoric models. A pharmacophore can be constructed 
-    from a list of pharmacophoric_points or from a file.
+class Pharmacophore:
+    """ Native object for pharmacophores.
 
     Parameters
     ----------
@@ -48,7 +46,9 @@ class Pharmacophore():
         Number of pharmacophoric points
 
     """
-    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], is_sorted: bool = False) -> None:
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [],
+                 is_sorted: bool = False) -> None:
+        # TODO: remove is_sorted parameter
 
         if is_sorted or len(pharmacophoric_points) == 0:
             self._pharmacophoric_points = pharmacophoric_points
@@ -158,7 +158,8 @@ class Pharmacophore():
                 Index of the pharmacophoric point
         """
         return self._pharmacophoric_points[index]
-    
+
+    # TODO: delete this method. Use getters and setters instead
     def get_all_points(self) -> List[PharmacophoricPoint]:
         """ Returns a list with the pharmacophoric points of the pharmacophore."""
         return copy.deepcopy(self._pharmacophoric_points)
