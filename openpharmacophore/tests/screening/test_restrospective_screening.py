@@ -142,7 +142,7 @@ def test_enrichment_data(dataset_for_enrichment_tests):
     assert np.allclose(screen_percent, screen_percent_expected)
     assert screen_percent.shape[0] == len(actives_percent)
 
- 
+
 def test_calculate_enrichment_factor(dataset_for_enrichment_tests):
     maccs_score, morgan_score, bioactivity = dataset_for_enrichment_tests
 

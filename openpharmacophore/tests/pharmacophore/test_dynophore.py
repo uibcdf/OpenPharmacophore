@@ -38,7 +38,6 @@ def test_init_dynophore(mdtraj_trajectory, mdanalysis_universe):
     assert isinstance(dynophore._trajectory, mdtraj.Trajectory)
 
 
-@pytest.mark.skip(reason="It takes too long. Will replace it with a smaller trajectory")
 def test_first_and_last_pharmacophore(mdtraj_trajectory):
     traj = mdtraj_trajectory
     dynophore = Dynophore(traj)
@@ -52,13 +51,12 @@ def test_first_and_last_pharmacophore(mdtraj_trajectory):
     assert dynophore.pharmacophore_indices == [0, traj.n_frames]
 
 
-@pytest.mark.skip(reason="It takes too long. Will replace it with a smaller trajectory")
 def test_pharmacophore_from_mdtraj(mdtraj_trajectory):
     dynophore = Dynophore(mdtraj_trajectory)
 
     pharmacophore_1 = dynophore._pharmacophore_from_mdtraj(0, load_ligand=True)
-    pharmacophore_2 = dynophore._pharmacophore_from_mdtraj(10, load_ligand=False)
-    pharmacophore_3 = dynophore._pharmacophore_from_mdtraj(15, load_mol_system=True)
+    pharmacophore_2 = dynophore._pharmacophore_from_mdtraj(3, load_ligand=False)
+    pharmacophore_3 = dynophore._pharmacophore_from_mdtraj(5, load_mol_system=True)
 
     pharmacophores = [pharmacophore_1, pharmacophore_2, pharmacophore_3]
     for pharma in pharmacophores:
@@ -80,19 +78,19 @@ def test_pharmacophore_from_mdanalysis():
     pass
 
 
-@pytest.mark.skip(reason="It takes too long. Will replace it with a smaller trajectory")
+# @pytest.mark.skip(reason="It takes too long. Will replace it with a smaller trajectory")
 def test_pharmacophores_from_frames(mdtraj_trajectory):
     dynophore = Dynophore(mdtraj_trajectory)
 
-    dynophore.pharmacophores_from_frames([10, 3, 5])
+    dynophore.pharmacophores_from_frames([0, 2, 5])
     assert dynophore.n_pharmacophores == 3
-    assert dynophore.pharmacophore_indices == [10, 3, 5]
+    assert dynophore.pharmacophore_indices == [0, 2, 5]
     for pharma in dynophore.pharmacophores:
         assert pharma.n_pharmacophoric_points > 0
 
-    dynophore.pharmacophores_from_frames([2, 8])
+    dynophore.pharmacophores_from_frames([1, 3])
     assert dynophore.n_pharmacophores == 2
-    assert dynophore.pharmacophore_indices == [2, 8]
+    assert dynophore.pharmacophore_indices == [1, 3]
     for pharma in dynophore.pharmacophores:
         assert pharma.n_pharmacophoric_points > 0
 
