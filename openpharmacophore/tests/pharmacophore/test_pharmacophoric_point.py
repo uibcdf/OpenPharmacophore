@@ -5,9 +5,8 @@ import numpy as np
 import pyunitwizard as puw
 import pytest
 
-from openpharmacophore.screening.screening import Match
 
-def test_PharmacophoricPoint():
+def test_pharmacophoric_point_constructor():
 
     # First we test that it raises the correct exceptions when the input arguments
     # are not valid
@@ -64,6 +63,7 @@ def test_PharmacophoricPoint():
     assert donor_1 != ring
     assert donor_2 != donor_1
 
+
 def test_distance_between_pharmacophoric_points():
     
     radius = puw.quantity(1.0, "angstroms") 
@@ -78,3 +78,10 @@ def test_distance_between_pharmacophoric_points():
     
     assert distance_bewteen_pharmacophoric_points(point_1, point_2) == 0
 
+
+def test_add_to_ngl_view():
+    assert False, "Complete me!"
+
+
+def test_pharmacophoric_point_string_representation():
+    pass

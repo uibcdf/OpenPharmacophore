@@ -24,7 +24,8 @@ feature_to_char = {
 
 ArrayLike = TypeVar("ArrayLike", list, np.ndarray)
 
-class PharmacophoricPoint():
+
+class PharmacophoricPoint:
     """ Class to store pharmacophoric points of any feature type. This class can
         store spheres or sphere and vector pharmacophoric points.
 
@@ -225,6 +226,7 @@ class PharmacophoricPoint():
                     f"center=({x}, {y}, {z}); radius={radius})")
 
 
+# TODO: we should try to implement dynophores without the use of this class
 class UniquePharmacophoricPoint(PharmacophoricPoint):
     """ A class to keep track of unique pharmacophoric points on a dynophore or in a set
         with multiple pharmacophores.

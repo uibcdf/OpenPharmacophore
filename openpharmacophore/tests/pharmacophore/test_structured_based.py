@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 import pyunitwizard as puw
 from rdkit import Chem
-import os
 
 
 @pytest.mark.parametrize("file_name,ligand_id,hydrophobics", [
@@ -298,3 +297,19 @@ def test_smarts_hydrophobics():
                     )
     assert np.allclose(np.around(hyd_2_center, 3), (-2.130, -0.542, -0.479), rtol=0, atol=1e-04)
     assert np.allclose(hyd_2_radius, hyd_2_radius, rtol=0, atol=1e-03)
+
+
+def test_from_file():
+    assert False, "Complete me!"
+
+
+def test_to_pharmer():
+    assert False, "Complete me!"
+
+
+def test_show():
+    assert False, "Complete me!"
+
+
+def test_draw():
+    assert False, "Complete me!"
