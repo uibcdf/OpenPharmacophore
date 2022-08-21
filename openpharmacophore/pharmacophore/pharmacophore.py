@@ -149,8 +149,8 @@ class Pharmacophore():
         insort_right(self._pharmacophoric_points, pharmacophoric_point, key=lambda p : p.short_name)
         self.n_pharmacophoric_points += 1
     
-    def get_point(self, index: int) -> None:
-        """ Get an specific pharmacophoric point from the pharmacophore. 
+    def get_point(self, index: int) -> PharmacophoricPoint:
+        """ Get a specific pharmacophoric point from the pharmacophore.
 
             Parameters
             ----------
@@ -219,7 +219,7 @@ class Pharmacophore():
                 Name of file to be written with the ligandscout format of the pharmacophore.
 
         """
-        tree, _ = _ligandscout_xml_tree(self._pharmacophoric_points)
+        tree = _ligandscout_xml_tree(self._pharmacophoric_points)
         tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_pharmer(self, file_name: str) -> None:

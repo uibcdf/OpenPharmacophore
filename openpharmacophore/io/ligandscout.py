@@ -6,6 +6,7 @@ from collections import namedtuple
 from typing import List
 import xml.etree.ElementTree as ET
 
+
 def from_ligandscout(file_name: str) -> List[PharmacophoricPoint]: 
     """ Loads a pharmacophore from a ligandscout pml file.
 
@@ -23,7 +24,7 @@ def from_ligandscout(file_name: str) -> List[PharmacophoricPoint]:
     tree = ET.parse(file_name)
     pharmacophore = tree.getroot()
 
-    ligandscout_to_oph = { # dictionary to map ligandscout features to openpharmacophore pharmacophoric_points
+    ligandscout_to_oph = {
         "PI": "positive charge",
         "NI": "negative charge",
         "HBD": "hb donor", 
@@ -109,13 +110,14 @@ def from_ligandscout(file_name: str) -> List[PharmacophoricPoint]:
 
     return points
 
+
 def _ligandscout_xml_tree(pharmacophoric_points: List[PharmacophoricPoint]) -> ET.ElementTree:
-    """ Get an xml element tree necesary to create a ligandscout pharmacophore.
+    """ Get a xml element tree necessary to create a ligandscout pharmacophore.
 
         Parameters
         ----------
         pharmacophoric_points : openpharmacophore.Pharmacophore
-            Pharmacophore object that will be saved to a file.
+            The pharmacophore that will be saved to a file.
 
         Returns
         -------
@@ -124,7 +126,7 @@ def _ligandscout_xml_tree(pharmacophoric_points: List[PharmacophoricPoint]) -> E
 
     """
     Feature = namedtuple("Feature", ["name", "id"])
-    feature_mapper = { # dictionary to map openpharmacophore features to ligandscout
+    feature_mapper = {
         "aromatic ring": Feature("AR", "ai_"),
         "hydrophobicity": Feature("H", "hi_"),
         "hb acceptor": Feature("HBA", "ha_"),
@@ -139,17 +141,17 @@ def _ligandscout_xml_tree(pharmacophoric_points: List[PharmacophoricPoint]) -> E
     document.set("name", "pharmacophore.pml")
     document.set("pharmacophoreType", "LIGAND_SCOUT")
 
-    for i, element in enumerate(pharmacophoric_points):
+    for ii, element in enumerate(pharmacophoric_points):
         try:
             feat_name = feature_mapper[element.feature_name].name
-        except: # skip features not supported by ligandscout
+        except KeyError:  # skip features not supported by ligandscout
             continue
         coords = puw.get_value(element.center, to_unit="angstroms")
         x = str(coords[0])
         y = str(coords[1])
         z = str(coords[2])
         radius = str(puw.get_value(element.radius, to_unit="angstroms"))
-        feat_id =  feature_mapper[element.feature_name].id + str(i + 1)
+        feat_id = feature_mapper[element.feature_name].id + str(ii + 1)
 
         is_point = (feat_name == "PI" or feat_name == "NI" or feat_name == "H" 
                     or feat_name == "HBD" or feat_name == "HBA")
@@ -236,4 +238,4 @@ def _ligandscout_xml_tree(pharmacophoric_points: List[PharmacophoricPoint]) -> E
 
     tree._setroot(document)
 
-    return tree, document
+    return tree

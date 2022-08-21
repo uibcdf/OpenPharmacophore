@@ -6,6 +6,7 @@ from rdkit import Geometry
 from rdkit.Chem import rdMolTransforms
 from rdkit.Numerics import rdAlignment
 
+
 def apply_radii_to_bounds(radii, pharmacophore):
     """
         Apply the radius of the pharmacophoric points to the bound
@@ -29,6 +30,7 @@ def apply_radii_to_bounds(radii, pharmacophore):
             sum_radii = radii[i] + radii[j]
             pharmacophore.setLowerBound(i, j, max(pharmacophore.getLowerBound(i, j) - sum_radii, 0))
             pharmacophore.setUpperBound(i, j, pharmacophore.getUpperBound(i, j) + sum_radii)
+
 
 def get_transform_matrix(align_ref, conf_embed, atom_match):
 
@@ -68,6 +70,7 @@ def get_transform_matrix(align_ref, conf_embed, atom_match):
     ssd, transform_matrix = rdAlignment.GetAlignmentTransform(align_ref, align_probe)
     return ssd, transform_matrix
 
+
 def transform_embeddings(pharmacophore, embeddings, atom_match):
 
     """Transform embeddings. Performs the alignment of the molecules 
@@ -78,15 +81,15 @@ def transform_embeddings(pharmacophore, embeddings, atom_match):
         pharmacophore: rdkit.Chem.Pharm3D.Pharmacophore
             A pharmacophore object.
 
-        embeddings: list of rdkit.Chem.Mol
+        embeddings: list[rdkit.Mol]
             List of molecules with a single conformer.
 
-        atom_match: list of list
-            List of list of atoms ids that match the pharmacophore.
+        atom_match: list[list[int]]
+            A nested list of atoms ids that match the pharmacophore.
 
         Returns
         -------
-        SSDs: list of float
+        SSDs: list[float]
             List of sum of square deviations (SSD) values for the alignments.
 
         """
