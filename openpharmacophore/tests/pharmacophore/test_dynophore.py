@@ -8,6 +8,9 @@ import pytest
 from rdkit import Chem
 
 
+pytest.skip(reason="Tests are too slow", allow_module_level=True)
+
+
 @pytest.fixture
 def mdtraj_trajectory():
     """ Loads a trajectory from a h5 file and returns a mdtraj trajectory."""
@@ -78,7 +81,6 @@ def test_pharmacophore_from_mdanalysis():
     pass
 
 
-# @pytest.mark.skip(reason="It takes too long. Will replace it with a smaller trajectory")
 def test_pharmacophores_from_frames(mdtraj_trajectory):
     dynophore = Dynophore(mdtraj_trajectory)
 

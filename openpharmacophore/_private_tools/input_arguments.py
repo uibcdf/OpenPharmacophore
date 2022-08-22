@@ -13,7 +13,7 @@ def validate_input_quantity(quantity, dimensionality, name,
 
         Parameters
         ----------
-        quantity : pyunitwizard.Quantity
+        quantity : Quantity
             The quantity object that will be validated.
         
         dimensionality : dict
@@ -41,7 +41,7 @@ def validate_input_quantity(quantity, dimensionality, name,
             If the datatype is not of the expected types.
         
         BadShapeError
-            If a non scalar quantity has an incorrect shape.
+            If a non-scalar quantity has an incorrect shape.
         
     """
     if not isinstance(quantity, pint.Quantity):
@@ -62,7 +62,8 @@ def validate_input_quantity(quantity, dimensionality, name,
         quantity_shape = puw.get_value(quantity).shape
         if quantity_shape != shape:
             raise BadShapeError(f"{name} has shape {quantity_shape}. Expected Shape {shape}")
-        
+
+
 def validate_input_array_like(array, shape, name):
     """ Check whether an array-like object has the correct type, shape or length and data type.
     
@@ -89,7 +90,7 @@ def validate_input_array_like(array, shape, name):
             If the array like object has incorrect shape/lenght.
     
     """
-    types=(list, tuple, np.ndarray)
+    types = (list, tuple, np.ndarray)
 
     if not isinstance(array, types):
         raise NotArrayLikeError(f"{name} is not array like.")

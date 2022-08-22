@@ -5,7 +5,7 @@ from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, _lig
 from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.algorithms.discretize import discretize
 from openpharmacophore.algorithms.bisection import insort_right
-from openpharmacophore.pharmacophore.pharmacophoric_point import distance_bewteen_pharmacophoric_points
+from openpharmacophore.pharmacophore.pharmacophoric_point import distance_between_pharmacophoric_points
 from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third party
 import networkx as nx
@@ -341,7 +341,7 @@ class Pharmacophore:
             element.short_name += str(feat_count[element.short_name])            
         # Now we can add edges without repeating the nodes
         for points in itertools.combinations(pharmacophoric_points, 2):
-            distance = distance_bewteen_pharmacophoric_points(points[0], points[1])
+            distance = distance_between_pharmacophoric_points(points[0], points[1])
             binned_distance = discretize(distance, bins)
             pharmacophore_graph.add_edge(points[0].short_name,
                                          points[1].short_name,
@@ -366,7 +366,7 @@ class Pharmacophore:
                 if ii == jj:
                     dis_matrix[ii, jj] = 0
                 else:
-                    distance = distance_bewteen_pharmacophoric_points(
+                    distance = distance_between_pharmacophoric_points(
                             self._pharmacophoric_points[ii],
                             self._pharmacophoric_points[jj])
                     dis_matrix[ii, jj] = distance
