@@ -10,7 +10,6 @@ def two_element_pharmacophore():
         center=puw.quantity([1, 0, 0], "angstroms"),
         radius=radius,
         direction=[0, 0, 1],
-        atom_indices=None
     )
     acceptor = oph.PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -27,7 +26,6 @@ def three_element_pharmacophore():
         center=puw.quantity([1, 0, 0], "angstroms"),
         radius=radius,
         direction=[0, 0, 1],
-        atom_indices=None
     )
     acceptor = oph.PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -49,13 +47,12 @@ def five_element_pharmacophore():
         center=puw.quantity([1, 0, 0], "angstroms"),
         radius=radius,
         direction=[0, 0, 1],
-        atom_indices=None
     )
     ring_2 = oph.PharmacophoricPoint(
         feat_type="aromatic ring",
         center=puw.quantity([0, 1, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms"),
-        direction = [0, 0, 1],
+        direction=[0, 0, 1],
     )
     acceptor = oph.PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -75,5 +72,4 @@ def five_element_pharmacophore():
         radius=radius,
     )
     return oph.StructuredBasedPharmacophore(pharmacophoric_points=[acceptor, hb_donor,
-                                                                   hydrophobicity, ring_1, ring_2],
-                                            is_sorted=True)
+                                                                   hydrophobicity, ring_1, ring_2])

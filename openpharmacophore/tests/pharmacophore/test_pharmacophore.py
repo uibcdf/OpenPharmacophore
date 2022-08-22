@@ -1,7 +1,7 @@
 from openpharmacophore import Pharmacophore, PharmacophoricPoint
+import openpharmacophore.data as data
 import pyunitwizard as puw
 import pytest
-import networkx as nx
 import numpy as np
 from rdkit.Chem import Pharm3D
 import copy
@@ -63,10 +63,7 @@ def five_point_pharmacophore(three_point_pharmacophore) -> Pharmacophore:
 
 
 def test_get_point(three_point_pharmacophore):
-    # Test that we can get an element by indexing and calling the get_point method
-    assert three_point_pharmacophore[0] == three_point_pharmacophore.get_point(0)
-    assert three_point_pharmacophore[1] == three_point_pharmacophore.get_point(1)
-    assert three_point_pharmacophore[2] == three_point_pharmacophore.get_point(2)
+
     assert three_point_pharmacophore[0].feature_name == "hb acceptor"
     assert three_point_pharmacophore[1].feature_name == "aromatic ring"
     assert three_point_pharmacophore[2].feature_name == "aromatic ring"
@@ -272,7 +269,7 @@ def test_to_rdkit(three_point_pharmacophore):
 
 def test_distance_matrix():
     # Test pharmacophore with zero elements
-    pharmacophore = Pharmacophore()
+    pharmacophore = Pharmacophore([])
     matrix = pharmacophore.distance_matrix()
     assert matrix.shape == (0, 0)
 
@@ -327,7 +324,7 @@ def test_distance_matrix():
 
 def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_point_pharmacophore):
     # Test pharmacophore with zero elements
-    pharmacophore = Pharmacophore()
+    pharmacophore = Pharmacophore([])
     graph = pharmacophore.to_nx_graph()
     assert graph.number_of_nodes() == 0
 
@@ -336,7 +333,6 @@ def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_po
     assert graph.number_of_edges() == 1
 
     graph = three_point_pharmacophore.to_nx_graph()
-    assert isinstance(graph, nx.Graph)
     assert graph.number_of_nodes() == 3
     assert graph.number_of_edges() == 3
 
@@ -355,7 +351,15 @@ def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_po
 
 
 def test_from_file():
-    assert False, "Complete me!"
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["ligscout"])
+    assert len(pharmacophore) == 4
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["gmp"])
+    assert len(pharmacophore) == 10
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["1M70"])
+    assert len(pharmacophore) == 5
 
 
 def test_add_to_ngl_view():

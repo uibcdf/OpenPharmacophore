@@ -16,7 +16,7 @@ from rdkit import Chem
 ])
 def test_from_pdb(file_name, ligand_id, hydrophobics):
     file_path = data.pdb[file_name]
-    pharmacophore = SBP().from_pdb(file_path, radius=1.0, ligand_id=ligand_id, hydrophobics=hydrophobics)
+    pharmacophore = SBP.from_pdb(file_path, radius=1.0, ligand_id=ligand_id, hydrophobics=hydrophobics)
 
     if file_name == "1ncr":
         assert len(pharmacophore) == 5
@@ -282,7 +282,7 @@ def test_smarts_hydrophobics():
     
     ligand = Chem.MolFromSmiles("CC1=CC(=CC(=C1OCCCC2=CC(=NO2)C)C)C3=NOC(=N3)C(F)(F)F")
     ligand = generate_conformers(ligand, 1, random_seed=1)
-    hydrophobics = SBP()._smarts_hydrophobics(ligand, 1.0)
+    hydrophobics = SBP._smarts_hydrophobics(ligand, 1.0)
 
     assert len(hydrophobics) == 3
     

@@ -1,7 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidFileFormat
-from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, _ligandscout_xml_tree, _moe_ph4_string, 
-    to_pharmagist, _pharmer_dict)
+from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, _ligandscout_xml_tree, _moe_ph4_string,
+                                  to_pharmagist, _pharmer_dict)
 from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.algorithms.discretize import discretize
 from openpharmacophore.algorithms.bisection import insort_right
@@ -15,12 +15,11 @@ import pyunitwizard as puw
 from rdkit import Geometry, RDLogger
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
-RDLogger.DisableLog('rdApp.*') # Disable rdkit warnings
 # Standard library
-import copy
-import itertools
 import json
 from typing import List, Dict, Tuple
+
+RDLogger.DisableLog('rdApp.*')  # Disable rdkit warnings
 
 
 class Pharmacophore:
@@ -32,12 +31,8 @@ class Pharmacophore:
     pharmacophoric_points : list openpharmacophore.PharmacophoricPoint
         List of pharmacophoric points. 
 
-    sorted : bool
-        Whether the pharmacophoric points list is sorted.
-
     Attributes
     ----------
-
     _pharmacophoric_points : list of openpharmacophore.PharmacophoricPoint
         Private attribute, should not be modified directly. To add or remove pharmacophoric 
         points use the respective methods
@@ -46,16 +41,13 @@ class Pharmacophore:
         Number of pharmacophoric points
 
     """
-    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [],
-                 is_sorted: bool = False) -> None:
-        # TODO: remove is_sorted parameter
 
-        if is_sorted or len(pharmacophoric_points) == 0:
-            self._pharmacophoric_points = pharmacophoric_points
-        else:
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint]) -> None:
+
+        if pharmacophoric_points is not None:
             self._pharmacophoric_points = sorted(pharmacophoric_points, key=lambda p: p.short_name)
         self.n_pharmacophoric_points = len(pharmacophoric_points)
-    
+
     @classmethod
     def from_file(cls, file_name: str) -> "Pharmacophore":
         """
@@ -67,21 +59,21 @@ class Pharmacophore:
             Name of the file containing the pharmacophore
 
         """
-        fextension = file_name.split(".")[-1]
-        if fextension == "json":
-            points, _ , _ = from_pharmer(file_name, False)
+        file_extension = file_name.split(".")[-1]
+        if file_extension == "json":
+            points, _, _ = from_pharmer(file_name, False)
 
-        elif fextension == "ph4":
+        elif file_extension == "ph4":
             points = from_moe(file_name)
-           
-        elif fextension == "pml":
+
+        elif file_extension == "pml":
             points = from_ligandscout(file_name)
-        
+
         else:
             raise InvalidFileFormat(f"Invalid file format, \"{file_name}\" is not a supported file format")
-        
-        return cls(pharmacophoric_points=points)    
-        
+
+        return cls(pharmacophoric_points=points)
+
     def add_to_NGLView(self, view: nv.NGLWidget, palette: str = 'openpharmacophore') -> None:
         """Add the pharmacophore representation to a view (NGLWidget) from NGLView.
 
@@ -109,12 +101,16 @@ class Pharmacophore:
             if element.has_direction:
                 label = f"{element.feature_name}_vector"
                 if element.feature_name == "hb acceptor":
-                    end_arrow = puw.get_value(element.center - 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    end_arrow = puw.get_value(
+                        element.center - 2 * radius * puw.quantity(element.direction, "angstroms"),
+                        to_unit='angstroms').tolist()
                     view.shape.add_arrow(end_arrow, center, feature_color, 0.2, label)
                 else:
-                    end_arrow = puw.get_value(element.center + 2 * radius * puw.quantity(element.direction, "angstroms"), to_unit='angstroms').tolist()
+                    end_arrow = puw.get_value(
+                        element.center + 2 * radius * puw.quantity(element.direction, "angstroms"),
+                        to_unit='angstroms').tolist()
                     view.shape.add_arrow(center, end_arrow, feature_color, 0.2, label)
-        
+
         # Add opacity to spheres
         last_element_index = len(view._ngl_component_ids)
         for jj in range(first_element_index, last_element_index):
@@ -139,34 +135,19 @@ class Pharmacophore:
         return view
 
     def add_point(self, pharmacophoric_point: PharmacophoricPoint) -> None:
-        """Add a pharmacophoric point to the container, keeping them sorted by feature type
+        """ Adds a pharmacophoric point.
 
             Parameters
             ----------
-            pharmacophoric_point : openpharmacophore.PharmacophricPoint
+            pharmacophoric_point : PharmacophoricPoint
                 The pharmacophoric point that will be added.
         """
-        insort_right(self._pharmacophoric_points, pharmacophoric_point, key=lambda p : p.short_name)
+        insort_right(self._pharmacophoric_points, pharmacophoric_point, key=lambda p: p.short_name)
         self.n_pharmacophoric_points += 1
-    
-    def get_point(self, index: int) -> PharmacophoricPoint:
-        """ Get a specific pharmacophoric point from the pharmacophore.
 
-            Parameters
-            ----------
-            index : int
-                Index of the pharmacophoric point
-        """
-        return self._pharmacophoric_points[index]
-
-    # TODO: delete this method. Use getters and setters instead
-    def get_all_points(self) -> List[PharmacophoricPoint]:
-        """ Returns a list with the pharmacophoric points of the pharmacophore."""
-        return copy.deepcopy(self._pharmacophoric_points)
-
-    def print_points(self) -> None:
-        """ Prints the pharmacophoric points of the pharmacophore."""
-        print(self._pharmacophoric_points)
+    @property
+    def pharmacophoric_points(self) -> List[PharmacophoricPoint]:
+        return self._pharmacophoric_points
 
     def remove_point(self, index: int) -> None:
         """Remove a pharmacophoric point from the pharmacophore.
@@ -185,7 +166,7 @@ class Pharmacophore:
         for ii, point in enumerate(self._pharmacophoric_points):
             if ii not in indices:
                 new_pharmacophoric_points.append(point)
-         
+
         self._pharmacophoric_points = new_pharmacophoric_points
         self.n_pharmacophoric_points = len(self._pharmacophoric_points)
 
@@ -201,10 +182,11 @@ class Pharmacophore:
         if feat_type not in feats:
             raise InvalidFeatureError(f"Cannot remove feature. \"{feat_type}\" is not a valid feature type")
 
-        temp_pharmacophoric_points = [element for element in self._pharmacophoric_points if element.feature_name != feat_type]
+        temp_pharmacophoric_points = [element for element in self._pharmacophoric_points if
+                                      element.feature_name != feat_type]
         self._pharmacophoric_points = temp_pharmacophoric_points
         self.n_pharmacophoric_points = len(self._pharmacophoric_points)
-    
+
     def _reset(self) -> None:
         """Private method to reset all attributes to default values.
         """
@@ -245,7 +227,7 @@ class Pharmacophore:
                 Name of file to be written with the pharmagist format of the pharmacophore.
         """
         return to_pharmagist(self, file_name=file_name)
-    
+
     def to_moe(self, file_name: str) -> None:
         """Method to export the pharmacophore to the MOE compatible format.
 
@@ -258,9 +240,9 @@ class Pharmacophore:
         ph4_str = _moe_ph4_string(self._pharmacophoric_points)
         with open(file_name, "w") as f:
             f.writelines(ph4_str)
-    
+
     def to_rdkit(self) -> Tuple[rdkitPharmacophore.Pharmacophore, List[float]]:
-        """ Returns an rdkit pharmacophore with the pharmacophoric_points from the original pharmacophore. 
+        """ Returns a rdkit pharmacophore with the pharmacophoric_points from the original pharmacophore.
             
             rdkit pharmacophores do not store the pharmacophoric_points radii, so they are returned as well.
 
@@ -272,13 +254,13 @@ class Pharmacophore:
             radii : list of float
                 List with the radius in angstroms of each pharmacophoric point.
         """
-        rdkit_element_name = { # dictionary to map openpharmacophore feature names to rdkit feature names
-        "aromatic ring": "Aromatic",
-        "hydrophobicity": "Hydrophobe",
-        "hb acceptor": "Acceptor",
-        "hb donor": "Donor",
-        "positive charge": "PosIonizable",
-        "negative charge": "NegIonizable",
+        rdkit_element_name = {  # dictionary to map openpharmacophore feature names to rdkit feature names
+            "aromatic ring": "Aromatic",
+            "hydrophobicity": "Hydrophobe",
+            "hb acceptor": "Acceptor",
+            "hb donor": "Donor",
+            "positive charge": "PosIonizable",
+            "negative charge": "NegIonizable",
         }
 
         points = []
@@ -297,8 +279,8 @@ class Pharmacophore:
 
         rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
         return rdkit_pharmacophore, radii
-    
-    def to_nx_graph(self, dmin: float = 2.0, dmax: float = 20.0, bin_size: float = 1.0) -> nx.Graph:
+
+    def to_nx_graph(self, d_min: float = 2.0, d_max: float = 20.0, bin_size: float = 1.0) -> nx.Graph:
         """ Obtain a networkx graph representation of the pharmacophore.
         
             The pharmacophore graph is a graph whose nodes are pharmacophoric features and
@@ -307,10 +289,10 @@ class Pharmacophore:
         
             Parameters
             ----------
-            dmin : float
+            d_min : float
                 The minimun distance in angstroms from which two pharmacophoric points are considered different.
             
-            dmax : flaot
+            d_max : flaot
                 The maximum distance in angstroms between pharmacohoric points.
                 
             bin_size : float
@@ -322,34 +304,36 @@ class Pharmacophore:
                 The pharmacophore graph
         """
         pharmacophore_graph = nx.Graph()
-        bins = np.arange(dmin, dmax, bin_size)
+        bins = np.arange(d_min, d_max, bin_size)
         # We keep track of feature counts to avoid repeated nodes
         feat_count = {
-            "A" : 0,
-            "D" : 0,
-            "R" : 0,
-            "H" : 0,
-            "P" : 0,
-            "N" : 0,
-            "E" : 0,
-            "I" : 0,
+            "A": 0,
+            "D": 0,
+            "R": 0,
+            "H": 0,
+            "P": 0,
+            "N": 0,
+            "E": 0,
+            "I": 0,
         }
-        # First update the names with the count of each feature
-        pharmacophoric_points = copy.deepcopy(self._pharmacophoric_points)
-        for element in pharmacophoric_points:
-            feat_count[element.short_name] += 1
-            element.short_name += str(feat_count[element.short_name])            
-        # Now we can add edges without repeating the nodes
-        for points in itertools.combinations(pharmacophoric_points, 2):
-            distance = distance_between_pharmacophoric_points(points[0], points[1])
-            binned_distance = discretize(distance, bins)
-            pharmacophore_graph.add_edge(points[0].short_name,
-                                         points[1].short_name,
-                                         dis=binned_distance)
-        
-        assert pharmacophore_graph.number_of_nodes() == len(pharmacophoric_points)
+        nodes = [""] * len(self)
+        for ii, point in enumerate(self):
+            name = point.short_name
+            feat_count[name] += 1
+            nodes[ii] = point.short_name + str(feat_count[name])
+
+        for ii in range(len(self)):
+            for jj in range(ii + 1, len(self)):
+                distance = distance_between_pharmacophoric_points(self[ii], self[jj])
+                binned_distance = discretize(distance, bins)
+                pharmacophore_graph.add_edge(nodes[ii],
+                                             nodes[jj],
+                                             dis=binned_distance)
+
+        assert pharmacophore_graph.number_of_nodes() == len(self.pharmacophoric_points), \
+            f"Graph has {pharmacophore_graph.number_of_nodes()} nodes"
         return pharmacophore_graph
-    
+
     def distance_matrix(self) -> np.ndarray:
         """ Compute the distance matrix of the pharmacophore.
         
@@ -360,20 +344,20 @@ class Pharmacophore:
         """
         n_pharmacophoric_points = self.n_pharmacophoric_points
         dis_matrix = np.zeros((n_pharmacophoric_points, n_pharmacophoric_points))
-        
+
         for ii in range(n_pharmacophoric_points):
             for jj in range(ii, n_pharmacophoric_points):
                 if ii == jj:
                     dis_matrix[ii, jj] = 0
                 else:
                     distance = distance_between_pharmacophoric_points(
-                            self._pharmacophoric_points[ii],
-                            self._pharmacophoric_points[jj])
+                        self._pharmacophoric_points[ii],
+                        self._pharmacophoric_points[jj])
                     dis_matrix[ii, jj] = distance
                     dis_matrix[jj, ii] = distance
-        
+
         return dis_matrix
-    
+
     def feature_count(self) -> Dict[str, int]:
         """ Count the number of features ot the same kind in the pharmacophore.
         
@@ -383,26 +367,26 @@ class Pharmacophore:
                 Dictionary with the count of each feature
         """
         counter = {
-            "aromatic ring":   0,
-            "hydrophobicity":  0,
-            "hb acceptor":     0,
-            "hb donor":        0,
+            "aromatic ring": 0,
+            "hydrophobicity": 0,
+            "hb acceptor": 0,
+            "hb donor": 0,
             "positive charge": 0,
             "negative charge": 0,
         }
 
         for element in self._pharmacophoric_points:
             counter[element.feature_name] += 1
-            
+
         return counter
-    
+
     def __len__(self) -> int:
         return len(self._pharmacophoric_points)
 
     def __iter__(self) -> "Pharmacophore":
         self.count = -1
         return self
-        
+
     def __next__(self) -> PharmacophoricPoint:
         self.count += 1
         if self.count >= self.n_pharmacophoric_points:
@@ -424,8 +408,6 @@ class Pharmacophore:
                         return False
                 return True
         return False
-    
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(n_pharmacophoric_points: {self.n_pharmacophoric_points})"
-
-    
