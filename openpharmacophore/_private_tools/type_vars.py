@@ -9,6 +9,7 @@ from openmm.unit.quantity import Quantity as openmm_quantity
 List = typing.List
 Optional = typing.Optional
 Sequence = typing.Sequence
+Union = typing.Union
 
 # Custom types
 ArrayLike = typing.TypeVar("ArrayLike",
