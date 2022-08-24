@@ -18,6 +18,7 @@ from io import BytesIO
 from PIL import Image
 from typing import Callable, List, Tuple, Optional
 
+
 class LigandBasedPharmacophore(Pharmacophore):
     """ Class to store and compute ligand-based pharmacophores
 
@@ -26,37 +27,34 @@ class LigandBasedPharmacophore(Pharmacophore):
     Parameters
     ----------
 
-    pharmacophoric_points : list of openpharmacophore.PharamacoporicPoint
+    pharmacophoric_points : list of PharmacophoricPoint
         List of pharmacophoric points.
 
     ligands : list of rdkit.Chem.Mol
         Set of ligands from which the pharmacophore will be derived.
 
-    feat_def : dict, optional
-        A custom smarts feature definition that will be used to obtain the pharmacophoric
-        points.
 
     Attributes
     ----------
 
-    pharmacophoric_points : list of openpharmacophore.PharamacophoricPoint
-        List of pharmacophoric points.
+    pharmacophoric_points : list of PharmacophoricPoint
+        The pharmacophoric points.
 
     n_pharmacophoric_points : int
         Number of pharmacophoric points.
 
     ligands : list of rdkit.Chem.Mol
-        List of ligands from which this pharmacophore was extracted.
+        Ligands from which this pharmacophore was extracted.
 
     """
 
-    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint] = [], 
-                ligands: List[Chem.Mol] = [], is_sorted: bool = False) -> None:
-        super().__init__(pharmacophoric_points=pharmacophoric_points, is_sorted=is_sorted)
+    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint],
+                 ligands: List[Chem.Mol]) -> None:
+        super().__init__(pharmacophoric_points=pharmacophoric_points)
         self.ligands = ligands
- 
-    def draw(self, n_per_row: int, subimage_size: Tuple[int, int] = (250, 200), 
-            lig_indices: Optional[List[int]] = None, legends: Optional[List[str]] = None) -> bytes:
+
+    def draw(self, n_per_row: int, subimage_size: Tuple[int, int] = (250, 200),
+             lig_indices: Optional[List[int]] = None, legends: Optional[List[str]] = None) -> bytes:
         """ Get a 2D representation of the ligands with the pharmacophoric points highlighted.
             
             Parameters
@@ -94,16 +92,16 @@ class LigandBasedPharmacophore(Pharmacophore):
         n_rows = len(ligand_list) // n_per_row
         if len(ligand_list) % n_per_row:
             n_rows += 1
-        
+
         # Create a PIL image where all the individual ligand images will be combined
         n_cols = n_per_row
         img_size = (subimage_size[0] * n_cols, subimage_size[1] * n_rows)
         res = Image.new("RGB", img_size, (255, 255, 255))
-        
+
         extractor = PharmacophoricPointExtractor()
 
         for ii, lig in enumerate(ligand_list):
-            
+
             col = ii % n_per_row
             row = ii // n_per_row
 
@@ -127,7 +125,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
                 indices = point.atom_indices
                 for idx in indices:
-                    
+
                     atoms.append(idx)
                     atom_highlights[idx].append(get_color_from_palette_for_feature(point.feature_name))
                     highlight_radius[idx] = 0.6
@@ -140,7 +138,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                                 continue
                             bond = ligand.GetBondBetweenAtoms(idx, nbr_idx).GetIdx()
                             bond_colors[bond] = [get_color_from_palette_for_feature("aromatic ring")]
-                    
+
                     # If an atom has more than one feature label will contain both names
                     if idx in atoms:
                         if ligand.GetAtomWithIdx(idx).HasProp("atomNote"):
@@ -162,13 +160,14 @@ class LigandBasedPharmacophore(Pharmacophore):
             img = Image.open(bio)
             res.paste(img, box=(col * subimage_size[0], row * subimage_size[1]))
 
-        bio = BytesIO()    
+        bio = BytesIO()
         res.save(bio, format="PNG")
         return bio.getvalue()
 
     @classmethod
-    def single_ligand_pharmacophore(cls, ligand: Chem.Mol, radius: float = 1.0, 
-        featdef: Callable = oph_featuredefinition(), features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
+    def single_ligand_pharmacophore(cls, ligand: Chem.Mol, radius: float = 1.0,
+                                    featdef: Callable = oph_featuredefinition(),
+                                    features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Get a pharmacophore from a single ligand.
 
             Parameters
@@ -179,22 +178,22 @@ class LigandBasedPharmacophore(Pharmacophore):
         extractor = PharmacophoricPointExtractor(featdef=featdef, default_radius=radius, features=features)
         pharmacophore_points = extractor(ligand, 0)
         return cls(pharmacophore_points, [ligand])
-        
+
     @classmethod
-    def from_ligand_list(cls, ligands: List[Chem.Mol], method: str, radius: float, 
-        feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
+    def from_ligand_list(cls, ligands: List[Chem.Mol], method: str, radius: float,
+                         feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Class Method to derive a pharmacophore model from a list of rdkit molecules. 
 
         Parameters
         ----------
-        ligands : list of rdkit.Chem.rdchem.Mol
+        ligands : list of rdkit.Mol
             List of ligands
         
         method : str
             Name of method or algorithm to derive the ligand based pharmacophore.
 
         radius : float
-            The radius in angstroms of the parmacohporic points.
+            The radius in angstroms of the pharmacophoric points.
         
         feat_list : list of str, optional
             List of features that will be used to derive the pharmacophore. If None is passed the
@@ -207,7 +206,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         """
         if not isinstance(ligands, list):
             raise OpenPharmacophoreTypeError("Ligands must be of type list")
-        
+
         if method == "dbscan":
             points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list, feat_def=feat_def)
         else:
@@ -217,7 +216,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     @classmethod
     def from_ligand_file(cls, file_name: str, method: str, radius: float,
-        feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
+                         feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Get a pharmacophore from a file of ligands
 
         Accepted file formats: smi, mol2, sdf, pdb 
@@ -244,7 +243,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         """
         fextension = file_name.split(".")[-1]
-        
+
         if fextension == "smi":
             ligands = Chem.SmilesMolSupplier(file_name, delimiter='\t', titleLine=False)
         elif fextension == "mol2":
@@ -260,12 +259,13 @@ class LigandBasedPharmacophore(Pharmacophore):
         ligands = list(ligands)
         assert len(ligands) > 0
         tmp_pharmacophore = LigandBasedPharmacophore().from_ligand_list(
-                                                        ligands=ligands, 
-                                                        method=method, 
-                                                        radius=radius, 
-                                                        feat_list=feat_list, 
-                                                        feat_def=feat_def)
-        return cls(pharmacophoric_points=tmp_pharmacophore.pharmacophoric_points, ligands=tmp_pharmacophore.ligands, feat_def=feat_def)
+            ligands=ligands,
+            method=method,
+            radius=radius,
+            feat_list=feat_list,
+            feat_def=feat_def)
+        return cls(pharmacophoric_points=tmp_pharmacophore.pharmacophoric_points, ligands=tmp_pharmacophore.ligands,
+                   feat_def=feat_def)
 
     def show(self, show_ligands: bool = True, palette: str = "openpharmacophore") -> nv.NGLWidget:
         """ Visualize the pharmacophore model. 
@@ -289,8 +289,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             view = view_ligands(self.ligands)
         else:
             view = nv.NGLWidget()
-        
+
         self.add_to_NGLView(view, palette=palette)
 
         return view
-

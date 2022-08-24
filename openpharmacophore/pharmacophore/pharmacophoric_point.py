@@ -179,10 +179,7 @@ class PharmacophoricPoint:
         radius = puw.get_value(self._radius, to_unit='angstroms')
         center = puw.get_value(self._center, to_unit='angstroms').tolist()
 
-        try:
-            n_components = len(view._ngl_component_ids)
-        except:
-            n_components = 0
+        n_components = len(view._ngl_component_ids)
 
         view.shape.add_sphere(center, color, radius, self.feature_name)
         view.update_representation(component=n_components, repr_index=0, opacity=opacity)

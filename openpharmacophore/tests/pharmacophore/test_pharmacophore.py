@@ -3,6 +3,7 @@ import openpharmacophore.data as data
 import pyunitwizard as puw
 import pytest
 import numpy as np
+import nglview as nv
 from rdkit.Chem import Pharm3D
 import copy
 
@@ -362,9 +363,19 @@ def test_from_file():
     assert len(pharmacophore) == 5
 
 
-def test_add_to_ngl_view():
-    assert False, "Complete me!"
+def test_add_to_ngl_view(three_point_pharmacophore, five_point_pharmacophore):
 
+    view = nv.NGLWidget()
+    assert len(view._ngl_component_ids) == 0
 
-def test_show():
-    assert False, "Complete me!"
+    # A pharmacophore view should have as many components as pharmacophoric points
+    three_point_pharmacophore.add_to_NGLView(view)
+    assert len(view._ngl_component_ids) == 3
+
+    # Add the second pharmacophore
+    five_point_pharmacophore.add_to_NGLView(view)
+    # Aromatic ring should add a sphere and an arrow to the view
+    assert len(view._ngl_component_ids) == 8
+    assert len(view._ngl_component_names) == 8
+    for component in view._ngl_component_names:
+        assert component == "nglview.shape.Shape"

@@ -2,6 +2,7 @@ from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.pharmacophore.pharmacophoric_point import distance_between_pharmacophoric_points
 import openpharmacophore._private_tools.exceptions as exc
 import numpy as np
+import nglview as nv
 import pyunitwizard as puw
 import pytest
 
@@ -136,8 +137,21 @@ def test_distance_between_pharmacophoric_points():
     assert distance_between_pharmacophoric_points(point_1, point_2) == 0
 
 
-def test_add_to_ngl_view():
-    assert False, "Complete me!"
+def test_add_to_ngl_view(hydrogen_bond_donor, aromatic_ring):
+
+    view = nv.NGLWidget()
+    assert len(view._ngl_component_ids) == 0
+
+    # HB donor with no direction should just add a sphere to the view
+    hydrogen_bond_donor.add_to_ngl_view(view)
+    assert len(view._ngl_component_ids) == 1
+    assert view._ngl_component_names[0] == "nglview.shape.Shape"
+
+    # Aromatic ring should add a sphere and an arrow to the view
+    aromatic_ring.add_to_ngl_view(view)
+    assert len(view._ngl_component_ids) == 3
+    assert view._ngl_component_names[1] == "nglview.shape.Shape"
+    assert view._ngl_component_names[2] == "nglview.shape.Shape"
 
 
 def test_pharmacophoric_point_string_representation(hydrogen_bond_donor, aromatic_ring):

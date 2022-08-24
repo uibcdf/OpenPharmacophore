@@ -308,7 +308,19 @@ def test_to_pharmer():
 
 
 def test_show():
-    assert False, "Complete me!"
+    pharmacophore = SBP.from_pdb(data.pdb["1ncr"],
+                                 radius=1.0,
+                                 ligand_id="W11:A:7001",
+                                 hydrophobics="plip"
+                                 )
+    assert len(pharmacophore) == 5
+    view = pharmacophore.show()
+    # 5 spheres + 1 arrow the protein and the ligand gives 8 components total
+    assert len(view._ngl_component_ids) == 8
+    for ii in range(1):
+        assert view._ngl_component_names[ii] == "nglview.adaptor.RdkitStructure"
+    for ii in range(2, 8):
+        assert view._ngl_component_names[ii] == "nglview.shape.Shape"
 
 
 def test_draw():
