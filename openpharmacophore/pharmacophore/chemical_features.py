@@ -1,7 +1,7 @@
 # Openpharmacophore
 from openpharmacophore._private_tools.exceptions import NoConformersError, OpenPharmacophoreTypeError
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.algorithms.bisection import insort_right
+from openpharmacophore.utils.bisection import insort_right
 # Third Party
 import numpy as np
 from rdkit import RDConfig, Chem

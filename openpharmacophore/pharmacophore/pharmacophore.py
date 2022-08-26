@@ -3,8 +3,8 @@ from openpharmacophore._private_tools.exceptions import InvalidFeatureError, Inv
 from openpharmacophore.io import (from_pharmer, from_moe, from_ligandscout, _ligandscout_xml_tree, _moe_ph4_string,
                                   to_pharmagist, _pharmer_dict)
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.algorithms.discretize import discretize
-from openpharmacophore.algorithms.bisection import insort_right
+from openpharmacophore.utils.discretize import discretize
+from openpharmacophore.utils.bisection import insort_right
 from openpharmacophore.pharmacophore.pharmacophoric_point import distance_between_pharmacophoric_points
 from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third party

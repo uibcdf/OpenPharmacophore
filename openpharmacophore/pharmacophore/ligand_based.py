@@ -4,7 +4,6 @@ from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLig
 from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor, oph_featuredefinition
 from openpharmacophore.pharmacophore.pharmacophoric_point import PharmacophoricPoint
 from openpharmacophore.visualization.view_mols import view_ligands
-from openpharmacophore.algorithms.dbscan import dbscan_pharmacophore
 from openpharmacophore.io.mol2 import load_mol2_file
 from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
 # Third Party
@@ -204,15 +203,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             Definitions of the pharmacophoric features. 
 
         """
-        if not isinstance(ligands, list):
-            raise OpenPharmacophoreTypeError("Ligands must be of type list")
-
-        if method == "dbscan":
-            points, ligands = dbscan_pharmacophore(ligands, radius=radius, feat_list=feat_list, feat_def=feat_def)
-        else:
-            raise NotImplementedError
-
-        return cls(pharmacophoric_points=points, ligands=ligands, feat_def=feat_def)
+        raise NotImplementedError
 
     @classmethod
     def from_ligand_file(cls, file_name: str, method: str, radius: float,

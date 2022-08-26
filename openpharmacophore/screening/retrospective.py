@@ -1,6 +1,6 @@
 # OpenPharmacophore
 from openpharmacophore import Pharmacophore, LigandBasedPharmacophore, StructuredBasedPharmacophore
-from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
+from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import BadShapeError, MissingParameters, OpenPharmacophoreValueError
 from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore
 # Third Party

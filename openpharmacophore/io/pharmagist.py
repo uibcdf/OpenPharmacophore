@@ -1,5 +1,5 @@
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.algorithms import bisection
+from openpharmacophore.utils import bisection
 import pyunitwizard as puw
 import numpy as np
 import re

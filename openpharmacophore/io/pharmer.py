@@ -1,6 +1,6 @@
 from openpharmacophore import _puw
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.algorithms.bisection import insort_right
+from openpharmacophore.utils.bisection import insort_right
 from rdkit import Chem
 import pyunitwizard as puw
 import json

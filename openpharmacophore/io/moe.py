@@ -1,5 +1,5 @@
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.algorithms.bisection import insort_right
+from openpharmacophore.utils.bisection import insort_right
 import pyunitwizard as puw
 import datetime
 import re
