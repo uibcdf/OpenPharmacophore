@@ -29,7 +29,7 @@ RDLogger.DisableLog('rdApp.*')  # Disable rdkit warnings
 
 
 class StructuredBasedPharmacophore(Pharmacophore):
-    """ Class to store and compute structured-based pharmacophores
+    """ Class to store and derive pharmacophores from protein-ligand complexes.
 
     Inherits from pharmacophore
 
@@ -65,6 +65,8 @@ class StructuredBasedPharmacophore(Pharmacophore):
         self.molecular_system = molecular_system
         self.ligand = ligand
 
+    # TODO: add methods to set the molecular system and ligand
+
     @classmethod
     def from_pdb(cls, pdb: str, radius: float = 1.0, ligand_id: Optional[str] = None,
                  hydrophobics: str = "smarts", load_mol_system: bool = True,
@@ -92,6 +94,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             The pharmacophore extracted from the protein-ligand complex.
 
         """
+        # TODO: remove hydrophobics argument
         if isinstance(pdb, str):
             pdb_name = pdb
             pattern = re.compile('[0-9][a-zA-Z_0-9]{3}')  # PDB id pattern
@@ -415,6 +418,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
             grouped_points : list of openpharmacophore.PharmacophoricPoint
                 List with the grouped points.
         """
+        # TODO: This method is not working properly
         grouped_points = []
         skip = []
         for inx, hyd1 in enumerate(hydrophobics):
@@ -587,7 +591,7 @@ class StructuredBasedPharmacophore(Pharmacophore):
                 Name of the file that will contain the pharmacophore
 
             save_mol_system: bool, default=True
-                Wheter to save the molecular system or just the pharmacophoric points.
+                Whether to save the molecular system or just the pharmacophoric points.
     """
         pharmacophore_dict = _pharmer_dict(self.pharmacophoric_points)
 

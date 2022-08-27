@@ -65,7 +65,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                 A list with the indices of the ligands that will be drawn. If none is passed
                 all ligands will be drawn.
 
-            sub_img_size : 2-tuple of int, default=(250,200)
+            subimage_size : 2-tuple of int, default=(250,200)
                 The size of each subimage (each ligand drawing). The final image size may
                 vary depending on the number per rows.
 
@@ -164,7 +164,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         return bio.getvalue()
 
     @classmethod
-    def single_ligand_pharmacophore(cls, ligand: Chem.Mol, radius: float = 1.0,
+    def single_ligand(cls, ligand: Chem.Mol, radius: float = 1.0,
                                     featdef: Callable = oph_featuredefinition(),
                                     features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Get a pharmacophore from a single ligand.
@@ -221,7 +221,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             Name of method or algorithm to compute the ligand based pharmacophore.
 
         radius : float, default=1.0
-            The radius in angstroms of the parmacohporic points.
+            The radius in angstroms of the pharmacophoric points.
         
         feat_list : list of str, optional
             List of features that will be used to derive the pharmacophore. If None is passed the
@@ -246,17 +246,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         else:
             raise InvalidFileFormat(f"{fextension} is not a supported file format")
 
-        len(ligands)
-        ligands = list(ligands)
-        assert len(ligands) > 0
-        tmp_pharmacophore = LigandBasedPharmacophore().from_ligand_list(
-            ligands=ligands,
-            method=method,
-            radius=radius,
-            feat_list=feat_list,
-            feat_def=feat_def)
-        return cls(pharmacophoric_points=tmp_pharmacophore.pharmacophoric_points, ligands=tmp_pharmacophore.ligands,
-                   feat_def=feat_def)
+        raise NotImplementedError
 
     def show(self, show_ligands: bool = True, palette: str = "openpharmacophore") -> nv.NGLWidget:
         """ Visualize the pharmacophore model. 
@@ -275,7 +265,6 @@ class LigandBasedPharmacophore(Pharmacophore):
             An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
             molecular system used to elucidate it.
         """
-
         if self.ligands and show_ligands:
             view = view_ligands(self.ligands)
         else:

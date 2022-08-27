@@ -300,11 +300,9 @@ def test_smarts_hydrophobics():
 
 
 def test_from_file():
-    assert False, "Complete me!"
-
-
-def test_to_pharmer():
-    assert False, "Complete me!"
+    pharmacophore = SBP.from_file(data.pharmacophores["1M70"], load_mol_sys=False)
+    assert len(pharmacophore) == 5
+    assert pharmacophore.molecular_system is None
 
 
 def test_show():

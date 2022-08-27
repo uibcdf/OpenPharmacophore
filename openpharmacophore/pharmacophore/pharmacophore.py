@@ -41,7 +41,6 @@ class Pharmacophore:
         Number of pharmacophoric points
 
     """
-
     def __init__(self, pharmacophoric_points: List[PharmacophoricPoint]) -> None:
 
         if pharmacophoric_points is not None:
@@ -379,6 +378,8 @@ class Pharmacophore:
             counter[element.feature_name] += 1
 
         return counter
+
+    # TODO: methods to add and remove pharmacophoric points based on a selection on ngl view.
 
     def __len__(self) -> int:
         return len(self._pharmacophoric_points)

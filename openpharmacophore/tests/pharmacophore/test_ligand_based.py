@@ -37,10 +37,12 @@ def ligand_based_pharmacophore():
     return LigandBasedPharmacophore(points, ligands)
 
 
+@pytest.mark.skip(reason="Extraction of ligand based pharmacophores has not been implemented yet")
 def test_from_ligand_list():
     assert False, "Complete me!"
 
 
+@pytest.mark.skip(reason="Extraction of ligand based pharmacophores has not been implemented yet")
 def test_from_ligand_file():
     assert False, "Complete me!"
 
