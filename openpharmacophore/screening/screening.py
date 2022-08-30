@@ -1,7 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore import Pharmacophore, LigandBasedPharmacophore, StructuredBasedPharmacophore
 from openpharmacophore.io.mol_suppliers import smiles_mol_generator, smi_has_header_and_id, mol2_mol_generator
-from openpharmacophore.algorithms.alignment import apply_radii_to_bounds, transform_embeddings
+from openpharmacophore.screening.alignment import apply_radii_to_bounds, transform_embeddings
 from openpharmacophore._private_tools.exceptions import NoMatchesError, OpenPharmacophoreIOError, \
     OpenPharmacophoreNotImplementedError, OpenPharmacophoreTypeError
 from openpharmacophore._private_tools.screening_arguments import check_virtual_screening_kwargs, is_3d_pharmacophore

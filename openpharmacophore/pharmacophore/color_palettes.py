@@ -1,4 +1,6 @@
 from matplotlib.colors import to_rgb
+from openpharmacophore._private_tools.exceptions import InvalidFeatureError, InvalidPaletteError
+
 """Module with objects and methods to choose and define the color code to represent pharmacophoric
 features when a pharmacophore is shown.
 
@@ -18,17 +20,19 @@ redefined: colors are temporary.
 """
 
 openpharmacophore = {
-    'positive charge': '#3498DB', # Blue
-    'negative charge': '#884EA0', # Purple 
-    'hb acceptor': '#B03A2E', # Red
-    'hb donor': '#17A589', # Green
-    'included volume': '#707B7C', # Gray
-    'excluded volume': '#283747', # Black
-    'hydrophobicity': '#F5B041', # Orange
-    'aromatic ring': '#F1C40F', # Yellow
+    'positive charge': '#3498DB',  # Blue
+    'negative charge': '#884EA0',  # Purple
+    'hb acceptor': '#B03A2E',  # Red
+    'hb donor': '#17A589',  # Green
+    'included volume': '#707B7C',  # Gray
+    'excluded volume': '#283747',  # Black
+    'hydrophobicity': '#F5B041',  # Orange
+    'aromatic ring': '#F1C40F',  # Yellow
 }
 
-def get_color_from_palette_for_feature(feature_name, color_palette='openpharmacophore'):
+
+def get_color_from_palette_for_feature(feature_name,
+                                       color_palette='openpharmacophore'):
     """ Get the color code of a pharmacophoric feature from a color palette.
 
     A color palette is a Python dictionary where keys are the farmacophoric feature names and
@@ -41,7 +45,8 @@ def get_color_from_palette_for_feature(feature_name, color_palette='openpharmaco
         'included volume', 'excluded volume', 'hydrophobicity' or 'aromatic ring'.
         
     color_palette: str or dict
-        Dictionary or color palette name predefined already in the module `openpharmacophore.pharmacophoric_elements.features.color_palettes`. (Default: 'openpharmacophore')
+        Dictionary or color palette name predefined already in the module
+        `openpharmacophore.pharmacophoric_elements.features.color_palettes`. (Default: 'openpharmacophore')
 
     Examples
     -------
@@ -70,16 +75,15 @@ def get_color_from_palette_for_feature(feature_name, color_palette='openpharmaco
 
     """
 
-    if type(color_palette)==str:
+    if isinstance(color_palette, str):
         try:
             color_palette = globals()[color_palette]
-        except:
-            raise TypeError('color_palette')
+        except KeyError:
+            raise InvalidPaletteError(f'The palette {color_palette} does not exist')
 
     try:
         color = to_rgb(color_palette[feature_name])
-    except:
-        raise TypeError('feature_name')
+    except KeyError:
+        raise InvalidFeatureError(f'{feature_name} is not a valid feature_name')
 
     return color
-

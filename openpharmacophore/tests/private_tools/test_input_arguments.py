@@ -3,6 +3,7 @@ from openpharmacophore._private_tools.input_arguments import validate_input_quan
 import pyunitwizard as puw
 import pytest
 
+
 def test_validate_input_quantity():
     
     name = "quantity"
@@ -20,8 +21,8 @@ def test_validate_input_quantity():
         validate_input_quantity(quantity, dim, name, shape=(3,))
     
     with pytest.raises(exc.QuantityDataTypeError):
-        validate_input_quantity(quantity, dim, name, dtype=(int))
-        validate_input_quantity(puw.quantity(1, unit="angstroms"), dim, name, dtype=(float))
+        validate_input_quantity(quantity, dim, name, dtype=int)
+        validate_input_quantity(puw.quantity(1, unit="angstroms"), dim, name, dtype=float)
 
 
 def test_validate_input_array_like():
@@ -33,6 +34,3 @@ def test_validate_input_array_like():
     with pytest.raises(exc.BadShapeError):
         validate_input_array_like([1, 2, 3], (4,), name)
         validate_input_array_like((1, 2), (4,), name)
-
-
-

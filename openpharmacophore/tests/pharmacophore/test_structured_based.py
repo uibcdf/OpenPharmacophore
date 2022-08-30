@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 import pyunitwizard as puw
 from rdkit import Chem
-import os
 
 
 @pytest.mark.parametrize("file_name,ligand_id,hydrophobics", [
@@ -17,7 +16,7 @@ import os
 ])
 def test_from_pdb(file_name, ligand_id, hydrophobics):
     file_path = data.pdb[file_name]
-    pharmacophore = SBP().from_pdb(file_path, radius=1.0, ligand_id=ligand_id, hydrophobics=hydrophobics)
+    pharmacophore = SBP.from_pdb(file_path, radius=1.0, ligand_id=ligand_id, hydrophobics=hydrophobics)
 
     if file_name == "1ncr":
         assert len(pharmacophore) == 5
@@ -283,7 +282,7 @@ def test_smarts_hydrophobics():
     
     ligand = Chem.MolFromSmiles("CC1=CC(=CC(=C1OCCCC2=CC(=NO2)C)C)C3=NOC(=N3)C(F)(F)F")
     ligand = generate_conformers(ligand, 1, random_seed=1)
-    hydrophobics = SBP()._smarts_hydrophobics(ligand, 1.0)
+    hydrophobics = SBP._smarts_hydrophobics(ligand, 1.0)
 
     assert len(hydrophobics) == 3
     
@@ -298,3 +297,25 @@ def test_smarts_hydrophobics():
                     )
     assert np.allclose(np.around(hyd_2_center, 3), (-2.130, -0.542, -0.479), rtol=0, atol=1e-04)
     assert np.allclose(hyd_2_radius, hyd_2_radius, rtol=0, atol=1e-03)
+
+
+def test_from_file():
+    pharmacophore = SBP.from_file(data.pharmacophores["1M70"], load_mol_sys=False)
+    assert len(pharmacophore) == 5
+    assert pharmacophore.molecular_system is None
+
+
+def test_show():
+    pharmacophore = SBP.from_pdb(data.pdb["1ncr"],
+                                 radius=1.0,
+                                 ligand_id="W11:A:7001",
+                                 hydrophobics="plip"
+                                 )
+    assert len(pharmacophore) == 5
+    view = pharmacophore.show()
+    # 5 spheres + 1 arrow the protein and the ligand gives 8 components total
+    assert len(view._ngl_component_ids) == 8
+    for ii in range(1):
+        assert view._ngl_component_names[ii] == "nglview.adaptor.RdkitStructure"
+    for ii in range(2, 8):
+        assert view._ngl_component_names[ii] == "nglview.shape.Shape"

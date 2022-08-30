@@ -1,6 +1,6 @@
-## This file contains functions necessary to align molecules to a 3D pharmacophore
-## model. The functions in this file are called by the VirtualScreening3D and 
-## RetrospectiveScreening3D classes
+# This file contains functions necessary to align molecules to a 3D pharmacophore
+# model. The functions in this file are called by the VirtualScreening3D and
+# RetrospectiveScreening3D classes
 
 from rdkit import Geometry
 from rdkit.Chem import rdMolTransforms
@@ -72,7 +72,6 @@ def get_transform_matrix(align_ref, conf_embed, atom_match):
 
 
 def transform_embeddings(pharmacophore, embeddings, atom_match):
-
     """Transform embeddings. Performs the alignment of the molecules 
         to the pharmacophore.
 

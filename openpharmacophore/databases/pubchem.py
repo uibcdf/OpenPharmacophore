@@ -9,6 +9,7 @@ from typing import List, Dict, Tuple
 
 base_url = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
+
 def _get_data(url: str, attempts: int = 5) -> requests.Response.content:
     """ Downloads data from a given url.
         
@@ -35,12 +36,12 @@ def _get_data(url: str, attempts: int = 5) -> requests.Response.content:
         else:
             attempts -= 1
             time.sleep(2)
-    
+
     if res.status_code != requests.codes.ok:
         raise FetchError("Failed to get data from {}".format(url))
-    
+
     return res.content
-    
+
 
 def get_assay_compounds_id(assay_id: int, attempts: int = 10) -> List[int]:
     """ Get compounds id for tested compounds in an assay
@@ -61,12 +62,13 @@ def get_assay_compounds_id(assay_id: int, attempts: int = 10) -> List[int]:
     """
     assay_url = base_url + "/bioassay/AID/{}/cids/JSON".format(assay_id)
     data = _get_data(assay_url, attempts)
-    
+
     ids_dict = json.loads(data)
 
     return ids_dict["InformationList"]["Information"][0]["CID"]
 
-def get_assay_description(assay_id: int, summary: bool =True, attempts: int = 10) -> Dict[str, str]:
+
+def get_assay_description(assay_id: int, summary: bool = True, attempts: int = 10) -> Dict[str, str]:
     """ Get the description of an assay in JSON format.
 
         Parameters
@@ -95,6 +97,7 @@ def get_assay_description(assay_id: int, summary: bool =True, attempts: int = 10
 
     data = _get_data(description_url, attempts)
     return json.loads(data)
+
 
 def get_assay_results(assay_id, form="dataframe", attempts=10):
     """ Get results of an assay. 
@@ -127,13 +130,14 @@ def get_assay_results(assay_id, form="dataframe", attempts=10):
     assay_url = base_url + "/assay/aid/{}/{}".format(assay_id, format)
 
     data = _get_data(assay_url, attempts)
-    
+
     if format == "CSV":
         csv_string = StringIO(data.decode("utf-8"))
         return pd.read_csv(csv_string)
     elif format == "JSON":
         return json.loads(data.content)
-    
+
+
 def get_assay_target_info(assay_id: int, attempts: int = 10) -> Dict[str, str]:
     """ Get target information of an assay.
 
@@ -154,6 +158,7 @@ def get_assay_target_info(assay_id: int, attempts: int = 10) -> Dict[str, str]:
     target_url = base_url + "/assay/aid/{}/targets/ProteinGI,ProteinName,GeneID,GeneSymbol/JSON".format(assay_id)
     data = _get_data(target_url, attempts)
     return json.loads(data)
+
 
 def get_assay_bioactivity_data(assay_id):
     """ Get bioactivity data and the compounds in an assay. 
@@ -182,7 +187,7 @@ def get_assay_bioactivity_data(assay_id):
     df = df.drop("PUBCHEM_ACTIVITY_OUTCOME", axis=1)
     df = df.astype("int32")
     molecules_ids = df["PUBCHEM_CID"].tolist()
-    bioactivity = df["activity"].to_numpy() 
+    bioactivity = df["activity"].to_numpy()
 
     molecules = []
     print("Fetching molecules smiles...")
@@ -191,6 +196,7 @@ def get_assay_bioactivity_data(assay_id):
         molecules.append((mol_id, smiles))
 
     return molecules, bioactivity
+
 
 def get_assay_actives_and_inactives(assay_id):
     """ Get smiles for compounds in an assay split into active and inactive.
@@ -226,7 +232,7 @@ def get_assay_actives_and_inactives(assay_id):
 
     actives_list = actives["PUBCHEM_CID"].tolist()
     inactives_list = inactives["PUBCHEM_CID"].tolist()
-    
+
     actives_smiles = []
     inactives_smiles = []
 
@@ -234,13 +240,14 @@ def get_assay_actives_and_inactives(assay_id):
     for compound in tqdm(actives_list):
         smiles = get_compound_smiles(compound)
         actives_smiles.append(smiles)
-    
+
     print("Fetching inactive compound smiles...")
     for compound in tqdm(inactives_list):
         smiles = get_compound_smiles(compound)
         inactives_smiles.append(smiles)
-            
+
     return (actives_list, actives_smiles), (inactives_list, inactives_smiles)
+
 
 def get_compound_assay_summary(compound_id, form="dataframe", attempts=10):
     """ Get summary of biological test results for a given compound.
@@ -268,15 +275,16 @@ def get_compound_assay_summary(compound_id, form="dataframe", attempts=10):
         format = "JSON"
     else:
         raise OpenPharmacophoreValueError("{} is not a valid form".format(form))
-    
+
     compound_url = base_url + "/compound/cid/{}/assaysummary/{}".format(compound_id, format)
     data = _get_data(compound_url, attempts)
-    
+
     if format == "CSV":
         csv_string = StringIO(data.decode("utf-8"))
         return pd.read_csv(csv_string)
     elif format == "JSON":
         return json.loads(data.content)
+
 
 def get_compound_id(name: str, attempts: int = 10) -> str:
     """ Get pubchem compound id for a given compound name.
@@ -300,6 +308,7 @@ def get_compound_id(name: str, attempts: int = 10) -> str:
 
     json_data = json.loads(data)
     return json_data["IdentifierList"]["CID"][0]
+
 
 def get_compound_description(compound_identifier, attempts=10):
     """ Get description for a given compound. 
@@ -328,6 +337,7 @@ def get_compound_description(compound_identifier, attempts=10):
     data = _get_data(compound_url, attempts)
     return json.loads(data)
 
+
 def get_compound_smiles(compound_id: int, attempts: int = 10) -> str:
     """ Get smiles for a given compound. 
 
@@ -350,6 +360,7 @@ def get_compound_smiles(compound_id: int, attempts: int = 10) -> str:
     data = _get_data(smiles_url, attempts)
     smiles = data.decode("utf-8").rstrip()
     return smiles
+
 
 def get_target_assays(identifier: str, identifier_type: str, attempts: int = 10) -> pd.DataFrame:
     """ Get assay ids and name for a given target
@@ -393,6 +404,7 @@ def get_target_assays(identifier: str, identifier_type: str, attempts: int = 10)
 
     return pd.DataFrame.from_dict(assays)
 
+
 def similarity_search(compound, threshold=None, max_records=None, attempts=5):
     """ Perform a 2D similarity search for a given compound.
 
@@ -422,7 +434,7 @@ def similarity_search(compound, threshold=None, max_records=None, attempts=5):
     # Else use compound id
     else:
         url = base_url + "/compound/similarity/cid/{}/JSON".format(compound)
-    
+
     if threshold and max_records:
         url += "?Threshold={}&MaxRecords={}".format(threshold, max_records)
     elif threshold:
@@ -434,7 +446,7 @@ def similarity_search(compound, threshold=None, max_records=None, attempts=5):
     # Data returns a listkey that can be used to retrieve the results from another url
     content = json.loads(data)
     listkey = content["Waiting"]["ListKey"]
-    
+
     results_url = base_url + "/compound/listkey/{}/cids/JSON".format(listkey)
     # Wait a little as similarity searches take more time to complete
     time.sleep(5)
@@ -442,4 +454,3 @@ def similarity_search(compound, threshold=None, max_records=None, attempts=5):
     data_dict = json.loads(data)
 
     return data_dict["IdentifierList"]["CID"]
-

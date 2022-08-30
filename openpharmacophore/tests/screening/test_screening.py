@@ -12,7 +12,7 @@ def mock_screening_results():
     """ Returns an instance of a VirtualScreening class
         with fake attributes.
     """
-    pharmacophore = oph.Pharmacophore()
+    pharmacophore = oph.Pharmacophore([])
     screener = oph.VirtualScreening(pharmacophore)
     screener.n_molecules = 60000
     screener.n_matches = 3

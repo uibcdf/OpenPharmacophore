@@ -1,18 +1,19 @@
 from openpharmacophore import Pharmacophore, PharmacophoricPoint
-from openpharmacophore._private_tools.exceptions import InvalidFeatureError
+import openpharmacophore.data as data
 import pyunitwizard as puw
 import pytest
-import networkx as nx
 import numpy as np
+import nglview as nv
 from rdkit.Chem import Pharm3D
 import copy
+
 
 @pytest.fixture
 def three_point_pharmacophore() -> Pharmacophore:
     """Returns as pharmacophore with three pharmacophoric_points"""
     hb_acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
-        center=puw.quantity([1,0,0], "angstroms"),
+        center=puw.quantity([1, 0, 0], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
     ring_1 = PharmacophoricPoint(
@@ -27,12 +28,13 @@ def three_point_pharmacophore() -> Pharmacophore:
     )
     return Pharmacophore(pharmacophoric_points=[ring_1, hb_acceptor, ring_2])
 
+
 @pytest.fixture
 def two_point_pharmacophore() -> Pharmacophore:
     """Returns a pharmacophore with two pharmacophoric points."""
     hb_donor = PharmacophoricPoint(
         feat_type="hb donor",
-        center=puw.quantity([1,0,1], "angstroms"),
+        center=puw.quantity([1, 0, 1], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
     hydrophobicity = PharmacophoricPoint(
@@ -42,6 +44,7 @@ def two_point_pharmacophore() -> Pharmacophore:
     )
     return Pharmacophore(pharmacophoric_points=[hb_donor, hydrophobicity])
 
+
 @pytest.fixture
 def five_point_pharmacophore(three_point_pharmacophore) -> Pharmacophore:
     hydrophobicity = PharmacophoricPoint(
@@ -49,7 +52,7 @@ def five_point_pharmacophore(three_point_pharmacophore) -> Pharmacophore:
         center=puw.quantity([-1, 0, 3], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    positive =  PharmacophoricPoint(
+    positive = PharmacophoricPoint(
         feat_type="positive charge",
         center=puw.quantity([3, -1, 4], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
@@ -59,16 +62,15 @@ def five_point_pharmacophore(three_point_pharmacophore) -> Pharmacophore:
     pharmacophore.add_point(positive)
     return pharmacophore
 
+
 def test_get_point(three_point_pharmacophore):
-    # Test that we can get an element by indexing and calling the get_point method
-    assert three_point_pharmacophore[0] == three_point_pharmacophore.get_point(0)
-    assert three_point_pharmacophore[1] == three_point_pharmacophore.get_point(1)
-    assert three_point_pharmacophore[2] == three_point_pharmacophore.get_point(2)
+
     assert three_point_pharmacophore[0].feature_name == "hb acceptor"
     assert three_point_pharmacophore[1].feature_name == "aromatic ring"
     assert three_point_pharmacophore[2].feature_name == "aromatic ring"
-    
-def test_inmutable(three_point_pharmacophore):
+
+
+def test_pharmacophore_point_list_cannot_be_modified(three_point_pharmacophore):
     # Test that we cannot modify the pharmacophoric point list
     hydrophobicity = PharmacophoricPoint(
         feat_type="hydrophobicity",
@@ -79,29 +81,31 @@ def test_inmutable(three_point_pharmacophore):
     with pytest.raises(TypeError):
         three_point_pharmacophore[2] = hydrophobicity
 
-def test_iter(three_point_pharmacophore):
+
+def test_iterate_pharmacophore(three_point_pharmacophore):
     for point in three_point_pharmacophore:
         assert isinstance(point, PharmacophoricPoint)
 
+
 def test_equality(three_point_pharmacophore, two_point_pharmacophore):
-    
     other_pharmacophore = copy.deepcopy(three_point_pharmacophore)
     assert three_point_pharmacophore == other_pharmacophore
     assert three_point_pharmacophore != two_point_pharmacophore
 
-def test_representation(three_point_pharmacophore, two_point_pharmacophore):
+
+def test_string_representation(three_point_pharmacophore, two_point_pharmacophore):
     assert three_point_pharmacophore.__repr__() == "Pharmacophore(n_pharmacophoric_points: 3)"
     assert two_point_pharmacophore.__repr__() == "Pharmacophore(n_pharmacophoric_points: 2)"
 
-def test_add_point(three_point_pharmacophore):
 
+def test_add_point_to_pharmacophore(three_point_pharmacophore):
     hydrophobic = PharmacophoricPoint(
         feat_type="hydrophobicity",
         center=puw.quantity([-1, 0, 2], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
 
-    positive =  PharmacophoricPoint(
+    positive = PharmacophoricPoint(
         feat_type="positive charge",
         center=puw.quantity([3, -1, 4], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
@@ -122,7 +126,7 @@ def test_add_point(three_point_pharmacophore):
     # Test adding a repetead feature type
     hb_acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
-        center=puw.quantity([-1,0,-1], "angstroms"),
+        center=puw.quantity([-1, 0, -1], "angstroms"),
         radius=puw.quantity(1.0, "angstroms")
     )
     pharmacophore.add_point(hb_acceptor)
@@ -144,11 +148,10 @@ def test_add_point(three_point_pharmacophore):
     assert pharmacophore[5].feature_name == "aromatic ring"
     assert pharmacophore[6].feature_name == "aromatic ring"
 
-def test_remove_points(three_point_pharmacophore, five_point_pharmacophore):
 
+def test_remove_points(three_point_pharmacophore, five_point_pharmacophore):
     # Test pharmacophore with three elements
     pharmacophore = copy.deepcopy(three_point_pharmacophore)
-   
 
     with pytest.raises(IndexError):
         pharmacophore.remove_points([3, 4])
@@ -159,7 +162,7 @@ def test_remove_points(three_point_pharmacophore, five_point_pharmacophore):
     assert pharmacophore[0].feature_name == "aromatic ring"
     assert pharmacophore[1].feature_name == "aromatic ring"
 
-    pharmacophore.remove_points([0,1])
+    pharmacophore.remove_points([0, 1])
     assert len(pharmacophore) == 0
     assert pharmacophore.n_pharmacophoric_points == 0
 
@@ -189,7 +192,6 @@ def test_remove_points(three_point_pharmacophore, five_point_pharmacophore):
 
 
 def test_remove_feature(three_point_pharmacophore, five_point_pharmacophore):
-
     pharmacophore = copy.deepcopy(three_point_pharmacophore)
     pharmacophore.remove_feature("aromatic ring")
     assert len(pharmacophore) == 1
@@ -205,35 +207,37 @@ def test_remove_feature(three_point_pharmacophore, five_point_pharmacophore):
     assert pharmacophore[1].feature_name == "hydrophobicity"
     assert pharmacophore[2].feature_name == "positive charge"
 
+
 def test_reset(three_point_pharmacophore):
     pharmacophore = copy.deepcopy(three_point_pharmacophore)
     pharmacophore._reset()
     assert pharmacophore.n_pharmacophoric_points == 0
     assert len(pharmacophore._pharmacophoric_points) == 0
 
+
 def test_feature_count(three_point_pharmacophore, five_point_pharmacophore):
-    
     counter = {
-            "aromatic ring":   2,
-            "hydrophobicity":  0,
-            "hb acceptor":     1,
-            "hb donor":        0,
-            "positive charge": 0,
-            "negative charge": 0,
+        "aromatic ring": 2,
+        "hydrophobicity": 0,
+        "hb acceptor": 1,
+        "hb donor": 0,
+        "positive charge": 0,
+        "negative charge": 0,
     }
 
     assert three_point_pharmacophore.feature_count() == counter
 
     counter = {
-            "aromatic ring":   2,
-            "hydrophobicity":  1,
-            "hb acceptor":     1,
-            "hb donor":        0,
-            "positive charge": 1,
-            "negative charge": 0,
+        "aromatic ring": 2,
+        "hydrophobicity": 1,
+        "hb acceptor": 1,
+        "hb donor": 0,
+        "positive charge": 1,
+        "negative charge": 0,
     }
 
     assert five_point_pharmacophore.feature_count() == counter
+
 
 def test_to_rdkit(three_point_pharmacophore):
     rdkit_ph, radii = three_point_pharmacophore.to_rdkit()
@@ -250,7 +254,7 @@ def test_to_rdkit(three_point_pharmacophore):
     assert np.allclose(acceptor.GetPos().x, 1.0)
     assert np.allclose(acceptor.GetPos().y, 0.0)
     assert np.allclose(acceptor.GetPos().z, 0.0)
-    
+
     ring_1 = feats[1]
     assert ring_1.GetFamily() == "Aromatic"
     assert np.allclose(ring_1.GetPos().x, 2.0)
@@ -263,10 +267,10 @@ def test_to_rdkit(three_point_pharmacophore):
     assert np.allclose(ring_2.GetPos().y, 1.0)
     assert np.allclose(ring_2.GetPos().z, 2.0)
 
-def test_distance_matrix():
 
+def test_distance_matrix():
     # Test pharmacophore with zero elements
-    pharmacophore = Pharmacophore()
+    pharmacophore = Pharmacophore([])
     matrix = pharmacophore.distance_matrix()
     assert matrix.shape == (0, 0)
 
@@ -282,17 +286,17 @@ def test_distance_matrix():
                             center=puw.quantity([-3, 2, -1], "angstroms"),
                             radius=radius),
     ]
-    
+
     pharmacophore = Pharmacophore(pharmacophoric_points=points)
     distance_matrix = pharmacophore.distance_matrix()
-    
+
     assert distance_matrix.shape == (3, 3)
-    assert np.allclose(distance_matrix, 
+    assert np.allclose(distance_matrix,
                        np.array([[0, np.sqrt(27), 6],
                                  [np.sqrt(27), 0, np.sqrt(27)],
                                  [6, np.sqrt(27), 0]])
                        )
-    
+
     points = [
         PharmacophoricPoint(feat_type="hb acceptor",
                             center=puw.quantity([1, 2, 3], "angstroms"),
@@ -307,7 +311,7 @@ def test_distance_matrix():
                             center=puw.quantity([2, -1, 1], "angstroms"),
                             radius=radius),
     ]
-    
+
     sq = np.sqrt
     pharmacophore = Pharmacophore(pharmacophoric_points=points)
     distance_matrix = pharmacophore.distance_matrix()
@@ -318,10 +322,10 @@ def test_distance_matrix():
                                  [sq(24), sq(2), 0, sq(14)],
                                  [sq(14), sq(6), sq(14), 0]]))
 
+
 def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_point_pharmacophore):
-    
     # Test pharmacophore with zero elements
-    pharmacophore = Pharmacophore()
+    pharmacophore = Pharmacophore([])
     graph = pharmacophore.to_nx_graph()
     assert graph.number_of_nodes() == 0
 
@@ -330,7 +334,6 @@ def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_po
     assert graph.number_of_edges() == 1
 
     graph = three_point_pharmacophore.to_nx_graph()
-    assert isinstance(graph, nx.Graph)
     assert graph.number_of_nodes() == 3
     assert graph.number_of_edges() == 3
 
@@ -338,11 +341,41 @@ def test_to_nx_graph(three_point_pharmacophore, two_point_pharmacophore, five_po
     assert ("A1", "R1") in edges
     assert ("A1", "R2") in edges
     assert ("R1", "R2") in edges
-    
+
     assert graph["A1"]["R1"]["dis"] == 4.0
     assert graph["A1"]["R2"]["dis"] == 2.0
     assert graph["R1"]["R2"]["dis"] == 3.0
-    
+
     graph = five_point_pharmacophore.to_nx_graph()
     assert graph.number_of_nodes() == 5
     assert graph.number_of_edges() == 10
+
+
+def test_from_file():
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["ligscout"])
+    assert len(pharmacophore) == 4
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["gmp"])
+    assert len(pharmacophore) == 10
+
+    pharmacophore = Pharmacophore.from_file(data.pharmacophores["1M70"])
+    assert len(pharmacophore) == 5
+
+
+def test_add_to_ngl_view(three_point_pharmacophore, five_point_pharmacophore):
+
+    view = nv.NGLWidget()
+    assert len(view._ngl_component_ids) == 0
+
+    # A pharmacophore view should have as many components as pharmacophoric points
+    three_point_pharmacophore.add_to_NGLView(view)
+    assert len(view._ngl_component_ids) == 3
+
+    # Add the second pharmacophore
+    five_point_pharmacophore.add_to_NGLView(view)
+    # Aromatic ring should add a sphere and an arrow to the view
+    assert len(view._ngl_component_ids) == 8
+    assert len(view._ngl_component_names) == 8
+    for component in view._ngl_component_names:
+        assert component == "nglview.shape.Shape"
