@@ -319,7 +319,3 @@ def test_show():
         assert view._ngl_component_names[ii] == "nglview.adaptor.RdkitStructure"
     for ii in range(2, 8):
         assert view._ngl_component_names[ii] == "nglview.shape.Shape"
-
-
-def test_draw():
-    assert False, "Complete me!"

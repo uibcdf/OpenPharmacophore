@@ -70,7 +70,7 @@ def test_get_point(three_point_pharmacophore):
     assert three_point_pharmacophore[2].feature_name == "aromatic ring"
 
 
-def test_inmutable(three_point_pharmacophore):
+def test_pharmacophore_point_list_cannot_be_modified(three_point_pharmacophore):
     # Test that we cannot modify the pharmacophoric point list
     hydrophobicity = PharmacophoricPoint(
         feat_type="hydrophobicity",
@@ -82,7 +82,7 @@ def test_inmutable(three_point_pharmacophore):
         three_point_pharmacophore[2] = hydrophobicity
 
 
-def test_iter(three_point_pharmacophore):
+def test_iterate_pharmacophore(three_point_pharmacophore):
     for point in three_point_pharmacophore:
         assert isinstance(point, PharmacophoricPoint)
 
@@ -93,12 +93,12 @@ def test_equality(three_point_pharmacophore, two_point_pharmacophore):
     assert three_point_pharmacophore != two_point_pharmacophore
 
 
-def test_representation(three_point_pharmacophore, two_point_pharmacophore):
+def test_string_representation(three_point_pharmacophore, two_point_pharmacophore):
     assert three_point_pharmacophore.__repr__() == "Pharmacophore(n_pharmacophoric_points: 3)"
     assert two_point_pharmacophore.__repr__() == "Pharmacophore(n_pharmacophoric_points: 2)"
 
 
-def test_add_point(three_point_pharmacophore):
+def test_add_point_to_pharmacophore(three_point_pharmacophore):
     hydrophobic = PharmacophoricPoint(
         feat_type="hydrophobicity",
         center=puw.quantity([-1, 0, 2], "angstroms"),

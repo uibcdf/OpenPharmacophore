@@ -165,7 +165,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     @classmethod
     def single_ligand(cls, ligand: Chem.Mol, radius: float = 1.0,
-                                    featdef: Callable = oph_featuredefinition(),
+                                    featdef: Callable = None,
                                     features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
         """ Get a pharmacophore from a single ligand.
 

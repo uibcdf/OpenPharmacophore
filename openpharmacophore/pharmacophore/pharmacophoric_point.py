@@ -113,7 +113,7 @@ class PharmacophoricPoint:
     def atom_indices(self, atom_indices: Sequence) -> None:
         if not isinstance(atom_indices, (list, set, tuple)):
             raise OpenPharmacophoreTypeError("atom_indices must be a list, set or tuple of int")
-        self._atom_indices = atom_indices
+        self._atom_indices = set(atom_indices)
 
     @property
     def has_direction(self) -> bool:

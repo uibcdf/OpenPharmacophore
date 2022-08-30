@@ -8,6 +8,8 @@ import pyunitwizard as puw
 import pytest
 
 
+# TODO: Redo this tests
+
 @pytest.fixture
 def sample_molecule():
     """Returns a sample molecule for testing"""
@@ -18,7 +20,7 @@ def test_feature_centroid(sample_molecule):
     mol = utils.conformers.generate_conformers(molecule=sample_molecule, n_conformers=1, random_seed=1)
 
     idxs = (11, 12, 13, 14, 15)
-    x, y, z = -5.256026015194413, 0.2637169048998521, -0.22204282175815981 # Known coordinates of centroid
+    x, y, z = -5.256026015194413, 0.2637169048998521, -0.22204282175815981  # Known coordinates of centroid
 
     centroid = feats.PharmacophoricPointExtractor._feature_centroid(mol, idxs, 0)
 
@@ -28,10 +30,9 @@ def test_feature_centroid(sample_molecule):
 
 
 def test_load_smarts_fdef():
-    
     feat_def = feats.load_smarts_fdef(file_name=data.smarts_features)
     assert len(feat_def) == 28
-    
+
     n_donors = 0
     n_acceptors = 0
     n_positives = 0
@@ -48,16 +49,15 @@ def test_load_smarts_fdef():
             n_negatives += 1
         elif feat_name == "hydrophobicity":
             n_hydrophobes += 1
-            
+
     assert n_donors == 3
     assert n_acceptors == 2
     assert n_hydrophobes == 13
     assert n_negatives == 4
     assert n_positives == 4
-    
+
 
 def test_pharmacophoric_point_extractor():
-    
     # Known points of acetic acid
     acceptor = PharmacophoricPoint(
         feat_type="hb acceptor",
@@ -69,10 +69,10 @@ def test_pharmacophoric_point_extractor():
         center=puw.quantity([0.08966065176585349, 0.03784658233931392, -0.01482808230401158], "nanometer"),
         radius=puw.quantity(1.0, "angstroms")
     )
-    
+
     acetic_acid = Chem.MolFromSmiles("CC(=O)O")
     acetic_acid = utils.conformers.generate_conformers(acetic_acid, 1, random_seed=1, alignment=False)
-    
+
     extractor = feats.PharmacophoricPointExtractor()
     points = extractor(acetic_acid, 0)
     assert len(points) == 3
@@ -82,7 +82,7 @@ def test_pharmacophoric_point_extractor():
 
     rdkit_extractor = feats.PharmacophoricPointExtractor(featdef=feats.rdkit_featuredefinition())
     points = rdkit_extractor(acetic_acid, 0)
-    assert len(points) == 5 
+    assert len(points) == 5
     assert acceptor.feature_name == points[0].feature_name
     assert np.all(acceptor.center == points[0].center)
     assert acceptor.radius == points[0].radius
@@ -101,12 +101,12 @@ def benzoic_acid():
 
 
 def test_aromatic_direction_vector(benzoic_acid):
-
     aromatic_atoms_inx = (0, 1, 2, 3, 4, 5)
-    direction_vector = feats.PharmacophoricPointExtractor._aromatic_direction_vector(benzoic_acid, aromatic_atoms_inx, 0)
+    direction_vector = feats.PharmacophoricPointExtractor._aromatic_direction_vector(
+        benzoic_acid, aromatic_atoms_inx, 0)
 
     assert direction_vector.shape[0] == 3
-    assert np.all(np.around(np.array([ 0.02452289, -1.10048427,  1.20713535]), 2) == np.around(direction_vector, 2))
+    assert np.all(np.around(np.array([0.02452289, -1.10048427, 1.20713535]), 2) == np.around(direction_vector, 2))
 
 
 def test_donor_acceptor_direction_vector(benzoic_acid):
@@ -123,4 +123,4 @@ def test_donor_acceptor_direction_vector(benzoic_acid):
     assert donor_vector.shape[0] == 3
     assert acceptor_vector.shape[0] == 3
     assert np.all(np.around(np.array([0.7275082, 0.87517266, 0.7830512]), 2) == np.around(donor_vector, 2))
-    assert np.all(np.around(np.array([-0.62292014, 0.7957192 , 0.73807555]), 2) == np.around(acceptor_vector, 2))
+    assert np.all(np.around(np.array([-0.62292014, 0.7957192, 0.73807555]), 2) == np.around(acceptor_vector, 2))

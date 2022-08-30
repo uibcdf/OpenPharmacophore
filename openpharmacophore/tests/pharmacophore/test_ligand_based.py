@@ -1,5 +1,6 @@
-from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
 import openpharmacophore.data as data
+from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
+from openpharmacophore.utils.conformers import generate_conformers
 import pytest
 import pyunitwizard as puw
 from rdkit import Chem
@@ -48,11 +49,13 @@ def test_from_ligand_file():
 
 
 def test_single_ligand_pharmacophore():
-    assert False, "Complete me!"
-
-
-def test_draw():
-    assert False, "Complete me!"
+    phenol = Chem.MolFromSmiles("C1=CC=C(C=C1)O")
+    phenol = generate_conformers(phenol, 1)
+    pharmacophore = LigandBasedPharmacophore.single_ligand(phenol,
+                                                           features=["hb donor", "aromatic ring"])
+    assert len(pharmacophore) == 2
+    assert pharmacophore[0].feature_name == "hb donor"
+    assert pharmacophore[1].feature_name == "aromatic ring"
 
 
 def test_show(ligand_based_pharmacophore):
