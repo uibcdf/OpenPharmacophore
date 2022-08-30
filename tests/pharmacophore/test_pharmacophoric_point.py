@@ -4,6 +4,8 @@ import numpy as np
 import nglview as nv
 import pyunitwizard as puw
 import pytest
+from matplotlib.colors import to_rgb
+from unittest.mock import Mock, call
 
 
 @pytest.fixture()
@@ -30,6 +32,7 @@ def aromatic_ring():
 
 
 def test_init_pharmacophoric_point(hydrogen_bond_donor, aromatic_ring):
+    # Test hydrogen bond donor
     assert not hydrogen_bond_donor.has_direction
     assert np.allclose(puw.get_value(hydrogen_bond_donor.center, "angstroms"),
                        np.array([1.0, 1.0, 1.0]))
@@ -37,6 +40,7 @@ def test_init_pharmacophoric_point(hydrogen_bond_donor, aromatic_ring):
     assert hydrogen_bond_donor.atom_indices == {3, 4, 5, 6}
     assert hydrogen_bond_donor.feature_name == "hb donor"
 
+    # Test ring
     ring = aromatic_ring
     assert ring.has_direction
     assert ring.feature_name == "aromatic ring"
@@ -48,27 +52,34 @@ def test_init_pharmacophoric_point(hydrogen_bond_donor, aromatic_ring):
                        np.array([[1.0, 1.0, 1.0]]) / np.linalg.norm(np.array([1.0, 1.0, 1.0])))
 
 
-def test_pharmacophoric_center_validation():
-    # First we test that it raises the correct exceptions when the input arguments
-    # are not valid
+def test_init_pharmacophoric_point_center_is_not_quantity():
     radius = puw.quantity(1.0, "angstroms")
-
-    with pytest.raises(exc.IsNotQuantityError, match="center is not a quantity"):
+    with pytest.raises(exc.NotAQuantityError, match="center is of type <class 'list'>"):
         PharmacophoricPoint(feat_type="hb donor", center=[1, 2, 3], radius=radius)
-    with pytest.raises(exc.WrongDimensionalityError, match="center has dimensionality"):
+
+
+def test_init_pharmacophoric_point_center_has_wrong_dim():
+    radius = puw.quantity(1.0, "angstroms")
+    with pytest.raises(exc.WrongDimensionalityError, match="center has incorrect dimensionality"):
         PharmacophoricPoint(feat_type="hb donor", center=puw.quantity([1.0, 1.0, 1.0], "seconds"), radius=radius)
-    with pytest.raises(exc.BadShapeError, match="center has shape"):
+
+
+def test_init_pharmacophoric_point_center_has_wrong_shape():
+    radius = puw.quantity(1.0, "angstroms")
+    with pytest.raises(exc.IncorrectShapeError, match="center has incorrect shape"):
         PharmacophoricPoint(feat_type="hb donor", center=puw.quantity([1.0, 1.0], "angstroms"), radius=radius)
 
 
-def test_pharmacophoric_point_radius_validation():
+def test_init_pharmacophoric_point_radius_is_not_a_quantity():
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
 
-    with pytest.raises(exc.IsNotQuantityError, match="radius is not a quantity"):
+    with pytest.raises(exc.NotAQuantityError, match="radius is of type <class 'float'>"):
         PharmacophoricPoint(feat_type="hb donor", center=center, radius=1.0)
-    with pytest.raises(exc.NegativeRadiusError, match="radius must be a positive"):
-        PharmacophoricPoint(feat_type="hb donor", center=center, radius=puw.quantity(-1.0, "angstroms"))
-    with pytest.raises(exc.WrongDimensionalityError, match="radius has dimensionality"):
+
+
+def test_init_pharmacophoric_point_radius_has_wrong_dim():
+    center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
+    with pytest.raises(exc.WrongDimensionalityError, match="radius has incorrect dimensionality"):
         PharmacophoricPoint(feat_type="hb donor", center=center, radius=puw.quantity(1.0, "seconds"))
 
 
@@ -76,16 +87,8 @@ def test_pharmacophoric_point_init_with_invalid_feature():
     radius = puw.quantity(1.0, "angstroms")
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
 
-    with pytest.raises(exc.InvalidFeatureType, match="is not a valid feature type"):
+    with pytest.raises(exc.InvalidFeatureError, match="Invalid feature name rubber duck"):
         PharmacophoricPoint(feat_type="rubber duck", center=center, radius=radius)
-
-
-def test_pharmacophoric_point_atom_indices_validation():
-    radius = puw.quantity(1.0, "angstroms")
-    center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
-
-    with pytest.raises(exc.NotArrayLikeError, match="atom_indices must be"):
-        PharmacophoricPoint(feat_type="hb donor", center=center, radius=radius, atom_indices=1)
 
 
 def test_pharmacophoric_point_equality_based_on_atom_indices(hydrogen_bond_donor):
@@ -122,21 +125,46 @@ def test_pharmacophoric_point_equality_based_on_coordinates():
     assert not donor_1 == donor_3
 
 
-def test_distance_between_pharmacophoric_points():
-    radius = puw.quantity(1.0, "angstroms")
+def test_add_to_ngl_view_point_with_no_direction(hydrogen_bond_donor):
 
-    point_1 = PharmacophoricPoint("aromatic ring", puw.quantity([3, 4, 0], "angstroms"), radius)
-    point_2 = PharmacophoricPoint("hb acceptor", puw.quantity([0, 0, 0], "angstroms"), radius)
+    mock_view = Mock()
+    mock_view._ngl_component_ids = []
+    hydrogen_bond_donor.add_to_ngl_view(mock_view)
+    donor_color = to_rgb("#17A589")
+    radius = 1.0
+    center = puw.get_value(hydrogen_bond_donor.center, "angstroms").tolist()
 
-    assert distance_between_pharmacophoric_points(point_1, point_2) == 5
+    assert mock_view.shape.add_sphere.call_args == call(
+        center, donor_color, radius, "hb donor"
+    )
+    assert mock_view.update_representation.call_args == call(
+        component=0, repr_index=0, opacity=0.5
+    )
 
-    point_1 = PharmacophoricPoint("aromatic ring", puw.quantity([1, 1, 1], "angstroms"), radius)
-    point_2 = PharmacophoricPoint("hb acceptor", puw.quantity([1, 1, 1], "angstroms"), radius)
 
-    assert distance_between_pharmacophoric_points(point_1, point_2) == 0
+def test_add_to_ngl_view_point_with_direction(aromatic_ring):
+    mock_view = Mock()
+    mock_view._ngl_component_ids = [0, 1]
+    aromatic_ring.add_to_ngl_view(mock_view, opacity=0.7)
+
+    ring_color = to_rgb("#F1C40F")
+    radius = 1.5
+    center = puw.get_value(aromatic_ring.center, "angstroms").tolist()
+    arrow_end = (center + radius * aromatic_ring.direction).tolist()
+
+    assert mock_view.shape.add_sphere.call_args == call(
+        center, ring_color, radius, "aromatic ring"
+    )
+    assert mock_view.shape.add_arrow.call_args == call(
+        center, arrow_end, ring_color, 0.2
+    )
+    assert mock_view.update_representation.call_count == 2
+    assert mock_view.update_representation.call_args == call(
+        component=3, repr_index=0, opacity=0.9
+    )
 
 
-def test_add_to_ngl_view(hydrogen_bond_donor, aromatic_ring):
+def test_add_to_ngl_view_components_are_loaded(hydrogen_bond_donor, aromatic_ring):
 
     view = nv.NGLWidget()
     assert len(view._ngl_component_ids) == 0
@@ -166,3 +194,17 @@ def test_pharmacophoric_point_string_representation(hydrogen_bond_donor, aromati
                              "direction=(0.58, 0.58, 0.58))")
 
     assert str(aromatic_ring) == expected_aromatic_str
+
+
+def test_distance_between_pharmacophoric_points():
+    radius = puw.quantity(1.0, "angstroms")
+
+    point_1 = PharmacophoricPoint("aromatic ring", puw.quantity([3, 4, 0], "angstroms"), radius)
+    point_2 = PharmacophoricPoint("hb acceptor", puw.quantity([0, 0, 0], "angstroms"), radius)
+
+    assert distance_between_pharmacophoric_points(point_1, point_2) == 5
+
+    point_1 = PharmacophoricPoint("aromatic ring", puw.quantity([1, 1, 1], "angstroms"), radius)
+    point_2 = PharmacophoricPoint("hb acceptor", puw.quantity([1, 1, 1], "angstroms"), radius)
+
+    assert distance_between_pharmacophoric_points(point_1, point_2) == 0

@@ -2,6 +2,7 @@
 import openpharmacophore._private_tools.exceptions as exc
 from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
+from matplotlib.colors import to_rgb
 import numpy as np
 import pyunitwizard as puw
 
@@ -68,17 +69,24 @@ class PharmacophoricPoint:
     }
 
     palette = {
-
+        'positive charge': '#3498DB',  # Blue
+        'negative charge': '#884EA0',  # Purple
+        'hb acceptor': '#B03A2E',  # Red
+        'hb donor': '#17A589',  # Green
+        'included volume': '#707B7C',  # Gray
+        'excluded volume': '#283747',  # Black
+        'hydrophobicity': '#F5B041',  # Orange
+        'aromatic ring': '#F1C40F',  # Yellow
     }
 
-    def __init__(self, feat_type, center, radius, direction, atom_indices=None):
+    def __init__(self, feat_type, center, radius, direction=None, atom_indices=None):
 
         try:
             self._feat_name = PharmacophoricPoint.feature_to_char[feat_type]
         except KeyError:
             raise exc.InvalidFeatureError(feat_type)
 
-        self._validate_input_arguments(feat_type, center, radius, direction, atom_indices)
+        self._validate_input_arguments(center, radius, direction)
         self._center = puw.standardize(center)
         self._radius = puw.standardize(radius)
 
@@ -113,8 +121,6 @@ class PharmacophoricPoint:
 
     @atom_indices.setter
     def atom_indices(self, atom_indices):
-        if not isinstance(atom_indices, (list, set, tuple)):
-            raise exc.InvalidAtomIndicesError("atom_indices must be a list, set or tuple of int")
         self._atom_indices = set(atom_indices)
 
     @property
@@ -130,7 +136,7 @@ class PharmacophoricPoint:
         return self._feat_name
 
     @staticmethod
-    def _validate_input_arguments(feat_type, center, radius, direction, atom_indices):
+    def _validate_input_arguments(center, radius, direction):
         """ Validates the input arguments of the PharmacophoricPoint constructor.
         """
         # Validate center
@@ -140,10 +146,6 @@ class PharmacophoricPoint:
         # Validate direction
         if direction is not None:
             validate_input_array_like(direction, shape=(3,), name="direction")
-
-        # Validate atom_indices
-        if atom_indices is not None and not isinstance(atom_indices, (list, set, tuple)):
-            raise exc.InvalidAtomIndicesError("atom_indices must be a list, set or tuple of int")
 
     def add_to_ngl_view(self, view, color_palette=None, opacity=0.5):
         """ Add the pharmacophoric point to an NGLview.
@@ -167,10 +169,9 @@ class PharmacophoricPoint:
         if color_palette:
             color = color_palette[self.feature_name]
         else:
-            color = PharmacophoricPoint.palette[self.short_name]
+            color = PharmacophoricPoint.palette[self.feature_name]
 
-        color = self.convert_color_code(color, to_form='rgb')
-
+        color = to_rgb(color)
         radius = puw.get_value(self._radius, to_unit='angstroms')
         center = puw.get_value(self._center, to_unit='angstroms').tolist()
 
@@ -199,10 +200,6 @@ class PharmacophoricPoint:
             "excluded volume",
             "included volume",
         ]
-
-    @staticmethod
-    def convert_color_code(color, to_form):
-        pass
 
     def is_equal(self, other):
         """ Compare equality of two pharmacophoric points based on atoms indices.
