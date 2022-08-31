@@ -226,7 +226,7 @@ class PharmacophoricPoint:
                 return radius_eq and center_eq
         return False
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         center = np.around(puw.get_value(self._center, "angstroms"), 2)
         radius = np.around(puw.get_value(self._radius, "angstroms"), 2)
         x, y, z = center[0], center[1], center[2]
@@ -243,7 +243,7 @@ class PharmacophoricPoint:
                     f"center=({x}, {y}, {z}); radius={radius})")
 
 
-def distance_between_pharmacophoric_points(p1: PharmacophoricPoint, p2: PharmacophoricPoint) -> float:
+def distance_between_pharmacophoric_points(p1: PharmacophoricPoint, p2: PharmacophoricPoint):
     """ Compute the distance in angstroms between two pharmacophoric points.
     
         Parameters
