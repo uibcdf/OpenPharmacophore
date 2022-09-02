@@ -107,9 +107,19 @@ class PharmacophoricPoint:
     def center(self):
         return self._center
 
+    @center.setter
+    def center(self, new_center):
+        validate_input_quantity(new_center, {"[L]": 1}, "center", shape=(3,))
+        self._center = new_center
+
     @property
     def radius(self):
         return self._radius
+
+    @radius.setter
+    def radius(self, new_radius):
+        validate_input_quantity(new_radius, {"[L]": 1}, "radius")
+        self._radius = new_radius
 
     @property
     def direction(self):

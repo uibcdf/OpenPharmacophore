@@ -5,6 +5,7 @@ import nglview as nv
 import pyunitwizard as puw
 import pytest
 from matplotlib.colors import to_rgb
+from copy import deepcopy
 from unittest.mock import Mock, call
 
 
@@ -194,6 +195,12 @@ def test_pharmacophoric_point_string_representation(hydrogen_bond_donor, aromati
                              "direction=(0.58, 0.58, 0.58))")
 
     assert str(aromatic_ring) == expected_aromatic_str
+
+
+def test_set_center_pharmacophoric_point(hydrogen_bond_donor):
+    donor = deepcopy(hydrogen_bond_donor)
+    donor.center = puw.quantity(np.array([3.5, 2.2, 1.0]), "angstroms")
+    assert np.all(puw.get_value(donor.center) == np.array([3.5, 2.2, 1.0]))
 
 
 def test_distance_between_pharmacophoric_points():

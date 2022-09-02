@@ -54,21 +54,18 @@ class Pharmacophore(metaclass=ABCMeta):
     def show(self, *args, **kwargs):
         pass
 
-    @classmethod
-    def from_pharmacophoric_point_list(cls, points):
+    @abstractmethod
+    def to_ligand_scout(self, *args, **kwargs):
         pass
 
-    def to_ligand_scout(self, file_name):
-        pass
-
+    @abstractmethod
     def to_moe(self, file_name):
         pass
 
+    @abstractmethod
     def to_pharmagist(self, file_name):
         pass
 
+    @abstractmethod
     def to_rdkit(self):
-        pass
-
-    def distance_matrix(self):
         pass
