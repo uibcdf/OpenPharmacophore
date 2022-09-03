@@ -53,7 +53,7 @@ def test_pharmacophore_equality(pharmacophore_three_points):
     pharmacophore_1.pharmacophoric_points = [donor]
     assert not pharmacophore_1 == pharmacophore_three_points
 
-    ring = PharmacophoricPoint("hb donor",
+    ring = PharmacophoricPoint("aromatic ring",
                                puw.quantity([2.0, 2.0, 2.0], "angstroms"),
                                radius)
     hydrophobic = PharmacophoricPoint("hydrophobicity",
@@ -79,22 +79,22 @@ def test_to_rdkit(pharmacophore_three_points):
     assert len(feats) == 3
 
     acceptor = feats[0]
-    assert acceptor.GetFamily() == "Acceptor"
+    assert acceptor.GetFamily() == "Donor"
     assert np.allclose(acceptor.GetPos().x, 1.0)
-    assert np.allclose(acceptor.GetPos().y, 0.0)
-    assert np.allclose(acceptor.GetPos().z, 0.0)
+    assert np.allclose(acceptor.GetPos().y, 1.0)
+    assert np.allclose(acceptor.GetPos().z, 1.0)
 
     ring_1 = feats[1]
     assert ring_1.GetFamily() == "Aromatic"
     assert np.allclose(ring_1.GetPos().x, 2.0)
-    assert np.allclose(ring_1.GetPos().y, 1.0)
-    assert np.allclose(ring_1.GetPos().z, 4.0)
+    assert np.allclose(ring_1.GetPos().y, 2.0)
+    assert np.allclose(ring_1.GetPos().z, 2.0)
 
     ring_2 = feats[2]
-    assert ring_2.GetFamily() == "Aromatic"
-    assert np.allclose(ring_2.GetPos().x, 0.0)
-    assert np.allclose(ring_2.GetPos().y, 1.0)
-    assert np.allclose(ring_2.GetPos().z, 2.0)
+    assert ring_2.GetFamily() == "Hydrophobe"
+    assert np.allclose(ring_2.GetPos().x, -2.0)
+    assert np.allclose(ring_2.GetPos().y, -2.0)
+    assert np.allclose(ring_2.GetPos().z, -2.0)
 
 
 def test_distance_matrix():

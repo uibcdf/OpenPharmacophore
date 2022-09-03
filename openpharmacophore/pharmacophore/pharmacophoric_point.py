@@ -8,8 +8,7 @@ import pyunitwizard as puw
 
 
 class PharmacophoricPoint:
-    """ Class to store pharmacophoric points of any feature type. This class can
-        store spheres or sphere and vector pharmacophoric points.
+    """ Class to store pharmacophoric points of any feature type.
 
         Parameters
         -----------
