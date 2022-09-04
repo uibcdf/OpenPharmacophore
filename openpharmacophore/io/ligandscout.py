@@ -1,5 +1,4 @@
 from collections import namedtuple
-import numpy as np
 import pyunitwizard as puw
 import xml.etree.ElementTree as ET
 from ..pharmacophore import PharmacophoricPoint
@@ -96,33 +95,31 @@ def read_ligandscout(file_name):
         elif element.tag == "vector" or element.tag == "plane":
             point = pharmacophoric_point_from_vector_or_plane(element)
 
-        elif element.tag == "plane":
-            feat_name = element.attrib["name"]
-            for position in element:
-                if position.tag == "position":
-                    coords_1 = position.attrib
-                    x_1 = float(coords_1["x3"])
-                    y_1 = float(coords_1["y3"])
-                    z_1 = float(coords_1["z3"])
-                    radius_1 = float(coords_1["tolerance"])
-                    center = np.array([x_1, y_1, z_1])
-                elif position.tag == "normal":
-                    coords_2 = position.attrib
-                    x_2 = float(coords_2["x3"])
-                    y_2 = float(coords_2["y3"])
-                    z_2 = float(coords_2["z3"])
-            point = PharmacophoricPoint(
-                feat_type=ligandscout_to_oph[feat_name],
-                center=puw.quantity(center, "angstroms"),
-                radius=puw.quantity(radius_1, "angstroms"),
-                direction=[x_2, y_2, z_2])
-
         else:
             continue
 
         points.append(point)
 
     return points
+
+
+def set_coords_and_radius(tree_element, coords, radius,
+                          feat_id):
+    """ Set the coords and radius of a tree element corresponding
+        to a volume, plane or point tag.
+    """
+    x, y, z = coords
+
+    tree_element.set("featureId", feat_id)
+    tree_element.set("optional", "false")
+    tree_element.set("disabled", "false")
+    tree_element.set("weight", "1.0")
+    # Add position tag
+    position = ET.SubElement(tree_element, "position")
+    position.set("x3", x)
+    position.set("y3", y)
+    position.set("z3", z)
+    position.set("tolerance", radius)
 
 
 def ligandscout_xml_tree(pharmacophoric_points):
@@ -200,36 +197,18 @@ def ligandscout_xml_tree(pharmacophoric_points):
             target.set("tolerance", radius)
         elif is_point:
             point = ET.SubElement(document, "point")
-            # Set point attributes
             point.set("name", feat_name)
-            point.set("featureId", feat_id)
-            point.set("optional", "false")
-            point.set("disabled", "false")
-            point.set("weight", "1.0")
-            # Add position tag
-            position = ET.SubElement(point, "position")
-            position.set("x3", x)
-            position.set("y3", y)
-            position.set("z3", z)
-            position.set("tolerance", radius)
+            set_coords_and_radius(point, (x, y, z),
+                                  radius, feat_id)
         elif feat_name == "AR":
             direction = element.direction
             dir_x = f"{direction[0]:.3f}"
             dir_y = f"{direction[1]:.3f}"
             dir_z = f"{direction[2]:.3f}"
             plane = ET.SubElement(document, "plane")
-            # Set plane attributes
             plane.set("name", feat_name)
-            plane.set("featureId", feat_id)
-            plane.set("optional", "false")
-            plane.set("disabled", "false")
-            plane.set("weight", "1.0")
-            # Add position tag
-            position = ET.SubElement(plane, "position")
-            position.set("x3", x)
-            position.set("y3", y)
-            position.set("z3", z)
-            position.set("tolerance", radius)
+            set_coords_and_radius(plane, (x, y, z),
+                                  radius, feat_id)
             # Add normal tag
             normal = ET.SubElement(plane, "normal")
             normal.set("x3", dir_x)
@@ -240,16 +219,8 @@ def ligandscout_xml_tree(pharmacophoric_points):
             volume = ET.SubElement(document, "volume")
             # Set volume attributes
             volume.set("type", "exclusion")
-            volume.set("featureId", feat_id)
-            volume.set("optional", "false")
-            volume.set("disabled", "false")
-            volume.set("weight", "1.0")
-            # Add position tag
-            position = ET.SubElement(volume, "position")
-            position.set("x3", x)
-            position.set("y3", y)
-            position.set("z3", z)
-            position.set("tolerance", radius)
+            set_coords_and_radius(volume, (x, y, z),
+                                  radius, feat_id)
 
     tree._setroot(document)
 
