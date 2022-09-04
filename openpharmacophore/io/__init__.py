@@ -1,1 +1,2 @@
 from .ligandscout import read_ligandscout, ligandscout_xml_tree
+from .json_file import load_json_pharmacophore, json_pharmacophoric_elements
