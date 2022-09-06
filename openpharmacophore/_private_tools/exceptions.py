@@ -85,3 +85,19 @@ class InvalidFeatureError(ValueError):
             self.message += ".\n"
 
         super().__init__(self.message)
+
+
+class InvalidFileFormat(ValueError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, file_format):
+
+        self.message = "Invalid file format"
+        if file_format:
+            self.message += f" {file_format}.\n"
+        else:
+            self.message += ".\n"
+
+        super().__init__(self.message)

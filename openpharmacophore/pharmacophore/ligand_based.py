@@ -1,9 +1,10 @@
-from .pharmacophoric_point import distance_between_pharmacophoric_points
+from .pharmacophoric_point import distance_between_pharmacophoric_points, PharmacophoricPoint
 from .pharmacophore import Pharmacophore
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                   pharmacophoric_points_from_ph4_file, read_ligandscout)
+from .._private_tools.exceptions import InvalidFileFormat
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -41,7 +42,15 @@ class LigandBasedPharmacophore(Pharmacophore):
         return len(self._points)
 
     def from_file(self, file_name):
+        """
+               Load a pharmacophore from a file.
 
+               Parameters
+               ---------
+               file_name : str
+                   Name of the file containing the pharmacophore
+
+       """
         if file_name.endswith(".json"):
             return load_json_pharmacophore(file_name)[0]
         elif file_name.endswith(".mol2"):
@@ -51,7 +60,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         elif file_name.endswith("ph4"):
             return pharmacophoric_points_from_ph4_file(file_name)
         else:
-            raise ValueError
+            raise InvalidFileFormat(file_name.split(".")[-1])
 
     def add_point(self, point):
         """ Adds a pharmacophoric point.
@@ -73,14 +82,99 @@ class LigandBasedPharmacophore(Pharmacophore):
         """
         self._points.pop(index)
 
-    def remove_picked_point(self, *args, **kwargs):
-        pass
+    @staticmethod
+    def get_picked_point_index(view):
+        """ Get the index of a point picked in a view in the
+            pharmacophore.
 
-    def edit_picked_point(self, *args, **kwargs):
-        pass
+            Parameters
+            ----------
+            view : nglview.NGLWidget
+                View where the pharmacophore will be added.
 
-    def add_point_in_picked_location(self, *args, **kwargs):
-        pass
+            Returns
+            -------
+            index: int or None
+                The index or None if something invalid was selected.
+        """
+        if len(view.picked) != 1:
+            # An atom or nothing was selected
+            return
+
+        picked_index = view.picked["component"]
+        # We'll assume that the view components are the molecule(s) followed by
+        # the pharmacophoric points
+        points_start = None
+        for ii in range(len(view._ngl_component_names)):
+            if view._ngl_component_names[ii] == "nglview.shape.Shape":
+                points_start = ii
+                break
+
+        if points_start is None:
+            return
+
+        return picked_index - points_start
+
+    def remove_picked_point(self, view):
+        """ Remove a pharmacophoric point selected in a ngl view.
+
+            If nothing is selected or the selected thing is not a
+            pharmacophoric point, it doesn't change the view.
+
+           Parameters
+           ----------
+           view : nglview.NGLWidget
+               View where the pharmacophore will be added.
+        """
+        index = self.get_picked_point_index(view)
+        if index is not None and index < len(self):
+            self.remove_point(index)
+
+    def edit_picked_point(self, view, center, radius):
+        """ Remove a pharmacophoric point selected in a ngl view.
+
+           If nothing is selected or the selected thing is not a
+           pharmacophoric point, it doesn't change the view.
+
+          Parameters
+          ----------
+          view : nglview.NGLWidget
+              View where the pharmacophore will be added.
+
+          center: Quantity
+              The new center of the pharmacophoric point
+
+          radius: Quantity:
+              The new radius of the pharmacophric point
+        """
+        index = self.get_picked_point_index(view)
+        if index is not None and index < len(self):
+            self[index].center = center
+            self[index].radius = radius
+
+    def add_point_in_picked_location(self, view, feat_name, radius):
+        """ Add a pharmacophoric point in the selected atom of a ngl view.
+
+            Parameters
+              ----------
+              view : nglview.NGLWidget
+                  View where the pharmacophore will be added.
+
+              feat_name: str
+                  The feature type of the pharmacophoric point
+
+              radius: Quantity:
+                  The new radius of the pharmacophric point
+
+        """
+        try:
+            atom = view.picked["atom1"]
+        except KeyError:
+            return
+
+        center = puw.quantity([atom["x"], atom["y"], atom["z"]], "angstroms")
+        new_point = PharmacophoricPoint(feat_name, center, radius)
+        self._points.append(new_point)
 
     def add_to_view(self, view, palette=None, opacity=0.5):
         """Add the pharmacophore representation to a view from NGLView.
@@ -131,15 +225,36 @@ class LigandBasedPharmacophore(Pharmacophore):
             json.dump(data, fp)
 
     def to_ligand_scout(self, file_name):
+        """ Save the pharmacophore to a ligand scout file (pml).
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
         xml_tree = ligandscout_xml_tree(self.pharmacophoric_points)
         xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_moe(self, file_name):
+        """ Save the pharmacophore to a moe file (ph4).
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
         pharmacophore_str = ph4_string(self.pharmacophoric_points)
         with open(file_name, "w") as fp:
             fp.write(pharmacophore_str)
 
     def to_mol2(self, file_name):
+        """ Save the pharmacophore to a mol2 file.
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
         pharmacophore_data = mol2_file_info(self)
         with open(file_name, "w") as fp:
             fp.writelines(pharmacophore_data[0])
@@ -154,7 +269,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             rdkit_pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
                 The rdkit pharmacophore.
 
-            radii : list of float
+            radii : list[float]
                 List with the radius in angstroms of each pharmacophoric point.
         """
         rdkit_element_name = {

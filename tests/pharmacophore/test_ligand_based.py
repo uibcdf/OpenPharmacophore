@@ -6,10 +6,11 @@ import nglview as nv
 import pyunitwizard as puw
 import pytest
 import os
+from unittest.mock import Mock
 
 
 def test_init_ligand_based_pharmacophore():
-    lbp = LigandBasedPharmacophore(None)
+    lbp = LigandBasedPharmacophore([])
 
 
 @pytest.fixture()
@@ -21,7 +22,7 @@ def pharmacophore_three_points():
         PharmacophoricPoint("aromatic ring", center * 2.0, radius),
         PharmacophoricPoint("hydrophobicity", center * -2.0, radius),
     ]
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore([])
     pharmacophore.pharmacophoric_points = points
     return pharmacophore
 
@@ -238,3 +239,82 @@ def test_from_file():
 
 def test_pharmacophore_string_representation(pharmacophore_three_points):
     assert pharmacophore_three_points.__repr__() == "LigandBasedPharmacophore(n_pharmacophoric_points: 3)"
+
+
+def test_remove_picked_point(pharmacophore_three_points):
+    mock_view = Mock()
+    mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape']
+    # We want to remove the first element from the pharmacophore
+    mock_view.picked = {
+        "component": 1
+    }
+    pharmacophore = deepcopy(pharmacophore_three_points)
+    pharmacophore.remove_picked_point(mock_view)
+    assert len(pharmacophore) == 2
+    assert pharmacophore[0].short_name == "R"
+    assert pharmacophore[1].short_name == "H"
+
+
+def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points):
+    # Suppose we select an atom from the molecule
+    # The pharmacophore should be intact
+    mock_view = Mock()
+    mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
+                                      'nglview.shape.Shape']
+    mock_view.picked = {
+        "atom1": {
+            "x": 1,
+            "y": 1,
+            "z": 1,
+        },
+        "component": 0
+    }
+    pharmacophore = deepcopy(pharmacophore_three_points)
+    pharmacophore.remove_picked_point(mock_view)
+    assert len(pharmacophore) == 3
+
+
+def test_edit_picked_point(pharmacophore_three_points):
+    mock_view = Mock()
+    mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape']
+    # We want to remove the first element from the pharmacophore
+    mock_view.picked = {
+        "component": 1
+    }
+    pharmacophore = deepcopy(pharmacophore_three_points)
+    pharmacophore.edit_picked_point(
+        mock_view,
+        center=puw.quantity([1.5, 1.5, 1.5], "angstroms"),
+        radius=puw.quantity(2.0, "angstroms"))
+    assert len(pharmacophore) == 3
+    assert np.all(puw.get_value(pharmacophore[0].center) == np.array([1.5, 1.5, 1.5]))
+    assert puw.get_value(pharmacophore[0].radius) == 2.0
+
+
+def test_add_point_in_picked_location(pharmacophore_three_points):
+    mock_view = Mock()
+    mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape',
+                                      'nglview.shape.Shape']
+    mock_view.picked = {
+        "atom1": {
+            "x": 3.5,
+            "y": 3.5,
+            "z": 3.5,
+        },
+        "component": 0
+    }
+
+    pharmacophore = deepcopy(pharmacophore_three_points)
+    radius = puw.quantity(2.0, "angstroms")
+    pharmacophore.add_point_in_picked_location(
+        mock_view, "hb acceptor", radius)
+    assert len(pharmacophore) == 4
+    assert pharmacophore[3].short_name == "A"
