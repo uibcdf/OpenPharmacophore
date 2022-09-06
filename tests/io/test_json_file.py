@@ -83,7 +83,7 @@ def create_json_pharmacophoric_element(name, coords, radius, direction=None):
     }
 
 
-def test_create_json_pharmacophoric_element():
+def test_json_pharmacophoric_elements():
 
     # Expected output from to_json
     expected = {"points": []}

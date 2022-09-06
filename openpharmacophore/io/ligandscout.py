@@ -201,6 +201,10 @@ def ligandscout_xml_tree(pharmacophoric_points):
             set_coords_and_radius(point, (x, y, z),
                                   radius, feat_id)
         elif feat_name == "AR":
+            # TODO: ligandscout expects aromatic rings to have direction.
+            #  what should we do if an aromatic point doesn't have direction
+            if not element.has_direction:
+                continue
             direction = element.direction
             dir_x = f"{direction[0]:.3f}"
             dir_y = f"{direction[1]:.3f}"

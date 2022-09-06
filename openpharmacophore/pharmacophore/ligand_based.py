@@ -1,17 +1,32 @@
 from .pharmacophoric_point import distance_between_pharmacophoric_points
-from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
+from .pharmacophore import Pharmacophore
+from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
+                  mol2_file_info, ph4_string)
+from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
+                  pharmacophoric_points_from_ph4_file, read_ligandscout)
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
 from rdkit import Geometry
 from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
+import json
 
 
 class LigandBasedPharmacophore(Pharmacophore):
+    """ Class to store and extract pharmacophores from a set of ligands.
+
+        Parameters
+        ----------
+        ligands : str or list[rdkit.Mol]
+            A file with ligands or a list of molecules
+    """
 
     def __init__(self, ligands):
-        self._points = self._extract_pharmacophore(ligands)
+        if isinstance(ligands, str):
+            self._points = self.from_file(ligands)
+        else:
+            self._points = self._extract_pharmacophore(ligands)
 
     @property
     def pharmacophoric_points(self):
@@ -25,9 +40,18 @@ class LigandBasedPharmacophore(Pharmacophore):
     def num_points(self, *args, **kwargs):
         return len(self._points)
 
-    @classmethod
-    def from_file(cls, file_name):
-        pass
+    def from_file(self, file_name):
+
+        if file_name.endswith(".json"):
+            return load_json_pharmacophore(file_name)[0]
+        elif file_name.endswith(".mol2"):
+            return load_mol2_pharmacophoric_points(file_name)[0]
+        elif file_name.endswith(".pml"):
+            return read_ligandscout(file_name)
+        elif file_name.endswith("ph4"):
+            return pharmacophoric_points_from_ph4_file(file_name)
+        else:
+            raise ValueError
 
     def add_point(self, point):
         """ Adds a pharmacophoric point.
@@ -94,17 +118,31 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         return view
 
-    def to_json(self, *args, **kwargs):
-        pass
+    def to_json(self, file_name):
+        """ Save the pharmacophore to a json file.
 
-    def to_ligand_scout(self, *args, **kwargs):
-        pass
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
+        data = json_pharmacophoric_elements(self.pharmacophoric_points)
+        with open(file_name, "w") as fp:
+            json.dump(data, fp)
+
+    def to_ligand_scout(self, file_name):
+        xml_tree = ligandscout_xml_tree(self.pharmacophoric_points)
+        xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_moe(self, file_name):
-        pass
+        pharmacophore_str = ph4_string(self.pharmacophoric_points)
+        with open(file_name, "w") as fp:
+            fp.write(pharmacophore_str)
 
-    def to_pharmagist(self, file_name):
-        pass
+    def to_mol2(self, file_name):
+        pharmacophore_data = mol2_file_info(self)
+        with open(file_name, "w") as fp:
+            fp.writelines(pharmacophore_data[0])
 
     def to_rdkit(self):
         """ Returns a rdkit pharmacophore with the pharmacophoric_points from the original pharmacophore.

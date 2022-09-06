@@ -1,4 +1,4 @@
-from openpharmacophore import PharmacophoricPoint
+from ..pharmacophore import PharmacophoricPoint
 import pyunitwizard as puw
 import numpy as np
 import re

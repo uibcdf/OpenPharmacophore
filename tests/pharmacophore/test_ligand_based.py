@@ -1,9 +1,11 @@
 from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
+import openpharmacophore.data as data
 from copy import deepcopy
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
 import pytest
+import os
 
 
 def test_init_ligand_based_pharmacophore():
@@ -70,7 +72,7 @@ def test_pharmacophore_equality(pharmacophore_three_points):
     donor = PharmacophoricPoint("hb donor",
                                 puw.quantity([1.0, 1.0, 1.0], "angstroms"),
                                 radius)
-    pharmacophore_1 = LigandBasedPharmacophore(None)
+    pharmacophore_1 = LigandBasedPharmacophore([])
     pharmacophore_1.pharmacophoric_points = [donor]
     assert not pharmacophore_1 == pharmacophore_three_points
 
@@ -80,12 +82,12 @@ def test_pharmacophore_equality(pharmacophore_three_points):
     hydrophobic = PharmacophoricPoint("hydrophobicity",
                                       puw.quantity([-1.0, 2.0, 2.0], "angstroms"),
                                       radius)
-    pharmacophore_2 = LigandBasedPharmacophore(None)
+    pharmacophore_2 = LigandBasedPharmacophore([])
     pharmacophore_2.pharmacophoric_points = [donor, ring, hydrophobic]
     assert not pharmacophore_2 == pharmacophore_three_points
 
     hydrophobic.center = puw.quantity([-2.0, -2.0, -2.0], "angstroms")
-    pharmacophore_3 = LigandBasedPharmacophore(None)
+    pharmacophore_3 = LigandBasedPharmacophore([])
     pharmacophore_3.pharmacophoric_points = [donor, ring, hydrophobic]
     assert pharmacophore_3 == pharmacophore_three_points
 
@@ -120,7 +122,7 @@ def test_to_rdkit(pharmacophore_three_points):
 
 def test_distance_matrix():
     # Test pharmacophore with zero elements
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore([])
     matrix = pharmacophore.distance_matrix()
     assert matrix.shape == (0, 0)
 
@@ -137,7 +139,7 @@ def test_distance_matrix():
                             radius=radius),
     ]
 
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore([])
     pharmacophore.pharmacophoric_points = points
     distance_matrix = pharmacophore.distance_matrix()
 
@@ -164,7 +166,7 @@ def test_distance_matrix():
     ]
 
     sq = np.sqrt
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore([])
     pharmacophore.pharmacophoric_points = points
     distance_matrix = pharmacophore.distance_matrix()
     assert distance_matrix.shape == (4, 4)
@@ -179,7 +181,7 @@ def test_adding_pharmacophore_to_view_updates_components(pharmacophore_three_poi
     view = nv.NGLWidget()
     assert len(view._ngl_component_ids) == 0
 
-    # The view should have a components for each sphere and one for each vector
+    # The view should have a component for each sphere and one for each vector
     ph = deepcopy(pharmacophore_three_points)
     ph.add_point(PharmacophoricPoint(
         "negative charge",
@@ -191,19 +193,47 @@ def test_adding_pharmacophore_to_view_updates_components(pharmacophore_three_poi
     assert len(view._ngl_component_ids) == 5
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_to_ligand_scout():
-    assert False, "Implement me!"
+def assert_file_is_created(file_name):
+    assert os.path.isfile(file_name)
+    os.remove(file_name)
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_to_moe():
-    assert False, "Implement me!"
+def test_to_json(pharmacophore_three_points):
+    file_name = "ph.json"
+    pharmacophore_three_points.to_json(file_name)
+    assert_file_is_created(file_name)
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_to_pharmagist():
-    assert False, "Implement me!"
+def test_to_ligand_scout(pharmacophore_three_points):
+    file_name = "ph.pml"
+    pharmacophore_three_points.to_ligand_scout(file_name)
+    assert_file_is_created(file_name)
+
+
+def test_to_moe(pharmacophore_three_points):
+    file_name = "ph.ph4"
+    pharmacophore_three_points.to_moe(file_name)
+    assert_file_is_created(file_name)
+
+
+def test_to_mol2(pharmacophore_three_points):
+    file_name = "ph.mol2"
+    pharmacophore_three_points.to_mol2(file_name)
+    assert_file_is_created(file_name)
+
+
+def test_from_file():
+    pharma = LigandBasedPharmacophore(data.pharmacophores["ligscout"])
+    assert len(pharma) == 4
+
+    pharma = LigandBasedPharmacophore(data.pharmacophores["gmp"])
+    assert len(pharma) == 10
+
+    pharma = LigandBasedPharmacophore(data.pharmacophores["elastase"])
+    assert len(pharma) == 4
+
+    pharma = LigandBasedPharmacophore(data.pharmacophores["1M70"])
+    assert len(pharma) == 5
 
 
 def test_pharmacophore_string_representation(pharmacophore_three_points):

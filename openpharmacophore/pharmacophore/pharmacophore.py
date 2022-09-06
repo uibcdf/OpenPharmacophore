@@ -63,7 +63,7 @@ class Pharmacophore(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def to_pharmagist(self, file_name):
+    def to_mol2(self, file_name):
         pass
 
     @abstractmethod
