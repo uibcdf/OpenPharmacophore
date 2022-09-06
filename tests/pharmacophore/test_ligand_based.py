@@ -1,5 +1,7 @@
 from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
+from copy import deepcopy
 import numpy as np
+import nglview as nv
 import pyunitwizard as puw
 import pytest
 
@@ -36,6 +38,25 @@ def test_iterate_pharmacophore(pharmacophore_three_points):
         iterated = True
 
     assert iterated
+
+
+def test_add_point_to_pharmacophore(pharmacophore_three_points):
+    ph = deepcopy(pharmacophore_three_points)
+    ph.add_point(PharmacophoricPoint(
+        "positive charge",
+        puw.quantity([1., 2., 3.], "angstroms"),
+        puw.quantity(1., "angstroms")
+    ))
+    assert len(ph) == 4
+    assert ph[3].feature_name == "positive charge"
+
+
+def test_remove_point_from_pharmacophore(pharmacophore_three_points):
+    ph = deepcopy(pharmacophore_three_points)
+    ph.remove_point(1)
+    assert len(ph) == 2
+    assert ph[0].feature_name == "hb donor"
+    assert ph[1].feature_name == "hydrophobicity"
 
 
 def test_pharmacophore_get_item(pharmacophore_three_points):
@@ -152,6 +173,22 @@ def test_distance_matrix():
                                  [sq(14), 0, sq(2), sq(6)],
                                  [sq(24), sq(2), 0, sq(14)],
                                  [sq(14), sq(6), sq(14), 0]]))
+
+
+def test_adding_pharmacophore_to_view_updates_components(pharmacophore_three_points):
+    view = nv.NGLWidget()
+    assert len(view._ngl_component_ids) == 0
+
+    # The view should have a components for each sphere and one for each vector
+    ph = deepcopy(pharmacophore_three_points)
+    ph.add_point(PharmacophoricPoint(
+        "negative charge",
+        puw.quantity([2., 3., 1.], "angstroms"),
+        puw.quantity(2., "angstroms"),
+        direction=[0.3, 0.3, 0.3]
+    ))
+    ph.add_to_view(view)
+    assert len(view._ngl_component_ids) == 5
 
 
 @pytest.mark.skip(reason="Not implemented yet")

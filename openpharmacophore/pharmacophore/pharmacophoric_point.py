@@ -17,27 +17,25 @@ class PharmacophoricPoint:
             The feature type of the point. This can be hb donor, hb acceptor, aromatic ring
             hydrophobic, positive charge, negative charge, excluded volume.
 
-        center : Quantity (dimensionality:{'[L]':1}; value_type:list,tuple,numpy.ndarray; shape:(3,))
+        center : Quantity (dimensionality:{'[L]':1}; shape:(3,))
             Coordinates of the sphere center.
         
-        radius : Quantity (dimensionality:{'[L]':1}; value:float)
+        radius : Quantity (dimensionality:{'[L]':1})
             Radius of the pharmacophoric sphere.
         
-        direction : array_like; shape:(3,)
-            Direction as a three-dimensional vector. If the pharmacophoric point doesn't have
-            direction is set to None.
+        direction : array-like; shape:(3,), optional
+            Direction as a three-dimensional vector.
         
-        atom_indices : list, set or tuple of int
+        atom_indices : array-like of int, optional
             The indices of the atoms corresponding to the pharmacophoric point in the molecule from which
-            they were extracted. A list, set or tuple.
+            they were extracted.
 
         Attributes
         ----------
         feature_name : str
-            The feature type of the point. This can be hb donor, hb acceptor, aromatic ring
-            hydrophobic, positive charge, negative charge, excluded volume.
+            The feature type of the point.
 
-        center : Quantity (dimensionality:{'[L]':1}; value:numpy.ndarray; shape:(3,)) or None
+        center : Quantity (dimensionality:{'[L]':1}; shape:(3,))
             Coordinates of the sphere center.
 
         radius : Quantity (dimensionality:{'[L]':1}; value:float)
@@ -98,9 +96,6 @@ class PharmacophoricPoint:
             self._atom_indices = set(atom_indices)
         else:
             self._atom_indices = set()
-
-        self.pharmacophore_index = 0
-        self.count = 1
 
     @property
     def center(self):
