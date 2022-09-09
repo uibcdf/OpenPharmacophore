@@ -5,7 +5,7 @@ import re
 
 
 def pad_coordinate_with_zeros(coord):
-    """ Pad a number with zeros.
+    """ Pad a number with zeros to the right.
 
         Parameters
         ----------
@@ -38,8 +38,8 @@ def mol2_file_info(pharmacophores):
 
         Parameters
         ----------
-        pharmacophores : list[Pharmacophore] or Pharmacophore
-            The pharmacophores that will be saved
+        pharmacophores : list[list[PharmacophoricPoint]]
+            Nested list of pharmacophoric points were each entry represents a pharmacophore
 
         Returns
         -------

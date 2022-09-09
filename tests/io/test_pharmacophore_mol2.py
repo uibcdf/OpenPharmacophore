@@ -43,22 +43,29 @@ def test_pad_coordinate_with_zeros_negative_number():
 
 def test_mol2_file_info():
     # Test for two element pharmacophore
-    mol2_list = mol2_file_info(two_element_pharmacophore())
-    expected_output = ['@<TRIPOS>MOLECULE\n',
-                       '@<TRIPOS>ATOM\n',
-                       '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
-                       '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
-                       '@<TRIPOS>BOND\n']
-    assert mol2_list == expected_output
+    ph_1 = two_element_pharmacophore()
+    mol2_list = mol2_file_info(ph_1.pharmacophoric_points)
+    expected_output_1 = ['@<TRIPOS>MOLECULE\n',
+                         '@<TRIPOS>ATOM\n',
+                         '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
+                         '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
+                         '@<TRIPOS>BOND\n']
+    assert mol2_list == expected_output_1
 
     # Test for five element pharmacophore
-    mol2_list = mol2_file_info(five_element_pharmacophore())
-    expected_output = ['@<TRIPOS>MOLECULE\n',
-                       '@<TRIPOS>ATOM\n',
-                       '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',
-                       '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
-                       '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     0.0000\n',
-                       '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      0.0000\n',
-                       '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      0.0000\n',
-                       '@<TRIPOS>BOND\n']
-    assert mol2_list == expected_output
+    ph_2 = five_element_pharmacophore()
+    mol2_list = mol2_file_info(ph_2.pharmacophoric_points)
+    expected_output_2 = ['@<TRIPOS>MOLECULE\n',
+                         '@<TRIPOS>ATOM\n',
+                         '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',
+                         '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
+                         '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     0.0000\n',
+                         '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      0.0000\n',
+                         '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      0.0000\n',
+                         '@<TRIPOS>BOND\n']
+    assert mol2_list == expected_output_2
+
+    # Test for multiple pharmacophores
+    expected_output_3 = expected_output_1 + expected_output_2
+    mol2_list = mol2_file_info([ph_1, ph_2])
+    assert mol2_list == expected_output_3
