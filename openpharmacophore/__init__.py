@@ -10,7 +10,7 @@ from ._version import get_versions
 from ._pyunitwizard import puw
 from .pharmacophore import PharmacophoricPoint, distance_between_pharmacophoric_points
 from .pharmacophore import LigandBasedPharmacophore
-
+from .pharmacophore import StructureBasedPharmacophore
 
 versions = get_versions()
 __version__ = versions['version']

@@ -7,16 +7,6 @@ class Pharmacophore(metaclass=ABCMeta):
         Parent class of LigandBasedPharmacophore and StructureBasedPharmacophore.
     """
 
-    @property
-    @abstractmethod
-    def pharmacophoric_points(self):
-        pass
-
-    @property
-    @abstractmethod
-    def num_points(self, *args, **kwargs):
-        pass
-
     @classmethod
     @abstractmethod
     def from_file(cls, file_name):
@@ -59,13 +49,13 @@ class Pharmacophore(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def to_moe(self, file_name):
+    def to_moe(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def to_mol2(self, file_name):
+    def to_mol2(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def to_rdkit(self):
+    def to_rdkit(self, *args, **kwargs):
         pass
