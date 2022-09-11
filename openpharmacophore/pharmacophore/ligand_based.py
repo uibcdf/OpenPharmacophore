@@ -1,5 +1,6 @@
 from .pharmacophoric_point import distance_between_pharmacophoric_points, PharmacophoricPoint
 from .pharmacophore import Pharmacophore
+from .rdkit_pharmacophore import rdkit_pharmacophore
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
@@ -8,9 +9,6 @@ from .._private_tools.exceptions import InvalidFileFormat
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
-from rdkit import Geometry
-from rdkit.Chem import ChemicalFeatures
-from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
 import json
 
 
@@ -255,7 +253,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             file_name: str
                 Name of the json file.
         """
-        pharmacophore_data = mol2_file_info(self)
+        pharmacophore_data = mol2_file_info([self.pharmacophoric_points])
         with open(file_name, "w") as fp:
             fp.writelines(pharmacophore_data[0])
 
@@ -272,31 +270,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             radii : list[float]
                 List with the radius in angstroms of each pharmacophoric point.
         """
-        rdkit_element_name = {
-            "aromatic ring": "Aromatic",
-            "hydrophobicity": "Hydrophobe",
-            "hb acceptor": "Acceptor",
-            "hb donor": "Donor",
-            "positive charge": "PosIonizable",
-            "negative charge": "NegIonizable",
-        }
-
-        points = []
-        radii = []
-
-        for element in self:
-            feat_name = rdkit_element_name[element.feature_name]
-            center = puw.get_value(element.center, to_unit="angstroms")
-            center = Geometry.Point3D(center[0], center[1], center[2])
-            points.append(ChemicalFeatures.FreeChemicalFeature(
-                feat_name,
-                center
-            ))
-            radius = puw.get_value(element.radius, to_unit="angstroms")
-            radii.append(radius)
-
-        rdkit_pharmacophore = rdkitPharmacophore.Pharmacophore(points)
-        return rdkit_pharmacophore, radii
+        return rdkit_pharmacophore(self.pharmacophoric_points)
 
     def distance_matrix(self):
         """ Compute the distance matrix of the pharmacophore.

@@ -1,4 +1,5 @@
 from .pharmacophore import Pharmacophore
+from .rdkit_pharmacophore import rdkit_pharmacophore
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
@@ -103,14 +104,14 @@ class StructureBasedPharmacophore(Pharmacophore):
         """
         if frame is None or isinstance(frame, list):
             raise NotImplementedError
-        pharmacophore_data = mol2_file_info(self[frame])
+        pharmacophore_data = mol2_file_info([self[frame]])
         with open(file_name, "w") as fp:
             fp.writelines(pharmacophore_data[0])
 
     def to_rdkit(self, frame):
-        """ Transform a pharmacophore at a given format to rdkit pharmacophore.
+        """ Transform a pharmacophore at a given frame to a rdkit pharmacophore.
         """
-        pass
+        return rdkit_pharmacophore(self[frame])
 
     def __len__(self):
         return len(self._pharmacophores)

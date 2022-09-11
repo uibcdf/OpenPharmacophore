@@ -1,5 +1,6 @@
 from openpharmacophore import StructureBasedPharmacophore, PharmacophoricPoint
 import nglview as nv
+import numpy as np
 import pyunitwizard as puw
 import pytest
 from copy import deepcopy
@@ -90,3 +91,32 @@ def test_to_mol2(pharmacophore_one_frame):
     file_name = "ph.mol2"
     pharmacophore_one_frame.to_mol2(file_name, 0)
     assert_file_is_created(file_name)
+
+
+def test_to_rdkit(pharmacophore_one_frame):
+    rdkit_ph, radii = pharmacophore_one_frame.to_rdkit(0)
+
+    assert len(radii) == 3
+    assert np.all(np.array(radii) == np.array([1.0, 1.5, 1.0]))
+
+    feats = rdkit_ph.getFeatures()
+    assert len(feats) == 3
+
+    acceptor = feats[0]
+    assert acceptor.GetFamily() == "Acceptor"
+    assert np.allclose(acceptor.GetPos().x, 1.0)
+    assert np.allclose(acceptor.GetPos().y, 1.0)
+    assert np.allclose(acceptor.GetPos().z, 1.0)
+
+    ring_1 = feats[1]
+    assert ring_1.GetFamily() == "Donor"
+    assert np.allclose(ring_1.GetPos().x, 2.0)
+    assert np.allclose(ring_1.GetPos().y, 0.0)
+    assert np.allclose(ring_1.GetPos().z, 3.0)
+
+    ring_2 = feats[2]
+    assert ring_2.GetFamily() == "Aromatic"
+    assert np.allclose(ring_2.GetPos().x, 0.0)
+    assert np.allclose(ring_2.GetPos().y, 1.5)
+    assert np.allclose(ring_2.GetPos().z, 2.0)
+    

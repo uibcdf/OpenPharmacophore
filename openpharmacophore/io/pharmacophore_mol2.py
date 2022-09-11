@@ -64,9 +64,6 @@ def mol2_file_info(pharmacophores):
         "negative charge": "CHG",
     }
 
-    if not isinstance(pharmacophores, list):
-        pharmacophores = [pharmacophores]
-
     doc = []  # list to store all pharmacophores
     for pharmacophore in pharmacophores:
         lines = ["@<TRIPOS>MOLECULE\n", "@<TRIPOS>ATOM\n"]  # list to store all lines for a single pharmacophore
