@@ -9,8 +9,53 @@ import os
 from unittest.mock import Mock
 
 
-def test_init_ligand_based_pharmacophore():
-    lbp = LigandBasedPharmacophore([])
+def test_init_with_pharmacophore_file():
+    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["ligscout"])
+    assert len(pharmacophore) == 4
+
+
+def test_init_with_smi_file():
+    ligands = data.ligands["clique_detection"]
+    pharmacophore = LigandBasedPharmacophore(ligands)
+    # TODO: this test must be updated once extraction is implemented
+    assert len(pharmacophore) == 0
+
+
+def test_init_with_mol2_file():
+    ligands = data.ligands["ace"]
+    pharmacophore = LigandBasedPharmacophore(ligands)
+    # TODO: this test must be updated once extraction is implemented
+    assert len(pharmacophore) == 0
+
+
+def test_init_with_sdf_file():
+    ligands = data.ligands["er_alpha_ligands"]
+    pharmacophore = LigandBasedPharmacophore(ligands)
+    # TODO: this test must be updated once extraction is implemented
+    assert len(pharmacophore) == 0
+
+
+def test_from_file_moe():
+    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore.from_file(data.pharmacophores["gmp"])
+    assert len(pharmacophore) == 10
+
+
+def test_from_file_mol2():
+    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore.from_file(data.pharmacophores["elastase"])
+    assert len(pharmacophore) == 4
+
+
+def test_from_file_json():
+    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore.from_file(data.pharmacophores["1M70"])
+    assert len(pharmacophore) == 5
+
+
+def test_is_ligand_file():
+    assert LigandBasedPharmacophore._is_ligand_file("mols.smi")
+    assert not LigandBasedPharmacophore._is_ligand_file("mols.jpg")
 
 
 @pytest.fixture()
@@ -223,20 +268,6 @@ def test_to_mol2(pharmacophore_three_points):
     assert_file_is_created(file_name)
 
 
-def test_from_file():
-    pharma = LigandBasedPharmacophore(data.pharmacophores["ligscout"])
-    assert len(pharma) == 4
-
-    pharma = LigandBasedPharmacophore(data.pharmacophores["gmp"])
-    assert len(pharma) == 10
-
-    pharma = LigandBasedPharmacophore(data.pharmacophores["elastase"])
-    assert len(pharma) == 4
-
-    pharma = LigandBasedPharmacophore(data.pharmacophores["1M70"])
-    assert len(pharma) == 5
-
-
 def test_pharmacophore_string_representation(pharmacophore_three_points):
     assert pharmacophore_three_points.__repr__() == "LigandBasedPharmacophore(n_pharmacophoric_points: 3)"
 
@@ -318,3 +349,24 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
         mock_view, "hb acceptor", radius)
     assert len(pharmacophore) == 4
     assert pharmacophore[3].short_name == "A"
+
+
+def test_load_ligands_smi_file():
+    ligands = LigandBasedPharmacophore._load_ligands(
+        data.ligands["clique_detection"]
+    )
+    assert len(ligands) == 5
+
+
+def test_load_ligands_mol2_file():
+    ligands = LigandBasedPharmacophore._load_ligands(
+        data.ligands["ace"]
+    )
+    assert len(ligands) == 3
+
+
+def test_load_ligands_sfd_file():
+    ligands = LigandBasedPharmacophore._load_ligands(
+        data.ligands["er_alpha_ligands"]
+    )
+    assert len(ligands) == 3

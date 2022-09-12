@@ -7,9 +7,8 @@ class Pharmacophore(metaclass=ABCMeta):
         Parent class of LigandBasedPharmacophore and StructureBasedPharmacophore.
     """
 
-    @classmethod
     @abstractmethod
-    def from_file(cls, file_name):
+    def from_file(self, file_name):
         pass
 
     @abstractmethod

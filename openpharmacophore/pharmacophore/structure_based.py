@@ -30,8 +30,7 @@ class StructureBasedPharmacophore(Pharmacophore):
     def num_frames(self):
         return self._num_frames
 
-    @classmethod
-    def from_file(cls, file_name):
+    def from_file(self, file_name):
         pass
 
     def add_frame(self):

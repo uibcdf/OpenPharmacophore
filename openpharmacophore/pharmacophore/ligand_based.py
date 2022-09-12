@@ -9,6 +9,7 @@ from .._private_tools.exceptions import InvalidFileFormat
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
+import os
 import json
 
 
@@ -22,8 +23,14 @@ class LigandBasedPharmacophore(Pharmacophore):
     """
 
     def __init__(self, ligands):
-        if isinstance(ligands, str):
-            self._points = self.from_file(ligands)
+        self._points = []
+
+        if isinstance(ligands, str) and os.path.isfile(ligands):
+            if self._is_ligand_file(ligands):
+                ligands = self._load_ligands(ligands)
+                self._points = self._extract_pharmacophore(ligands)
+            else:
+                self.from_file(ligands)
         else:
             self._points = self._extract_pharmacophore(ligands)
 
@@ -36,27 +43,26 @@ class LigandBasedPharmacophore(Pharmacophore):
         self._points = points
 
     @property
-    def num_points(self, *args, **kwargs):
+    def num_points(self):
         return len(self._points)
 
     def from_file(self, file_name):
-        """
-               Load a pharmacophore from a file.
+        """ Load a pharmacophore from a file.
 
-               Parameters
-               ---------
-               file_name : str
-                   Name of the file containing the pharmacophore
+           Parameters
+           ---------
+           file_name : str
+               Name of the file containing the pharmacophore
 
        """
         if file_name.endswith(".json"):
-            return load_json_pharmacophore(file_name)[0]
+            self._points = load_json_pharmacophore(file_name)[0]
         elif file_name.endswith(".mol2"):
-            return load_mol2_pharmacophoric_points(file_name)[0]
+            self._points = load_mol2_pharmacophoric_points(file_name)[0]
         elif file_name.endswith(".pml"):
-            return read_ligandscout(file_name)
-        elif file_name.endswith("ph4"):
-            return pharmacophoric_points_from_ph4_file(file_name)
+            self._points = read_ligandscout(file_name)
+        elif file_name.endswith(".ph4"):
+            self._points = pharmacophoric_points_from_ph4_file(file_name)
         else:
             raise InvalidFileFormat(file_name.split(".")[-1])
 
@@ -294,6 +300,18 @@ class LigandBasedPharmacophore(Pharmacophore):
                     dis_matrix[jj, ii] = distance
 
         return dis_matrix
+
+    @staticmethod
+    def _is_ligand_file(file_name):
+        file_extension = file_name.split(".")[-1]
+        if file_extension in ["mol2", "smi", "sdf"]:
+            return True
+        return False
+
+    @staticmethod
+    def _load_ligands(file_name):
+        """ Load molecules from a file. """
+        return []
 
     @staticmethod
     def _extract_pharmacophore(ligands):
