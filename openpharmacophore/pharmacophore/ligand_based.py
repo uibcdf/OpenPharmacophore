@@ -5,7 +5,9 @@ from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                   pharmacophoric_points_from_ph4_file, read_ligandscout)
+from ..io import load_mol2_ligands
 from .._private_tools.exceptions import InvalidFileFormat
+from rdkit import Chem
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -149,7 +151,7 @@ class LigandBasedPharmacophore(Pharmacophore):
               The new center of the pharmacophoric point
 
           radius: Quantity:
-              The new radius of the pharmacophric point
+              The new radius of the pharmacophoric point
         """
         index = self.get_picked_point_index(view)
         if index is not None and index < len(self):
@@ -168,7 +170,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                   The feature type of the pharmacophoric point
 
               radius: Quantity:
-                  The new radius of the pharmacophric point
+                  The new radius of the pharmacophoric point
 
         """
         try:
@@ -270,7 +272,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
             Returns
             -------
-            rdkit_pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
+            rdkit_pharmacophore : rdkit.Chem.Pharmacophore
                 The rdkit pharmacophore.
 
             radii : list[float]
@@ -310,8 +312,31 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     @staticmethod
     def _load_ligands(file_name):
-        """ Load molecules from a file. """
-        return []
+        """ Load molecules from a file.
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the file.
+
+            Returns
+            -------
+            list[rdkit.Mol]
+                List of ligands.
+        """
+        ligands = []
+        if file_name.endswith(".smi"):
+            supplier = Chem.SmilesMolSupplier(file_name, titleLine=False)
+            for mol in supplier:
+                ligands.append(mol)
+        elif file_name.endswith(".mol2"):
+            ligands = load_mol2_ligands(file_name)
+        elif file_name.endswith("sdf"):
+            supplier = Chem.SDMolSupplier(file_name)
+            for mol in supplier:
+                ligands.append(mol)
+
+        return ligands
 
     @staticmethod
     def _extract_pharmacophore(ligands):

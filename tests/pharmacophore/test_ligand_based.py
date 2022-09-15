@@ -29,7 +29,7 @@ def test_init_with_mol2_file():
 
 
 def test_init_with_sdf_file():
-    ligands = data.ligands["er_alpha_ligands"]
+    ligands = data.ligands["sdf_example"]
     pharmacophore = LigandBasedPharmacophore(ligands)
     # TODO: this test must be updated once extraction is implemented
     assert len(pharmacophore) == 0
@@ -367,6 +367,6 @@ def test_load_ligands_mol2_file():
 
 def test_load_ligands_sfd_file():
     ligands = LigandBasedPharmacophore._load_ligands(
-        data.ligands["er_alpha_ligands"]
+        data.ligands["sdf_example"]
     )
     assert len(ligands) == 3

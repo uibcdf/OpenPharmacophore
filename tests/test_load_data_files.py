@@ -3,7 +3,7 @@ import openpharmacophore.data as data
 
 def test_all_data_dictionaries_are_populated():
 
-    assert len(data.ligands) == 3
+    assert len(data.ligands) == 4
     assert len(data.pdb) == 5
     assert len(data.pharmacophores) == 5
     # assert len(data.trajectories) == 1
