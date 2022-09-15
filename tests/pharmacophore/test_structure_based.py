@@ -1,4 +1,5 @@
 from openpharmacophore import StructureBasedPharmacophore, PharmacophoricPoint
+import openpharmacophore.data as data
 import nglview as nv
 import numpy as np
 import pyunitwizard as puw
@@ -7,10 +8,78 @@ from copy import deepcopy
 import os
 
 
-def test_init_structured_based_pharmacophore():
+def load_pdb_content():
+    """ Returns the content of a pdb file as a string."""
+    with open(data.pdb["1ncr"]) as fp:
+        lines = fp.read()
 
+    return lines
+
+
+def test_init_from_pdb_file():
+    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    assert pharmacophore.num_frames == 1
+    # TODO: update once extraction method is implemented
+    assert len(pharmacophore) == 0
+    assert pharmacophore.num_frames == 1
+
+
+def test_init_from_pdb_id(mocker):
+    mocker.patch("openpharmacophore.StructureBasedPharmacophore._fetch_pdb",
+                 return_value="")
+    pharmacophore = StructureBasedPharmacophore("1NCR")
+    assert len(pharmacophore) == 0
+    assert pharmacophore.num_frames == 1
+
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_init_from_trajectory_file():
+    pass
+
+
+def test_is_pdb_id():
+    assert StructureBasedPharmacophore._is_pdb_id("1A52")
+    assert StructureBasedPharmacophore._is_pdb_id("5UFW")
+    assert not StructureBasedPharmacophore._is_pdb_id("1A52D")
+    assert not StructureBasedPharmacophore._is_pdb_id("1A3")
+
+
+def test_fetch_pdb(mocker):
+    mock_get = mocker.patch("requests.get")
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.content = b"pdb"
+
+    assert StructureBasedPharmacophore._fetch_pdb("1A52") == "pdb"
+    mock_get.assert_called_once_with('http://files.rcsb.org/download/1A52.pdb', allow_redirects=True)
+
+
+def test_from_file_moe():
     pharmacophore = StructureBasedPharmacophore(None)
-    assert pharmacophore.num_frames == 0
+    pharmacophore.from_file(data.pharmacophores["gmp"])
+    assert len(pharmacophore) == 1
+    assert len(pharmacophore[0]) == 10
+
+
+def test_from_file_mol2():
+    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore.from_file(data.pharmacophores["elastase"])
+    assert len(pharmacophore) == 8
+    assert pharmacophore.num_frames == 8
+    assert pharmacophore._pharmacophores_frames == list(range(0, 8))
+
+
+def test_from_file_json():
+    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore.from_file(data.pharmacophores["1M70"])
+    assert len(pharmacophore) == 1
+    assert len(pharmacophore[0]) == 5
+
+
+def test_from_file_pml():
+    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore.from_file(data.pharmacophores["ligscout"])
+    assert len(pharmacophore) == 1
+    assert len(pharmacophore[0]) == 4
 
 
 @pytest.fixture

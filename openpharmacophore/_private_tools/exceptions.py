@@ -101,3 +101,14 @@ class InvalidFileFormat(ValueError):
             self.message += ".\n"
 
         super().__init__(self.message)
+
+
+class PDBFetchError(IOError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, pdb_id, url):
+
+        self.message = f"Error obtaining pdb with id {pdb_id} from {url}"
+        super().__init__(self.message)
