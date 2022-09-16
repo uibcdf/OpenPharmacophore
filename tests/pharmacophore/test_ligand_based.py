@@ -1,38 +1,42 @@
 from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
 import openpharmacophore.data as data
-from copy import deepcopy
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
 import pytest
+from rdkit import Chem
+from copy import deepcopy
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 
 def test_init_with_pharmacophore_file():
     pharmacophore = LigandBasedPharmacophore(data.pharmacophores["ligscout"])
     assert len(pharmacophore) == 4
 
+    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["gmp"])
+    assert len(pharmacophore) == 10
+
 
 def test_init_with_smi_file():
     ligands = data.ligands["clique_detection"]
     pharmacophore = LigandBasedPharmacophore(ligands)
-    # TODO: this test must be updated once extraction is implemented
     assert len(pharmacophore) == 0
+    assert len(pharmacophore.ligands) == 5
 
 
 def test_init_with_mol2_file():
     ligands = data.ligands["ace"]
     pharmacophore = LigandBasedPharmacophore(ligands)
-    # TODO: this test must be updated once extraction is implemented
     assert len(pharmacophore) == 0
+    assert len(pharmacophore.ligands) == 3
 
 
 def test_init_with_sdf_file():
     ligands = data.ligands["sdf_example"]
     pharmacophore = LigandBasedPharmacophore(ligands)
-    # TODO: this test must be updated once extraction is implemented
     assert len(pharmacophore) == 0
+    assert len(pharmacophore.ligands) == 3
 
 
 def test_from_file_moe():
@@ -370,3 +374,34 @@ def test_load_ligands_sfd_file():
         data.ligands["sdf_example"]
     )
     assert len(ligands) == 3
+
+
+def test_add_ligands_to_view():
+
+    mock_view = Mock()
+    pharmacophore = LigandBasedPharmacophore(data.ligands["clique_detection"])
+    pharmacophore.add_ligands_to_view(mock_view)
+    ligands_call = [call(lig) for lig in pharmacophore.ligands]
+
+    assert mock_view.add_component.call_count == 5
+    assert mock_view.add_component.call_args_list == ligands_call
+
+
+def ligand_list():
+    supplier = Chem.SmilesMolSupplier(data.ligands["clique_detection"],
+                                      titleLine=False)
+    return [mol for mol in supplier]
+
+
+def test_show_no_ligands(pharmacophore_three_points):
+
+    view = pharmacophore_three_points.show(ligands=False)
+    assert len(view._ngl_component_ids) == 3
+
+
+def test_show_with_ligands(pharmacophore_three_points):
+
+    pharmacophore = deepcopy(pharmacophore_three_points)
+    pharmacophore.ligands = ligand_list()
+    view = pharmacophore.show(ligands=True)
+    assert len(view._ngl_component_ids) == 8

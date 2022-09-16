@@ -26,15 +26,15 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     def __init__(self, ligands):
         self._points = []
+        self._ligands = []
 
         if isinstance(ligands, str) and os.path.isfile(ligands):
             if self._is_ligand_file(ligands):
-                ligands = self._load_ligands(ligands)
-                self._points = self._extract_pharmacophore(ligands)
+                self._ligands = self._load_ligands(ligands)
             else:
                 self.from_file(ligands)
         else:
-            self._points = self._extract_pharmacophore(ligands)
+            self._ligands = ligands
 
     @property
     def pharmacophoric_points(self):
@@ -47,6 +47,18 @@ class LigandBasedPharmacophore(Pharmacophore):
     @property
     def num_points(self):
         return len(self._points)
+
+    @property
+    def ligands(self):
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, ligand_list):
+        self._ligands = ligand_list
+
+    @ligands.deleter
+    def ligands(self):
+        self._ligands.clear()
 
     def from_file(self, file_name):
         """ Load a pharmacophore from a file.
@@ -200,11 +212,28 @@ class LigandBasedPharmacophore(Pharmacophore):
         for point in self.pharmacophoric_points:
             point.add_to_ngl_view(view, palette, opacity)
 
-    def show(self, palette=None):
+    def add_ligands_to_view(self, view):
+        """ Adds the ligands to a ngl view.
+
+            Parameters
+            ----------
+            view : nglview.NGLWidget
+               View where the pharmacophore will be added.
+        """
+        for ligand in self._ligands:
+            component = view.add_component(ligand)
+            component.clear()
+            component.add_ball_and_stick(multipleBond=True)
+
+    def show(self, ligands=True, palette=None):
         """ Show the pharmacophore model.
 
         Parameters
         ----------
+        ligands : bool
+            Whether to show the ligands from which this pharmacophore
+            was extracted from.
+
         palette : str or dict.
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
@@ -214,8 +243,9 @@ class LigandBasedPharmacophore(Pharmacophore):
             A nglview.NGLWidget with the 'view' of the pharmacophoric model.
         """
         view = nv.NGLWidget()
+        if ligands:
+            self.add_ligands_to_view(view)
         self.add_to_view(view, palette=palette)
-
         return view
 
     def to_json(self, file_name):
@@ -326,20 +356,14 @@ class LigandBasedPharmacophore(Pharmacophore):
         """
         ligands = []
         if file_name.endswith(".smi"):
-            supplier = Chem.SmilesMolSupplier(file_name, titleLine=False)
-            for mol in supplier:
-                ligands.append(mol)
+            ligands = [mol for mol in Chem.SmilesMolSupplier(file_name, titleLine=False)]
         elif file_name.endswith(".mol2"):
             ligands = load_mol2_ligands(file_name)
         elif file_name.endswith("sdf"):
-            supplier = Chem.SDMolSupplier(file_name)
-            for mol in supplier:
-                ligands.append(mol)
-
+            ligands = [mol for mol in Chem.SDMolSupplier(file_name)]
         return ligands
 
-    @staticmethod
-    def _extract_pharmacophore(ligands):
+    def extract(self):
         """ Extracts a pharmacophore from a set of ligands.
         """
         return []
