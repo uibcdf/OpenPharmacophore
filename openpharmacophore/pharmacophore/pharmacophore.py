@@ -32,6 +32,10 @@ class Pharmacophore(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def extract(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
     def to_json(self, *args, **kwargs):
         pass
 

@@ -35,10 +35,10 @@ class StructureBasedPharmacophore(Pharmacophore):
         if isinstance(receptor, str):
             if self._is_pdb_id(receptor):
                 pdb_str = self._fetch_pdb(receptor)
-                self._extract(pdb_str, True)
+                self.extract(pdb_str, True)
                 self._num_frames += 1
             elif receptor.endswith(".pdb"):
-                self._extract(receptor, False)
+                self.extract(receptor, False)
                 self._num_frames += 1
             else:
                 # Load from a trajectory
@@ -187,8 +187,8 @@ class StructureBasedPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def _extract(self, receptor, as_string=False):
-        """ Extract a pharmacophore from a pdb file or string.
+    def extract(self, receptor, frames=None):
+        """ Extract pharmacophore(s) from the receptor.
         """
         pass
 
