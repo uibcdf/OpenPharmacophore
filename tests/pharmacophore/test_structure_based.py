@@ -32,11 +32,6 @@ def test_init_from_pdb_id(mocker):
     assert pharmacophore.num_frames == 1
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_init_from_trajectory_file():
-    pass
-
-
 def test_is_pdb_id():
     assert StructureBasedPharmacophore._is_pdb_id("1A52")
     assert StructureBasedPharmacophore._is_pdb_id("5UFW")
@@ -188,4 +183,27 @@ def test_to_rdkit(pharmacophore_one_frame):
     assert np.allclose(ring_2.GetPos().x, 0.0)
     assert np.allclose(ring_2.GetPos().y, 1.5)
     assert np.allclose(ring_2.GetPos().z, 2.0)
-    
+
+
+@pytest.fixture()
+def protein_ligand_interactions():
+    pdb_2hz1 = data.pdb["1ncr"]
+    return StructureBasedPharmacophore._protein_ligand_interactions(pdb_2hz1)
+
+
+def test_protein_ligand_interactions(protein_ligand_interactions):
+
+    assert len(protein_ligand_interactions) == 2
+    assert "MYR:D:4000" in protein_ligand_interactions
+    assert "W11:A:7001" in protein_ligand_interactions
+
+
+def test_points_from_interactions(protein_ligand_interactions):
+
+    points = StructureBasedPharmacophore._points_from_interactions(protein_ligand_interactions,
+                                                                   "W11:A:7001", 1.0)
+    assert len(points) == 9
+    n_hydrophobics = len([p for p in points if p.short_name == "H"])
+    n_rings = len([p for p in points if p.short_name == "R"])
+    assert n_hydrophobics == 8
+    assert n_rings == 1

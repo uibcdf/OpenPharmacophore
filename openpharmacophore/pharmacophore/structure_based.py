@@ -1,11 +1,15 @@
 from .pharmacophore import Pharmacophore
+from .pharmacophoric_point import PharmacophoricPoint
 from .rdkit_pharmacophore import rdkit_pharmacophore
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                   pharmacophoric_points_from_ph4_file, read_ligandscout)
 from .._private_tools.exceptions import InvalidFileFormat, PDBFetchError
+from plip.structure.preparation import PDBComplex
+import numpy as np
 import nglview as nv
+import pyunitwizard as puw
 import json
 import re
 import requests
@@ -31,10 +35,10 @@ class StructureBasedPharmacophore(Pharmacophore):
         if isinstance(receptor, str):
             if self._is_pdb_id(receptor):
                 pdb_str = self._fetch_pdb(receptor)
-                self._extract(pdb_str)
+                self._extract(pdb_str, True)
                 self._num_frames += 1
             elif receptor.endswith(".pdb"):
-                self._extract(receptor)
+                self._extract(receptor, False)
                 self._num_frames += 1
             else:
                 # Load from a trajectory
@@ -118,7 +122,7 @@ class StructureBasedPharmacophore(Pharmacophore):
             self._pharmacophores[frame].append(point)
 
     def add_point(self, point, frame):
-        """ Add a pharmacophoric point to a pharmacophore in an specific frame."""
+        """ Add a pharmacophoric point to a pharmacophore in a specific frame."""
         self._pharmacophores[frame].append(point)
 
     def remove_point(self, index, frame):
@@ -171,6 +175,7 @@ class StructureBasedPharmacophore(Pharmacophore):
     def to_mol2(self, file_name, frame=None):
         """ Save pharmacophore(s) to mol2 file.
         """
+        # TODO: save multiple pharmacophores
         if frame is None or isinstance(frame, list):
             raise NotImplementedError
         pharmacophore_data = mol2_file_info([self[frame]])
@@ -182,8 +187,144 @@ class StructureBasedPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def _extract(self, receptor):
+    def _extract(self, receptor, as_string=False):
+        """ Extract a pharmacophore from a pdb file or string.
+        """
         pass
+
+    @staticmethod
+    def _protein_ligand_interactions(receptor, as_string=False):
+        """ Returns a dictionary with the protein-ligand interactions.
+
+            Parameters
+            ----------
+            receptor : str
+                File or string containing the protein-ligand complex.
+
+            as_string : bool
+                Whether the receptor is a string or a file path.
+
+            Returns
+            -------
+            ligands : dict[str, plip.PLInteraction]
+                The interactions of each ligand in the receptor
+        """
+        protein = PDBComplex()
+        protein.load_pdb(receptor, as_string=as_string)
+        protein.analyze()
+        # Remove ions and very small molecules from the interactions dictionary
+        interactions = protein.interaction_sets
+        for ligand in protein.ligands:
+            if ligand.type != "SMALLMOLECULE" or len(ligand.atomorder) <= 5:
+                ligand_id = ":".join([ligand.hetid, ligand.chain, str(ligand.position)])
+                interactions.pop(ligand_id)
+
+        return interactions
+
+    @staticmethod
+    def _points_from_interactions(interactions, ligand, radius):
+        """ Transform interactions to a list of pharmacophoric points.
+
+            Parameters
+            ----------
+            interactions : dict[str, plip.PLInteraction]
+                Interaction data for each ligand in the receptor.
+
+            Returns
+            -------
+            points : list[PharmacophoricPoint]
+                The pharmacophoric points
+
+        """
+        interactions_list = interactions[ligand].all_itypes
+        points = []
+        radius = puw.quantity(radius, "angstroms")
+
+        for interaction in interactions_list:
+            interaction_name = type(interaction).__name__
+
+            if interaction_name == "pistack":
+                ligand_center = np.array(interaction.ligandring.center)
+                protein_center = np.array(interaction.proteinring.center)
+                direction = protein_center - ligand_center
+                atom_indices = {atom.idx for atom in interaction.ligandring.atoms}
+                aromatic = PharmacophoricPoint(
+                    feat_type="aromatic ring",
+                    center=puw.quantity(ligand_center, "angstroms"),
+                    radius=radius,
+                    direction=direction,
+                    atom_indices=atom_indices
+                )
+                points.append(aromatic)
+
+            elif interaction_name == "hydroph_interaction":
+                center = puw.quantity(interaction.ligatom.coords, "angstroms")
+                atom_inx = {interaction.ligatom.idx}
+                hydrophobic = PharmacophoricPoint(
+                    feat_type="hydrophobicity",
+                    center=center,
+                    radius=radius,
+                    direction=None,
+                    atom_indices=atom_inx
+                )
+                points.append(hydrophobic)
+
+            elif interaction_name == "saltbridge":
+                if interaction.protispos:
+                    # The ligand has a negative charge
+                    center = puw.quantity(interaction.negative.center, "angstroms")
+                    atom_indices = {atom.idx for atom in interaction.negative.atoms}
+                    charge_sphere = PharmacophoricPoint(
+                        feat_type="negative charge",
+                        center=center,
+                        radius=radius,
+                        atom_indices=atom_indices
+                    )
+                else:
+                    # The ligand has a positive charge
+                    center = puw.quantity(interaction.positive.center, "angstroms")
+                    atom_indices = {atom.idx for atom in interaction.positive.atoms}
+                    charge_sphere = PharmacophoricPoint(
+                        feat_type="positive charge",
+                        center=center,
+                        radius=radius,
+                        atom_indices=atom_indices
+                    )
+                points.append(charge_sphere)
+
+            elif interaction_name == "hbond":
+                if interaction.protisdon:
+                    # The ligand has an acceptor atom
+                    ligand_acceptor_center = np.array(interaction.a.coords)
+                    ligand_acceptor_inx = {interaction.a.idx}
+                    protein_donor_center = np.array(interaction.d.coords)
+                    direction = ligand_acceptor_center - protein_donor_center
+                    acceptor = PharmacophoricPoint(
+                        feat_type="hb acceptor",
+                        center=puw.quantity(ligand_acceptor_center, "angstroms"),
+                        radius=radius,
+                        direction=direction,
+                        atom_indices=ligand_acceptor_inx
+                    )
+                    points.append(acceptor)
+                else:
+                    # The ligand has a donor atom
+                    ligand_donor_center = np.array(interaction.d.coords)
+                    ligand_donor_inx = {interaction.d.idx}
+                    protein_acceptor_center = np.array(interaction.a.coords)
+                    direction = protein_acceptor_center - ligand_donor_center
+                    donor = PharmacophoricPoint(
+                        feat_type="hb donor",
+                        center=puw.quantity(ligand_donor_center, "angstroms"),
+                        radius=radius,
+                        direction=direction,
+                        atom_indices=ligand_donor_inx
+                    )
+                    points.append(donor)
+            else:
+                continue
+
+        return points
 
     def __len__(self):
         return len(self._pharmacophores)
