@@ -8,28 +8,20 @@ from copy import deepcopy
 import os
 
 
-def load_pdb_content():
-    """ Returns the content of a pdb file as a string."""
-    with open(data.pdb["1ncr"]) as fp:
-        lines = fp.read()
-
-    return lines
-
-
 def test_init_from_pdb_file():
     pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
     assert pharmacophore.num_frames == 1
-    # TODO: update once extraction method is implemented
     assert len(pharmacophore) == 0
-    assert pharmacophore.num_frames == 1
+    assert pharmacophore._pdb == data.pdb["1ncr"]
 
 
 def test_init_from_pdb_id(mocker):
     mocker.patch("openpharmacophore.StructureBasedPharmacophore._fetch_pdb",
-                 return_value="")
+                 return_value="pdb")
     pharmacophore = StructureBasedPharmacophore("1NCR")
     assert len(pharmacophore) == 0
     assert pharmacophore.num_frames == 1
+    assert pharmacophore._pdb == "pdb"
 
 
 def test_is_pdb_id():
@@ -186,24 +178,64 @@ def test_to_rdkit(pharmacophore_one_frame):
 
 
 @pytest.fixture()
-def protein_ligand_interactions():
-    pdb_2hz1 = data.pdb["1ncr"]
-    return StructureBasedPharmacophore._protein_ligand_interactions(pdb_2hz1)
+def analyzed_pharmacophore():
+    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore.analyze()
+    return pharmacophore
 
 
-def test_protein_ligand_interactions(protein_ligand_interactions):
+def test_protein_ligand_interactions(analyzed_pharmacophore):
+    interactions = analyzed_pharmacophore._interactions
+    assert len(interactions) == 2
+    assert "MYR:D:4000" in interactions
+    assert "W11:A:7001" in interactions
 
-    assert len(protein_ligand_interactions) == 2
-    assert "MYR:D:4000" in protein_ligand_interactions
-    assert "W11:A:7001" in protein_ligand_interactions
 
+def test_points_from_interactions(analyzed_pharmacophore):
+    interactions = analyzed_pharmacophore._interactions
+    points = StructureBasedPharmacophore._points_from_interactions(
+        interactions, "W11:A:7001", 1.0)
 
-def test_points_from_interactions(protein_ligand_interactions):
-
-    points = StructureBasedPharmacophore._points_from_interactions(protein_ligand_interactions,
-                                                                   "W11:A:7001", 1.0)
     assert len(points) == 9
     n_hydrophobics = len([p for p in points if p.short_name == "H"])
     n_rings = len([p for p in points if p.short_name == "R"])
     assert n_hydrophobics == 8
     assert n_rings == 1
+
+
+def test_extract_single_frame_without_analyzing():
+    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore.extract("W11:A:7001", 1.0)
+    assert len(pharmacophore) == 1
+    assert len(pharmacophore[0]) == 9
+    assert pharmacophore._pharmacophores_frames == [0]
+
+
+@pytest.fixture()
+def analyzed_and_extracted_pharmacophore():
+    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore.analyze()
+    pharmacophore.extract("W11:A:7001", 1.0)
+
+    return pharmacophore
+
+
+def test_extract_single_frame_after_analyzing(analyzed_and_extracted_pharmacophore):
+    assert len(analyzed_and_extracted_pharmacophore) == 1
+    assert len(analyzed_and_extracted_pharmacophore[0]) == 9
+
+
+def test_interactions_and_pdb_are_deleted_after_extraction(analyzed_and_extracted_pharmacophore):
+    with pytest.raises(AttributeError):
+        analyzed_and_extracted_pharmacophore._interactions
+    with pytest.raises(AttributeError):
+        analyzed_and_extracted_pharmacophore._pdb
+    with pytest.raises(AttributeError):
+        analyzed_and_extracted_pharmacophore._pdb_is_str
+
+
+def test_ligand_ids(analyzed_pharmacophore):
+    assert analyzed_pharmacophore.ligand_ids() == [
+        "W11:A:7001",
+        "MYR:D:4000",
+    ]

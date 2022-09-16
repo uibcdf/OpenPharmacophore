@@ -32,13 +32,18 @@ class StructureBasedPharmacophore(Pharmacophore):
         self._coordinates = None
         self._num_frames = 0
 
+        self._pdb = ""  # A file path to a pdb file or a pdb as a string
+        self._pdb_is_str = False
+        self._interactions = None
+
         if isinstance(receptor, str):
             if self._is_pdb_id(receptor):
-                pdb_str = self._fetch_pdb(receptor)
-                self.extract(pdb_str, True)
+                self._pdb = self._fetch_pdb(receptor)
+                self._pdb_is_str = True
                 self._num_frames += 1
             elif receptor.endswith(".pdb"):
-                self.extract(receptor, False)
+                self._pdb_is_str = False
+                self._pdb = receptor
                 self._num_frames += 1
             else:
                 # Load from a trajectory
@@ -130,13 +135,13 @@ class StructureBasedPharmacophore(Pharmacophore):
         self._pharmacophores[frame].pop(index)
 
     def remove_picked_point(self, view):
-        pass
+        raise NotImplementedError
 
     def edit_picked_point(self, view):
-        pass
+        raise NotImplementedError
 
     def add_point_in_picked_location(self, view):
-        pass
+        raise NotImplementedError
 
     def add_to_view(self, view, frame=None):
         """ Add pharmacophore(s) to a ngl view.
@@ -187,10 +192,59 @@ class StructureBasedPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def extract(self, receptor, frames=None):
-        """ Extract pharmacophore(s) from the receptor.
+    def analyze(self):
+        """ Analyze the pdb to obtain protein-ligand interactions and the
+            name of all ligands in the pdb.
+
+            This method should be called before ligand_ids method to obtain the
+            ids of the ligands and then extract the pharmacophore.
+
         """
-        pass
+        self._interactions = self._protein_ligand_interactions(self._pdb, self._pdb_is_str)
+
+    def extract(self, ligand_id, radius, frames=None):
+        """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
+            can contain multiple ligands or small molecules, pharmacophore(s) is
+            extracted only for the selected one.
+
+            Parameters
+            ----------
+            ligand_id : str
+                The id of the ligand whose pharmacophore will be extracted.
+
+            radius : float
+                The desired radius in angstroms of the pharmacophoric points.
+
+            frames : list[int] or 'all', optional
+                Extract pharmacophores from the given frames of the trajectory.
+                If None is passed only the first frame will be used.
+        """
+        if frames is None:
+            if self._interactions is None:
+                self._interactions = self._protein_ligand_interactions(
+                    self._pdb, self._pdb_is_str)
+
+            points = self._points_from_interactions(self._interactions,
+                                                    ligand_id, radius)
+            self._pharmacophores.append(points)
+            self._pharmacophores_frames.append(0)
+            # Delete interactions and pdb. They are no longer useful
+            del self._interactions
+            del self._pdb
+            del self._pdb_is_str
+        else:
+            raise NotImplementedError
+
+    def ligand_ids(self):
+        """ Obtain the ids of all the ligands in the protein-ligand complex.
+
+            This method should be called after analyze, or it will return an
+            empty list. The ids obtained from this method can be passed to
+            the extract method.
+        """
+        if self._interactions is not None:
+            return [ligand for ligand in self._interactions.keys()]
+        return []
 
     @staticmethod
     def _protein_ligand_interactions(receptor, as_string=False):
