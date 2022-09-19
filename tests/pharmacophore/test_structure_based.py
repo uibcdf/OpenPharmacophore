@@ -150,11 +150,7 @@ def test_to_mol2(pharmacophore_one_frame):
 
 
 def test_to_rdkit(pharmacophore_one_frame):
-    rdkit_ph, radii = pharmacophore_one_frame.to_rdkit(0)
-
-    assert len(radii) == 3
-    assert np.all(np.array(radii) == np.array([1.0, 1.5, 1.0]))
-
+    rdkit_ph = pharmacophore_one_frame.to_rdkit(0)
     feats = rdkit_ph.getFeatures()
     assert len(feats) == 3
 

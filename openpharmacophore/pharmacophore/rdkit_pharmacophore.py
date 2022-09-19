@@ -41,4 +41,11 @@ def rdkit_pharmacophore(pharmacophoric_points):
         radii.append(radius)
 
     pharmacophore = rdkitPharmacophore.Pharmacophore(points)
-    return pharmacophore, radii
+    # Apply the radius of each point to the bound matrix of the pharmacophore
+    for ii in range(len(radii)):
+        for jj in range(ii + 1, len(radii)):
+            sum_radii = radii[ii] + radii[jj]
+            pharmacophore.setLowerBound(ii, jj, max(pharmacophore.getLowerBound(ii, jj) - sum_radii, 0))
+            pharmacophore.setUpperBound(ii, jj, pharmacophore.getUpperBound(ii, jj) + sum_radii)
+
+    return pharmacophore

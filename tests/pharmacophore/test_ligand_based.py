@@ -143,10 +143,7 @@ def test_pharmacophore_equality(pharmacophore_three_points):
 
 
 def test_to_rdkit(pharmacophore_three_points):
-    rdkit_ph, radii = pharmacophore_three_points.to_rdkit()
-
-    assert len(radii) == 3
-    assert np.allclose(np.array(radii), np.array([1.0, 1.0, 1.0]))
+    rdkit_ph = pharmacophore_three_points.to_rdkit()
 
     feats = rdkit_ph.getFeatures()
     assert len(feats) == 3
