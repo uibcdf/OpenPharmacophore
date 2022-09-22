@@ -30,3 +30,44 @@ def load_mol2_ligands(file_name):
         molecules.append(mol)
 
     return molecules
+
+
+def mol2_iterator(file_name):
+    """ A molecule generator for mol2 files.
+
+            Parameters
+            ----------
+            file_name : str
+                A file object
+
+            Yields
+            ------
+            mol : rdkit.Mol
+                A molecule.
+        """
+    with open(file_name) as file_object:
+        while True:
+
+            line = file_object.readline()
+            if not line:
+                break
+
+            if not line.strip():
+                continue
+
+            # Skip comments
+            if line.startswith("#"):
+                continue
+
+            if '@<TRIPOS>MOLECULE' not in line:
+                mol2_block = "@<TRIPOS>MOLECULE\n"
+                mol2_block += line
+            else:
+                mol2_block = line
+            while True:
+                line = file_object.readline()
+                if '@<TRIPOS>MOLECULE' in line or len(line) == 0:
+                    break
+                mol2_block += line
+
+            yield Chem.MolFromMol2Block(mol2_block)
