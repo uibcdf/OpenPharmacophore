@@ -1,11 +1,16 @@
 from ..pharmacophore import LigandBasedPharmacophore, StructureBasedPharmacophore
+from ..io import mol_file_to_list
 from rdkit import RDConfig, Geometry
 from rdkit import Chem
 from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms
 from rdkit.Chem.Pharm3D import EmbedLib
 from rdkit.Numerics import rdAlignment
+from collections import namedtuple
 from operator import itemgetter
 import os
+
+
+Match = namedtuple("Match", ["mol", "score"])
 
 
 class VirtualScreening:
@@ -18,14 +23,19 @@ class VirtualScreening:
     def __init__(self, pharmacophore):
         self._matches = []  # Nested list of molecules that match a pharmacophore
         self._pharmacophores = []  # List of rdkit pharmacophores
+        self._fails = []
 
         if isinstance(pharmacophore, LigandBasedPharmacophore):
             self._matches.append([])
             self._pharmacophores.append(pharmacophore.to_rdkit())
+            self._fails.append(0)
         elif isinstance(pharmacophore, StructureBasedPharmacophore):
             for ii in range(pharmacophore.num_frames):
                 self._matches.append([])
                 self._pharmacophores.append(pharmacophore.to_rdkit(ii))
+                self._fails.append(0)
+        else:
+            raise TypeError  # TODO: replace with custom error
 
     @property
     def pharmacophores(self):
@@ -35,9 +45,88 @@ class VirtualScreening:
     def matches(self):
         return self._matches
 
+    def fails(self, index):
+        """ Returns the number of molecules that failed to match the pharmacophore
+            with given index.
+
+            Parameters
+            ----------
+            index : int
+                The index of the pharmacophore
+        """
+        return self._fails[index]
+
+    def num_mols(self, index):
+        """ Returns the number of molecules that were screened with the pharmacophore
+            with given index.
+
+            Parameters
+            ----------
+            index : int
+                The index of the pharmacophore
+        """
+        return self._fails[index] + len(self._matches[index])
+
+    def from_list(self, molecules, pharmacophore_index):
+        """ Screen molecules from a list.
+
+            Parameters
+            ----------
+            molecules : list[rdkit.Mol]
+                The list of molecules that will be screened.
+
+            pharmacophore_index : int
+                The index of the pharmacophore that will be used.
+        """
+        for mol in molecules:
+            mol_and_score = self._align_to_pharmacophore(
+                mol, self._pharmacophores[pharmacophore_index])
+            if mol_and_score is not None:
+                match = Match(mol_and_score[0], mol_and_score[1])
+                self._matches[pharmacophore_index].append(match)
+            else:
+                self._fails[pharmacophore_index] += 1
+
+    def from_file(self, file_name, pharmacophore_index):
+        """ Screen molecules from a file.
+
+            Parameters
+            ----------
+            file_name : str
+                Name of the file
+
+            pharmacophore_index : int
+                The index of the pharmacophore that will be used.
+        """
+        # TODO: molecules should be loaded from a generator to save memory
+        molecules = mol_file_to_list(file_name)
+        self.from_list(molecules, pharmacophore_index)
+
+    def from_dir(self, path, pharmacophore_index):
+        """ Screen molecules from a directory.
+
+            Parameters
+            ----------
+            path : str
+                Name of the directory.
+
+            pharmacophore_index : int
+                The index of the pharmacophore that will be used.
+        """
+        file_formats = ["smi", "mol2", "sdf"]
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.split(".")[-1] in file_formats:
+                    self.from_file(os.path.join(root, file), pharmacophore_index)
+
     @staticmethod
     def _align_to_pharmacophore(molecule, pharmacophore):
-        """ Align a molecule to a given pharmacophore.
+        """ Align a molecule to a given pharmacophore. If the molecule
+            can be aligned it returns the molecule with a conformer that
+            matches the pharmacophore and the SSD value of the alignment.
+
+            If the molecule can't be matched to the pharmacophore, None is
+            returned.
 
             Parameters
             ----------
@@ -45,7 +134,15 @@ class VirtualScreening:
                 Molecule to align.
 
             pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
-                An rdkit pharmacophore
+                An rdkit pharmacophore.
+
+            Returns
+            -------
+            rdkit.Mol
+                The molecule with a conformer that matches the pharmacophore.
+
+            float
+                The SSD value of the alignment.
         """
         bounds_matrix = rdDistGeom.GetMoleculeBoundsMatrix(molecule)
         # Check if the molecule features can match with the pharmacophore.
@@ -127,7 +224,7 @@ class VirtualScreening:
             transform_matrix: numpy.ndarray; shape(4, 4)
                 The transform matrix.
         """
-        align_probe = []   # probe points to align to reference points
+        align_probe = []  # probe points to align to reference points
         for match_ids in atom_match:
             dummy_point = Geometry.Point3D(0.0, 0.0, 0.0)
             for id_ in match_ids:

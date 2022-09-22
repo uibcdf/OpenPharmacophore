@@ -124,3 +124,79 @@ def test_transform_matrix(mocker, sample_molecules):
     assert VirtualScreening._transform_matrix(
         None, conformer, atom_match
     ) == (1.0, None)
+
+
+match_mol = True
+
+
+def mock_align_to_pharmacophore(*args, **kwargs):
+    """ Mock align to pharmacophore that matches half the molecules"""
+    global match_mol
+    if match_mol:
+        ssd = 2.5
+        match_mol = False
+        molecule = args[0]
+        return molecule, ssd
+    else:
+        match_mol = True
+        return
+
+
+def test_from_list(mocker, sample_molecules, ligand_based_pharmacophore):
+    mocker.patch(
+        "openpharmacophore.VirtualScreening._align_to_pharmacophore",
+        side_effect=mock_align_to_pharmacophore
+    )
+    global match_mol
+    match_mol = True
+    vs = VirtualScreening(ligand_based_pharmacophore)
+    vs.from_list(sample_molecules, 0)
+
+    assert len(vs.matches[0]) == 2
+    assert vs.matches[0][0].mol == sample_molecules[0]
+    assert vs.matches[0][0].score == 2.5
+    assert vs.matches[0][1].mol == sample_molecules[2]
+    assert vs.matches[0][1].score == 2.5
+    assert vs.fails(0) == 1
+    assert vs.num_mols(0) == 3
+
+
+def assert_screening_with_files(mocker, pharmacophore, path,
+                                matches, fails, n_mols, directory=False):
+    mocker.patch(
+        "openpharmacophore.VirtualScreening._align_to_pharmacophore",
+        side_effect=mock_align_to_pharmacophore
+    )
+    global match_mol
+    match_mol = True
+    vs = VirtualScreening(pharmacophore)
+    if not directory:
+        vs.from_file(path, 0)
+    else:
+        vs.from_dir(path, 0)
+
+    assert len(vs.matches[0]) == matches
+    assert vs.fails(0) == fails
+    assert vs.num_mols(0) == n_mols
+
+
+def test_from_file_smi(mocker, ligand_based_pharmacophore):
+    assert_screening_with_files(mocker, ligand_based_pharmacophore,
+                                data.ligands["mols"], 3, 2, 5)
+
+
+def test_from_file_mol2(mocker, ligand_based_pharmacophore):
+    assert_screening_with_files(mocker, ligand_based_pharmacophore,
+                                data.ligands["ace"], 2, 1, 3)
+
+
+def test_from_file_sdf(mocker, ligand_based_pharmacophore):
+    assert_screening_with_files(mocker, ligand_based_pharmacophore,
+                                data.ligands["sdf_example"], 2, 1, 3)
+
+
+def test_from_dir(mocker, ligand_based_pharmacophore):
+    files_dir = data.ligands["ace"]
+    files_dir = "/".join(files_dir.split("/")[:-1])
+    assert_screening_with_files(mocker, ligand_based_pharmacophore,
+                                files_dir, 8, 8, 16, directory=True)
