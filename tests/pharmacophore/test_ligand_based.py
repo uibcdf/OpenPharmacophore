@@ -352,27 +352,6 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
     assert pharmacophore[3].short_name == "A"
 
 
-def test_load_ligands_smi_file():
-    ligands = LigandBasedPharmacophore._load_ligands(
-        data.ligands["clique_detection"]
-    )
-    assert len(ligands) == 5
-
-
-def test_load_ligands_mol2_file():
-    ligands = LigandBasedPharmacophore._load_ligands(
-        data.ligands["ace"]
-    )
-    assert len(ligands) == 3
-
-
-def test_load_ligands_sfd_file():
-    ligands = LigandBasedPharmacophore._load_ligands(
-        data.ligands["sdf_example"]
-    )
-    assert len(ligands) == 3
-
-
 def test_add_ligands_to_view():
 
     mock_view = Mock()

@@ -5,9 +5,8 @@ from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                   pharmacophoric_points_from_ph4_file, read_ligandscout)
-from ..io import load_mol2_ligands
+from ..io import mol_file_to_list
 from .._private_tools.exceptions import InvalidFileFormat
-from rdkit import Chem
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -30,7 +29,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         if isinstance(ligands, str) and os.path.isfile(ligands):
             if self._is_ligand_file(ligands):
-                self._ligands = self._load_ligands(ligands)
+                self._ligands = mol_file_to_list(ligands)
             else:
                 self.from_file(ligands)
         else:
@@ -339,29 +338,6 @@ class LigandBasedPharmacophore(Pharmacophore):
         if file_extension in ["mol2", "smi", "sdf"]:
             return True
         return False
-
-    @staticmethod
-    def _load_ligands(file_name):
-        """ Load molecules from a file.
-
-            Parameters
-            ----------
-            file_name: str
-                Name of the file.
-
-            Returns
-            -------
-            list[rdkit.Mol]
-                List of ligands.
-        """
-        ligands = []
-        if file_name.endswith(".smi"):
-            ligands = [mol for mol in Chem.SmilesMolSupplier(file_name, titleLine=False)]
-        elif file_name.endswith(".mol2"):
-            ligands = load_mol2_ligands(file_name)
-        elif file_name.endswith("sdf"):
-            ligands = [mol for mol in Chem.SDMolSupplier(file_name)]
-        return ligands
 
     def extract(self):
         """ Extracts a pharmacophore from a set of ligands.
