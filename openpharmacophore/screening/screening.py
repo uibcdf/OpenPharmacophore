@@ -1,5 +1,6 @@
+from .._private_tools.exceptions import NotAPharmacophoreError
 from ..pharmacophore import LigandBasedPharmacophore, StructureBasedPharmacophore
-from ..io import mol_file_to_list
+from ..io import mol_file_iterator
 from rdkit import RDConfig, Geometry
 from rdkit import Chem
 from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms
@@ -35,7 +36,7 @@ class VirtualScreening:
                 self._pharmacophores.append(pharmacophore.to_rdkit(ii))
                 self._fails.append(0)
         else:
-            raise TypeError  # TODO: replace with custom error
+            raise NotAPharmacophoreError(type(pharmacophore))
 
     @property
     def pharmacophores(self):
@@ -78,14 +79,7 @@ class VirtualScreening:
             pharmacophore_index : int
                 The index of the pharmacophore that will be used.
         """
-        for mol in molecules:
-            mol_and_score = self._align_to_pharmacophore(
-                mol, self._pharmacophores[pharmacophore_index])
-            if mol_and_score is not None:
-                match = Match(mol_and_score[0], mol_and_score[1])
-                self._matches[pharmacophore_index].append(match)
-            else:
-                self._fails[pharmacophore_index] += 1
+        self._from_iterable(molecules, pharmacophore_index)
 
     def from_file(self, file_name, pharmacophore_index):
         """ Screen molecules from a file.
@@ -98,8 +92,7 @@ class VirtualScreening:
             pharmacophore_index : int
                 The index of the pharmacophore that will be used.
         """
-        # TODO: molecules should be loaded from a generator to save memory
-        molecules = mol_file_to_list(file_name)
+        molecules = mol_file_iterator(file_name)
         self.from_list(molecules, pharmacophore_index)
 
     def from_dir(self, path, pharmacophore_index):
@@ -118,6 +111,26 @@ class VirtualScreening:
             for file in files:
                 if file.split(".")[-1] in file_formats:
                     self.from_file(os.path.join(root, file), pharmacophore_index)
+
+    def _from_iterable(self, molecules_iter, pharmacophore_index):
+        """ Screen molecules from an iterator.
+
+           Parameters
+           ----------
+           molecules_iter : Iterator[rdkit.Mol]
+               An iterator of molecules.
+
+           pharmacophore_index : int
+               The index of the pharmacophore that will be used.
+       """
+        for mol in molecules_iter:
+            mol_and_score = self._align_to_pharmacophore(
+                mol, self._pharmacophores[pharmacophore_index])
+            if mol_and_score is not None:
+                match = Match(mol_and_score[0], mol_and_score[1])
+                self._matches[pharmacophore_index].append(match)
+            else:
+                self._fails[pharmacophore_index] += 1
 
     @staticmethod
     def _align_to_pharmacophore(molecule, pharmacophore):
