@@ -6,8 +6,7 @@ def test_all_data_dictionaries_are_populated():
     assert len(data.ligands) == 4
     assert len(data.pdb) == 5
     assert len(data.pharmacophores) == 5
-    # assert len(data.trajectories) == 1
-    # assert len(data.topologies) == 1
+    assert len(data.zinc) == 2
 
 
 def test_can_load_a_file_from_each_dictionary():
@@ -26,3 +25,4 @@ def test_can_load_a_file_from_each_dictionary():
     with open(pharmacophore) as fp:
         header = fp.readline()
         assert "@<TRIPOS>" in header
+
