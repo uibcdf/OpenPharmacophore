@@ -23,56 +23,6 @@ def test_download_file_unsuccessful_raises_error(mocker):
         zinc._download_file("test_file.smi", "http://files.docking.org/3D/BA/AAML/BAAAML.smi")
 
 
-def test_download_multiple_files_3d_url(mocker):
-    mock_download = mocker.patch("openpharmacophore.zinc.zinc._download_file")
-    mock_mkdir = mocker.patch("openpharmacophore.zinc.zinc.os.mkdir")
-
-    urls = [
-        "http://files.docking.org/3D/BA/AAML/BAAAML.sdf",
-        "http://files.docking.org/3D/BB/AAML/BBAAMM.sdf",
-        "http://files.docking.org/3D/CA/AAML/CAAAMN.sdf"
-    ]
-    download_path = "./data"
-    zinc._download_multiple_files(urls, "./data")
-
-    arg_list = mock_mkdir.call_args_list
-    assert len(arg_list) == 3
-    assert arg_list[0] == mocker.call(os.path.join(download_path, "BA"))
-    assert arg_list[1] == mocker.call(os.path.join(download_path, "BB"))
-    assert arg_list[2] == mocker.call(os.path.join(download_path, "CA"))
-
-    arg_list = mock_download.call_args_list
-    assert len(arg_list) == 3
-    assert arg_list[0] == mocker.call(os.path.join(download_path, "BA", "BAAAML.sdf"), urls[0])
-    assert arg_list[1] == mocker.call(os.path.join(download_path, "BB", "BBAAMM.sdf"), urls[1])
-    assert arg_list[2] == mocker.call(os.path.join(download_path, "CA", "CAAAMN.sdf"), urls[2])
-
-
-def test_download_multiple_files_2d_url(mocker):
-    mock_download = mocker.patch("openpharmacophore.zinc.zinc._download_file")
-    mock_mkdir = mocker.patch("openpharmacophore.zinc.zinc.os.mkdir")
-
-    urls = [
-        "http://files.docking.org/2D/DD/DDAA.smi",
-        "http://files.docking.org/2D/ED/EDAA.smi",
-        "http://files.docking.org/2D/FD/FDAA.smi"
-    ]
-    download_path = "./data"
-    zinc._download_multiple_files(urls, "./data")
-
-    arg_list = mock_mkdir.call_args_list
-    assert len(arg_list) == 3
-    assert arg_list[0] == mocker.call(os.path.join(download_path, "DD"))
-    assert arg_list[1] == mocker.call(os.path.join(download_path, "ED"))
-    assert arg_list[2] == mocker.call(os.path.join(download_path, "FD"))
-
-    arg_list = mock_download.call_args_list
-    assert len(arg_list) == 3
-    assert arg_list[0] == mocker.call(os.path.join(download_path, "DD", "DDAA.smi"), urls[0])
-    assert arg_list[1] == mocker.call(os.path.join(download_path, "ED", "EDAA.smi"), urls[1])
-    assert arg_list[2] == mocker.call(os.path.join(download_path, "FD", "FDAA.smi"), urls[2])
-
-
 @pytest.fixture()
 def mock_tranche_dict_2d():
     return {
@@ -135,7 +85,7 @@ def test_tranche_rows_and_cols():
 def test_urls_from_mw_and_logp_2d(mock_tranche_dict_2d):
     urls = zinc._urls_from_mw_and_logp(
         logp=(-1, 0), mw=(250, 300), tranches=mock_tranche_dict_2d)
-    assert urls == [
+    assert list(urls) == [
         "BA/BAAA",
         "BA/BAAB",
         "CA/CAAA",
@@ -151,7 +101,7 @@ def test_urls_from_mw_and_logp_3d(mock_tranche_dict_3d):
     urls = zinc._urls_from_mw_and_logp(
         logp=(-1, 0), mw=(250, 300), tranches=mock_tranche_dict_3d
     )
-    assert urls == [
+    assert list(urls) == [
         "BA/BAAAML.xaa",
         "BA/BAAAMM.xaa",
         "CA/CAAAML.xaa",
@@ -161,3 +111,53 @@ def test_urls_from_mw_and_logp_3d(mock_tranche_dict_3d):
         "CB/CBAAML.xaa",
         "CB/CBAAMM.xaa",
     ]
+
+
+def test_download_subset_2d(mocker, mock_tranche_dict_2d):
+    mock_download = mocker.patch("openpharmacophore.zinc.zinc._download_file")
+    mock_mkdir = mocker.patch("openpharmacophore.zinc.zinc.os.mkdir")
+    mocker.patch("openpharmacophore.zinc.zinc._load_tranches_dict",
+                             return_value=mock_tranche_dict_2d)
+    download_path = "./data"
+    zinc.download_subset(logp=(-1, 0), mw=(250, 300),
+                            file_format="smi", download_path=download_path)
+    base_url = "http://files.docking.org/2D/"
+
+    arg_list = mock_mkdir.call_args_list
+    assert len(arg_list) == 8
+    assert arg_list[0] == mocker.call(os.path.join(download_path, "BA"))
+    assert arg_list[2] == mocker.call(os.path.join(download_path, "CA"))
+    assert arg_list[4] == mocker.call(os.path.join(download_path, "BB"))
+    assert arg_list[6] == mocker.call(os.path.join(download_path, "CB"))
+
+    arg_list = mock_download.call_args_list
+    assert len(arg_list) == 8
+    assert arg_list[0] == mocker.call(
+        os.path.join(download_path, "BA", "BAAA.smi"), base_url + "BA/BAAA.smi")
+    assert arg_list[2] == mocker.call(os.path.join(
+        download_path, "CA", "CAAA.smi"), base_url + "CA/CAAA.smi")
+
+
+def test_download_subset_3d(mocker, mock_tranche_dict_3d):
+    mock_download = mocker.patch("openpharmacophore.zinc.zinc._download_file")
+    mock_mkdir = mocker.patch("openpharmacophore.zinc.zinc.os.mkdir")
+    mocker.patch("openpharmacophore.zinc.zinc._load_tranches_dict",
+                             return_value=mock_tranche_dict_3d)
+    download_path = "./data"
+    zinc.download_subset(logp=(-1, 0), mw=(250, 300),
+                            file_format="sdf", download_path=download_path)
+    base_url = "http://files.docking.org/3D/"
+
+    arg_list = mock_mkdir.call_args_list
+    assert len(arg_list) == 8
+    assert arg_list[0] == mocker.call(os.path.join(download_path, "BA"))
+    assert arg_list[2] == mocker.call(os.path.join(download_path, "CA"))
+    assert arg_list[4] == mocker.call(os.path.join(download_path, "BB"))
+    assert arg_list[6] == mocker.call(os.path.join(download_path, "CB"))
+
+    arg_list = mock_download.call_args_list
+    assert len(arg_list) == 8
+    assert arg_list[0] == mocker.call(
+        os.path.join(download_path, "BA/BAAAML.xaa.sdf.gz"), base_url + "BA/BAAAML.xaa.sdf.gz")
+    assert arg_list[2] == mocker.call(os.path.join(
+        download_path, "CA/CAAAML.xaa.sdf.gz"), base_url + "CA/CAAAML.xaa.sdf.gz")

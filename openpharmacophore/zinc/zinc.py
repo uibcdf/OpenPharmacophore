@@ -24,30 +24,6 @@ def _download_file(file_name, url):
         fp.write(res.content)
 
 
-def _download_multiple_files(urls, download_path="./"):
-    """ Download multiple files from ZINC.
-
-        Parameters
-        ----------
-        urls : List[str]
-            List with urls of the files that will be downloaded.
-
-        download_path : str, default="./"
-            The path were the files will be downloaded.
-    """
-    for url in urls:
-        file_name = url.split("/")[-1]
-        tranch = file_name[0:2]
-        subdir = os.path.join(download_path, tranch)
-        if not os.path.isdir(subdir):
-            os.mkdir(subdir)
-        file_path = os.path.join(subdir, file_name)
-        try:
-            _download_file(file_path, url)
-        except ZincDownloadError:
-            continue
-
-
 def _load_tranches_dict(name):
     """ Returns a dictionary with the names of the tranches
         for 2D urls.
@@ -148,7 +124,7 @@ def _tranches_rows_and_cols(logp, mw):
 
 
 def _urls_from_mw_and_logp(logp, mw, tranches):
-    """ Returns a list of urls for the files containing molecules
+    """ Generator function of urls for the files containing molecules
         between the given logP and molecular weight.
 
         Parameters
@@ -164,13 +140,11 @@ def _urls_from_mw_and_logp(logp, mw, tranches):
         tranches : dict[str, list[str]]
             Dictionary with a list of the names of each sub-tranche.
 
-        Returns
+        Yields
         -------
-        urls : list[str]
-            List with urls
+        url : str
+            A url
     """
-    urls = []
-
     rows, columns = _tranches_rows_and_cols(logp, mw)
     # Rows and columns are named from A to K
     row_names = string.ascii_uppercase[:11]
@@ -181,18 +155,69 @@ def _urls_from_mw_and_logp(logp, mw, tranches):
             sub_tranches = tranches[tranche_name]
             for sub_tranche in sub_tranches:
                 url = tranche_name + "/" + sub_tranche
-                urls.append(url)
-
-    return urls
+                yield url
 
 
-def _predefined_subset_urls(subset):
-    """ Get a list of urls for one of ZINC's predifined subsets.
+def download_subset(logp, mw, file_format, download_path="./"):
+    """ Download multiple files from ZINC.
+
+        Parameters
+        ----------
+        logp : tuple[float, float]
+            The lowest value of logP and the greatest value of logP
+            for the molecules.
+
+        mw : tuple[float, float]
+            The lowest value and greatest value of molecular weight
+            for the molecules.
+
+        file_format : str
+            The format of the files
+
+        download_path : str, default="./"
+            The path were the files will be downloaded.
+
+    """
+    if file_format == "smi":
+        base_url = "http://files.docking.org/2D/"
+        tranches_dict = _load_tranches_dict("2d")
+    elif file_format == "sdf" or file_format == "mol2":
+        tranches_dict = _load_tranches_dict("3d")
+        base_url = "http://files.docking.org/3D/"
+        file_format += ".gz"
+    else:
+        raise ValueError
+
+    urls = _urls_from_mw_and_logp(logp, mw, tranches_dict)
+    file_format = "." + file_format
+
+    for url in urls:
+        file_name = url[3:] + file_format
+        tranche = file_name[0:2]
+        subdir = os.path.join(download_path, tranche)
+        full_url = base_url + url + file_format
+        if not os.path.isdir(subdir):
+            os.mkdir(subdir)
+        file_path = os.path.join(subdir, file_name)
+        try:
+            _download_file(file_path, full_url)
+        except ZincDownloadError:
+            continue
+
+
+def download_predefined_subset(subset, file_format, download_path="./"):
+    """ Get a list of urls for one of ZINC's predefined subsets.
 
         Parameters
         ----------
         subset : str
             Name of the subset
+
+        file_format : str
+            The format of the files
+
+        download_path : str, default="./"
+            The path were the files will be downloaded.
 
         Returns
         -------
@@ -211,4 +236,4 @@ def _predefined_subset_urls(subset):
         "Shards": [(-1, 6), (200, 200)],
     }
     logp, mw = subsets_dict[subset]
-    return _urls_from_mw_and_logp(logp, mw, _load_tranches_dict("2d"))
+    return download_subset(logp, mw, file_format, download_path)
