@@ -1,5 +1,6 @@
 from .._private_tools.exceptions import ZincDownloadError
 from ..data import zinc
+from tqdm.auto import tqdm
 import requests
 import os
 import string
@@ -191,7 +192,7 @@ def download_subset(logp, mw, file_format, download_path="./"):
     urls = _urls_from_mw_and_logp(logp, mw, tranches_dict)
     file_format = "." + file_format
 
-    for url in urls:
+    for url in tqdm(urls):
         file_name = url[3:] + file_format
         tranche = file_name[0:2]
         subdir = os.path.join(download_path, tranche)

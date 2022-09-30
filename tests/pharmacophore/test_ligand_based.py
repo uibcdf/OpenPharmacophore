@@ -365,7 +365,7 @@ def test_add_ligands_to_view():
 
 def ligand_list():
     supplier = Chem.SmilesMolSupplier(data.ligands["clique_detection"],
-                                      titleLine=False)
+                                      titleLine=True)
     return [mol for mol in supplier]
 
 

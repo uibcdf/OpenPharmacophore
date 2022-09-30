@@ -1,17 +1,19 @@
 from .._private_tools.exceptions import NotAPharmacophoreError
 from ..pharmacophore import LigandBasedPharmacophore, StructureBasedPharmacophore
 from ..io import mol_file_iterator
-from rdkit import RDConfig, Geometry
+from rdkit import RDConfig, Geometry, RDLogger
 from rdkit import Chem
 from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms
 from rdkit.Chem.Pharm3D import EmbedLib
 from rdkit.Numerics import rdAlignment
+from tqdm.auto import tqdm
 from collections import namedtuple
 from operator import itemgetter
 import os
 
 
 Match = namedtuple("Match", ["mol", "score"])
+RDLogger.DisableLog('rdApp.*')  # Disable rdkit warnings
 
 
 class VirtualScreening:
@@ -93,7 +95,7 @@ class VirtualScreening:
                 The index of the pharmacophore that will be used.
         """
         molecules = mol_file_iterator(file_name)
-        self.from_list(molecules, pharmacophore_index)
+        self._from_iterable(molecules, pharmacophore_index)
 
     def from_dir(self, path, pharmacophore_index):
         """ Screen molecules from a directory.
@@ -106,6 +108,7 @@ class VirtualScreening:
             pharmacophore_index : int
                 The index of the pharmacophore that will be used.
         """
+        # TODO: add progress bar
         file_formats = ["smi", "mol2", "sdf"]
         for root, dirs, files in os.walk(path):
             for file in files:
@@ -123,14 +126,16 @@ class VirtualScreening:
            pharmacophore_index : int
                The index of the pharmacophore that will be used.
        """
-        for mol in molecules_iter:
-            mol_and_score = self._align_to_pharmacophore(
-                mol, self._pharmacophores[pharmacophore_index])
-            if mol_and_score is not None:
-                match = Match(mol_and_score[0], mol_and_score[1])
-                self._matches[pharmacophore_index].append(match)
-            else:
-                self._fails[pharmacophore_index] += 1
+
+        for mol in tqdm(molecules_iter):
+            if mol is not None:
+                mol_and_score = self._align_to_pharmacophore(
+                    mol, self._pharmacophores[pharmacophore_index])
+                if mol_and_score is not None:
+                    match = Match(mol_and_score[0], mol_and_score[1])
+                    self._matches[pharmacophore_index].append(match)
+                else:
+                    self._fails[pharmacophore_index] += 1
 
     @staticmethod
     def _align_to_pharmacophore(molecule, pharmacophore):
@@ -174,8 +179,14 @@ class VirtualScreening:
         mol_H = Chem.AddHs(molecule)
         # Embed molecule onto the pharmacophore
         # embeddings is a list of molecules with a single conformer
-        _, embeddings, _ = EmbedLib.EmbedPharmacophore(mol_H, atom_match, pharmacophore, count=10)
+        try:
+            _, embeddings, _ = EmbedLib.EmbedPharmacophore(mol_H, atom_match, pharmacophore, count=10)
+        except KeyError:
+            # When embed fails it raises a key error
+            return
         SSDs = VirtualScreening._transform_embeddings(pharmacophore, embeddings, atom_match)
+        if len(SSDs) == 0:
+            return
         best_fit_index = min(enumerate(SSDs), key=itemgetter(1))[0]
 
         return embeddings[best_fit_index], SSDs[best_fit_index]

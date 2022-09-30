@@ -14,7 +14,7 @@ def test_can_load_a_file_from_each_dictionary():
     molecules = data.ligands["mols"]
     with open(molecules) as fp:
         lines = fp.readlines()
-        assert len(lines) == 5
+        assert len(lines) == 6
 
     pdb_1ncr = data.pdb["1ncr"]
     with open(pdb_1ncr) as fp:

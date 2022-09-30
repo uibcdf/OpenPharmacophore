@@ -156,6 +156,7 @@ class StructureBasedPharmacophore(Pharmacophore):
         """ Shows a 3D representation of the pharmacophore model. """
         view = nv.NGLWidget()
         self.add_to_view(view, frame)
+        return view
 
     def to_json(self, file_name, frame):
         """ Save pharmacophore(s) to a json file.
