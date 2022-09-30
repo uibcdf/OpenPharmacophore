@@ -5,13 +5,14 @@ channels:
 - defaults
 dependencies:
 - python
+- setuptools
 - numpy
 - pyunitwizard
+- sabueso
 - mdtraj
 - mdanalysis
 - nglview
 - plip
-- matplotlib
 - rdkit
 - requests
 - tqdm
