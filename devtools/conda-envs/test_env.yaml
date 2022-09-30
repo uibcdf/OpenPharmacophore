@@ -1,24 +1,22 @@
 channels:
-- uibcdf/label/dev
 - uibcdf
 - conda-forge
 - ambermd
 - defaults
 dependencies:
+- python
+- numpy
 - pyunitwizard
-- pandas
 - mdtraj
 - mdanalysis
 - nglview
 - plip
 - matplotlib
-- networkx
 - rdkit
 - requests
-- scikit-learn
 - tqdm
-- chembl_webresource_client
 - pytest
+- pytest-mock
 - pip
 - pytest-cov
 - codecov
