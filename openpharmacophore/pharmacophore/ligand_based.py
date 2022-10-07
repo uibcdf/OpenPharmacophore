@@ -1,275 +1,366 @@
-# OpenPharmacophore
-from openpharmacophore import Pharmacophore
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat, NoLigandsError, OpenPharmacophoreTypeError
-from openpharmacophore.pharmacophore.chemical_features import PharmacophoricPointExtractor, oph_featuredefinition
-from openpharmacophore.pharmacophore.pharmacophoric_point import PharmacophoricPoint
-from openpharmacophore.visualization.view_mols import view_ligands
-from openpharmacophore.io.mol2 import load_mol2_file
-from openpharmacophore.pharmacophore.color_palettes import get_color_from_palette_for_feature
-# Third Party
+from .pharmacophoric_point import distance_between_pharmacophoric_points, PharmacophoricPoint
+from .pharmacophore import Pharmacophore
+from .rdkit_pharmacophore import rdkit_pharmacophore
+from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
+                  mol2_file_info, ph4_string)
+from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
+                  pharmacophoric_points_from_ph4_file, read_ligandscout)
+from ..io import mol_file_to_list
+from .._private_tools.exceptions import InvalidFileFormat
+import numpy as np
 import nglview as nv
-from rdkit import Chem
-from rdkit.Chem.Draw import rdMolDraw2D
-# Standard Library
-from collections import defaultdict
-import copy
-from io import BytesIO
-from PIL import Image
-from typing import Callable, List, Tuple, Optional
+import pyunitwizard as puw
+import os
+import json
 
 
 class LigandBasedPharmacophore(Pharmacophore):
-    """ Class to store and compute ligand-based pharmacophores
+    """ Class to store and extract pharmacophores from a set of ligands.
 
-    Inherits from pharmacophore
-
-    Parameters
-    ----------
-
-    pharmacophoric_points : list of PharmacophoricPoint
-        List of pharmacophoric points.
-
-    ligands : list of rdkit.Chem.Mol
-        Set of ligands from which the pharmacophore will be derived.
-
-
-    Attributes
-    ----------
-
-    pharmacophoric_points : list of PharmacophoricPoint
-        The pharmacophoric points.
-
-    n_pharmacophoric_points : int
-        Number of pharmacophoric points.
-
-    ligands : list of rdkit.Chem.Mol
-        Ligands from which this pharmacophore was extracted.
-
+        Parameters
+        ----------
+        ligands : str or list[rdkit.Mol]
+            A file with ligands or a list of molecules
     """
 
-    def __init__(self, pharmacophoric_points: List[PharmacophoricPoint],
-                 ligands: List[Chem.Mol]) -> None:
-        super().__init__(pharmacophoric_points=pharmacophoric_points)
-        self.ligands = ligands
+    def __init__(self, ligands):
+        self._points = []
+        self._ligands = []
 
-    def draw(self, n_per_row: int, subimage_size: Tuple[int, int] = (250, 200),
-             lig_indices: Optional[List[int]] = None, legends: Optional[List[str]] = None) -> bytes:
-        """ Get a 2D representation of the ligands with the pharmacophoric points highlighted.
-            
+        if isinstance(ligands, str) and os.path.isfile(ligands):
+            if self._is_ligand_file(ligands):
+                self._ligands = mol_file_to_list(ligands)
+            else:
+                self.from_file(ligands)
+        else:
+            self._ligands = ligands
+
+    @property
+    def pharmacophoric_points(self):
+        return self._points
+
+    @pharmacophoric_points.setter
+    def pharmacophoric_points(self, points):
+        self._points = points
+
+    @property
+    def num_points(self):
+        return len(self._points)
+
+    @property
+    def ligands(self):
+        return self._ligands
+
+    @ligands.setter
+    def ligands(self, ligand_list):
+        self._ligands = ligand_list
+
+    @ligands.deleter
+    def ligands(self):
+        self._ligands.clear()
+
+    def from_file(self, file_name):
+        """ Load a pharmacophore from a file.
+
+           Parameters
+           ---------
+           file_name : str
+               Name of the file containing the pharmacophore
+
+       """
+        if file_name.endswith(".json"):
+            self._points = load_json_pharmacophore(file_name)[0]
+        elif file_name.endswith(".mol2"):
+            self._points = load_mol2_pharmacophoric_points(file_name)[0]
+        elif file_name.endswith(".pml"):
+            self._points = read_ligandscout(file_name)
+        elif file_name.endswith(".ph4"):
+            self._points = pharmacophoric_points_from_ph4_file(file_name)
+        else:
+            raise InvalidFileFormat(file_name.split(".")[-1])
+
+    def add_point(self, point):
+        """ Adds a pharmacophoric point.
+
             Parameters
             ----------
-            n_per_row : int 
-                Number of ligands that will be drawn in each row.
-            
-            lig_indices : list of int, optional
-                A list with the indices of the ligands that will be drawn. If none is passed
-                all ligands will be drawn.
+            point : PharmacophoricPoint
+                The pharmacophoric point that will be added.
+        """
+        self._points.append(point)
 
-            subimage_size : 2-tuple of int, default=(250,200)
-                The size of each subimage (each ligand drawing). The final image size may
-                vary depending on the number per rows.
+    def remove_point(self, index):
+        """ Removes a pharmacophoric point from the pharmacophore.
 
-            legends : list of str, optional
-                The legends of the ligands.
+            Parameters
+            ----------
+            index: int
+                The index of the pharmacophoric point.
+        """
+        self._points.pop(index)
+
+    @staticmethod
+    def get_picked_point_index(view):
+        """ Get the index of a point picked in a view in the
+            pharmacophore.
+
+            Parameters
+            ----------
+            view : nglview.NGLWidget
+                View where the pharmacophore will be added.
 
             Returns
             -------
-            bytes : 
-                The image in bytes. To visualize use a function such as Image from IPython.display.
+            index: int or None
+                The index or None if something invalid was selected.
         """
-        if len(self.ligands) == 0:
-            raise NoLigandsError("This pharmacophore contains no ligands. Cannot be drawn.")
+        if len(view.picked) != 1:
+            # An atom or nothing was selected
+            return
 
-        if not isinstance(n_per_row, int):
-            raise TypeError("n_per_row must be of type int")
+        picked_index = view.picked["component"]
+        # We'll assume that the view components are the molecule(s) followed by
+        # the pharmacophoric points
+        points_start = None
+        for ii in range(len(view._ngl_component_names)):
+            if view._ngl_component_names[ii] == "nglview.shape.Shape":
+                points_start = ii
+                break
 
-        if lig_indices is None:
-            ligand_list = self.ligands
-        else:
-            ligand_list = [lig for ii, lig in enumerate(self.ligands) if ii in lig_indices]
+        if points_start is None:
+            return
 
-        n_rows = len(ligand_list) // n_per_row
-        if len(ligand_list) % n_per_row:
-            n_rows += 1
+        return picked_index - points_start
 
-        # Create a PIL image where all the individual ligand images will be combined
-        n_cols = n_per_row
-        img_size = (subimage_size[0] * n_cols, subimage_size[1] * n_rows)
-        res = Image.new("RGB", img_size, (255, 255, 255))
+    def remove_picked_point(self, view):
+        """ Remove a pharmacophoric point selected in a ngl view.
 
-        extractor = PharmacophoricPointExtractor()
+            If nothing is selected or the selected thing is not a
+            pharmacophoric point, it doesn't change the view.
 
-        for ii, lig in enumerate(ligand_list):
+           Parameters
+           ----------
+           view : nglview.NGLWidget
+               View where the pharmacophore will be added.
+        """
+        index = self.get_picked_point_index(view)
+        if index is not None and index < len(self):
+            self.remove_point(index)
 
-            col = ii % n_per_row
-            row = ii // n_per_row
+    def edit_picked_point(self, view, center, radius):
+        """ Remove a pharmacophoric point selected in a ngl view.
 
-            if legends:
-                legend = legends[ii]
-            else:
-                legend = ""
+           If nothing is selected or the selected thing is not a
+           pharmacophoric point, it doesn't change the view.
 
-            ligand = copy.deepcopy(lig)
-            ligand_pharmacophore_points = extractor(ligand, 0)
+          Parameters
+          ----------
+          view : nglview.NGLWidget
+              View where the pharmacophore will be added.
 
-            ligand.RemoveAllConformers()
-            ligand = Chem.RemoveHs(ligand)
+          center: Quantity
+              The new center of the pharmacophoric point
 
-            atoms = []
-            bond_colors = {}
-            atom_highlights = defaultdict(list)
-            highlight_radius = {}
+          radius: Quantity:
+              The new radius of the pharmacophoric point
+        """
+        index = self.get_picked_point_index(view)
+        if index is not None and index < len(self):
+            self[index].center = center
+            self[index].radius = radius
 
-            for point in ligand_pharmacophore_points:
+    def add_point_in_picked_location(self, view, feat_name, radius):
+        """ Add a pharmacophoric point in the selected atom of a ngl view.
 
-                indices = point.atom_indices
-                for idx in indices:
+            Parameters
+              ----------
+              view : nglview.NGLWidget
+                  View where the pharmacophore will be added.
 
-                    atoms.append(idx)
-                    atom_highlights[idx].append(get_color_from_palette_for_feature(point.feature_name))
-                    highlight_radius[idx] = 0.6
+              feat_name: str
+                  The feature type of the pharmacophoric point
 
-                    # Draw aromatic rings bonds
-                    if point.feature_name == "aromatic ring":
-                        for neighbor in ligand.GetAtomWithIdx(idx).GetNeighbors():
-                            nbr_idx = neighbor.GetIdx()
-                            if nbr_idx not in indices:
-                                continue
-                            bond = ligand.GetBondBetweenAtoms(idx, nbr_idx).GetIdx()
-                            bond_colors[bond] = [get_color_from_palette_for_feature("aromatic ring")]
+              radius: Quantity:
+                  The new radius of the pharmacophoric point
 
-                    # If an atom has more than one feature label will contain both names
-                    if idx in atoms:
-                        if ligand.GetAtomWithIdx(idx).HasProp("atomNote"):
-                            label = ligand.GetAtomWithIdx(idx).GetProp("atomNote")
-                            label += "|" + str(point.short_name)
-                        else:
-                            label = point.short_name
-                    else:
-                        label = point.short_name
+        """
+        try:
+            atom = view.picked["atom1"]
+        except KeyError:
+            return
 
-                ligand.GetAtomWithIdx(idx).SetProp("atomNote", label)
+        center = puw.quantity([atom["x"], atom["y"], atom["z"]], "angstroms")
+        new_point = PharmacophoricPoint(feat_name, center, radius)
+        self._points.append(new_point)
 
-            drawing = rdMolDraw2D.MolDraw2DCairo(subimage_size[0], subimage_size[1])
-            drawing.DrawMoleculeWithHighlights(ligand, legend, dict(atom_highlights), bond_colors, highlight_radius, {})
-            drawing.FinishDrawing()
+    def add_to_view(self, view, palette=None, opacity=0.5):
+        """Add the pharmacophore representation to a view from NGLView.
 
-            png = drawing.GetDrawingText()
-            bio = BytesIO(png)
-            img = Image.open(bio)
-            res.paste(img, box=(col * subimage_size[0], row * subimage_size[1]))
+           Parameters
+           ----------
+           view : nglview.NGLWidget
+               View where the pharmacophore will be added.
 
-        bio = BytesIO()
-        res.save(bio, format="PNG")
-        return bio.getvalue()
+           palette : dict[str, str], optional
+               Dictionary with a color for each feature type.
 
-    @classmethod
-    def single_ligand(cls, ligand: Chem.Mol, radius: float = 1.0,
-                                    featdef: Callable = None,
-                                    features: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
-        """ Get a pharmacophore from a single ligand.
+           opacity : float
+                The level of opacity of the points. Must be a number between 0 and 1.
+
+        """
+        for point in self.pharmacophoric_points:
+            point.add_to_ngl_view(view, palette, opacity)
+
+    def add_ligands_to_view(self, view):
+        """ Adds the ligands to a ngl view.
 
             Parameters
             ----------
-            ligand : rdkit.chem.mol
-                A ligand.
+            view : nglview.NGLWidget
+               View where the pharmacophore will be added.
         """
-        extractor = PharmacophoricPointExtractor(featdef=featdef, default_radius=radius, features=features)
-        pharmacophore_points = extractor(ligand, 0)
-        return cls(pharmacophore_points, [ligand])
+        for ligand in self._ligands:
+            component = view.add_component(ligand)
+            component.clear()
+            component.add_ball_and_stick(multipleBond=True)
 
-    @classmethod
-    def from_ligand_list(cls, ligands: List[Chem.Mol], method: str, radius: float,
-                         feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
-        """ Class Method to derive a pharmacophore model from a list of rdkit molecules. 
+    def show(self, ligands=True, palette=None):
+        """ Show the pharmacophore model.
 
         Parameters
         ----------
-        ligands : list of rdkit.Mol
-            List of ligands
-        
-        method : str
-            Name of method or algorithm to derive the ligand based pharmacophore.
+        ligands : bool
+            Whether to show the ligands from which this pharmacophore
+            was extracted from.
 
-        radius : float
-            The radius in angstroms of the pharmacophoric points.
-        
-        feat_list : list of str, optional
-            List of features that will be used to derive the pharmacophore. If None is passed the
-            default features will be used: donors, acceptors, aromatic rings, hydrophobics, positive
-            and negative charges.
-        
-        feat_def : Callable
-            Definitions of the pharmacophoric features. 
-
-        """
-        raise NotImplementedError
-
-    @classmethod
-    def from_ligand_file(cls, file_name: str, method: str, radius: float,
-                         feat_def: Callable, feat_list: Optional[List[str]] = None) -> "LigandBasedPharmacophore":
-        """ Get a pharmacophore from a file of ligands
-
-        Accepted file formats: smi, mol2, sdf, pdb 
-
-        Parameters
-        ----------
-        file_name : str
-            Name or path of the file containing the ligands.
-        
-        method : str
-            Name of method or algorithm to compute the ligand based pharmacophore.
-
-        radius : float, default=1.0
-            The radius in angstroms of the pharmacophoric points.
-        
-        feat_list : list of str, optional
-            List of features that will be used to derive the pharmacophore. If None is passed the
-            default features will be used: donors, acceptors, aromatic rings, hydrophobics, positive
-            and negative charges.
-        
-        feat_def : dict, optional
-            Definitions of the pharmacophoric features. Dictionary which keys are SMARTS strings and 
-            values are feature names. If None is passed the default rdkit definition will be used.
-
-        """
-        fextension = file_name.split(".")[-1]
-
-        if fextension == "smi":
-            ligands = Chem.SmilesMolSupplier(file_name, delimiter='\t', titleLine=False)
-        elif fextension == "mol2":
-            ligands = load_mol2_file(file_name)
-        elif fextension == "sdf":
-            ligands = Chem.SDMolSupplier(file_name)
-        elif fextension == "pdb":
-            ligands = Chem.rdmolfiles.MolFromPDBFile(file_name)
-        else:
-            raise InvalidFileFormat(f"{fextension} is not a supported file format")
-
-        raise NotImplementedError
-
-    def show(self, show_ligands: bool = True, palette: str = "openpharmacophore") -> nv.NGLWidget:
-        """ Visualize the pharmacophore model. 
-
-        Parameters
-        ----------
-        show_ligands : bool, default=True
-            If true the ligands associated to the pharmacophore molecular system will be shown. 
-
-        palette : str or dict, optional
+        palette : str or dict.
             Color palette name or dictionary. (Default: 'openpharmacophore')
 
         Returns
         -------
         nglview.NGLWidget
-            An nglview.NGLWidget is returned with the 'view' of the pharmacophoric model and the
-            molecular system used to elucidate it.
+            A nglview.NGLWidget with the 'view' of the pharmacophoric model.
         """
-        if self.ligands and show_ligands:
-            view = view_ligands(self.ligands)
-        else:
-            view = nv.NGLWidget()
-
-        self.add_to_NGLView(view, palette=palette)
-
+        view = nv.NGLWidget()
+        if ligands:
+            self.add_ligands_to_view(view)
+        self.add_to_view(view, palette=palette)
         return view
+
+    def to_json(self, file_name):
+        """ Save the pharmacophore to a json file.
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
+        data = json_pharmacophoric_elements(self.pharmacophoric_points)
+        with open(file_name, "w") as fp:
+            json.dump(data, fp)
+
+    def to_ligand_scout(self, file_name):
+        """ Save the pharmacophore to a ligand scout file (pml).
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
+        xml_tree = ligandscout_xml_tree(self.pharmacophoric_points)
+        xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
+
+    def to_moe(self, file_name):
+        """ Save the pharmacophore to a moe file (ph4).
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
+        pharmacophore_str = ph4_string(self.pharmacophoric_points)
+        with open(file_name, "w") as fp:
+            fp.write(pharmacophore_str)
+
+    def to_mol2(self, file_name):
+        """ Save the pharmacophore to a mol2 file.
+
+            Parameters
+            ----------
+            file_name: str
+                Name of the json file.
+        """
+        pharmacophore_data = mol2_file_info([self.pharmacophoric_points])
+        with open(file_name, "w") as fp:
+            fp.writelines(pharmacophore_data[0])
+
+    def to_rdkit(self):
+        """ Returns a rdkit pharmacophore with the pharmacophoric_points from the original pharmacophore.
+
+            rdkit pharmacophores do not store the pharmacophoric_points radii, so they are returned as well.
+
+            Returns
+            -------
+            rdkit_pharmacophore : rdkit.Chem.Pharmacophore
+                The rdkit pharmacophore.
+
+            radii : list[float]
+                List with the radius in angstroms of each pharmacophoric point.
+        """
+        return rdkit_pharmacophore(self.pharmacophoric_points)
+
+    def distance_matrix(self):
+        """ Compute the distance matrix of the pharmacophore.
+
+            Returns
+            -------
+            dis_matrix : np.ndarray of shape(num_points, num_points)
+                The distance matrix.
+        """
+        n_pharmacophoric_points = self.num_points
+        dis_matrix = np.zeros((n_pharmacophoric_points, n_pharmacophoric_points))
+
+        for ii in range(n_pharmacophoric_points):
+            for jj in range(ii, n_pharmacophoric_points):
+                if ii == jj:
+                    dis_matrix[ii, jj] = 0
+                else:
+                    distance = distance_between_pharmacophoric_points(
+                        self[ii], self[jj])
+                    dis_matrix[ii, jj] = distance
+                    dis_matrix[jj, ii] = distance
+
+        return dis_matrix
+
+    @staticmethod
+    def _is_ligand_file(file_name):
+        file_extension = file_name.split(".")[-1]
+        if file_extension in ["mol2", "smi", "sdf"]:
+            return True
+        return False
+
+    def extract(self):
+        """ Extracts a pharmacophore from a set of ligands.
+        """
+        return []
+
+    def __len__(self):
+        return len(self._points)
+
+    def __getitem__(self, index):
+        return self._points[index]
+
+    def __eq__(self, other):
+        """ Check equality between pharmacophores.
+
+            Assumes that pharmacophoric points are sorted equally in both pharmacophores.
+        """
+        if isinstance(other, type(self)) and self.num_points == other.num_points:
+            for ii in range(self.num_points):
+                if not self.pharmacophoric_points[ii] == other.pharmacophoric_points[ii]:
+                    return False
+            return True
+        return False
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(n_pharmacophoric_points: {self.num_points})"

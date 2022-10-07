@@ -1,12 +1,11 @@
-from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.utils.bisection import insort_right
+from ..pharmacophore import PharmacophoricPoint
 import pyunitwizard as puw
 import datetime
 import re
-from typing import List
 
-def from_moe(file_name: str) -> List[PharmacophoricPoint]:
-    """ Loads a pharmacophore from a MOE ph4 file.
+
+def pharmacophoric_points_from_ph4_file(file_name: str):
+    """ Loads a list of pharmacophoric points from a MOE ph4 file.
 
         Parameters
         ----------
@@ -15,13 +14,13 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
 
         Returns
         -------
-        points : list of openpharmacophore.PharmacophoricPoint
+        points : list[PharmacophoricPoint]
             A list of pharmacophoric points.
     """
     moe_to_oph = {
         "Cat": "positive charge",
         "Ani": "negative charge",
-        "Don": "hb donor", 
+        "Don": "hb donor",
         "Acc": "hb acceptor",
         "Hyd": "hydrophobicity",
         "Aro": "aromatic ring",
@@ -31,7 +30,7 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
 
     with open(file_name, "r") as f:
         moe_ph4_string = f.read()
-        
+
     # pieces = re.split("\s", moe_ph4_string)
     pieces = moe_ph4_string.split()
     pattern = r"Don|Acc|Aro|Cat|Ani|Hyd"
@@ -39,8 +38,8 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
     exclusion_inx = None
     for i, piece in enumerate(pieces):
         if re.match(pattern, piece):
-            if len(piece) == 7: 
-            # Double features have seven characters i.e Acc|Aro 
+            if len(piece) == 7:
+                # Double features have seven characters i.e. Acc|Aro
                 feat_name_1 = piece[0: 3]
                 feat_name_2 = piece[4:]
                 # Coordinates are always two items after the feature name
@@ -58,11 +57,11 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
-                insort_right(points, point_1, key=lambda p: p.short_name)
-                insort_right(points, point_2, key=lambda p: p.short_name)
+                points.append(point_1)
+                points.append(point_2)
             else:
-            # Regular features and
-            # features with weird names i.e Cat$mDon, Acc2
+                # Regular features and
+                # features with weird names i.e. Cat$mDon, Acc2
                 feat_name = piece[0:3]
                 # Coordinates are always two items after the feature name
                 x = float(pieces[i + 2])
@@ -73,17 +72,17 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
                     feat_type=moe_to_oph[feat_name],
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
-                ) 
-                insort_right(points, point, key=lambda p: p.short_name)
+                )
+                points.append(point)
 
         if piece == "#volumesphere":
             # Excluded volume spheres are 10 items after #volumesphere
             exclusion_inx = i + 10
             break
-    
+
     if exclusion_inx:
         count = 1
-        for p in pieces[exclusion_inx :]:
+        for p in pieces[exclusion_inx:]:
             if p == "#volume":
                 break
             if count == 1:
@@ -102,21 +101,20 @@ def from_moe(file_name: str) -> List[PharmacophoricPoint]:
                     center=puw.quantity([x, y, z], "angstroms"),
                     radius=puw.quantity(radius, "angstroms")
                 )
-                insort_right(points, excluded_sphere, key=lambda p: p.short_name)
+                points.append(excluded_sphere)
                 count = 1
-    
+
     return points
-            
-def _moe_ph4_string(pharmacophoric_points: List[PharmacophoricPoint]) -> str:
-    """ Returns a string with the necessary info to create a MOE ph4 file.
+
+
+def ph4_string(pharmacophoric_points):
+    """ Returns a string with the necessary data to create a MOE ph4 file.
 
         Parameters
         ----------
-        pharmacophoric_points : List of PharmacophoricPoint
+        pharmacophoric_points : list[PharmacophoricPoint]
             List with the pharmacophoric points.
 
-        file_name : str
-            Name of the file containing the pharmacophore.
 
         Returns
         ------
@@ -145,22 +143,24 @@ def _moe_ph4_string(pharmacophoric_points: List[PharmacophoricPoint]) -> str:
             continue
         feat_name = oph_to_moe[element.feature_name]
         center = puw.get_value(element.center, to_unit="angstroms")
-        radius = str(puw.get_value(element.radius, to_unit="angstroms")) + " "
-        x = str(center[0]) + " "
-        y = str(center[1]) + " "
-        z = str(center[2]) + " "
-        ph4_str += feat_name + " df2f2 " + x + y + z + radius    
-        ph4_str += "0 300 "
-    
+        radius = puw.get_value(element.radius, to_unit="angstroms")
+        radius_str = f"{radius:.3f}" + " "
+        ph4_str += feat_name + " df2f2 "
+        for ii in range(3):
+            coord = f"{(center[ii]):.3f}" + " "
+            ph4_str += coord
+        ph4_str += radius_str + "0 300 "
+
     if excluded_spheres:
         ph4_str += "\n#volumesphere 90 x r y r z r r r\n"
         for excluded in excluded_spheres:
             center = puw.get_value(excluded.center, to_unit="angstroms")
-            radius = str(puw.get_value(excluded.radius, to_unit="angstroms")) + " "
-            x = str(center[0]) + " "
-            y = str(center[1]) + " "
-            z = str(center[2]) + " "
-            ph4_str += x + y + z + radius
+            radius = puw.get_value(excluded.radius, to_unit="angstroms")
+            radius_str = f"{radius:.3f}" + " "
+            for ii in range(3):
+                coord = f"{(center[ii]):.3f}" + " "
+                ph4_str += coord
+            ph4_str += radius_str
 
     ph4_str += "\n#endpharmacophore"
 

@@ -6,7 +6,6 @@ channels:
 - defaults
 dependencies:
 - pyunitwizard
-- pandas
 - mdtraj
 - mdanalysis
 - nglview
@@ -14,9 +13,7 @@ dependencies:
 - matplotlib
 - rdkit
 - requests
-- scikit-learn
 - tqdm
-- chembl_webresource_client
 - sphinx
 - sphinx_rtd_theme
 - sphinxcontrib-bibtex

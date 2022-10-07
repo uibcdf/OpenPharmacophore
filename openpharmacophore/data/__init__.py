@@ -12,7 +12,9 @@ pharmacophores = {}
 pdb = {}
 trajectories = {}
 topologies = {}
+zinc = {}
 smarts_features = parent.joinpath("smarts_features.txt")
+
 
 # Traverse all folders from the data directory and
 # fill the dictionaries
@@ -42,5 +44,9 @@ for dir_path, _, filenames in os.walk(parent):
             ))
         elif "topologies" in dir_path:
             topologies[name] = str(parent.joinpath(
+                os.path.join(dir_path, file_name)
+            ))
+        elif "zinc" in dir_path:
+            zinc[name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))

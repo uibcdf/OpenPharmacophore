@@ -1,231 +1,138 @@
-## General Exceptions ##
-#########################################
-class OpenPharmacophoreException(Exception):
-    """ Base exception for openpharmacophore """
 
-    def __init__(self, message, documentation_web=None):
-        self.message = message
-        if documentation_web is not None:
-            message += f" Check the online documentation for more information {documentation_web}"
+class WrongDimensionalityError(ValueError):
+    """ Exception raised when a quantity does not have
+        the expected dimensionality.
+    """
+    def __init__(self, dimensionality=None, name=""):
+        if name:
+            self.message = f"{name} has incorrect dimensionality.\n"
+        else:
+            self.message = f"Incorrect dimensionality.\n"
+
+        if dimensionality is not None:
+            self.message += f"Expected {dimensionality}"
+
         super().__init__(self.message)
 
 
-class MissingParameters(OpenPharmacophoreException):
-    """ Exception raised when calling a function and not passing all required parameters.
+class IncorrectShapeError(ValueError):
+    """ Exception raised when an array or array like object does not have
+        the expected shape.
     """
 
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, shape=None, name=""):
+        if name:
+            self.message = f"{name} has incorrect shape.\n"
+        else:
+            self.message = f"Incorrect shape.\n"
+
+        if shape is not None:
+            self.message += f"Expected {shape}"
+
         super().__init__(self.message)
 
 
-## Exceptions derived from value errors ##
-#########################################
+class NotArrayLikeError(TypeError):
+    """ Exception raised when an object is expected to be a numpy
+        array, list, tuple or set.
+   """
 
-class OpenPharmacophoreValueError(ValueError):
-    """ Base value error exception for OpenPharmacophore
-    """
+    def __init__(self, obj_type=None, name="", shape=None):
 
-    def __init__(self, message, documentation_web=None):
-        self.message = message
-        if documentation_web is not None:
-            message += f" Check the online documentation for more information {documentation_web}"
+        if shape is not None:
+            self.message = f"Expected array-like of shape {shape}.\n"
+        else:
+            self.message = "Expected array-like.\n"
+
+        if name and obj_type:
+            self.message += f"{name} is of type {obj_type}."
+        elif obj_type:
+            self.message += f"Got type {obj_type}"
+
         super().__init__(self.message)
 
 
-class BadShapeError(OpenPharmacophoreValueError):
-    """ Exception raised when an array has an incorrect shape."""
-    pass
+class NotAQuantityError(TypeError):
+    """ Exception raised when an object is expected to be a numpy
+        array, list, tuple or set.
+   """
 
+    def __init__(self, obj_type=None, name="", dimensionality=None):
 
-class PointWithNoColorError(OpenPharmacophoreValueError):
-    """ Exception raised when a pharmacophoric point has no color"""
-    pass
+        if dimensionality is not None:
+            self.message = f"Expected a quantity of dimensionality {dimensionality}.\n"
+        else:
+            self.message = "Expected a quantity.\n"
 
+        if name and obj_type:
+            self.message += f"{name} is of type {obj_type}."
+        elif obj_type:
+            self.message += f"Got type {obj_type}"
 
-class NoConformersError(OpenPharmacophoreValueError):
-    """ Exception raised when an rdkit molecule has no conformers and thus, no 3D coordinates.
-    """
-
-    def __init__(self, message="Molecule has no conformers."
-                               "Pharmacophoric points cannot be found without 3D coordinates.",
-                 documentation_web=None):
-        super().__init__(message, documentation_web)
-
-
-class NoLigandsError(OpenPharmacophoreValueError):
-    """ Exception raised when a pharmacophore contains no ligands."""
-    pass
-
-
-class NoMatchesError(OpenPharmacophoreValueError):
-    """ Exception raised when a VirtualScreening object contains no matches."""
-    pass
-
-
-class InvalidFeatureError(OpenPharmacophoreValueError):
-    """ Exception raised when a feature name is invalid or doesn't exist in a pharmacophore.
-    """
-    pass
-
-
-class InvalidFileFormat(OpenPharmacophoreValueError):
-    """ Exception raised when loading a file from an unsopported format.
-    """
-    pass
-
-
-class InvalidSimilarityFunction(OpenPharmacophoreValueError):
-    """ Exception raised when passing an invalid similarity function to the VirtualScreening
-        construtor.
-    """
-    pass
-
-
-class WrongDimensionalityError(OpenPharmacophoreValueError):
-    """ Exception raised when a quantity has the wrong dimensionality"""
-    pass
-
-
-class InvalidFeatureType(OpenPharmacophoreValueError):
-    """ Exception raised when trying to instansiate a PharmacophoricPoint with
-        a wrong feature type.
-    """
-    pass
-
-
-class NegativeRadiusError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidPaletteError(OpenPharmacophoreValueError):
-    pass
-
-
-## ZincClient Exceptions
-class InvalidZincIdError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidCatalogError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidAvailabilityError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidBioactiveError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidBiogenicError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidReactivityError(OpenPharmacophoreValueError):
-    pass
-
-
-class NegativeCountError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidSubsetError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidMolecularWeightRangeError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvalidLogPRangeError(OpenPharmacophoreValueError):
-    pass
-
-
-class InvaludUrlTypeError(OpenPharmacophoreValueError):
-    pass
-
-
-## Exceptions derived from type errors ##
-#########################################
-
-class OpenPharmacophoreTypeError(TypeError):
-    """ Base exception for openpharmacophore type errors"""
-
-    def __init__(self, message, documentation_web=None):
-        self.message = message
-        if documentation_web is not None:
-            message += f" Check the online documentation for more information {documentation_web}"
         super().__init__(self.message)
 
 
-class IsNotQuantityError(OpenPharmacophoreTypeError):
-    """ Exception raised when passing an invalid argument to a function or class that expected a quantity"""
-    pass
-
-
-class QuantityDataTypeError(OpenPharmacophoreTypeError):
-    """ Exception raised when passing a quantity has an invalid data type"""
-    pass
-
-
-class NotArrayLikeError(OpenPharmacophoreTypeError):
-    """ Exception raised when passing an invalid argument to a function or class that expected an 
-        array like parameter."""
-    pass
-
-
-## ZincClient Exceptions
-class CountTypeError(OpenPharmacophoreTypeError):
-    pass
-
-
-## Exceptions derived from IO errors ##
-#########################################
-
-class OpenPharmacophoreIOError(IOError):
-    """ Base exception for openpharmacophore IO related errors"""
-
-    def __init__(self, message, documentation_web=None):
-        self.message = message
-        if documentation_web is not None:
-            message += f" Check the online documentation for more information {documentation_web}"
-        super().__init__(self.message)
-
-
-class FetchError(OpenPharmacophoreIOError):
-    """ Exception raised when fetching a file.
+class NotAPharmacophoreError(TypeError):
+    """ Exception raised when an object is expected to be a pharmacophore.
     """
 
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, obj_type=None):
+
+        self.message = ""
+        if obj_type:
+            self.message += f"Expected a pharmacophore. Got type {obj_type}"
+
         super().__init__(self.message)
 
 
-## ZincClient Exceptions
-class DownloadError(OpenPharmacophoreIOError):
-    """ Exception raised when failing to download a file from ZINC"""
-    pass
+class InvalidFeatureError(ValueError):
+    """ Exception raised when a pharmacophoric feature is not supported.
+    """
+
+    def __init__(self, feat_name):
+
+        self.message = "Invalid feature name"
+        if feat_name:
+            self.message += f" {feat_name}.\n"
+        else:
+            self.message += ".\n"
+
+        super().__init__(self.message)
 
 
-class ZincNotFoundError(OpenPharmacophoreIOError):
-    pass
+class InvalidFileFormat(ValueError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, file_format):
+
+        self.message = "Invalid file format"
+        if file_format:
+            self.message += f" {file_format}.\n"
+        else:
+            self.message += ".\n"
+
+        super().__init__(self.message)
 
 
-class ZincTimeoutError(OpenPharmacophoreIOError):
-    pass
+class PDBFetchError(IOError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, pdb_id, url):
+
+        self.message = f"Error obtaining pdb with id {pdb_id} from {url}"
+        super().__init__(self.message)
 
 
-## Not Implemented Exceptions ##
-#########################################
+class ZincDownloadError(IOError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
 
-class OpenPharmacophoreNotImplementedError(NotImplementedError):
+    def __init__(self, status_code, url):
 
-    def __init__(self, message=None, issues_web=None):
-        if message is None:
-            if issues_web is not None:
-                message = ('It has not been implemeted yet. Write a new issue in'
-                           '{} asking for it.'.format(issues_web))
-
-        super().__init__(message)
+        self.message = f"Error downloading file from {url}.\nStatus code: {status_code}"
+        super().__init__(self.message)

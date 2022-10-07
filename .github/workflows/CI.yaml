@@ -38,18 +38,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         environment-file: devtools/conda-envs/test_env.yaml
+        mamba-version: "*"
+        use-mamba: true
+        channels: conda-forge,defaults
+
         activate-environment: test
-        auto-update-conda: true
+        auto-update-conda: false
         auto-activate-base: false
         show-channel-urls: true
-
-    - name: Info conda
-      shell: bash -l {0}
-      run: |
-        conda info
-        conda list
-        conda config --show-sources
-        conda config --show
 
     - name: Install package
 
@@ -70,7 +66,7 @@ jobs:
       shell: bash -l {0}
 
       run: |
-        pytest -v --cov=openpharmacophore --cov-report=xml --color=yes openpharmacophore/tests/
+        pytest -v --cov=openpharmacophore --cov-report=xml --color=yes tests/
 
     - name: CodeCov
       uses: codecov/codecov-action@v1
