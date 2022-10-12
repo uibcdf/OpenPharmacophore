@@ -2,13 +2,14 @@
 import numpy as np
 from collections import defaultdict
 from rdkit import Chem
+from rdkit.Chem import AllChem
 
 
 BS_DIST = 0.85  # in nanometers
 chain_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]
 
 
-smarts_patterns = {
+smarts_feat_def = {
     '*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]': 'Hydrophobe',
     'N=[CX3](N)-N': 'PosIonizable',
     '[#16!H0]': 'Donor',
@@ -42,9 +43,32 @@ smarts_patterns = {
     'c1nn[nH1]n1': 'NegIonizable'}
 
 
+protein_smarts = {
+    'C(=O)[O-,OH,OX1]': 'NegIonizable',
+    '[#16!H0]': 'Donor',
+    '[#7!H0&!$(N-[SX4](=O)(=O)[CX4](F)(F)F)]': 'Donor',
+    '[#7&!$([nX3])&!$([NX3]-*=[!#6])&!$([NX3]-[a])&!$([NX4])&!$(N=C([C,N])N)]': 'Acceptor',
+    '[#8!H0&!$([OH][C,S,P]=O)]': 'Donor',
+    '[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+    'I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+    'I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]': 'Hydrophobe',
+    '[$(C(N)(N)=N)]': 'PosIonizable',
+    '[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]': 'Hydrophobe',
+    '[$([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(**[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]': 'Hydrophobe',
+    '[$([O])&!$([OX2](C)C=O)&!$(*(~a)~a)]': 'Acceptor',
+    '[$([S]~[#6])&!$(S~[!#6])]': 'Hydrophobe',
+    '[$(n1cc[nH]c1)]': 'PosIonizable',
+    '[+,+2,+3,+4]': 'PosIonizable',
+    '[-,-2,-3,-4]': 'NegIonizable',
+    '[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]': 'Hydrophobe',
+    'a1aaaa1': 'Aromatic',
+    'a1aaaaa1': 'Aromatic'
+}
+
+
 def is_ligand_atom(atom):
     """ Check if an atom belongs to a ligand. """
-    if not atom.residue.is_water and not atom.residue.is_protein\
+    if not atom.residue.is_water and not atom.residue.is_protein \
             and atom.residue.n_atoms > 4:
         return True
     return False
@@ -145,19 +169,21 @@ def get_binding_site_atoms_indices(lig_center, lig_max_extent, coords):
     return np.where(np.logical_and(distance > lig_max_extent, distance <= bs_cutoff))[0]
 
 
-def chemical_features(molecule, bs_indices=None):
-    """ Find chemical features in a molecule using smarts patterns
+def chemical_features(molecule, smarts_patterns, bs_indices=None):
+    """ Find chemical features in a molecule using smarts patterns.
 
         Parameters
         ----------
         molecule : rdkit.Mol
+
+        smarts_patterns: dict[str, str]
 
         bs_indices: np.ndarray, optional
 
         Returns
         -------
         features dict[str, list[tuple[int]]
-
+            Dictionary with a list of the atom indices that compose each feature.
 
     """
     features = defaultdict(list)
@@ -201,3 +227,43 @@ def features_centroid(features, coords):
             centroids[feat].append(feat_center)
 
     return centroids
+
+
+def map_ligand_features_indices(features,  indices_mapper):
+    """ Map the indices of the chemical features of the ligand from
+        rdkit to mdtraj's.
+
+        Parameters
+        ----------
+        indices_mapper : dict[int, int]
+        features : dict[str, list[tuple]]
+    """
+    feats_mapped = defaultdict(list)
+    for feat_name, all_indices in features.items():
+        for indices in all_indices:
+            updated_indices = []
+            for index in indices:
+                updated_indices.append(indices_mapper[index])
+            feats_mapped[feat_name].append(tuple(updated_indices))
+
+    return feats_mapped
+
+
+def fix_bond_order_from_smiles(molecule, smiles):
+    """ Assign the correct bond order to a molecule with the corresponding smiles.
+
+        Parameters
+        ----------
+        molecule : rdkit.Mol
+            A molecule with incorrect bond orders.
+
+        smiles: str
+            The smiles that is used as a template to fix bond orders
+
+        Returns
+        -------
+        rdkit.Mol
+            Molecule with correct bond orders
+    """
+    template = AllChem.MolFromSmiles(smiles)
+    return AllChem.AssignBondOrdersFromTemplate(template, molecule)

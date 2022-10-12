@@ -55,7 +55,7 @@ def test_ligand_centroid(trajectory):
           [10.7379, 1.2449, 2.4419]]],
         dtype=np.float32)
     expected_centroid = np.mean(coordinates, axis=1)[0]
-    assert centroid.shape == (3, )
+    assert centroid.shape == (3,)
     assert np.allclose(centroid, expected_centroid)
 
 
@@ -106,24 +106,19 @@ def smart_patterns_mock():
 
 
 side_effect = [
-        ((0, 1), (1, 2)),
-        ((2, 3), ),
-        ((3, 4), (5, 6)),
-        ((7, 8, 9),),
-        ((10, 11, 12), (13, 14, 15)),
-        (),
-    ]
+    ((0, 1), (1, 2)),
+    ((2, 3),),
+    ((3, 4), (5, 6)),
+    ((7, 8, 9),),
+    ((10, 11, 12), (13, 14, 15)),
+    (),
+]
 
 
 def test_ligand_chemical_features(mocker, smart_patterns_mock):
-    mocker.patch.dict(
-        pli.smarts_patterns,
-        smart_patterns_mock,
-        clear=True
-    )
     mock_mol = mocker.Mock()
     mock_mol.GetSubstructMatches.side_effect = side_effect
-    features = pli.chemical_features(mock_mol, None)
+    features = pli.chemical_features(mock_mol, smart_patterns_mock, None)
     expected_features = {
         'PosIonizable': [(0, 1), (1, 2)],
         'Donor': [(2, 3)],
@@ -135,15 +130,10 @@ def test_ligand_chemical_features(mocker, smart_patterns_mock):
 
 
 def test_binding_site_chemical_features(mocker, smart_patterns_mock):
-    mocker.patch.dict(
-        pli.smarts_patterns,
-        smart_patterns_mock,
-        clear=True
-    )
     mock_mol = mocker.Mock()
     mock_mol.GetSubstructMatches.side_effect = side_effect
     bs_indices = np.array([5, 6, 7, 8, 9, 10, 11, 12])
-    features = pli.chemical_features(mock_mol, bs_indices)
+    features = pli.chemical_features(mock_mol, smart_patterns_mock, bs_indices)
     expected_features = {
         "Acceptor": [(5, 6)],
         'Hydrophobe': [(7, 8, 9)],
@@ -178,3 +168,24 @@ def test_features_centroid():
     assert np.all(feat_centroid["Acceptor"][0] == expected_feats_centroid["Acceptor"][0])
     assert np.all(feat_centroid["Hydrophobe"][0] == expected_feats_centroid["Hydrophobe"][0])
     assert np.all(feat_centroid["Hydrophobe"][1] == expected_feats_centroid["Hydrophobe"][1])
+
+
+def test_map_ligand_features_indices():
+    feats = {'Donor': [(18,), (19,)],
+             'Hydrophobe': [(0,), (1, 14, 15, 16, 17)],
+             'Acceptor': [(18,), (19,)],
+             'Aromatic': [(5, 6, 7, 8, 9, 10)]
+             }
+    ligand_indices = list(range(1990, 2010))
+    rd_indices = list(range(0, 20))
+    indices_mapper = dict(zip(rd_indices, ligand_indices))
+
+    feats_mapped = pli.map_ligand_features_indices(feats, indices_mapper)
+
+    feats_mapped_expected = {
+        'Donor': [(2008,), (2009,)],
+        'Hydrophobe': [(1990,), (1991, 2004, 2005, 2006, 2007)],
+        'Acceptor': [(2008,), (2009,)],
+        'Aromatic': [(1995, 1996, 1997, 1998, 1999, 2000)]
+    }
+    assert feats_mapped == feats_mapped_expected
