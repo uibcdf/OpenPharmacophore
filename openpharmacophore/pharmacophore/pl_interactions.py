@@ -6,7 +6,9 @@ from rdkit.Chem import AllChem
 
 
 BS_DIST = 0.85  # in nanometers
-chain_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"]
+chain_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
+               "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+               "W", "X", "Y", "Z"]
 
 
 smarts_feat_def = {
@@ -188,6 +190,7 @@ def chemical_features(molecule, smarts_patterns, bs_indices=None):
     """
     features = defaultdict(list)
 
+    # TODO: can we implement this more efficiently?
     for smarts, feat_name in smarts_patterns.items():
         pattern = Chem.MolFromSmarts(smarts)
         atom_indices = molecule.GetSubstructMatches(pattern)
@@ -265,5 +268,7 @@ def fix_bond_order_from_smiles(molecule, smiles):
         rdkit.Mol
             Molecule with correct bond orders
     """
+    # TODO: if the molecule and the template dont have the same number of
+    #  atoms this will fail. We should create a custom exception for that.
     template = AllChem.MolFromSmiles(smiles)
     return AllChem.AssignBondOrdersFromTemplate(template, molecule)
