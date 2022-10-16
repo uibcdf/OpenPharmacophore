@@ -5,12 +5,15 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 
-BS_DIST = 0.85  # in nanometers
+# The following values are in nanometers. Taken from PLIP
+BS_DIST = 0.85
+HYDROPHOBE_DIST = 0.4
+
 chain_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
                "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
                "W", "X", "Y", "Z"]
 
-
+# Feature definitions taken from Pharmer
 smarts_feat_def = {
     '*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]': 'Hydrophobe',
     'N=[CX3](N)-N': 'PosIonizable',
@@ -272,3 +275,31 @@ def fix_bond_order_from_smiles(molecule, smiles):
     #  atoms this will fail. We should create a custom exception for that.
     template = AllChem.MolFromSmiles(smiles)
     return AllChem.AssignBondOrdersFromTemplate(template, molecule)
+
+
+def hydrophobic_pharmacophoric_points(ligand_hyd_centers, protein_hyd_centers):
+    """ Returns a list with the centroid of the hydrophobic pharmacophoric points.
+
+        Parameters
+        ----------
+        ligand_hyd_centers : list[np.array]
+            Ligand hydrophobic features centroids.
+
+        protein_hyd_centers : list[np.array]
+            Protein hydrophobic features centroids.
+
+        Returns
+        -------
+        hyd_points : list[np.array]
+            Centers of the hydrophobic pharmacophoric points.
+    """
+    hyd_points = []
+    for lig_center in ligand_hyd_centers:
+        for protein_center in protein_hyd_centers:
+            # If we find two centers whose distance is <= HYDROPHOBE_DIST we add a
+            # pharmacophoric point
+            if np.sqrt(np.sum(np.power(protein_center - lig_center, 2))) <= HYDROPHOBE_DIST:
+                hyd_points.append(lig_center)
+                break
+
+    return hyd_points

@@ -189,3 +189,27 @@ def test_map_ligand_features_indices():
         'Aromatic': [(1995, 1996, 1997, 1998, 1999, 2000)]
     }
     assert feats_mapped == feats_mapped_expected
+
+
+def test_hydrophobic_pharmacophoric_points():
+    ligand_hyd_centers = [
+        np.array([0., 0., 0.]),
+        np.array([.3, .3, .3]),
+        np.array([-.2, -.2, -.2])
+    ]
+
+    protein_hyd_center = [
+        np.array([.15, .15, .15]),
+        np.array([.2, .2, .2]),
+        np.array([.5, .5, .5]),
+    ]
+
+    expected_points_centroid = [
+        np.array([0., 0., 0.]),
+        np.array([.3, .3, .3]),
+    ]
+    points_centroid = pli.hydrophobic_pharmacophoric_points(
+        ligand_hyd_centers, protein_hyd_center)
+    assert len(points_centroid) == 2
+    assert np.all(points_centroid[0] == expected_points_centroid[0])
+    assert np.all(points_centroid[1] == expected_points_centroid[1])
