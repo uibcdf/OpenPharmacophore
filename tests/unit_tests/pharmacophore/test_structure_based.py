@@ -9,10 +9,10 @@ import os
 
 
 def test_init_from_pdb_file():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
     assert pharmacophore.num_frames == 1
     assert len(pharmacophore) == 0
-    assert pharmacophore._pdb == data.pdb["1ncr"]
+    assert pharmacophore._pdb == data.pdb["1ncr.pdb"]
 
 
 def test_init_from_pdb_id(mocker):
@@ -42,14 +42,14 @@ def test_fetch_pdb(mocker):
 
 def test_from_file_moe():
     pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["gmp"])
+    pharmacophore.from_file(data.pharmacophores["gmp.ph4"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 10
 
 
 def test_from_file_mol2():
     pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["elastase"])
+    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
     assert len(pharmacophore) == 8
     assert pharmacophore.num_frames == 8
     assert pharmacophore._pharmacophores_frames == list(range(0, 8))
@@ -57,14 +57,14 @@ def test_from_file_mol2():
 
 def test_from_file_json():
     pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["1M70"])
+    pharmacophore.from_file(data.pharmacophores["1M70.json"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 5
 
 
 def test_from_file_pml():
     pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["ligscout"])
+    pharmacophore.from_file(data.pharmacophores["ligscout.pml"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 4
 
@@ -175,7 +175,7 @@ def test_to_rdkit(pharmacophore_one_frame):
 
 @pytest.fixture()
 def analyzed_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
     pharmacophore.analyze()
     return pharmacophore
 
@@ -200,7 +200,7 @@ def test_points_from_interactions(analyzed_pharmacophore):
 
 
 def test_extract_single_frame_without_analyzing():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
     pharmacophore.extract("W11:A:7001", 1.0)
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 9
@@ -209,7 +209,7 @@ def test_extract_single_frame_without_analyzing():
 
 @pytest.fixture()
 def analyzed_and_extracted_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
     pharmacophore.analyze()
     pharmacophore.extract("W11:A:7001", 1.0)
 

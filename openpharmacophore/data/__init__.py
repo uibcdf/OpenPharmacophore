@@ -6,14 +6,11 @@ import os
 
 parent = PurePath(__file__).parent
 
-bioassays = {}
 ligands = {}
 pharmacophores = {}
 pdb = {}
 trajectories = {}
-topologies = {}
 zinc = {}
-smarts_features = parent.joinpath("smarts_features.txt")
 
 
 # Traverse all folders from the data directory and
@@ -21,32 +18,23 @@ smarts_features = parent.joinpath("smarts_features.txt")
 for dir_path, _, filenames in os.walk(parent):
 
     for file_name in filenames:
-        name = file_name.split(".")[0]
-        if "bioassays" in dir_path:
-            bioassays[name] = str(parent.joinpath(
-                os.path.join(dir_path, file_name)
-            ))
-        elif "pharmacophores" in dir_path:
-            pharmacophores[name] = str(parent.joinpath(
+        if "pharmacophores" in dir_path:
+            pharmacophores[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
         elif "ligands" in dir_path:
-            ligands[name] = str(parent.joinpath(
+            ligands[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
         elif "pdb" in dir_path:
-            pdb[name] = str(parent.joinpath(
+            pdb[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
         elif "trajectories" in dir_path:
-            trajectories[name] = str(parent.joinpath(
-                os.path.join(dir_path, file_name)
-            ))
-        elif "topologies" in dir_path:
-            topologies[name] = str(parent.joinpath(
+            trajectories[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
         elif "zinc" in dir_path:
-            zinc[name] = str(parent.joinpath(
+            zinc[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))

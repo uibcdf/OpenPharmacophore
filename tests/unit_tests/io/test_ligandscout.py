@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 
 def test_from_ligandscout():
-    points = read_ligandscout(data.pharmacophores["ligscout"])
+    points = read_ligandscout(data.pharmacophores["ligscout.pml"])
     assert len(points) == 4
 
     neg_ion = points[0]

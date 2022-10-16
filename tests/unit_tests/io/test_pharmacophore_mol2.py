@@ -5,7 +5,7 @@ from example_pharmacophores import two_element_pharmacophore, five_element_pharm
 
 
 def test_load_mol2_pharmacophoric_points():
-    streptadivin_file = data.pharmacophores["streptadivin"]
+    streptadivin_file = data.pharmacophores["streptadivin.mol2"]
     pharmacophores_ = load_mol2_pharmacophoric_points(streptadivin_file)
     assert len(pharmacophores_) == 6
     assert len(pharmacophores_[0]) == 9
@@ -15,7 +15,7 @@ def test_load_mol2_pharmacophoric_points():
     assert len(pharmacophores_[4]) == 13
     assert len(pharmacophores_[5]) == 13
 
-    elastase_file = data.pharmacophores["elastase"]
+    elastase_file = data.pharmacophores["elastase.mol2"]
     pharmacophores_ = load_mol2_pharmacophoric_points(elastase_file)
 
     assert len(pharmacophores_) == 8

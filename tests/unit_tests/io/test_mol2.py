@@ -3,7 +3,7 @@ from openpharmacophore.io.mol2 import load_mol2_ligands, mol2_iterator
 
 
 def test_load_mol2_file():
-    file_name = data.ligands["ace"]
+    file_name = data.ligands["ace.mol2"]
     molecules = load_mol2_ligands(file_name=file_name)
 
     assert len(molecules) == 3
@@ -13,7 +13,7 @@ def test_load_mol2_file():
 
 
 def test_mol2_iterator():
-    mol2_file = data.ligands["ace"]
+    mol2_file = data.ligands["ace.mol2"]
     molecules = []
     for mol in mol2_iterator(mol2_file):
         molecules.append(mol)

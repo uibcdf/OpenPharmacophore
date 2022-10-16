@@ -34,9 +34,9 @@ def _load_tranches_dict(name):
         tranches : dict[str, list[str]]
     """
     if name == "2d":
-        path = zinc["tranches_2D"]
+        path = zinc["tranches_2D.txt"]
     elif name == "3d":
-        path = zinc["tranches_3D"]
+        path = zinc["tranches_3D.txt"]
     else:
         raise ValueError
     tranches = {}

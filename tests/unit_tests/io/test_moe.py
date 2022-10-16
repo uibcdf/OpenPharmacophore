@@ -8,7 +8,7 @@ from example_pharmacophores import three_element_pharmacophore
 
 
 def test_pharmacophoric_points_from_ph4_file():
-    file_name = data.pharmacophores["gmp"]
+    file_name = data.pharmacophores["gmp.ph4"]
     points = pharmacophoric_points_from_ph4_file(file_name)
     points = sorted(points, key=lambda p: p.short_name)
     assert len(points) == 10

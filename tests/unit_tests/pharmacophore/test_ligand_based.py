@@ -11,29 +11,29 @@ from unittest.mock import Mock, call
 
 
 def test_init_with_pharmacophore_file():
-    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["ligscout"])
+    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["ligscout.pml"])
     assert len(pharmacophore) == 4
 
-    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["gmp"])
+    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["gmp.ph4"])
     assert len(pharmacophore) == 10
 
 
 def test_init_with_smi_file():
-    ligands = data.ligands["clique_detection"]
+    ligands = data.ligands["clique_detection.smi"]
     pharmacophore = LigandBasedPharmacophore(ligands)
     assert len(pharmacophore) == 0
     assert len(pharmacophore.ligands) == 5
 
 
 def test_init_with_mol2_file():
-    ligands = data.ligands["ace"]
+    ligands = data.ligands["ace.mol2"]
     pharmacophore = LigandBasedPharmacophore(ligands)
     assert len(pharmacophore) == 0
     assert len(pharmacophore.ligands) == 3
 
 
 def test_init_with_sdf_file():
-    ligands = data.ligands["sdf_example"]
+    ligands = data.ligands["sdf_example.sdf"]
     pharmacophore = LigandBasedPharmacophore(ligands)
     assert len(pharmacophore) == 0
     assert len(pharmacophore.ligands) == 3
@@ -41,19 +41,19 @@ def test_init_with_sdf_file():
 
 def test_from_file_moe():
     pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["gmp"])
+    pharmacophore.from_file(data.pharmacophores["gmp.ph4"])
     assert len(pharmacophore) == 10
 
 
 def test_from_file_mol2():
     pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["elastase"])
+    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
     assert len(pharmacophore) == 4
 
 
 def test_from_file_json():
     pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["1M70"])
+    pharmacophore.from_file(data.pharmacophores["1M70.json"])
     assert len(pharmacophore) == 5
 
 
@@ -355,7 +355,7 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
 def test_add_ligands_to_view():
 
     mock_view = Mock()
-    pharmacophore = LigandBasedPharmacophore(data.ligands["clique_detection"])
+    pharmacophore = LigandBasedPharmacophore(data.ligands["clique_detection.smi"])
     pharmacophore.add_ligands_to_view(mock_view)
     ligands_call = [call(lig) for lig in pharmacophore.ligands]
 
@@ -364,7 +364,7 @@ def test_add_ligands_to_view():
 
 
 def ligand_list():
-    supplier = Chem.SmilesMolSupplier(data.ligands["clique_detection"],
+    supplier = Chem.SmilesMolSupplier(data.ligands["clique_detection.smi"],
                                       titleLine=True)
     return [mol for mol in supplier]
 

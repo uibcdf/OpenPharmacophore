@@ -9,19 +9,19 @@ def assert_is_mol_list(mol_list):
 
 
 def test_mol_file_to_list_smi():
-    molecules = mol_file_to_list(data.ligands["clique_detection"])
+    molecules = mol_file_to_list(data.ligands["clique_detection.smi"])
     assert len(molecules) == 5
     assert_is_mol_list(molecules)
 
 
 def test_mol_file_to_list_mol2():
-    molecules = mol_file_to_list(data.ligands["ace"])
+    molecules = mol_file_to_list(data.ligands["ace.mol2"])
     assert len(molecules) == 3
     assert_is_mol_list(molecules)
 
 
 def test_mol_file_to_list_sdf():
-    molecules = mol_file_to_list(data.ligands["sdf_example"])
+    molecules = mol_file_to_list(data.ligands["sdf_example.sdf"])
     assert len(molecules) == 3
     assert_is_mol_list(molecules)
 
@@ -35,15 +35,15 @@ def assert_iterable_contains_mol(mol_list, n_mols):
 
 
 def test_mol_file_iterator_smi():
-    mol_iterator = mol_file_iterator(data.ligands["clique_detection"])
+    mol_iterator = mol_file_iterator(data.ligands["clique_detection.smi"])
     assert_iterable_contains_mol(mol_iterator, 5)
 
 
 def test_mol_file_iterator_mol2():
-    mol_iterator = mol_file_iterator(data.ligands["ace"])
+    mol_iterator = mol_file_iterator(data.ligands["ace.mol2"])
     assert_iterable_contains_mol(mol_iterator, 3)
 
 
 def test_mol_file_iterator_sdf():
-    mol_iterator = mol_file_iterator(data.ligands["sdf_example"])
+    mol_iterator = mol_file_iterator(data.ligands["sdf_example.sdf"])
     assert_iterable_contains_mol(mol_iterator, 3)

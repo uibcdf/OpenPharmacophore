@@ -8,7 +8,7 @@ import math
 
 def test_load_json_pharmacophore():
     points, molecular_system, ligand = load_json_pharmacophore(
-        data.pharmacophores["1M70"], load_mol_sys=False)
+        data.pharmacophores["1M70.json"], load_mol_sys=False)
 
     assert len(points) == 5
     assert molecular_system is None

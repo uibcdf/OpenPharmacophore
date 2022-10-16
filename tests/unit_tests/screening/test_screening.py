@@ -8,14 +8,14 @@ from rdkit.Chem import MolFromSmiles
 @pytest.fixture()
 def ligand_based_pharmacophore():
     pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["elastase"])
+    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
     return pharmacophore
 
 
 @pytest.fixture()
 def structure_based_pharmacophore():
     pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["1M70"])
+    pharmacophore.from_file(data.pharmacophores["1M70.json"])
     return pharmacophore
 
 
@@ -182,21 +182,21 @@ def assert_screening_with_files(mocker, pharmacophore, path,
 
 def test_from_file_smi(mocker, ligand_based_pharmacophore):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["mols"], 3, 2, 5)
+                                data.ligands["mols.smi"], 3, 2, 5)
 
 
 def test_from_file_mol2(mocker, ligand_based_pharmacophore):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["ace"], 2, 1, 3)
+                                data.ligands["ace.mol2"], 2, 1, 3)
 
 
 def test_from_file_sdf(mocker, ligand_based_pharmacophore):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["sdf_example"], 2, 1, 3)
+                                data.ligands["sdf_example.sdf"], 2, 1, 3)
 
 
 def test_from_dir(mocker, ligand_based_pharmacophore):
-    files_dir = data.ligands["ace"]
+    files_dir = data.ligands["ace.mol2"]
     files_dir = "/".join(files_dir.split("/")[:-1])
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
                                 files_dir, 8, 8, 16, directory=True)
