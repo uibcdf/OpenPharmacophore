@@ -1,5 +1,5 @@
 from .._private_tools.exceptions import NotAPharmacophoreError
-from ..pharmacophore import LigandBasedPharmacophore, StructureBasedPharmacophore
+from ..pharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
 from ..io import mol_file_iterator
 from rdkit import RDConfig, Geometry, RDLogger
 from rdkit import Chem
@@ -32,7 +32,7 @@ class VirtualScreening:
             self._matches.append([])
             self._pharmacophores.append(pharmacophore.to_rdkit())
             self._fails.append(0)
-        elif isinstance(pharmacophore, StructureBasedPharmacophore):
+        elif isinstance(pharmacophore, LigandReceptorPharmacophore):
             for ii in range(pharmacophore.num_frames):
                 self._matches.append([])
                 self._pharmacophores.append(pharmacophore.to_rdkit(ii))

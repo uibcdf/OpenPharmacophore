@@ -15,7 +15,7 @@ import re
 import requests
 
 
-class StructureBasedPharmacophore(Pharmacophore):
+class LigandReceptorPharmacophore(Pharmacophore):
     """ Class to store, and extract pharmacophores from protein-ligand complexes.
 
         The pharmacophores can be extracted from a pdb file or from a molecular

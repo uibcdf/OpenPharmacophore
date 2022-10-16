@@ -1,4 +1,4 @@
-from openpharmacophore import StructureBasedPharmacophore, PharmacophoricPoint
+from openpharmacophore import LigandReceptorPharmacophore, PharmacophoricPoint
 import openpharmacophore.data as data
 import nglview as nv
 import numpy as np
@@ -9,26 +9,26 @@ import os
 
 
 def test_init_from_pdb_file():
-    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
     assert pharmacophore.num_frames == 1
     assert len(pharmacophore) == 0
     assert pharmacophore._pdb == data.pdb["1ncr"]
 
 
 def test_init_from_pdb_id(mocker):
-    mocker.patch("openpharmacophore.StructureBasedPharmacophore._fetch_pdb",
+    mocker.patch("openpharmacophore.LigandReceptorPharmacophore._fetch_pdb",
                  return_value="pdb")
-    pharmacophore = StructureBasedPharmacophore("1NCR")
+    pharmacophore = LigandReceptorPharmacophore("1NCR")
     assert len(pharmacophore) == 0
     assert pharmacophore.num_frames == 1
     assert pharmacophore._pdb == "pdb"
 
 
 def test_is_pdb_id():
-    assert StructureBasedPharmacophore._is_pdb_id("1A52")
-    assert StructureBasedPharmacophore._is_pdb_id("5UFW")
-    assert not StructureBasedPharmacophore._is_pdb_id("1A52D")
-    assert not StructureBasedPharmacophore._is_pdb_id("1A3")
+    assert LigandReceptorPharmacophore._is_pdb_id("1A52")
+    assert LigandReceptorPharmacophore._is_pdb_id("5UFW")
+    assert not LigandReceptorPharmacophore._is_pdb_id("1A52D")
+    assert not LigandReceptorPharmacophore._is_pdb_id("1A3")
 
 
 def test_fetch_pdb(mocker):
@@ -36,19 +36,19 @@ def test_fetch_pdb(mocker):
     mock_get.return_value.status_code = 200
     mock_get.return_value.content = b"pdb"
 
-    assert StructureBasedPharmacophore._fetch_pdb("1A52") == "pdb"
+    assert LigandReceptorPharmacophore._fetch_pdb("1A52") == "pdb"
     mock_get.assert_called_once_with('http://files.rcsb.org/download/1A52.pdb', allow_redirects=True)
 
 
 def test_from_file_moe():
-    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore(None)
     pharmacophore.from_file(data.pharmacophores["gmp"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 10
 
 
 def test_from_file_mol2():
-    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore(None)
     pharmacophore.from_file(data.pharmacophores["elastase"])
     assert len(pharmacophore) == 8
     assert pharmacophore.num_frames == 8
@@ -56,14 +56,14 @@ def test_from_file_mol2():
 
 
 def test_from_file_json():
-    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore(None)
     pharmacophore.from_file(data.pharmacophores["1M70"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 5
 
 
 def test_from_file_pml():
-    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore(None)
     pharmacophore.from_file(data.pharmacophores["ligscout"])
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 4
@@ -88,7 +88,7 @@ def pharmacophore_one_frame():
         puw.quantity(1.0, "angstroms")
     )
 
-    ph = StructureBasedPharmacophore(None)
+    ph = LigandReceptorPharmacophore(None)
     ph.add_frame()
     ph.add_points_to_frame([acceptor, donor, aromatic], 0)
     return ph
@@ -175,7 +175,7 @@ def test_to_rdkit(pharmacophore_one_frame):
 
 @pytest.fixture()
 def analyzed_pharmacophore():
-    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
     pharmacophore.analyze()
     return pharmacophore
 
@@ -189,7 +189,7 @@ def test_protein_ligand_interactions(analyzed_pharmacophore):
 
 def test_points_from_interactions(analyzed_pharmacophore):
     interactions = analyzed_pharmacophore._interactions
-    points = StructureBasedPharmacophore._points_from_interactions(
+    points = LigandReceptorPharmacophore._points_from_interactions(
         interactions, "W11:A:7001", 1.0)
 
     assert len(points) == 9
@@ -200,7 +200,7 @@ def test_points_from_interactions(analyzed_pharmacophore):
 
 
 def test_extract_single_frame_without_analyzing():
-    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
     pharmacophore.extract("W11:A:7001", 1.0)
     assert len(pharmacophore) == 1
     assert len(pharmacophore[0]) == 9
@@ -209,7 +209,7 @@ def test_extract_single_frame_without_analyzing():
 
 @pytest.fixture()
 def analyzed_and_extracted_pharmacophore():
-    pharmacophore = StructureBasedPharmacophore(data.pdb["1ncr"])
+    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr"])
     pharmacophore.analyze()
     pharmacophore.extract("W11:A:7001", 1.0)
 

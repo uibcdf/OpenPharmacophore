@@ -1,4 +1,4 @@
-from openpharmacophore import LigandBasedPharmacophore, StructureBasedPharmacophore, VirtualScreening
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, VirtualScreening
 from openpharmacophore.utils.conformers import generate_conformers
 import openpharmacophore.data as data
 import pytest
@@ -14,7 +14,7 @@ def ligand_based_pharmacophore():
 
 @pytest.fixture()
 def structure_based_pharmacophore():
-    pharmacophore = StructureBasedPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore(None)
     pharmacophore.from_file(data.pharmacophores["1M70"])
     return pharmacophore
 
