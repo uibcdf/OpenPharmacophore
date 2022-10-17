@@ -8,20 +8,33 @@ from copy import deepcopy
 import os
 
 
-def test_init_from_pdb_file():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
+def test_init_ligand_receptor_pharmacophore():
+    pharmacophore = LigandReceptorPharmacophore()
+    assert len(pharmacophore) == 0
+
+
+def test_load_pdb_file(mocker):
+    mock_pl_complex = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore.load_pdb(data.pdb["1ncr.pdb"])
     assert pharmacophore.num_frames == 1
     assert len(pharmacophore) == 0
-    assert pharmacophore._pdb == data.pdb["1ncr.pdb"]
+
+    mock_pl_complex.assert_called_once_with(data.pdb["1ncr.pdb"])
 
 
-def test_init_from_pdb_id(mocker):
+def test_load_pdb_id(mocker):
     mocker.patch("openpharmacophore.LigandReceptorPharmacophore._fetch_pdb",
-                 return_value="pdb")
-    pharmacophore = LigandReceptorPharmacophore("1NCR")
+                 return_value=b"pdb")
+    mock_pl_complex = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore.load_pdb_id("1NCR")
     assert len(pharmacophore) == 0
     assert pharmacophore.num_frames == 1
-    assert pharmacophore._pdb == "pdb"
+
+    mock_pl_complex.assert_called_once()
 
 
 def test_is_pdb_id():
@@ -36,7 +49,7 @@ def test_fetch_pdb(mocker):
     mock_get.return_value.status_code = 200
     mock_get.return_value.content = b"pdb"
 
-    assert LigandReceptorPharmacophore._fetch_pdb("1A52") == "pdb"
+    assert LigandReceptorPharmacophore._fetch_pdb("1A52") == b"pdb"
     mock_get.assert_called_once_with('http://files.rcsb.org/download/1A52.pdb', allow_redirects=True)
 
 
@@ -59,7 +72,7 @@ def pharmacophore_one_frame():
         puw.quantity(1.0, "angstroms")
     )
 
-    ph = LigandReceptorPharmacophore(None)
+    ph = LigandReceptorPharmacophore()
     ph.add_frame()
     ph.add_points_to_frame([acceptor, donor, aromatic], 0)
     return ph

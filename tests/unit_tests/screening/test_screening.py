@@ -14,7 +14,7 @@ def ligand_based_pharmacophore():
 
 @pytest.fixture()
 def structure_based_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore(None)
+    pharmacophore = LigandReceptorPharmacophore()
     pharmacophore.from_file(data.pharmacophores["1M70.json"])
     return pharmacophore
 

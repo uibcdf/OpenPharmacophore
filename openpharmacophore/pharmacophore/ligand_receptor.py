@@ -1,17 +1,16 @@
 from .pharmacophore import Pharmacophore
-from .pharmacophoric_point import PharmacophoricPoint
 from .rdkit_pharmacophore import rdkit_pharmacophore
+from .pl_complex import PLComplex
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                   pharmacophoric_points_from_ph4_file, read_ligandscout)
 from .._private_tools.exceptions import InvalidFileFormat, PDBFetchError
-import numpy as np
 import nglview as nv
-import pyunitwizard as puw
 import json
 import re
 import requests
+import tempfile
 
 
 class LigandReceptorPharmacophore(Pharmacophore):
@@ -20,34 +19,16 @@ class LigandReceptorPharmacophore(Pharmacophore):
         The pharmacophores can be extracted from a pdb file or from a molecular
         dynamics simulation.
 
-        Parameters
-        ----------
-        receptor : Any
-            A PDB id, pdb file or a trajectory or topology file containing the protein-ligand
-            complex.
-
     """
 
-    def __init__(self, receptor):
+    def __init__(self):
         # Pharmacophores will be stored as a list of pharmacophoric points.
         # A list for each pharmacophore
         self._pharmacophores = []
         self._pharmacophores_frames = []  # Contains the frame to which each pharmacophore belongs
         self._num_frames = 0
 
-        self._pdb = ""  # A file path to a pdb file or a pdb as a string
-
-        if isinstance(receptor, str):
-            if self._is_pdb_id(receptor):
-                self._pdb = self._fetch_pdb(receptor)
-                self._num_frames += 1
-            elif receptor.endswith(".pdb"):
-                self._pdb_is_str = False
-                self._pdb = receptor
-                self._num_frames += 1
-            else:
-                # Load from a trajectory
-                raise NotImplementedError
+        self._pl_complex = None
 
     @property
     def num_frames(self):
@@ -83,7 +64,23 @@ class LigandReceptorPharmacophore(Pharmacophore):
         if res.status_code != 200:
             raise PDBFetchError(pdb_id, url)
 
-        return res.content.decode()
+        return res.content
+
+    def load_pdb(self, file_path):
+        """ Loads the receptor file.
+        """
+        self._pl_complex = PLComplex(file_path)
+        self._num_frames += 1
+
+    def load_pdb_id(self, pdb_id):
+        """ Download the pdb with given id and save it to a temporary file.
+        """
+        pdb_str = self._fetch_pdb(pdb_id)
+        with tempfile.TemporaryFile() as fp:
+            fp.seek(0)
+            fp.write(pdb_str)
+            self._pl_complex = PLComplex(fp)
+        self._num_frames += 1
 
     def from_file(self, file_name):
         """ Load a pharmacophore from a file.
