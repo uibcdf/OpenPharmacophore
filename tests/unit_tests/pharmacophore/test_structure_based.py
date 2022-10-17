@@ -40,35 +40,6 @@ def test_fetch_pdb(mocker):
     mock_get.assert_called_once_with('http://files.rcsb.org/download/1A52.pdb', allow_redirects=True)
 
 
-def test_from_file_moe():
-    pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["gmp.ph4"])
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 10
-
-
-def test_from_file_mol2():
-    pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
-    assert len(pharmacophore) == 8
-    assert pharmacophore.num_frames == 8
-    assert pharmacophore._pharmacophores_frames == list(range(0, 8))
-
-
-def test_from_file_json():
-    pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["1M70.json"])
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 5
-
-
-def test_from_file_pml():
-    pharmacophore = LigandReceptorPharmacophore(None)
-    pharmacophore.from_file(data.pharmacophores["ligscout.pml"])
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 4
-
-
 @pytest.fixture
 def pharmacophore_one_frame():
     acceptor = PharmacophoricPoint(
@@ -173,65 +144,3 @@ def test_to_rdkit(pharmacophore_one_frame):
     assert np.allclose(ring_2.GetPos().z, 2.0)
 
 
-@pytest.fixture()
-def analyzed_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
-    pharmacophore.analyze()
-    return pharmacophore
-
-
-def test_protein_ligand_interactions(analyzed_pharmacophore):
-    interactions = analyzed_pharmacophore._interactions
-    assert len(interactions) == 2
-    assert "MYR:D:4000" in interactions
-    assert "W11:A:7001" in interactions
-
-
-def test_points_from_interactions(analyzed_pharmacophore):
-    interactions = analyzed_pharmacophore._interactions
-    points = LigandReceptorPharmacophore._points_from_interactions(
-        interactions, "W11:A:7001", 1.0)
-
-    assert len(points) == 9
-    n_hydrophobics = len([p for p in points if p.short_name == "H"])
-    n_rings = len([p for p in points if p.short_name == "R"])
-    assert n_hydrophobics == 8
-    assert n_rings == 1
-
-
-def test_extract_single_frame_without_analyzing():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
-    pharmacophore.extract("W11:A:7001", 1.0)
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 9
-    assert pharmacophore._pharmacophores_frames == [0]
-
-
-@pytest.fixture()
-def analyzed_and_extracted_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore(data.pdb["1ncr.pdb"])
-    pharmacophore.analyze()
-    pharmacophore.extract("W11:A:7001", 1.0)
-
-    return pharmacophore
-
-
-def test_extract_single_frame_after_analyzing(analyzed_and_extracted_pharmacophore):
-    assert len(analyzed_and_extracted_pharmacophore) == 1
-    assert len(analyzed_and_extracted_pharmacophore[0]) == 9
-
-
-def test_interactions_and_pdb_are_deleted_after_extraction(analyzed_and_extracted_pharmacophore):
-    with pytest.raises(AttributeError):
-        analyzed_and_extracted_pharmacophore._interactions
-    with pytest.raises(AttributeError):
-        analyzed_and_extracted_pharmacophore._pdb
-    with pytest.raises(AttributeError):
-        analyzed_and_extracted_pharmacophore._pdb_is_str
-
-
-def test_ligand_ids(analyzed_pharmacophore):
-    assert analyzed_pharmacophore.ligand_ids() == [
-        "W11:A:7001",
-        "MYR:D:4000",
-    ]
