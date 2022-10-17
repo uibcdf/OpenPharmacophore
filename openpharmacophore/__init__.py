@@ -12,6 +12,7 @@ from .pharmacophore import PharmacophoricPoint, distance_between_pharmacophoric_
 from .pharmacophore import LigandBasedPharmacophore
 from .pharmacophore import LigandReceptorPharmacophore
 from .pharmacophore import load_from_file
+from .pharmacophore import load
 from .screening import VirtualScreening
 
 
