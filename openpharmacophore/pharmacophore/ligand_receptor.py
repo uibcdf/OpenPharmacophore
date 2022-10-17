@@ -1,10 +1,13 @@
 from .pharmacophore import Pharmacophore
+from .pharmacophoric_point import PharmacophoricPoint
 from .rdkit_pharmacophore import rdkit_pharmacophore
 from .pl_complex import PLComplex
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from .._private_tools.exceptions import PDBFetchError
+import numpy as np
 import nglview as nv
+import pyunitwizard as puw
 import json
 import re
 import requests
@@ -18,6 +21,13 @@ class LigandReceptorPharmacophore(Pharmacophore):
         dynamics simulation.
 
     """
+    # Values from ligandscout and plip
+    HB_DIST_MIN = puw.quantity(2.5, "angstroms")
+    HB_DIST_MAX = puw.quantity(4.1, "angstroms")
+    HB_ANGLE_MIN = 100  # degrees
+    HYD_DIST_MAX = puw.quantity(5.0, "angstroms")
+    CHARGE_DIST_MAX = puw.quantity(5.6, "angstroms")
+    AR_DIST_MAX = puw.quantity(7.5, "angstroms")
 
     def __init__(self):
         # Pharmacophores will be stored as a list of pharmacophoric points.
@@ -31,6 +41,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
     @property
     def num_frames(self):
         return self._num_frames
+
+    @property
+    def receptor(self):
+        return self._pl_complex
 
     @staticmethod
     def _is_pdb_id(receptor):
@@ -158,7 +172,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def extract(self, ligand_id, frames=None):
+    def extract(self, ligand_id, frames=0):
         """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
             can contain multiple ligands or small molecules, pharmacophore(s) is
             extracted only for the selected one.
@@ -168,11 +182,128 @@ class LigandReceptorPharmacophore(Pharmacophore):
             ligand_id : str
                 The id of the ligand whose pharmacophore will be extracted.
 
-            frames : list[int] or 'all', optional
-                Extract pharmacophores from the given frames of the trajectory.
-                If None is passed only the first frame will be used.
+            frames : int or list[int] or 'all', optional
+                Extract pharmacophores from the given frame(s) of the trajectory.
         """
-        raise NotImplementedError
+        if isinstance(frames, int):
+            ligand_feats = self._pl_complex.ligand_feats_center(ligand_id)
+            receptor_feats = self._pl_complex.receptor_feats_center()
+
+            if "hb donor" in ligand_feats:
+                self._hb_donor_pharmacophoric_points(
+                    ligand_feats["hb donor"], receptor_feats["hb acceptor"], frames)
+
+            if "hb acceptor" in ligand_feats:
+                self._hb_acceptor_pharmacophoric_points(
+                    ligand_feats["hb acceptor"], receptor_feats["hb donor"], frames)
+
+            if "aromatic ring" in ligand_feats:
+                self._aromatic_pharmacophoric_points(
+                    ligand_feats["aromatic ring"], receptor_feats["aromatic ring"], frames)
+
+            if "hydrophobicity" in ligand_feats:
+                self._hydrophobic_pharmacophoric_points(
+                    ligand_feats["hydrophobicity"], receptor_feats["hydrophobicity"], frames)
+
+            if "positive charge" in ligand_feats:
+                self._charge_pharmacophoric_points(
+                    ligand_feats["positive charge"], receptor_feats["negative charge"], frames)
+
+            if "negative charge" in ligand_feats:
+                self._charge_pharmacophoric_points(
+                    ligand_feats["negative charge"], receptor_feats["positive charge"], frames)
+
+        else:
+            raise NotImplementedError
+
+    def _hb_donor_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        """ Compute hydrogen bond donor pharmacophoric points from
+            protein-ligand interactions.
+
+            Parameters
+            -----------
+            ligand_centers : list[puw.Quantity]
+                Centroids of the donors in the ligand.
+
+            receptor_centers : list[puw.Quantity]
+                Centroids of acceptors in the receptor.
+
+            frame : int
+                The frame of the trajectory.
+
+        """
+        pass
+
+    def _hb_acceptor_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        """ Compute hydrogen bond acceptor pharmacophoric points from
+            protein-ligand interactions.
+
+            Parameters
+            -----------
+            ligand_centers : list[puw.Quantity]
+                Centroids of the acceptors in the ligand.
+
+            receptor_centers : list[puw.Quantity]
+                Centroids of donors in the receptor.
+
+            frame : int
+                The frame of the trajectory.
+        """
+        pass
+
+    def _aromatic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        """ Compute aromatic pharmacophoric points from
+            protein-ligand interactions.
+
+            Parameters
+            -----------
+            ligand_centers : list[puw.Quantity]
+                Centroids of the aromatic rings in the ligand.
+
+            receptor_centers : list[puw.Quantity]
+                Centroids of aromatic rings in the receptor.
+
+            frame : int
+                The frame of the trajectory.
+
+        """
+        pass
+
+    def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        """ Compute hydrophobic pharmacophoric points from
+            protein-ligand interactions.
+
+            Parameters
+            -----------
+            ligand_centers : list[puw.Quantity]
+                Centroids of the hydrophobic areas in the ligand.
+
+            receptor_centers : list[puw.Quantity]
+                Centroids of hydrophobic areas in the receptor.
+
+            frame : int
+                The frame of the trajectory.
+
+        """
+        pass
+
+    def _charge_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        """ Compute positive or negative charge pharmacophoric points from
+            protein-ligand interactions.
+
+            Parameters
+            -----------
+            ligand_centers : list[puw.Quantity]
+                Centroids of the positive or negative areas in the ligand.
+
+            receptor_centers : list[puw.Quantity]
+                Centroids of areas with opposite sign in the receptor.
+
+            frame : int
+                The frame of the trajectory.
+
+        """
+        pass
 
     def __len__(self):
         return len(self._pharmacophores)

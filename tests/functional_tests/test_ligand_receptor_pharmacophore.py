@@ -78,7 +78,7 @@ def test_ligand_receptor_pharmacophore_from_pdb():
     # We call find ligands method to ensure our pdb contains a single ligand.
     # We know estradiol has the id EST.
     lig_ids = pharmacophore.receptor.find_ligands()
-    assert lig_ids == ["EST: B"]
+    assert lig_ids == ["EST:B"]
 
     # With the full ligand id we can now extract a ligand-receptor based pharmacophore
     ligand_id = lig_ids[0]

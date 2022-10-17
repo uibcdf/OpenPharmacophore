@@ -157,3 +157,137 @@ def test_to_rdkit(pharmacophore_one_frame):
     assert np.allclose(ring_2.GetPos().z, 2.0)
 
 
+# TODO:
+#  This mock object is set up so that the distance between the
+#  first center of each feature in the ligand is at an optimal distance
+#  of the second center of each feature in the protein to create a pharmacophoric
+#  point. Right now only distances are being considered. However, angles and other
+#  considerations must be made depending on the chemical feature.
+
+ligand_feats_side = [{
+        "hb acceptor": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                        puw.quantity(np.array([-7.] * 3), "angstroms"),
+                        ],
+        "aromatic ring": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                          puw.quantity(np.array([-7.] * 3), "angstroms"),
+                          ],
+        "hb donor": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                     puw.quantity(np.array([-7.] * 3), "angstroms"),
+                     ],
+        "hydrophobicity": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                           puw.quantity(np.array([-7.] * 3), "angstroms"),
+                           ],
+        "positive charge": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                            puw.quantity(np.array([-7.] * 3), "angstroms"),
+                            ],
+        "negative charge": [puw.quantity(np.array([0.] * 3), "angstroms"),
+                            puw.quantity(np.array([-7.] * 3), "angstroms"),
+                            ]
+    }]
+
+receptor_feats_side = [{
+        "hb acceptor": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                        puw.quantity(np.array([2.] * 3), "angstroms"),
+                        ],
+        "aromatic ring": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                          puw.quantity(np.array([2.] * 3), "angstroms"),
+                          ],
+        "hb donor": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                     puw.quantity(np.array([2.] * 3), "angstroms"),
+                     ],
+        "hydrophobicity": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                           puw.quantity(np.array([2.] * 3), "angstroms"),
+                           ],
+        "positive charge": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                            puw.quantity(np.array([2.] * 3), "angstroms"),
+                            ],
+        "negative charge": [puw.quantity(np.array([7.] * 3), "angstroms"),
+                            puw.quantity(np.array([2.] * 3), "angstroms"),
+                            ]
+    }]
+
+
+def test_hb_acceptor_pharmacophoric_points():
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._hb_acceptor_pharmacophoric_points(
+        ligand_feats_side[0]["hb acceptor"],
+        receptor_feats_side[0]["hb acceptor"]
+    )
+    assert len(pharmacophore[0]) == 1
+    assert pharmacophore[0][0].feature_name == "hb acceptor"
+    assert np.all(pharmacophore[0][0].center == np.array([0.]*3))
+    assert pharmacophore[0][0].has_direction
+
+
+def test_hb_donor_pharmacophoric_points():
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._hb_donor_pharmacophoric_points(
+        ligand_feats_side[0]["hb donor"],
+        receptor_feats_side[0]["hb donor"]
+    )
+    assert len(pharmacophore[0]) == 1
+    assert pharmacophore[0].feature_name == "hb donor"
+    assert np.all(pharmacophore[0].center == np.array([0.]*3))
+    assert pharmacophore[0][0].has_direction
+
+
+def test_aromatic_pharmacophoric_points():
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._aromatic_pharmacophoric_points(
+        ligand_feats_side[0]["aromatic ring"],
+        receptor_feats_side[0]["aromatic ring"],
+    )
+    assert len(pharmacophore[0]) == 1
+    assert pharmacophore[0].feature_name == "aromatic ring"
+    assert np.all(pharmacophore[0].center == np.array([0.] * 3))
+    assert pharmacophore[0][0].has_direction
+
+
+def test_hydrophobic_pharmacophoric_points():
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._hydrophobic_pharmacophoric_points(
+        ligand_feats_side[0]["hydrophobicity"],
+        receptor_feats_side[0]["hydrophobicity"],
+    )
+    assert len(pharmacophore[0]) == 1
+    assert pharmacophore[0].feature_name == "hydrophobicity"
+    assert np.all(pharmacophore[0].center == np.array([0.] * 3))
+    assert not pharmacophore[0][0].has_direction
+
+
+def test_charge_pharmacophoric_points():
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._hydrophobic_pharmacophoric_points(
+        ligand_feats_side[0]["positive charge"],
+        receptor_feats_side[0]["negative charge"],
+    )
+    assert len(pharmacophore[0]) == 1
+    assert pharmacophore[0].feature_name == "positive charge"
+    assert np.all(pharmacophore[0].center == np.array([0.] * 3))
+    assert not pharmacophore[0][0].has_direction
+
+
+def test_extract_all_features(mocker):
+    pharmacophore = LigandReceptorPharmacophore()
+    pharmacophore._pl_complex = mocker.Mock()
+    pharmacophore._pl_complex.ligand_feats_center.side_effect = ligand_feats_side
+    pharmacophore._pl_complex.receptor_feats_center.side_effect = receptor_feats_side
+
+    pharmacophore.extract("EST:B")
+    assert len(pharmacophore[0]) == 6
+    expected_features = {
+        "hb acceptor",
+        "aromatic ring",
+        "hb donor",
+        "hydrophobicity",
+        "positive charge",
+        "negative charge",
+    }
+    actual_features = set()
+    for pnt in pharmacophore[0]:
+        actual_features.add(pnt.feature_name)
+    assert actual_features == expected_features
+
+    center_expected = np.array([0.] * 3)
+    for point in pharmacophore[0]:
+        assert np.all(point.center == center_expected)
