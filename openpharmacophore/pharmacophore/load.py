@@ -1,3 +1,19 @@
+from .ligand_based import LigandBasedPharmacophore
+from .ligand_receptor import LigandReceptorPharmacophore
+import os
+
+
+traj_file_formats = [
+    "h5",
+    # TODO: add trajectory formats
+]
+
+molecular_file_formats = [
+    "smi",
+    "mol2",
+    "sdf",
+    # TODO: add other molecular formats
+]
 
 
 def load(pharmacophore_data):
@@ -14,4 +30,19 @@ def load(pharmacophore_data):
             Can be ligand, receptor-ligand or receptor based, depending on the type
             of input.
     """
-    pass
+    if os.path.isfile(pharmacophore_data):
+        file_extension = pharmacophore_data.split(".")[-1]
+        if file_extension == "pdb":
+            pharmacophore = LigandReceptorPharmacophore()
+            pharmacophore.load_pdb(pharmacophore_data)
+            return pharmacophore
+
+        if file_extension in traj_file_formats:
+            raise NotImplementedError
+
+        elif file_extension in molecular_file_formats:
+            pharmacophore = LigandBasedPharmacophore()
+            pharmacophore.load_ligands(pharmacophore_data)
+            return pharmacophore
+
+    raise NotImplementedError

@@ -23,17 +23,9 @@ class LigandBasedPharmacophore(Pharmacophore):
             A file with ligands or a list of molecules
     """
 
-    def __init__(self, ligands):
+    def __init__(self):
         self._points = []
         self._ligands = []
-
-        if isinstance(ligands, str) and os.path.isfile(ligands):
-            if self._is_ligand_file(ligands):
-                self._ligands = mol_file_to_list(ligands)
-            else:
-                self.from_file(ligands)
-        else:
-            self._ligands = ligands
 
     @property
     def pharmacophoric_points(self):
@@ -58,6 +50,12 @@ class LigandBasedPharmacophore(Pharmacophore):
     @ligands.deleter
     def ligands(self):
         self._ligands.clear()
+
+    def load_ligands(self, ligand_file):
+        """ Load ligands from a file and store them as a
+            list of molecules.
+        """
+        self._ligands = mol_file_to_list(ligand_file)
 
     def from_file(self, file_name):
         """ Load a pharmacophore from a file.

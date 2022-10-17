@@ -28,14 +28,13 @@ def test_load_ligand_receptor_pharma_pml():
     pharmacophore = load_from_file(data.pharmacophores["ligscout.pml"])
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
     assert len(pharmacophore) == 1
-    assert len(pharmacophore) == 4
+    assert len(pharmacophore[0]) == 4
 
 
 def test_load_ligand_based_pharma_ph4():
     pharmacophore = load_from_file(data.pharmacophores["gmp.ph4"],
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
-    assert len(pharmacophore) == 1
     assert len(pharmacophore) == 10
 
 
@@ -50,13 +49,11 @@ def test_load_ligand_based_pharma_json():
     pharmacophore = load_from_file(data.pharmacophores["1M70.json"],
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 5
+    assert len(pharmacophore) == 5
 
 
 def test_load_ligand_based_pharma_pml():
     pharmacophore = load_from_file(data.pharmacophores["ligscout.pml"],
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
-    assert len(pharmacophore) == 1
     assert len(pharmacophore) == 4

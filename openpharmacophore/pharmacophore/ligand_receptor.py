@@ -3,9 +3,7 @@ from .rdkit_pharmacophore import rdkit_pharmacophore
 from .pl_complex import PLComplex
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
-from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
-                  pharmacophoric_points_from_ph4_file, read_ligandscout)
-from .._private_tools.exceptions import InvalidFileFormat, PDBFetchError
+from .._private_tools.exceptions import PDBFetchError
 import nglview as nv
 import json
 import re
@@ -81,36 +79,6 @@ class LigandReceptorPharmacophore(Pharmacophore):
             fp.write(pdb_str)
             self._pl_complex = PLComplex(fp)
         self._num_frames += 1
-
-    def from_file(self, file_name):
-        """ Load a pharmacophore from a file.
-
-          Parameters
-          ---------
-          file_name : str
-              Name of the file containing the pharmacophore
-
-        """
-        if file_name.endswith(".json"):
-            self._pharmacophores.append(load_json_pharmacophore(file_name)[0])
-            self._num_frames = 1
-            self._pharmacophores_frames.append(0)
-        elif file_name.endswith(".mol2"):
-            # Loads all pharmacophores contained in the mol2 file. It assumes that each pharmacophore
-            # corresponds to a different timestep
-            self._pharmacophores = load_mol2_pharmacophoric_points(file_name)
-            self._pharmacophores_frames = list(range(0, len(self._pharmacophores)))
-            self._num_frames = len(self._pharmacophores)
-        elif file_name.endswith(".pml"):
-            self._pharmacophores.append(read_ligandscout(file_name))
-            self._num_frames = 1
-            self._pharmacophores_frames.append(0)
-        elif file_name.endswith(".ph4"):
-            self._pharmacophores.append(pharmacophoric_points_from_ph4_file(file_name))
-            self._num_frames = 1
-            self._pharmacophores_frames.append(0)
-        else:
-            raise InvalidFileFormat(file_name.split(".")[-1])
 
     def add_frame(self):
         """ Add a new frame to the pharmacophore. """

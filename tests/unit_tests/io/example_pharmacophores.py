@@ -3,7 +3,7 @@ import pyunitwizard as puw
 
 
 def two_element_pharmacophore():
-    """Returns a pharmacophore with an aromatic ring and an hb acceptor"""
+    """Returns a pharmacophore with an aromatic ring and a hb acceptor"""
     radius = puw.quantity(1.0, "angstroms")
     ring = PharmacophoricPoint(
         feat_type="aromatic ring",
@@ -16,7 +16,7 @@ def two_element_pharmacophore():
         center=puw.quantity([1, 2, 2], "angstroms"),
         direction=[0, 1, 1],
         radius=radius)
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = [ring, acceptor]
     return pharmacophore
 
@@ -39,7 +39,7 @@ def three_element_pharmacophore():
         feat_type="excluded volume",
         center=puw.quantity([2, 1, 2], "angstroms"),
         radius=radius)
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = [acceptor, excluded, ring]
     return pharmacophore
 
@@ -75,7 +75,7 @@ def five_element_pharmacophore():
         center=puw.quantity([-1, 2, 2], "angstroms"),
         radius=radius,
     )
-    pharmacophore = LigandBasedPharmacophore(None)
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = [acceptor, hb_donor,
                                            hydrophobicity, ring_1, ring_2]
     return pharmacophore

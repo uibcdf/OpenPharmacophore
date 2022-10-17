@@ -10,51 +10,17 @@ import os
 from unittest.mock import Mock, call
 
 
-def test_init_with_pharmacophore_file():
-    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["ligscout.pml"])
-    assert len(pharmacophore) == 4
-
-    pharmacophore = LigandBasedPharmacophore(data.pharmacophores["gmp.ph4"])
-    assert len(pharmacophore) == 10
-
-
-def test_init_with_smi_file():
-    ligands = data.ligands["clique_detection.smi"]
-    pharmacophore = LigandBasedPharmacophore(ligands)
+def test_init_ligand_based_pharmacophore():
+    pharmacophore = LigandBasedPharmacophore()
     assert len(pharmacophore) == 0
+    assert len(pharmacophore.ligands) == 0
+
+
+def test_load_ligands():
+    pharmacophore = LigandBasedPharmacophore()
+    pharmacophore.load_ligands(data.ligands["clique_detection.smi"])
     assert len(pharmacophore.ligands) == 5
-
-
-def test_init_with_mol2_file():
-    ligands = data.ligands["ace.mol2"]
-    pharmacophore = LigandBasedPharmacophore(ligands)
-    assert len(pharmacophore) == 0
-    assert len(pharmacophore.ligands) == 3
-
-
-def test_init_with_sdf_file():
-    ligands = data.ligands["sdf_example.sdf"]
-    pharmacophore = LigandBasedPharmacophore(ligands)
-    assert len(pharmacophore) == 0
-    assert len(pharmacophore.ligands) == 3
-
-
-def test_from_file_moe():
-    pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["gmp.ph4"])
-    assert len(pharmacophore) == 10
-
-
-def test_from_file_mol2():
-    pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
-    assert len(pharmacophore) == 4
-
-
-def test_from_file_json():
-    pharmacophore = LigandBasedPharmacophore([])
-    pharmacophore.from_file(data.pharmacophores["1M70.json"])
-    assert len(pharmacophore) == 5
+    assert all([isinstance(lig, Chem.Mol) for lig in pharmacophore.ligands])
 
 
 def test_is_ligand_file():
@@ -71,7 +37,7 @@ def pharmacophore_three_points():
         PharmacophoricPoint("aromatic ring", center * 2.0, radius),
         PharmacophoricPoint("hydrophobicity", center * -2.0, radius),
     ]
-    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = points
     return pharmacophore
 
@@ -122,7 +88,7 @@ def test_pharmacophore_equality(pharmacophore_three_points):
     donor = PharmacophoricPoint("hb donor",
                                 puw.quantity([1.0, 1.0, 1.0], "angstroms"),
                                 radius)
-    pharmacophore_1 = LigandBasedPharmacophore([])
+    pharmacophore_1 = LigandBasedPharmacophore()
     pharmacophore_1.pharmacophoric_points = [donor]
     assert not pharmacophore_1 == pharmacophore_three_points
 
@@ -132,12 +98,12 @@ def test_pharmacophore_equality(pharmacophore_three_points):
     hydrophobic = PharmacophoricPoint("hydrophobicity",
                                       puw.quantity([-1.0, 2.0, 2.0], "angstroms"),
                                       radius)
-    pharmacophore_2 = LigandBasedPharmacophore([])
+    pharmacophore_2 = LigandBasedPharmacophore()
     pharmacophore_2.pharmacophoric_points = [donor, ring, hydrophobic]
     assert not pharmacophore_2 == pharmacophore_three_points
 
     hydrophobic.center = puw.quantity([-2.0, -2.0, -2.0], "angstroms")
-    pharmacophore_3 = LigandBasedPharmacophore([])
+    pharmacophore_3 = LigandBasedPharmacophore()
     pharmacophore_3.pharmacophoric_points = [donor, ring, hydrophobic]
     assert pharmacophore_3 == pharmacophore_three_points
 
@@ -169,7 +135,7 @@ def test_to_rdkit(pharmacophore_three_points):
 
 def test_distance_matrix():
     # Test pharmacophore with zero elements
-    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore = LigandBasedPharmacophore()
     matrix = pharmacophore.distance_matrix()
     assert matrix.shape == (0, 0)
 
@@ -186,7 +152,7 @@ def test_distance_matrix():
                             radius=radius),
     ]
 
-    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = points
     distance_matrix = pharmacophore.distance_matrix()
 
@@ -213,7 +179,7 @@ def test_distance_matrix():
     ]
 
     sq = np.sqrt
-    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.pharmacophoric_points = points
     distance_matrix = pharmacophore.distance_matrix()
     assert distance_matrix.shape == (4, 4)
@@ -355,7 +321,8 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
 def test_add_ligands_to_view():
 
     mock_view = Mock()
-    pharmacophore = LigandBasedPharmacophore(data.ligands["clique_detection.smi"])
+    pharmacophore = LigandBasedPharmacophore()
+    pharmacophore.load_ligands(data.ligands["clique_detection.smi"])
     pharmacophore.add_ligands_to_view(mock_view)
     ligands_call = [call(lig) for lig in pharmacophore.ligands]
 

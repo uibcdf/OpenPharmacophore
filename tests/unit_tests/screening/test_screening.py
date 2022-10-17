@@ -1,5 +1,6 @@
 from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, VirtualScreening
 from openpharmacophore.utils.conformers import generate_conformers
+from openpharmacophore import load_from_file
 import openpharmacophore.data as data
 import pytest
 from rdkit.Chem import MolFromSmiles
@@ -7,16 +8,15 @@ from rdkit.Chem import MolFromSmiles
 
 @pytest.fixture()
 def ligand_based_pharmacophore():
-    pharmacophore = LigandBasedPharmacophore([])
+    pharmacophore = LigandBasedPharmacophore()
     pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
     return pharmacophore
 
 
 @pytest.fixture()
 def structure_based_pharmacophore():
-    pharmacophore = LigandReceptorPharmacophore()
-    pharmacophore.from_file(data.pharmacophores["1M70.json"])
-    return pharmacophore
+    return load_from_file(data.pharmacophores["1M70.json"],
+                          pharma_type="ligand-receptor")
 
 
 def test_init_virtual_screening_with_lbp(ligand_based_pharmacophore):
