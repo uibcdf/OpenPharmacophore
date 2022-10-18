@@ -5,6 +5,7 @@ from .pl_complex import PLComplex
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from .._private_tools.exceptions import PDBFetchError
+import networkx as nx
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -26,6 +27,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
     HB_DIST_MAX = puw.quantity(4.1, "angstroms")
     HB_ANGLE_MIN = 100  # degrees
     HYD_DIST_MAX = puw.quantity(5.0, "angstroms")
+    HYD_MERGE_DIST = puw.quantity(2.0, "angstroms")  # value from pharmer
     CHARGE_DIST_MAX = puw.quantity(5.6, "angstroms")
     AR_DIST_MAX = puw.quantity(7.5, "angstroms")
 
@@ -186,6 +188,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 Extract pharmacophores from the given frame(s) of the trajectory.
         """
         if isinstance(frames, int):
+            self._pharmacophores.append([])
+            self._pharmacophores_frames.append(frames)
+            self._num_frames += 1
+
             ligand_feats = self._pl_complex.ligand_feats_center(ligand_id)
             receptor_feats = self._pl_complex.receptor_feats_center()
 
@@ -207,11 +213,13 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
             if "positive charge" in ligand_feats:
                 self._charge_pharmacophoric_points(
-                    ligand_feats["positive charge"], receptor_feats["negative charge"], frames)
+                    ligand_feats["positive charge"], receptor_feats["negative charge"],
+                    "positive charge", frames)
 
             if "negative charge" in ligand_feats:
                 self._charge_pharmacophoric_points(
-                    ligand_feats["negative charge"], receptor_feats["positive charge"], frames)
+                    ligand_feats["negative charge"], receptor_feats["positive charge"],
+                    "negative charge", frames)
 
         else:
             raise NotImplementedError
@@ -270,8 +278,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
         pass
 
     def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
-        """ Compute hydrophobic pharmacophoric points from
-            protein-ligand interactions.
+        """ Compute hydrophobic pharmacophoric points from protein-ligand interactions.
+
+            Typically, there will be a lot of hydrophobic points so, they are passed
+            to a merging procedure.
 
             Parameters
             -----------
@@ -285,9 +295,54 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 The frame of the trajectory.
 
         """
-        pass
+        centers = []
+        radius = puw.quantity(1.0, "angstroms")
+        for lig_center in ligand_centers:
+            for prot_center in receptor_centers:
+                if self._points_distance(lig_center, prot_center) < self.HYD_DIST_MAX:
+                    centers.append(lig_center)
 
-    def _charge_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
+        points_clustered = self._merge_hydrophobic_points(centers, radius)
+        self._pharmacophores[frame] += points_clustered
+
+    @staticmethod
+    def _merge_hydrophobic_points(centers, radius):
+        """ Merge group of hydrophobic points close to each other.
+
+            Parameters
+            ----------
+            centers : list[np.array]
+            radius : puw.Quantity
+
+            Returns
+            -------
+            list[PharmacophoricPoint]
+        """
+        # Create a graph of the hydrophobic features, were each node represents
+        # a feature and an edge is added between two nodes only if their distance
+        # is < HYD_MERGE_DIST.
+        hyd_graph = nx.Graph()
+        for ii in range(len(centers)):
+            hyd_graph.add_node(ii)
+
+        for ii in range(len(centers)):
+            for jj in range(ii + 1, len(centers)):
+                dist = LigandReceptorPharmacophore._points_distance(centers[ii], centers[jj])
+                if dist <= LigandReceptorPharmacophore.HYD_MERGE_DIST:
+                    hyd_graph.add_edge(ii, jj)
+
+        # Find each maximum clique and group all nodes within a clique
+        cliques_iter = nx.find_cliques(hyd_graph)
+        points = []
+        for clique in cliques_iter:
+            clique_centers = [centers[ii] for ii in clique]
+            center = np.mean(np.stack(clique_centers), axis=0)
+            pharma_point = PharmacophoricPoint("hydrophobicity", center, radius)
+            points.append(pharma_point)
+        return points
+
+    def _charge_pharmacophoric_points(self, ligand_centers, receptor_centers,
+                                      charge_type, frame):
         """ Compute positive or negative charge pharmacophoric points from
             protein-ligand interactions.
 
@@ -303,7 +358,17 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 The frame of the trajectory.
 
         """
-        pass
+        radius = puw.quantity(1.0, "angstroms")
+        for lig_center in ligand_centers:
+            for prot_center in receptor_centers:
+                if self._points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
+                    pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
+                    self._pharmacophores[frame].append(pharma_point)
+
+    @staticmethod
+    def _points_distance(coords_1, coords_2):
+        """ Returns the distance between two points in 3D space."""
+        return np.sqrt(np.sum(np.power(coords_1 - coords_2, 2)))
 
     def __len__(self):
         return len(self._pharmacophores)
