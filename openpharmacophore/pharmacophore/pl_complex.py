@@ -18,6 +18,7 @@ class PLComplex:
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
+        self.coords = self.traj.xyz
         self.mol_graph = Chem.MolFromPDBFile(file_path)
 
     @staticmethod
