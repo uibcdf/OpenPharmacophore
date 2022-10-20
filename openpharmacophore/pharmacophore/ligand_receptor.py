@@ -295,8 +295,8 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 if maths.points_distance(rec_centers[jj], lig_centers[ii]) <= self.PISTACK_DIST_MAX:
                     # Calculate deviation from ideal angle by taking the angle between the normals
                     # defined by the planes of each ring
-                    lig_normal = maths.normal_vec(lig_indices[ii], self._pl_complex.coords)
-                    rec_normal = maths.normal_vec(lig_indices[jj], self._pl_complex.coords)
+                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords)
+                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords)
                     angle = maths.angle_between(lig_normal, rec_normal)
 
                     if 0 < angle < self.PISTACK_ANG_DEV or \
@@ -333,7 +333,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for lig_center in ligand_centers:
             for prot_center in receptor_centers:
-                if maths(lig_center, prot_center) < self.HYD_DIST_MAX:
+                if maths.points_distance(lig_center, prot_center) < self.HYD_DIST_MAX:
                     centers.append(lig_center)
 
         points_clustered = self._merge_hydrophobic_points(centers, radius)
@@ -395,7 +395,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for lig_center in ligand_centers:
             for prot_center in receptor_centers:
-                if maths(lig_center, prot_center) < self.CHARGE_DIST_MAX:
+                if maths.points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
                     pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
                     self._pharmacophores[frame].append(pharma_point)
 

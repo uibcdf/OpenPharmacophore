@@ -9,3 +9,35 @@ def test_points_distance():
         puw.quantity(np.array([4., 3., 0.]), "angstroms"),
     )
     assert puw.get_value(distance) == 5.
+
+
+def test_quantity_norm():
+    qt = puw.quantity(np.array([4, 3, 0]), "angstroms")
+    assert maths.quantity_norm(qt) == 5
+
+
+def test_ring_normal():
+    indices = [0, 1, 2, 3, 4, 5]
+    centroid = puw.quantity(np.array([-1, 1, 2]), "angstroms")
+    coords = puw.quantity(np.array([
+        [-4, 2, 2],
+        [-2, 1, 5],
+        [2, 3, 4],
+        [4, 5, 6],
+        [7, 8, 9],
+        [10, 11, 12]
+    ]), "angstroms")
+    normal = maths.ring_normal(indices, coords, centroid)
+    normal_expected = np.array(
+        [3 / np.sqrt(91), 9 / np.sqrt(91), 1 / np.sqrt(91)])
+    assert np.allclose(normal, normal_expected)
+
+
+def test_point_projection():
+    normal = np.array([0, 0, 1])
+    plane_point = puw.quantity(np.array([0, 0, 3]), "angstroms")
+    point = puw.quantity(np.array([-5, 6, 10]), "angstroms")
+
+    projection = maths.point_projection(normal, plane_point, point)
+    proj_expected = puw.quantity((np.array([-5, 6, 3])), "angstroms")
+    assert np.allclose(projection, proj_expected)
