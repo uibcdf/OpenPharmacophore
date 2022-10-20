@@ -295,20 +295,23 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 if maths.points_distance(rec_centers[jj], lig_centers[ii]) <= self.PISTACK_DIST_MAX:
                     # Calculate deviation from ideal angle by taking the angle between the normals
                     # defined by the planes of each ring
-                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords)
-                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords)
-                    angle = maths.angle_between(lig_normal, rec_normal)
+                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords, lig_centers[ii])
+                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords, rec_centers[jj])
+                    angle = maths.angle_between_normals(lig_normal, rec_normal)
+                    assert 0 <= angle <= 360, f"Angle is {angle}"
 
-                    if 0 < angle < self.PISTACK_ANG_DEV or \
-                            90 - self.PISTACK_ANG_DEV < angle < 90 + self.PISTACK_ANG_DEV:
+                    if 0 <= angle <= self.PISTACK_ANG_DEV or \
+                            90 - self.PISTACK_ANG_DEV <= angle <= 90 + self.PISTACK_ANG_DEV:
 
                         # Project ring centers into the other plane and calculate offset
                         rec_proj = maths.point_projection(lig_normal, lig_centers[ii], rec_centers[jj])
                         lig_proj = maths.point_projection(rec_normal, rec_centers[jj], lig_centers[ii])
-                        offset = min(maths.points_distance(lig_proj, rec_centers),
-                                     maths.points_distance(rec_proj, lig_centers))
+                        offset = min(maths.points_distance(lig_proj, rec_centers[jj]),
+                                     maths.points_distance(rec_proj, lig_centers[ii]))
                         if offset <= self.PISTACK_OFFSET_MAX:
-                            pharma_point = PharmacophoricPoint("aromatic ring", lig_centers[ii], radius)
+                            direction = puw.get_value(rec_centers[jj] - lig_centers[ii])
+                            pharma_point = PharmacophoricPoint(
+                                "aromatic ring", lig_centers[ii], radius, direction)
                             self._pharmacophores[frame].append(pharma_point)
 
     def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):

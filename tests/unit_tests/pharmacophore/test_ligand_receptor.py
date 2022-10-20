@@ -269,7 +269,7 @@ def test_aromatic_pharmacophoric_points_exceeds_max_distance():
 def test_aromatic_pharmacophoric_points_pstack(mocker, ligand_chem_feats, receptor_chem_feats):
     pharmacophore = empty_pharmacophore_one_frame()
     pharmacophore._pl_complex = mocker.Mock()
-    pharmacophore._pl_complex.coords = np.array([
+    pharmacophore._pl_complex.coords = puw.quantity(np.array([
         # First ring is a hexagon on the xy plane
         [1, 0, 0],
         [1/2, np.sqrt(3)/2, 0],
@@ -284,7 +284,7 @@ def test_aromatic_pharmacophoric_points_pstack(mocker, ligand_chem_feats, recept
         [0, 0, 3],
         [1/2, -np.sqrt(3)/2, 3],
         [3/2, -np.sqrt(3)/2, 3],
-    ])
+    ]), "angstroms")
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -296,14 +296,14 @@ def test_aromatic_pharmacophoric_points_pstack(mocker, ligand_chem_feats, recept
     assert pharmacophore[0][0].feature_name == "aromatic ring"
     assert np.all(puw.get_value(pharmacophore[0][0].center) == np.array([0.] * 3))
     assert pharmacophore[0][0].has_direction
-    assert np.allclose(pharmacophore[0].direction,
+    assert np.allclose(pharmacophore[0][0].direction,
                        np.array([1/np.sqrt(10), 0, 3/np.sqrt(10)]))
 
 
 def test_aromatic_pharmacophoric_points_exceeds_max_offset(mocker, ligand_chem_feats, receptor_chem_feats):
     pharmacophore = empty_pharmacophore_one_frame()
     pharmacophore._pl_complex = mocker.Mock()
-    pharmacophore._pl_complex.coords = np.array([
+    pharmacophore._pl_complex.coords = puw.quantity(np.array([
         # First ring is a hexagon on the xy plane
         [1, 0, 0],
         [1 / 2, np.sqrt(3) / 2, 0],
@@ -318,7 +318,7 @@ def test_aromatic_pharmacophoric_points_exceeds_max_offset(mocker, ligand_chem_f
         [4, 0, 3],
         [11 / 2, -np.sqrt(3) / 2, 3],
         [9 / 2, -np.sqrt(3) / 2, 3],
-    ])
+    ]), "angstroms")
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -332,7 +332,7 @@ def test_aromatic_pharmacophoric_points_exceeds_max_offset(mocker, ligand_chem_f
 def test_aromatic_pharmacophoric_points_t_stack(mocker, ligand_chem_feats, receptor_chem_feats):
     pharmacophore = empty_pharmacophore_one_frame()
     pharmacophore._pl_complex = mocker.Mock()
-    pharmacophore._pl_complex.coords = np.array([
+    pharmacophore._pl_complex.coords = puw.quantity(np.array([
         # First ring is a hexagon on the xy plane
         [1, 0, 0],
         [1 / 2, np.sqrt(3) / 2, 0],
@@ -347,7 +347,7 @@ def test_aromatic_pharmacophoric_points_t_stack(mocker, ligand_chem_feats, recep
         [2, -1, 0],
         [2, -1/2, -np.sqrt(3) / 2],
         [2, 1/2, -np.sqrt(3) / 2],
-    ])
+    ]), "angstroms")
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -359,8 +359,8 @@ def test_aromatic_pharmacophoric_points_t_stack(mocker, ligand_chem_feats, recep
     assert pharmacophore[0][0].feature_name == "aromatic ring"
     assert np.all(puw.get_value(pharmacophore[0][0].center) == np.array([0.] * 3))
     assert pharmacophore[0][0].has_direction
-    assert np.allclose(pharmacophore[0].direction,
-                       np.array([0., 0., 1.]))
+    assert np.allclose(pharmacophore[0][0].direction,
+                       np.array([1., 0., 0.]))
 
 
 def test_hydrophobic_pharmacophoric_points(ligand_chem_feats, receptor_chem_feats):

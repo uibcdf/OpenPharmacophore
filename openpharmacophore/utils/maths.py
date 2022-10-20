@@ -80,3 +80,27 @@ def point_projection(normal, plane_point, point):
     vec = point - plane_point
     dist = np.dot(vec, normal)
     return point - dist * normal
+
+
+def angle_between_normals(normal_1, normal_2):
+    """ Compute the angle between the normals of two planes.
+
+        Parameters
+        ----------
+        normal_1 : np.array
+            Vector of shape (3,)
+
+        normal_2 : np.array
+            Vector of shape (3,)
+
+        Returns
+        -------
+        angle: float
+            Angle in degrees
+    """
+    denominator = np.linalg.norm(normal_1) * np.linalg.norm(normal_2)
+    angle = np.arccos(np.dot(normal_1, normal_2) / denominator)
+    angle = np.degrees(angle)
+    if not 180 - angle < 0:
+        return min(angle, 180 - angle)
+    return angle

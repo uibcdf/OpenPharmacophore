@@ -41,3 +41,19 @@ def test_point_projection():
     projection = maths.point_projection(normal, plane_point, point)
     proj_expected = puw.quantity((np.array([-5, 6, 3])), "angstroms")
     assert np.allclose(projection, proj_expected)
+
+
+def test_angle_between_normals_vectors_equal():
+    n1 = np.array([0, 0, 1])
+    n2 = np.array([0, 0, 1])
+    assert maths.angle_between_normals(n1, n2) == 0
+
+
+def test_angle_between_normals():
+    n1 = np.array([0, 0, 1])
+    n2 = np.array([1, 0, 0])
+    assert maths.angle_between_normals(n1, n2) == 90
+
+    n1 = np.array([0, 0, 1])
+    n2 = np.array([-1, 0, 0])
+    assert maths.angle_between_normals(n1, n2) == 90
