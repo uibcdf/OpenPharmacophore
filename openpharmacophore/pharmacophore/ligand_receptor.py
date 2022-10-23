@@ -5,7 +5,7 @@ from .pl_complex import PLComplex
 from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
                   mol2_file_info, ph4_string)
 from .._private_tools.exceptions import PDBFetchError
-from ..utils import maths as maths
+from ..utils import maths
 import networkx as nx
 import numpy as np
 import nglview as nv
@@ -230,40 +230,39 @@ class LigandReceptorPharmacophore(Pharmacophore):
         else:
             raise NotImplementedError
 
-    def _hb_donor_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
-        """ Compute hydrogen bond donor pharmacophoric points from
+    def _hydrogen_bond_pharmacophoric_points(self, h_bonds, frame):
+        """ Compute hydrogen bond donor and acceptor pharmacophoric points from
             protein-ligand interactions.
 
             Parameters
             -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the donors in the ligand.
-
-            receptor_centers : list[puw.Quantity]
-                Centroids of acceptors in the receptor.
-
-            frame : int
-                The frame of the trajectory.
-
-        """
-        pass
-
-    def _hb_acceptor_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
-        """ Compute hydrogen bond acceptor pharmacophoric points from
-            protein-ligand interactions.
-
-            Parameters
-            -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the acceptors in the ligand.
-
-            receptor_centers : list[puw.Quantity]
-                Centroids of donors in the receptor.
+            h_bonds : np.ndarray
+                Array with the indices of the atoms involved in hydrogen bond.
+                Each row contains three integer indices, (d_i, h_i, a_i), such
+                that d_i is the index of the donor atom, h_i the index of the
+                hydrogen atom, and a_i the index of the acceptor atom.
+                Shape = (n_h_bonds, 3)
 
             frame : int
                 The frame of the trajectory.
         """
-        pass
+        radius = puw.quantity(1.0, "angstroms")
+        for bond in h_bonds:
+            # Case 1: There is an acceptor in the ligand
+            direction = puw.get_value(self._pl_complex.coords[bond[1]] -
+                                      self._pl_complex.coords[bond[0]])
+            if bond[0] not in self._pl_complex.lig_indices:
+                pharma_point = PharmacophoricPoint(
+                    "hb acceptor", self._pl_complex.coords[bond[2]],
+                    radius, direction
+                )
+            # Case 2: there is a donor in the ligand
+            else:
+                pharma_point = PharmacophoricPoint(
+                    "hb donor", self._pl_complex.coords[bond[0]],
+                    radius, direction
+                )
+            self._pharmacophores[frame].append(pharma_point)
 
     def _aromatic_pharmacophoric_points(self, lig_centers, lig_indices,
                                         rec_centers, rec_indices, frame):
@@ -364,7 +363,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
         for ii in range(len(centers)):
             for jj in range(ii + 1, len(centers)):
-                dist = LigandReceptorPharmacophore._points_distance(centers[ii], centers[jj])
+                dist = maths.points_distance(centers[ii], centers[jj])
                 if dist <= LigandReceptorPharmacophore.HYD_MERGE_DIST:
                     hyd_graph.add_edge(ii, jj)
 
@@ -401,11 +400,6 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 if maths.points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
                     pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
                     self._pharmacophores[frame].append(pharma_point)
-
-    @staticmethod
-    def _points_distance(coords_1, coords_2):
-        """ Returns the distance between two points in 3D space."""
-        return np.sqrt(np.sum(np.power(coords_1 - coords_2, 2)))
 
     def __len__(self):
         return len(self._pharmacophores)

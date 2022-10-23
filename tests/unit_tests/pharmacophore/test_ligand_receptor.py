@@ -159,21 +159,12 @@ def test_to_rdkit(pharmacophore_one_frame):
 
 
 ChemFeats = namedtuple("ChemFeats", [
-    "acc_cent", "acc_ind", "don_cent", "don_ind",
     "aro_cent", "aro_ind", "hyd_cent", "charge_cent",
 ])
 
 
 @pytest.fixture()
 def ligand_chem_feats():
-    acceptors_centers = [puw.quantity(np.array([0.] * 3), "angstroms"),
-                         puw.quantity(np.array([-7.] * 3), "angstroms")]
-    acceptor_indices = [[1], [1]]
-
-    donors_centers = [puw.quantity(np.array([0.] * 3), "angstroms"),
-                      puw.quantity(np.array([-7.] * 3), "angstroms")]
-    donors_indices = [[1], [1]]
-
     aromatic_centers = [puw.quantity(np.array([0., 0., 0.]), "angstroms")]
     aromatic_indices = [[0, 1, 2, 3, 4, 5]]
 
@@ -183,24 +174,14 @@ def ligand_chem_feats():
     charge_centers = [puw.quantity(np.array([0.] * 3), "angstroms"),
                       puw.quantity(np.array([-7.] * 3), "angstroms")]
 
-    return ChemFeats(acceptors_centers, acceptor_indices,
-                     donors_centers, donors_indices,
-                     aromatic_centers, aromatic_indices,
+    return ChemFeats(aromatic_centers, aromatic_indices,
                      hyd_centers, charge_centers)
 
 
 @pytest.fixture()
 def receptor_chem_feats():
-    acceptors_centers = [puw.quantity(np.array([7.] * 3), "angstroms"),
-                         puw.quantity(np.array([2.] * 3), "angstroms")]
-    acceptor_indices = [[1], [1]]
-
     aromatic_centers = [puw.quantity(np.array([1., 0., 3.]), "angstroms")]
     aromatic_indices = [[6, 7, 8, 9, 10, 11]]
-
-    donors_centers = [puw.quantity(np.array([7.] * 3), "angstroms"),
-                      puw.quantity(np.array([2.] * 3), "angstroms")]
-    donors_indices = [[1], [1]]
 
     hyd_centers = [puw.quantity(np.array([7.] * 3), "angstroms"),
                    puw.quantity(np.array([2.] * 3), "angstroms")]
@@ -208,9 +189,7 @@ def receptor_chem_feats():
     charge_centers = [puw.quantity(np.array([7.] * 3), "angstroms"),
                       puw.quantity(np.array([2.] * 3), "angstroms")]
 
-    return ChemFeats(acceptors_centers, acceptor_indices,
-                     donors_centers, donors_indices,
-                     aromatic_centers, aromatic_indices,
+    return ChemFeats(aromatic_centers, aromatic_indices,
                      hyd_centers, charge_centers)
 
 
@@ -220,36 +199,40 @@ def empty_pharmacophore_one_frame():
     return pharmacophore
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_hb_acceptor_pharmacophoric_points(ligand_chem_feats, receptor_chem_feats):
-    pharmacophore = empty_pharmacophore_one_frame()
-    pharmacophore._hb_acceptor_pharmacophoric_points(
-        ligand_chem_feats.acc_cent,
-        ligand_chem_feats.acc_ind,
-        receptor_chem_feats.don_cent,
-        receptor_chem_feats.don_ind,
-        frame=0
-    )
-    assert len(pharmacophore[0]) == 1
-    assert pharmacophore[0][0].feature_name == "hb acceptor"
-    assert np.all(puw.get_value(pharmacophore[0][0].center) == np.array([0.] * 3))
-    assert pharmacophore[0][0].has_direction
+def test_hydrogen_bond_pharmacophoric_points(mocker):
+    pharma = empty_pharmacophore_one_frame()
+    pharma._pl_complex = mocker.Mock()
+    pharma._pl_complex.coords = puw.quantity(
+        np.array([[float(ii)] * 3 for ii in range(0, 9)]), "angstroms")
+    assert pharma._pl_complex.coords.shape == (9, 3)
+    pharma._pl_complex.lig_indices = [5, 6, 7, 8]
 
+    h_bonds = np.array([
+        [0, 2, 5],
+        [1, 3, 6],
+        [7, 8, 4],
+    ])
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_hb_donor_pharmacophoric_points(ligand_chem_feats, receptor_chem_feats):
-    pharmacophore = empty_pharmacophore_one_frame()
-    pharmacophore._hb_donor_pharmacophoric_points(
-        ligand_chem_feats.don_center,
-        ligand_chem_feats.don_ind,
-        receptor_chem_feats.acc_cent,
-        receptor_chem_feats.acc_ind,
-        frame=0
-    )
-    assert len(pharmacophore[0]) == 1
-    assert pharmacophore[0].feature_name == "hb donor"
-    assert np.all(puw.get_value(pharmacophore[0][0].center) == np.array([0.] * 3))
-    assert pharmacophore[0][0].has_direction
+    pharma._hydrogen_bond_pharmacophoric_points(h_bonds, 0)
+    assert len(pharma[0]) == 3
+
+    assert pharma[0][0].feature_name == "hb acceptor"
+    assert np.all(puw.get_value(pharma[0][0].center) ==
+                  np.array([5., 5., 5.]))
+
+    assert pharma[0][1].feature_name == "hb acceptor"
+    assert np.all(puw.get_value(pharma[0][1].center) ==
+                  np.array([6., 6., 6.]))
+
+    assert pharma[0][2].feature_name == "hb donor"
+    assert np.all(puw.get_value(pharma[0][2].center) ==
+                  np.array([7., 7., 7.]))
+
+    # All points lie on the same line, they all have the same direction
+    expected_direction = np.array([1 / np.sqrt(3)] * 3)
+    assert all(p.has_direction for p in pharma[0])
+    assert all(np.allclose(pharma[0][ii].direction, expected_direction)
+               for ii in range(len(pharma[0])))
 
 
 def test_aromatic_pharmacophoric_points_exceeds_max_distance():
