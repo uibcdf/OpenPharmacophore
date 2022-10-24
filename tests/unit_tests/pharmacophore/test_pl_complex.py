@@ -1,9 +1,11 @@
+import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
 from openpharmacophore.pharmacophore.pl_complex import PLComplex
 import pytest
 from copy import deepcopy
 from rdkit import Chem
+from openmm.app import PDBFile
 
 
 @pytest.fixture()
@@ -187,3 +189,38 @@ def test_fix_ligand_template_and_lig_atom_number_different():
     pl._ligand = Chem.MolFromSmiles("CC12CCC3C(C1CCC2O)CCC4=C3C=CC(=C4)O")
     with pytest.raises(exc.DifferentNumAtomsError):
         pl.fix_ligand(smiles="CCCCCCCCCCCC(=O)O")
+
+
+def test_modeller_to_trajectory():
+    modeller = PDBFile(data.pdb["test_no_lig.pdb"])
+    traj = PLComplex._modeller_to_trajectory(modeller)
+    assert traj.n_frames == 1
+    assert traj.n_atoms == 19
+    assert traj.n_chains == 1
+    assert traj.topology.n_atoms == 19
+    assert traj.topology.n_chains == 1
+    assert traj.topology.n_residues == 2
+
+    expected_coords = np.array([
+        [44.235,  80.308,  18.419],
+        [43.549,  79.243,  17.706],
+        [44.528,  78.252,  17.077],
+        [45.699,  78.559,  16.853],
+        [42.608,  79.792,  16.611],
+        [43.375,  80.468,  15.608],
+        [41.586,  80.762,  17.208],
+        [44.030,  77.052,  16.814],
+        [44.799,  76.021,  16.156],
+        [44.189,  75.782,  14.791],
+        [43.007,  76.033,  14.583],
+        [44.721,  74.725,  16.954],
+        [45.253,  74.836,  18.355],
+        [46.598,  74.629,  18.621],
+        [44.412,  75.147,  19.416],
+        [47.098,  74.729,  19.906],
+        [44.895,  75.245,  20.707],
+        [46.246,  75.036,  20.946],
+        [46.748,  75.126,  22.224],
+    ]) / 10  # convert to nanometers
+
+    assert np.allclose(traj.xyz, expected_coords)

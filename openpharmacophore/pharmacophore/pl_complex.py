@@ -1,7 +1,9 @@
 from .._private_tools import exceptions as exc
 from ..data import pdb_to_smi
+import numpy as np
 import mdtraj as mdt
 import rdkit.Chem.AllChem as Chem
+import pyunitwizard as puw
 import tempfile
 
 
@@ -171,6 +173,8 @@ class PLComplex:
 
         self._ligand = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
 
+        # TODO: Add hydrogens
+
     @staticmethod
     def _pdb_id_to_smi(pdb_id):
         """ Get the smiles of a ligand from its pdb id.
@@ -201,3 +205,26 @@ class PLComplex:
             return pdb_id_mapper[lig_name]
         except KeyError:
             raise exc.SmilesNotFoundError(lig_name)
+
+    @staticmethod
+    def _modeller_to_trajectory(modeller):
+        """ Convert an openmm.Modeller to a mdtraj.Trajectory.
+
+            Parameters
+            ----------
+            modeller : openmm.Modeller
+
+            Returns
+            -------
+            mdtraj.Trajectory
+        """
+        positions = modeller.getPositions()
+        n_atoms = len(positions)
+        coords = np.zeros((1, n_atoms, 3))
+
+        for jj in range(n_atoms):
+            coords[0, jj, :] = puw.get_value(
+                positions[jj], to_unit="nanometers")
+
+        topology = mdt.Topology.from_openmm(modeller.getTopology())
+        return mdt.Trajectory(coords, topology)
