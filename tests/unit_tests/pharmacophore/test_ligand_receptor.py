@@ -199,7 +199,7 @@ def empty_pharmacophore_one_frame():
     return pharmacophore
 
 
-def test_hydrogen_bond_pharmacophoric_points(mocker):
+def set_up_hbond_pharmacophoric_points(mocker):
     pharma = empty_pharmacophore_one_frame()
     pharma._pl_complex = mocker.Mock()
     pharma._pl_complex.coords = puw.quantity(
@@ -213,9 +213,27 @@ def test_hydrogen_bond_pharmacophoric_points(mocker):
         [7, 8, 4],
     ])
 
-    pharma._hydrogen_bond_pharmacophoric_points(h_bonds, 0)
-    assert len(pharma[0]) == 3
+    return pharma, h_bonds
 
+
+def test_hbond_donor_pharmacophoric_points(mocker):
+    pharma, h_bonds = set_up_hbond_pharmacophoric_points(mocker)
+    pharma._hbond_donor_pharmacophoric_points(h_bonds, 0)
+    assert len(pharma[0]) == 1
+    assert pharma[0][0].feature_name == "hb donor"
+    assert np.all(puw.get_value(pharma[0][0].center) ==
+                  np.array([7., 7., 7.]))
+
+    # All points lie on the same line, they all have the same direction
+    expected_direction = np.array([1 / np.sqrt(3)] * 3)
+    assert pharma[0][0].has_direction
+    assert np.allclose(pharma[0][0].direction, expected_direction)
+
+
+def test_hb_acceptor_pharmacophoric_points(mocker):
+    pharma, h_bonds = set_up_hbond_pharmacophoric_points(mocker)
+    pharma._hbond_acceptor_pharmacophoric_points(h_bonds, 0)
+    assert len(pharma[0]) == 2
     assert pharma[0][0].feature_name == "hb acceptor"
     assert np.all(puw.get_value(pharma[0][0].center) ==
                   np.array([5., 5., 5.]))
@@ -224,11 +242,6 @@ def test_hydrogen_bond_pharmacophoric_points(mocker):
     assert np.all(puw.get_value(pharma[0][1].center) ==
                   np.array([6., 6., 6.]))
 
-    assert pharma[0][2].feature_name == "hb donor"
-    assert np.all(puw.get_value(pharma[0][2].center) ==
-                  np.array([7., 7., 7.]))
-
-    # All points lie on the same line, they all have the same direction
     expected_direction = np.array([1 / np.sqrt(3)] * 3)
     assert all(p.has_direction for p in pharma[0])
     assert all(np.allclose(pharma[0][ii].direction, expected_direction)
