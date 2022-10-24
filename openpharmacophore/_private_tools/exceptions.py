@@ -156,3 +156,23 @@ class NoLigandIndicesError(ValueError):
     def __init__(self):
         self.message = f"_lig_indices is empty. Cannot extract/remove."
         super().__init__(self.message)
+
+
+class SmilesNotFoundError(ValueError):
+    """ Exception raised when the smiles of a ligand is not found.
+    """
+
+    def __init__(self, ligand):
+        self.message = f"Smiles not found for {ligand}"
+        super().__init__(self.message)
+
+
+class DifferentNumAtomsError(ValueError):
+    """ Exception raised in fix ligand when the smiles and the
+        number of atoms in the ligand don't match.
+    """
+
+    def __init__(self, atoms_1, atoms_2):
+        self.message = f"Ligand contains {atoms_1} atoms, while " \
+                       f"smiles contains {atoms_2} atoms"
+        super().__init__(self.message)

@@ -1,4 +1,5 @@
-from .._private_tools.exceptions import NoLigandError, NoLigandIndicesError
+from .._private_tools import exceptions as exc
+from ..data import pdb_to_smi
 import mdtraj as mdt
 import rdkit.Chem.AllChem as Chem
 import tempfile
@@ -23,7 +24,7 @@ class PLComplex:
 
         self._ligand_ids = self.find_ligands()
         if len(self._ligand_ids) == 0:
-            raise NoLigandError
+            raise exc.NoLigandError
 
         self.coords = self.traj.xyz
         self.mol_graph = Chem.MolFromPDBFile(file_path)
@@ -32,6 +33,7 @@ class PLComplex:
 
         self._lig_indices = []
         self._ligand = None
+        self._ligand_id = ""
 
     @property
     def ligand_ids(self):
@@ -40,6 +42,18 @@ class PLComplex:
     @property
     def ligand(self):
         return self._ligand
+
+    def set_ligand(self, lig_id):
+        """ Set the ligand that will be used to do all computations.
+
+            Parameters
+            ----------
+            lig_id : str
+                Ligand id.
+        """
+        if lig_id not in self._ligand_ids:
+            raise ValueError("Invalid ligand id")
+        self._ligand_id = lig_id
 
     @staticmethod
     def _is_ligand_atom(atom):
@@ -76,7 +90,7 @@ class PLComplex:
 
         return ligands
 
-    def _ligand_and_receptor_indices(self, lig_id):
+    def _ligand_and_receptor_indices(self):
         """ Get the indices of the ligand with the given id and
             those of the receptor.
 
@@ -85,7 +99,7 @@ class PLComplex:
             lig_id : str
                 Ligand id.
         """
-        ligand, chain = lig_id.split(":")
+        ligand, chain = self._ligand_id.split(":")
         chain_index = self.chain_names.index(chain)
         for atom in self.topology.atoms:
             if atom.residue.name == ligand and atom.residue.chain.index == chain_index:
@@ -97,7 +111,7 @@ class PLComplex:
         """ Extract the ligand from the trajectory and create and rdkit mol.
         """
         if len(self._lig_indices) == 0:
-            raise NoLigandIndicesError
+            raise exc.NoLigandIndicesError
 
         # TODO: implement the conversion from trajectory to rdkit mol without using
         #  a file.
@@ -116,7 +130,7 @@ class PLComplex:
         """ Remove a ligand from the trajectory.
         """
         if len(self._lig_indices) == 0:
-            raise NoLigandIndicesError
+            raise exc.NoLigandIndicesError
 
         self.traj = self.traj.atom_slice(self._receptor_indices)
         self.topology = self.traj.topology
@@ -128,3 +142,62 @@ class PLComplex:
             if atom.element.symbol == "H":
                 return True
         return False
+
+    def fix_ligand(self, smiles=""):
+        """ Add hydrogens to the ligand and correct its bond orders.
+
+            If a smiles is not given, a smiles for the ligand will
+            be searched for. In case it is not found this will raise
+            an error.
+
+            Parameters
+            ----------
+            smiles : str, optional
+                The smiles of the ligand.
+
+            Raises
+            ------
+            SmilesNotFoundError
+                If a smiles for the ligand is not found.
+        """
+        if not smiles:
+            smiles = self._pdb_id_to_smi(self._ligand_id)
+
+        template = Chem.MolFromSmiles(smiles)
+        if self._ligand.GetNumAtoms() != template.GetNumAtoms():
+            raise exc.DifferentNumAtomsError(
+                self._ligand.GetNumAtoms(), template.GetNumAtoms()
+            )
+
+        self._ligand = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
+
+    @staticmethod
+    def _pdb_id_to_smi(pdb_id):
+        """ Get the smiles of a ligand from its pdb id.
+
+            Parameters
+            ----------
+            pdb_id: str
+                The pdb id of the ligand
+
+            Returns
+            -------
+            str
+                The smiles of the ligand.
+        """
+        lig_name = pdb_id.split(":")[0]
+        if lig_name == "UNL":
+            raise exc.SmilesNotFoundError(lig_name)
+
+        with open(pdb_to_smi) as fp:
+            lines = fp.readlines()
+
+        pdb_id_mapper = {}
+        for line in lines:
+            lig_id, smi = line.split()
+            pdb_id_mapper[lig_id] = smi
+
+        try:
+            return pdb_id_mapper[lig_name]
+        except KeyError:
+            raise exc.SmilesNotFoundError(lig_name)
