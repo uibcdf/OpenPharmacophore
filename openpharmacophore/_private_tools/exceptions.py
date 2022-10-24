@@ -136,3 +136,23 @@ class ZincDownloadError(IOError):
 
         self.message = f"Error downloading file from {url}.\nStatus code: {status_code}"
         super().__init__(self.message)
+
+
+class NoLigandError(ValueError):
+    """ Exception raised when a protein-ligand complex contains no ligand.
+    """
+
+    def __init__(self):
+
+        self.message = f"This molecular system does not contain any ligand."
+        super().__init__(self.message)
+
+
+class NoLigandIndicesError(ValueError):
+    """ Exception raised when trying to extract or remove a ligand
+        from PLComplex object without obtaining the indices first.
+    """
+
+    def __init__(self):
+        self.message = f"_lig_indices is empty. Cannot extract/remove."
+        super().__init__(self.message)

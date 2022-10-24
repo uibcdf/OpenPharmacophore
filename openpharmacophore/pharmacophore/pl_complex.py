@@ -1,5 +1,7 @@
+from .._private_tools.exceptions import NoLigandError, NoLigandIndicesError
 import mdtraj as mdt
 import rdkit.Chem.AllChem as Chem
+import tempfile
 
 
 class PLComplex:
@@ -18,8 +20,24 @@ class PLComplex:
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
+
+        self._ligand_ids = self.find_ligands()
+        if len(self._ligand_ids) == 0:
+            raise NoLigandError
+
         self.coords = self.traj.xyz
         self.mol_graph = Chem.MolFromPDBFile(file_path)
+
+        self._lig_indices = []
+        self._ligand = None
+
+    @property
+    def ligand_ids(self):
+        return self._ligand_ids
+
+    @property
+    def ligand(self):
+        return self._ligand
 
     @staticmethod
     def _is_ligand_atom(atom):
@@ -55,3 +73,36 @@ class PLComplex:
                     ligands.append(ligand_id)
 
         return ligands
+
+    def _ligand_atom_indices(self, lig_id):
+        """ Get the indices of the ligand with the given id.
+
+            Parameters
+            ----------
+            lig_id : str
+                Ligand id.
+        """
+        ligand, chain = lig_id.split(":")
+        chain_index = self.chain_names.index(chain)
+        for atom in self.topology.atoms:
+            if atom.residue.name == ligand and atom.residue.chain.index == chain_index:
+                self._lig_indices.append(atom.index)
+
+    def _ligand_to_mol(self):
+        """ Extract the ligand from the trajectory and create and rdkit mol.
+        """
+        if len(self._lig_indices) == 0:
+            raise NoLigandIndicesError
+
+        # TODO: implement the conversion from trajectory to rdkit mol without using
+        #  a file.
+        lig_traj = self.traj.atom_slice(self._lig_indices)
+        pdb_file = tempfile.NamedTemporaryFile()
+        lig_traj.save_pdb(pdb_file.name)
+
+        pdb_file.seek(0)
+        mol = Chem.MolFromPDBFile(pdb_file.name)
+        assert mol is not None
+        pdb_file.close()
+
+        self._ligand = mol

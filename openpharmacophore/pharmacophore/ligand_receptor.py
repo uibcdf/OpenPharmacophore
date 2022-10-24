@@ -90,7 +90,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         """ Loads the receptor file.
         """
         self._pl_complex = PLComplex(file_path)
-        self._num_frames += 1
+        self.add_frame()
 
     def load_pdb_id(self, pdb_id):
         """ Download the pdb with given id and save it to a temporary file.
@@ -100,7 +100,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
             fp.seek(0)
             fp.write(pdb_str)
             self._pl_complex = PLComplex(fp)
-        self._num_frames += 1
+        self.add_frame()
 
     def add_frame(self):
         """ Add a new frame to the pharmacophore. """
@@ -180,7 +180,8 @@ class LigandReceptorPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def extract(self, ligand_id, frames=0, smiles="", features=None):
+    def extract(self, ligand_id, frames=0, smiles="", features=None,
+                *args, **kwargs):
         """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
             can contain multiple ligands or small molecules, pharmacophore(s) is
             extracted only for the selected one.
@@ -199,20 +200,20 @@ class LigandReceptorPharmacophore(Pharmacophore):
             features : list[str], optional
                 A list of the chemical features that will be used in the extraction.
         """
-        pl = self._pl_complex
         if isinstance(frames, int):
             frames = [frames]
 
         if features is None:
             features = PharmacophoricPoint.get_valid_features()
 
+        pl = self._pl_complex
+        pl.analyze(lig_id=ligand_id, smiles=smiles, *args, **kwargs)
+        pl.extract_feats()
+
         for frame in frames:
             self._pharmacophores.append([])
             self._pharmacophores_frames.append(frames)
             self._num_frames += 1
-
-            pl.analyze(lig_id=ligand_id, smiles=smiles)
-            pl.extract_feats()
 
             if "hydrophobicity" in features:
                 lig_hyd_centers = pl.ligand_hyd_centers(frame)
