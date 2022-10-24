@@ -180,7 +180,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         """
         return rdkit_pharmacophore(self[frame])
 
-    def extract(self, ligand_id, frames=0):
+    def extract(self, ligand_id, frames=0, smiles="", features=None):
         """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
             can contain multiple ligands or small molecules, pharmacophore(s) is
             extracted only for the selected one.
@@ -192,43 +192,66 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
             frames : int or list[int] or 'all', optional
                 Extract pharmacophores from the given frame(s) of the trajectory.
+
+            smiles : str, optional
+                The smiles of the ligand.
+
+            features : list[str], optional
+                A list of the chemical features that will be used in the extraction.
         """
+        pl = self._pl_complex
         if isinstance(frames, int):
+            frames = [frames]
+
+        if features is None:
+            features = PharmacophoricPoint.get_valid_features()
+
+        for frame in frames:
             self._pharmacophores.append([])
             self._pharmacophores_frames.append(frames)
             self._num_frames += 1
 
-            ligand_feats = self._pl_complex.ligand_feats_center(ligand_id)
-            receptor_feats = self._pl_complex.receptor_feats_center()
+            pl.analyze(lig_id=ligand_id, smiles=smiles)
+            pl.extract_feats()
 
-            if "hb donor" in ligand_feats:
-                self._hb_donor_pharmacophoric_points(
-                    ligand_feats["hb donor"], receptor_feats["hb acceptor"], frames)
+            if "hydrophobicity" in features:
+                lig_hyd_centers = pl.ligand_hyd_centers(frame)
+                if len(lig_hyd_centers) > 0:
+                    rec_hyd_centers = pl.receptor_hyd_centers(frame)
+                    self._hydrophobic_pharmacophoric_points(
+                        lig_hyd_centers, rec_hyd_centers, frame
+                    )
 
-            if "hb acceptor" in ligand_feats:
-                self._hb_acceptor_pharmacophoric_points(
-                    ligand_feats["hb acceptor"], receptor_feats["hb donor"], frames)
+            if "positive charge" in features:
+                lig_pos_charge_cent = pl.ligand_pos_charge_centers(frame)
+                if len(lig_pos_charge_cent) > 0:
+                    rec_neg_charge_cent = pl.receptor_neg_charge_centers(frame)
+                    self._charge_pharmacophoric_points(
+                        lig_pos_charge_cent, rec_neg_charge_cent,
+                        "positive charge", frame
+                    )
 
-            if "aromatic ring" in ligand_feats:
-                self._aromatic_pharmacophoric_points(
-                    ligand_feats["aromatic ring"], receptor_feats["aromatic ring"], frames)
+            if "negative charge" in features:
+                lig_neg_charge_cent = pl.ligand_neg_charge_centers(frame)
+                if len(lig_neg_charge_cent) > 0:
+                    rec_pos_charge_cent = pl.receptor_pos_charge_centers(frame)
+                    self._charge_pharmacophoric_points(
+                        lig_neg_charge_cent, rec_pos_charge_cent,
+                        "negative charge", frame
+                    )
 
-            if "hydrophobicity" in ligand_feats:
-                self._hydrophobic_pharmacophoric_points(
-                    ligand_feats["hydrophobicity"], receptor_feats["hydrophobicity"], frames)
+            if "aromatic ring" in features:
+                lig_aro_cent, lig_aro_ind = pl.ligand_aromatic_feats(frame)
+                if len(lig_aro_cent) > 0:
+                    rec_aro_cent, rec_aro_ind = pl.receptor_aromatic_feats(frame)
+                    self._aromatic_pharmacophoric_points(
+                        lig_aro_cent, lig_aro_ind,
+                        rec_aro_cent, rec_aro_ind, frame
+                    )
 
-            if "positive charge" in ligand_feats:
-                self._charge_pharmacophoric_points(
-                    ligand_feats["positive charge"], receptor_feats["negative charge"],
-                    "positive charge", frames)
-
-            if "negative charge" in ligand_feats:
-                self._charge_pharmacophoric_points(
-                    ligand_feats["negative charge"], receptor_feats["positive charge"],
-                    "negative charge", frames)
-
-        else:
-            raise NotImplementedError
+            if "hb donor" in features or "hb acceptor" in features:
+                h_bonds = pl.hbond_indices(frame)
+                self._hydrogen_bond_pharmacophoric_points(h_bonds, frame)
 
     def _hydrogen_bond_pharmacophoric_points(self, h_bonds, frame):
         """ Compute hydrogen bond donor and acceptor pharmacophoric points from

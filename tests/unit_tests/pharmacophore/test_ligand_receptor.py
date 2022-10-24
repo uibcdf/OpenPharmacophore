@@ -240,7 +240,7 @@ def test_aromatic_pharmacophoric_points_exceeds_max_distance():
     lig_centers = [puw.quantity(np.array([0., 0., 0.]), "angstroms")]
     lig_indices = [[6, 7, 8, 9, 10, 11]]
     rec_centers = [puw.quantity(np.array([10., 10., 10.]), "angstroms")]
-    rec_indices = [0, 1, 2, 3, 4, 5]
+    rec_indices = [[0, 1, 2, 3, 4, 5]]
     pharmacophore._aromatic_pharmacophoric_points(
         lig_centers, lig_indices,
         rec_centers, rec_indices,
@@ -390,13 +390,69 @@ def test_charge_pharmacophoric_points(ligand_chem_feats, receptor_chem_feats):
     assert not pharmacophore[0][0].has_direction
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_extract_all_features(mocker, ligand_chem_feats, receptor_chem_feats):
-    pharmacophore = LigandReceptorPharmacophore()
-    pharmacophore._pl_complex = mocker.Mock()
+def setup_extract(mocker, ligand_chem_feats, receptor_chem_feats):
+    """ Set up a test for the extract method of LigandReceptorPharmacophore. """
+    pharma = LigandReceptorPharmacophore()
+    pharma._pl_complex = mocker.Mock()
+    pl = pharma._pl_complex
 
-    pharmacophore.extract("EST:B")
-    assert len(pharmacophore[0]) == 6
+    pl.ligand_hyd_centers.return_value = ligand_chem_feats.hyd_cent
+    pl.ligand_pos_charge_centers.return_value = ligand_chem_feats.charge_cent
+    pl.ligand_neg_charge_centers.return_value = ligand_chem_feats.charge_cent
+    pl.ligand_aromatic_feats.return_value = (
+        ligand_chem_feats.aro_cent, ligand_chem_feats.aro_ind)
+
+    pl.receptor_hyd_centers.return_value = receptor_chem_feats.hyd_cent
+    pl.receptor_pos_charge_centers.return_value = receptor_chem_feats.charge_cent
+    pl.receptor_neg_charge_centers.return_value = receptor_chem_feats.charge_cent
+    pl.receptor_aromatic_feats.return_value = (
+        receptor_chem_feats.aro_cent, receptor_chem_feats.aro_ind)
+
+    pl.coords = puw.quantity(np.array([
+        # Aromatic ring ligand
+        [1, 0, 0],
+        [1 / 2, np.sqrt(3) / 2, 0],
+        [-1 / 2, np.sqrt(3) / 2, 0],
+        [-1, 0, 0],
+        [-1 / 2, -np.sqrt(3) / 2, 0],
+        [1 / 2, -np.sqrt(3) / 2, 0],
+        # Aromatic ring receptor
+        [2, 0, 3],
+        [3 / 2, np.sqrt(3) / 2, 3],
+        [1 / 2, np.sqrt(3) / 2, 3],
+        [0, 0, 3],
+        [1 / 2, -np.sqrt(3) / 2, 3],
+        [3 / 2, -np.sqrt(3) / 2, 3],
+        # Hydrogen bonding atoms receptor
+        [0, 0, 0],  # donor atom
+        [1, 1, 1],  # hydrogen atom
+        [2, 2, 2],  # acceptor atom
+        # Hydrogen bonding atoms ligand
+        [3, 3, 3],  # acceptor atom
+        [4, 4, 4],  # hydrogen atom
+        [5, 5, 5],  # donor atom
+    ]), "angstroms")
+    pl.hbond_indices.return_value = np.array([
+        [12, 13, 14],
+        [15, 16, 17],
+    ])
+    pl.lig_indices = [0, 1, 2, 3, 4, 5, 14, 15, 16]
+
+    return pharma, pl
+
+
+def test_extract_all_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    pharma, pl = setup_extract(mocker, ligand_chem_feats, receptor_chem_feats)
+    pharma.extract("EST:B")
+
+    pl.analyze.assert_called_once_with(
+        lig_id="EST:B", smiles=""
+    )
+    pl.extract_feats.assert_called_once_with(
+    )
+
+    assert len(pharma[0]) == 6
     expected_features = {
         "hb acceptor",
         "aromatic ring",
@@ -406,10 +462,64 @@ def test_extract_all_features(mocker, ligand_chem_feats, receptor_chem_feats):
         "negative charge",
     }
     actual_features = set()
-    for pnt in pharmacophore[0]:
+    for pnt in pharma[0]:
         actual_features.add(pnt.feature_name)
     assert actual_features == expected_features
 
-    center_expected = np.array([0.] * 3)
-    for point in pharmacophore[0]:
-        assert np.all(point.center == center_expected)
+
+def setup_test_extract_feature(mocker, lig_feats,
+                               rec_feats, feature):
+    """ Set up a test for the extract method with a particular feature."""
+    pharma, pl = setup_extract(
+        mocker, lig_feats, rec_feats)
+    pharma.extract("EST:B", features=[feature])
+    assert len(pharma[0]) == 1
+    assert pharma[0][0].feature_name == feature
+
+
+def test_extract_hydrophobic_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "hydrophobicity"
+    )
+
+
+def test_extract_aromatic_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "aromatic ring"
+    )
+
+
+def test_extract_positive_charge_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "positive charge"
+    )
+
+
+def test_extract_negative_charge_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "negative charge"
+    )
+
+
+def test_extract_acceptor_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "hb acceptor"
+    )
+
+
+def test_extract_donor_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "hb donor"
+    )
