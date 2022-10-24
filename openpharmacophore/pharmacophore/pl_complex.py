@@ -28,6 +28,8 @@ class PLComplex:
         self.coords = self.traj.xyz
         self.mol_graph = Chem.MolFromPDBFile(file_path)
 
+        self._receptor_indices = []
+
         self._lig_indices = []
         self._ligand = None
 
@@ -74,8 +76,9 @@ class PLComplex:
 
         return ligands
 
-    def _ligand_atom_indices(self, lig_id):
-        """ Get the indices of the ligand with the given id.
+    def _ligand_and_receptor_indices(self, lig_id):
+        """ Get the indices of the ligand with the given id and
+            those of the receptor.
 
             Parameters
             ----------
@@ -87,6 +90,8 @@ class PLComplex:
         for atom in self.topology.atoms:
             if atom.residue.name == ligand and atom.residue.chain.index == chain_index:
                 self._lig_indices.append(atom.index)
+            else:
+                self._receptor_indices.append(atom.index)
 
     def _ligand_to_mol(self):
         """ Extract the ligand from the trajectory and create and rdkit mol.
@@ -106,3 +111,20 @@ class PLComplex:
         pdb_file.close()
 
         self._ligand = mol
+
+    def _remove_ligand(self):
+        """ Remove a ligand from the trajectory.
+        """
+        if len(self._lig_indices) == 0:
+            raise NoLigandIndicesError
+
+        self.traj = self.traj.atom_slice(self._receptor_indices)
+        self.topology = self.traj.topology
+
+    def has_hydrogens(self):
+        """ Returns true if the topology contains hydrogens.
+        """
+        for atom in self.topology.atoms:
+            if atom.element.symbol == "H":
+                return True
+        return False

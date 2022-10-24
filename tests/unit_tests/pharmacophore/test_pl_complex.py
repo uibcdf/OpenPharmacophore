@@ -2,6 +2,7 @@ import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
 from openpharmacophore.pharmacophore.pl_complex import PLComplex
 import pytest
+from copy import deepcopy
 
 
 @pytest.fixture()
@@ -49,19 +50,74 @@ def test_find_ligands(pl_complex):
     assert pl_complex.ligand_ids == ["EST:B"]
 
 
-def test_ligand_indices(pl_complex):
-    pl_complex._ligand_atom_indices("EST:B")
-    expected_indices = list(range(146, 166))
-    assert len(pl_complex._lig_indices) == len(expected_indices)
-    assert pl_complex._lig_indices == expected_indices
+def test_ligand_and_receptor_indices(pl_complex):
+    pl = deepcopy(pl_complex)
+    pl._ligand_and_receptor_indices("EST:B")
+
+    expected_receptor = list(range(0, 146))
+    assert len(pl._receptor_indices) == len(expected_receptor)
+    assert pl._receptor_indices == expected_receptor
+
+    expected_ligand = list(range(146, 166))
+    assert len(pl._lig_indices) == len(expected_ligand)
+    assert pl._lig_indices == expected_ligand
 
 
 def test_ligand_to_mol(pl_complex):
-    pl_complex._ligand_atom_indices("EST:B")
-    pl_complex._ligand_to_mol()
-    assert pl_complex.ligand.GetNumAtoms() == 20
+    pl = deepcopy(pl_complex)
+    pl._ligand_and_receptor_indices("EST:B")
+    pl._ligand_to_mol()
+    assert pl.ligand.GetNumAtoms() == 20
 
 
 def test_ligand_to_mol_empty_indices_list_raises_error(pl_complex):
     with pytest.raises(exc.NoLigandIndicesError):
         pl_complex._ligand_to_mol()
+
+
+def test_remove_ligand(pl_complex):
+    pl = deepcopy(pl_complex)
+    pl._ligand_and_receptor_indices("EST:B")
+    pl._remove_ligand()
+    assert pl.traj.n_atoms == 146
+    assert pl.traj.n_chains == 1
+    assert pl.topology.n_atoms == 146
+    assert pl.topology.n_chains == 1
+
+
+def test_remove_ligand_empty_indices_list_raises_error(pl_complex):
+    with pytest.raises(exc.NoLigandIndicesError):
+        pl_complex._remove_ligand()
+
+
+def test_has_hydrogens(pl_complex):
+    # TODO: test with a trajectory that contains hydrogen
+    assert not pl_complex.has_hydrogens()
+
+
+def test_add_hydrogens(mocker):
+    pass
+
+
+def test_fix_ligand_smiles_is_given(mocker, pl_complex):
+    mock_chem = mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.Chem")
+
+    pl = deepcopy(pl_complex)
+    pl._ligand = mocker.Mock()
+    pl.fix_ligand("CC12CCC3C(C1CCC2O)CCC4=C3C=CC(=C4)O")
+
+    template = mock_chem.MolFromSmiles
+    template.assert_called_once_with(
+        "CC12CCC3C(C1CCC2O)CCC4=C3C=CC(=C4)O")
+    mock_chem.AssignBondOrdersFromTemplate.assert_called_once_with(
+        template, pl._ligand
+    )
+
+
+def test_fix_ligand_no_smiles_given(mocker):
+    pass
+
+
+def test_fix_ligand_no_smiles_found():
+    pass
