@@ -12,7 +12,6 @@ pdb = {}
 trajectories = {}
 zinc = {}
 
-
 # Traverse all folders from the data directory and
 # fill the dictionaries
 for dir_path, _, filenames in os.walk(parent):
@@ -36,5 +35,9 @@ for dir_path, _, filenames in os.walk(parent):
             ))
         elif "zinc" in dir_path:
             zinc[file_name] = str(parent.joinpath(
+                os.path.join(dir_path, file_name)
+            ))
+        elif "pdb_to_smi" in file_name:
+            pdb_to_smi = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
