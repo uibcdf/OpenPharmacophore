@@ -1,9 +1,10 @@
 from .._private_tools import exceptions as exc
 from ..data import pdb_to_smi
-import numpy as np
 import mdtraj as mdt
-import rdkit.Chem.AllChem as Chem
+import numpy as np
+from openmm.app import Modeller
 import pyunitwizard as puw
+import rdkit.Chem.AllChem as Chem
 import tempfile
 
 
@@ -43,6 +44,12 @@ class PLComplex:
 
     @property
     def ligand(self):
+        """ Returns the ligand.
+
+            Returns
+            -------
+            rdkit.Mol
+        """
         return self._ligand
 
     def set_ligand(self, lig_id):
@@ -56,6 +63,18 @@ class PLComplex:
         if lig_id not in self._ligand_ids:
             raise ValueError("Invalid ligand id")
         self._ligand_id = lig_id
+
+    def _update_traj(self, traj):
+        """ Update traj, topology and coords attributes.
+
+            Parameters
+            ----------
+            traj : mdt.Trajectory
+
+        """
+        self.traj = traj
+        self.topology = traj.topology
+        self.coords = traj.xyz
 
     @staticmethod
     def _is_ligand_atom(atom):
@@ -95,11 +114,6 @@ class PLComplex:
     def _ligand_and_receptor_indices(self):
         """ Get the indices of the ligand with the given id and
             those of the receptor.
-
-            Parameters
-            ----------
-            lig_id : str
-                Ligand id.
         """
         ligand, chain = self._ligand_id.split(":")
         chain_index = self.chain_names.index(chain)
@@ -134,8 +148,7 @@ class PLComplex:
         if len(self._lig_indices) == 0:
             raise exc.NoLigandIndicesError
 
-        self.traj = self.traj.atom_slice(self._receptor_indices)
-        self.topology = self.traj.topology
+        self._update_traj(self.traj.atom_slice(self._receptor_indices))
 
     def has_hydrogens(self):
         """ Returns true if the topology contains hydrogens.
@@ -171,9 +184,8 @@ class PLComplex:
                 self._ligand.GetNumAtoms(), template.GetNumAtoms()
             )
 
-        self._ligand = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
-
-        # TODO: Add hydrogens
+        fixed_lig = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
+        self._ligand = Chem.AddHs(fixed_lig, addCoords=True)
 
     @staticmethod
     def _pdb_id_to_smi(pdb_id):
@@ -228,3 +240,15 @@ class PLComplex:
 
         topology = mdt.Topology.from_openmm(modeller.getTopology())
         return mdt.Trajectory(coords, topology)
+
+    def add_hydrogens(self):
+        """ Add hydrogens to the receptor. Necessary to get
+            hydrogen bond protein-ligand interactions.
+        """
+        modeller = Modeller(
+            topology=self.topology.to_openmm(),
+            positions=self.traj.openmm_positions(0)
+        )
+        modeller.addHydrogens()
+        self._update_traj(self._modeller_to_trajectory(modeller))
+
