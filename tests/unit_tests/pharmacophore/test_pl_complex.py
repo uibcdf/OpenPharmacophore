@@ -290,5 +290,12 @@ def test_modeller_to_trajectory():
     assert np.allclose(traj.xyz, expected_coords)
 
 
+def test_mol_to_traj(estradiol_mol):
+    traj = PLComplex._mol_to_traj(estradiol_mol)
+    assert traj.n_atoms == 20
+    assert traj.topology.n_atoms == 20
+    assert traj.xyz.shape == (1, 20, 3)
+
+
 def test_add_fixed_ligand():
-    assert False, "Complete me!"
+    assert False

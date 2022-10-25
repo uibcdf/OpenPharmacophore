@@ -252,3 +252,24 @@ class PLComplex:
         modeller.addHydrogens()
         self._update_traj(self._modeller_to_trajectory(modeller))
 
+    @staticmethod
+    def _mol_to_traj(mol):
+        """ Transform a rdkit.Mol to mdtraj.Trajectory
+
+            Parameters
+            ----------
+            mol : rdkit.Chem.Mol
+
+            Returns
+            -------
+            traj : mdtraj.Trajectory
+        """
+        # TODO: convert directly from mol to traj without using file.
+        mol_file = tempfile.NamedTemporaryFile(suffix=".pdb")
+        Chem.MolToPDBFile(mol, mol_file.name)
+        mol_file.seek(0)
+
+        traj = mdt.load(mol_file.name)
+        mol_file.close()
+
+        return traj
