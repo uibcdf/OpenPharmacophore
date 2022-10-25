@@ -57,7 +57,7 @@ def test_find_ligands(pl_complex):
 
 def test_ligand_and_receptor_indices(pl_complex):
     pl = deepcopy(pl_complex)
-    pl._ligand_and_receptor_indices()
+    pl.ligand_and_receptor_indices()
 
     expected_receptor = list(range(0, 146))
     assert len(pl._receptor_indices) == len(expected_receptor)
@@ -70,20 +70,20 @@ def test_ligand_and_receptor_indices(pl_complex):
 
 def test_ligand_to_mol(pl_complex):
     pl = deepcopy(pl_complex)
-    pl._ligand_and_receptor_indices()
-    pl._ligand_to_mol()
+    pl.ligand_and_receptor_indices()
+    pl.ligand_to_mol()
     assert pl.ligand.GetNumAtoms() == 20
 
 
 def test_ligand_to_mol_empty_indices_list_raises_error(pl_complex):
     with pytest.raises(exc.NoLigandIndicesError):
-        pl_complex._ligand_to_mol()
+        pl_complex.ligand_to_mol()
 
 
 def test_remove_ligand(pl_complex):
     pl = deepcopy(pl_complex)
-    pl._ligand_and_receptor_indices()
-    pl._remove_ligand()
+    pl.ligand_and_receptor_indices()
+    pl.remove_ligand()
     assert pl.traj.n_atoms == 146
     assert pl.traj.n_chains == 1
     assert pl.topology.n_atoms == 146
@@ -92,7 +92,7 @@ def test_remove_ligand(pl_complex):
 
 def test_remove_ligand_empty_indices_list_raises_error(pl_complex):
     with pytest.raises(exc.NoLigandIndicesError):
-        pl_complex._remove_ligand()
+        pl_complex.remove_ligand()
 
 
 def test_has_hydrogens(pl_complex):
@@ -290,5 +290,5 @@ def test_modeller_to_trajectory():
     assert np.allclose(traj.xyz, expected_coords)
 
 
-def test_add_fixed_ligand_to_traj():
+def test_add_fixed_ligand():
     assert False, "Complete me!"

@@ -9,6 +9,7 @@ from ._version import get_versions
 # Add imports here
 from ._pyunitwizard import puw
 from .pharmacophore import PharmacophoricPoint, distance_between_pharmacophoric_points
+from .pharmacophore import PLComplex
 from .pharmacophore import LigandBasedPharmacophore
 from .pharmacophore import LigandReceptorPharmacophore
 from .pharmacophore import load_from_file

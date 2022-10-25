@@ -111,7 +111,7 @@ class PLComplex:
 
         return ligands
 
-    def _ligand_and_receptor_indices(self):
+    def ligand_and_receptor_indices(self):
         """ Get the indices of the ligand with the given id and
             those of the receptor.
         """
@@ -123,7 +123,7 @@ class PLComplex:
             else:
                 self._receptor_indices.append(atom.index)
 
-    def _ligand_to_mol(self):
+    def ligand_to_mol(self):
         """ Extract the ligand from the trajectory and create and rdkit mol.
         """
         if len(self._lig_indices) == 0:
@@ -142,7 +142,7 @@ class PLComplex:
 
         self._ligand = mol
 
-    def _remove_ligand(self):
+    def remove_ligand(self):
         """ Remove a ligand from the trajectory.
         """
         if len(self._lig_indices) == 0:
