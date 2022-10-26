@@ -1,7 +1,11 @@
+import pytest
+
 import openpharmacophore as oph
 import openpharmacophore.data as data
 
 
+@pytest.mark.skip(
+    reason="Ligand based pharmacophore extraction isn't implemented yet")
 def test_ligand_based_pharmacophore_from_ligand_set():
     # We want to create a ligand-based pharmacophore for the ligands of the
     # Non-Peptide Angiotensin II Receptor

@@ -1,6 +1,10 @@
 import openpharmacophore as oph
 import openpharmacophore.data as data
 import nglview as nv
+import pytest
+
+pytest.skip("Extract method not implemented yet",
+            allow_module_level=True)
 
 
 def assert_view_contains_pharmacophore(view, n_points):
