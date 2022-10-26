@@ -395,3 +395,88 @@ def test_ligand_feature_centroids_null_ligand_raises_error():
     pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
     with pytest.raises(exc.NoLigandError):
         pl_complex.ligand_feature_centroids("aromatic ring", 0)
+
+
+def test_ligand_feature_centroids(mocker, estradiol_mol):
+    mock_feat_indices = mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
+        return_value=[(0, 1)]
+    )
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex._coords = puw.quantity(np.array(
+        [[
+            [2., 2., 2.],
+            [4., 4., 4.],
+        ]]
+    ), "nanometers")
+    pl_complex._ligand = estradiol_mol
+
+    centers = pl_complex.ligand_feature_centroids("hydrophobicity", frame=0)
+    expected_cent = [puw.quantity(np.array([3., 3., 3.]), "nanometer")]
+
+    assert np.all(centers[0] == expected_cent[0])
+
+    mock_feat_indices.assert_called_once()
+    _, args, _ = mock_feat_indices.mock_calls[0]
+    assert len(args) == 2
+    assert args[0] == pl_complex.smarts_ligand["hydrophobicity"]
+
+
+def test_feature_indices(mocker):
+    mock_mol = mocker.Mock()
+    mock_mol.GetSubstructMatches.side_effect = [
+        ((0, 1), (2, 3)),
+        ((4,),),
+    ]
+
+    patterns = ['a1aaaa1', 'a1aaaaa1']
+    indices = PLComplex.feature_indices(patterns, mock_mol)
+    assert indices == [(0, 1), (2, 3), (4,), ]
+
+
+def test_receptor_feature_centroids(mocker):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_max_extent",
+        return_value=puw.quantity(0.15, "nanometers")
+    )
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_centroid",
+        return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
+    )
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
+        return_value=[(0, 1), (2,)]
+    )
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex._coords = puw.quantity(np.array(
+        [[
+            [.2, .2, .2],
+            [.4, .4, .4],
+            [6., 6., 6.],
+        ]]
+    ), "nanometers")
+
+    centers = pl_complex.receptor_feature_centroids("aromatic ring", frame=0)
+    assert len(centers) == 1
+    expected_cent = puw.quantity(np.array([.3, .3, .3]), "nanometer")
+    assert np.allclose(centers[0], expected_cent)
+
+
+def test_receptor_features_invalid_mol_graph_raises_error():
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex._file_path = data.ligands["mols.smi"]
+    with pytest.raises(exc.MolGraphError):
+        pl_complex.receptor_feature_centroids("aromatic ring", frame=0)
+
+
+def test_hbond_indices_baker_criterion(mocker):
+    mock_bh = mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.mdt.baker_hubbard",
+    )
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex.hbond_indices(frame=0, criterion="baker")
+
+    mock_bh.assert_called_once()
+    _, args, _ = mock_bh.mock_calls[0]
+
+    assert args[0].n_atoms == 19

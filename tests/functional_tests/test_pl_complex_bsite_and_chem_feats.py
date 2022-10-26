@@ -27,11 +27,11 @@ def test_pl_complex_bsite_and_chem_feats():
     for feat_name in feats:
         ligand_feats[feat_name] = pl_complex.ligand_feature_centroids(feat_name, frame=0)
     receptor_feats = {}
-    for feat_name in receptor_feats:
+    for feat_name in feats:
         ligand_feats[feat_name] = pl_complex.receptor_feature_centroids(feat_name, frame=0)
 
     # Also the hydrogen bonds
-    hbond_indices = pl_complex.hbond_indices()
+    hbond_indices = pl_complex.hbond_indices(frame=0, criterion="baker")
     hbonds = {
         "hb acceptor": pl_complex.hbonds_acceptors(hbond_indices, frame=0),
         "hb donor": pl_complex.hbonds_donors(hbond_indices, frame=0)

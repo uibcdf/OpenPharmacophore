@@ -25,6 +25,66 @@ class PLComplex:
 
     BS_DIST_MAX = puw.quantity(0.85, "nanometers")
 
+    smarts_ligand = {
+        "aromatic ring": [
+            "a1aaaa1",
+            "a1aaaaa1"
+        ],
+        "hydrophobicity": [
+            '[$([S]~[#6])&!$(S~[!#6])]',
+            '[C&r3]1~[C&r3]~[C&r3]1',
+            '[C&r4]1~[C&r4]~[C&r4]~[C&r4]1',
+            '[C&r5]1~[C&r5]~[C&r5]~[C&r5]~[C&r5]1',
+            '[C&r6]1~[C&r6]~[C&r6]~[C&r6]~[C&r6]~[C&r6]1',
+            '[C&r7]1~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]1',
+            '[C&r8]1~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]1',
+            '[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+            '*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+            '[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+            'I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,'
+            'CH2X3,CH1X2,F,Cl,Br,I]',
+            '[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]',
+            '[$([CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,'
+            'CH0X2])])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2] ',
+            '[$([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(**[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]',
+        ],
+        "negative charge": [
+            '[$([-,-2,-3])&!$(*[+,+2,+3])]',
+            '[$([CX3,SX3,PX3](=O)[O-,OH])](=O)[O-,OH]',
+            '[$([SX4,PX4](=O)(=O)[O-,OH])](=O)(=O)[O-,OH]',
+            'c1nn[nH1]n1'
+        ],
+        "positive charge": [
+            'N=[CX3](N)-N',
+            '[$([+,+2,+3])&!$(*[-,-2,-3])]',
+            '[$([CX3](=N)(-N)[!N])](=N)-N',
+            '[$([NX3]([CX4])([CX4,#1])[CX4,#1])&!$([NX3]-*=[!#6])]',
+        ]
+    }
+
+    smarts_protein = {
+        "aromatic ring": [
+            "a1aaaa1",
+            "a1aaaaa1"
+        ],
+        "hydrophobicity": [
+            '[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+            'I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+            'I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+            '[$([S]~[#6])&!$(S~[!#6])]',
+            '[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+        ],
+        "negative charge": [
+            'C(=O)[O-,OH,OX1]',
+            '[-,-2,-3,-4]',
+        ],
+        "positive charge": [
+            '[$(C(N)(N)=N)]',
+            '[$(n1cc[nH]c1)]',
+            '[+,+2,+3,+4]',
+        ]
+    }
+
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
@@ -37,6 +97,8 @@ class PLComplex:
         self._lig_indices = []
         self._ligand = None
         self._ligand_id = ""
+
+        self._file_path = file_path
 
     @property
     def ligand_ids(self):
@@ -363,9 +425,115 @@ class PLComplex:
         return np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
 
     def ligand_feature_centroids(self, feat_name, frame):
-        """ Get the chemical features of the ligand.
+        """ Get the centroid of chemical features in the ligand.
 
             Hydrogen bonds cannot be obtained with this method.
+
+            Parameters
+            ----------
+            feat_name : str
+                Name of the feature
+            frame : int
+                Frame of the trajectory
+
+            Returns
+            -------
+            centers : list[puw.Quantity]
+                List with quantities of shape (3, ).
+
         """
         if self.ligand is None:
             raise exc.NoLigandError
+
+        centers = []
+        indices = self.feature_indices(
+            self.smarts_ligand[feat_name], self._ligand)
+        for indices_set in indices:
+            feat_coords = self._coords[frame, indices_set, :]
+            centers.append(np.mean(feat_coords, axis=0))
+
+        return centers
+
+    def receptor_feature_centroids(self, feat_name, frame):
+        """ Get the centroid of chemical features in the receptor.
+
+            Hydrogen bonds cannot be obtained with this method.
+
+            Parameters
+            ----------
+            feat_name : str
+                Name of the feature
+            frame : int
+                Frame of the trajectory
+
+            Returns
+            -------
+            centers : list[puw.Quantity]
+                List with quantities of shape (3, ).
+
+        """
+        if self._mol_graph is None:
+            self._mol_graph = Chem.MolFromPDBFile(self._file_path)
+            if self._mol_graph is None:
+                raise exc.MolGraphError(self._file_path)
+
+        lig_center = self._lig_centroid(frame)
+        lig_extent = self._lig_max_extent(lig_center, frame)
+        bs_cutoff = lig_extent + self.BS_DIST_MAX
+
+        centers = []
+        indices = self.feature_indices(
+            self.smarts_ligand[feat_name], self._mol_graph)
+        for indices_set in indices:
+            feat_coords = self._coords[frame, indices_set, :]
+            centroid = np.mean(feat_coords, axis=0)
+            # Only keep features in the binding site
+            if maths.points_distance(centroid, lig_center) < bs_cutoff:
+                centers.append(centroid)
+
+        return centers
+
+    @staticmethod
+    def feature_indices(feat_def, mol):
+        """ Get the indices of the atoms that encompass a chemical
+            feature.
+
+            Parameters
+            ----------
+            feat_def : list[str]
+                A smart features definition to find chemical features.
+
+            mol : rdkit.Chem.Mol
+                Molecule that will be scanned for the desired features.
+
+            Returns
+            -------
+            list[tuple[int]]
+        """
+        feat_indices = []
+
+        for smarts in feat_def:
+            pattern = Chem.MolFromSmarts(smarts)
+            assert pattern is not None, f"{smarts}"
+            all_indices = mol.GetSubstructMatches(pattern)
+            for indices in all_indices:
+                feat_indices.append(indices)
+
+        return feat_indices
+
+    def hbond_indices(self, frame, criterion="baker"):
+        """ Get the indices of atoms involved in hydrogen bonding
+            between the ligand and the receptor
+
+            Parameters
+            ----------
+            frame : int
+                Frame of the trajectory
+
+            criterion : str
+                The criterion used to compute the hydrogen bonds.
+        """
+        if criterion == "baker":
+            return mdt.baker_hubbard(self.traj[frame])
+        else:
+            raise NotImplementedError
