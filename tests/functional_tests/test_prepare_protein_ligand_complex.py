@@ -12,7 +12,6 @@ def test_pl_complex_preparation():
     assert not pl.has_hydrogens()
 
     pl.set_ligand(pl.ligand_ids[0])
-    pl.ligand_and_receptor_indices()
     # First we need to extract the ligand, so we can fix its bond orders
     # and add hydrogens to it.
     pl.ligand_to_mol()

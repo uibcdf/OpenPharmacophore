@@ -147,3 +147,5 @@ def test_ligand_receptor_pharmacophore_from_pdb():
     # are involved in protein ligand interactions clearly.
     view = pharmacophore.bsite_view()
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
+
+# TODO: add a test for a pdb that contains hydrogens and its ligand has correct bonds

@@ -207,8 +207,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
             features = PharmacophoricPoint.get_valid_features()
 
         pl = self._pl_complex
-        pl.analyze(lig_id=ligand_id, smiles=smiles, *args, **kwargs)
-        pl.extract_feats()
+        pl.prepare(lig_id=ligand_id, smiles=smiles, *args, **kwargs)
 
         for frame in frames:
             self._pharmacophores.append([])

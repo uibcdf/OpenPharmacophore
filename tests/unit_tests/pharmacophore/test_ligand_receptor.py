@@ -461,10 +461,8 @@ def test_extract_all_features(
     pharma, pl = setup_extract(mocker, ligand_chem_feats, receptor_chem_feats)
     pharma.extract("EST:B")
 
-    pl.analyze.assert_called_once_with(
+    pl.prepare.assert_called_once_with(
         lig_id="EST:B", smiles=""
-    )
-    pl.extract_feats.assert_called_once_with(
     )
 
     assert len(pharma[0]) == 6

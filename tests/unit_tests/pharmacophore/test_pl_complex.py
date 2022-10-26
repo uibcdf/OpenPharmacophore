@@ -1,3 +1,4 @@
+import mdtraj as mdt
 import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
@@ -19,12 +20,6 @@ def pl_complex():
 def test_init_pl_complex(pl_complex):
     assert pl_complex.traj.n_atoms == 166
     assert pl_complex.topology.n_chains == 2
-    assert pl_complex.mol_graph.GetNumAtoms() == 166
-
-
-def test_init_pl_complex_with_no_ligand_raises_error():
-    with pytest.raises(exc.NoLigandError):
-        PLComplex(data.pdb["test_no_lig.pdb"])
 
 
 def test_is_ligand_atom_protein_atom(mocker):
@@ -75,9 +70,10 @@ def test_ligand_to_mol(pl_complex):
     assert pl.ligand.GetNumAtoms() == 20
 
 
-def test_ligand_to_mol_empty_indices_list_raises_error(pl_complex):
-    with pytest.raises(exc.NoLigandIndicesError):
-        pl_complex.ligand_to_mol()
+def test_ligand_to_mol_empty_indices_list(pl_complex):
+    pl = deepcopy(pl_complex)
+    pl.ligand_to_mol()
+    assert pl.ligand.GetNumAtoms() == 20
 
 
 def test_remove_ligand(pl_complex):
@@ -90,9 +86,11 @@ def test_remove_ligand(pl_complex):
     assert pl.topology.n_chains == 1
 
 
-def test_remove_ligand_empty_indices_list_raises_error(pl_complex):
-    with pytest.raises(exc.NoLigandIndicesError):
-        pl_complex.remove_ligand()
+def test_remove_ligand_empty_indices_list(pl_complex):
+    pl = deepcopy(pl_complex)
+    pl.remove_ligand()
+    assert pl.traj.n_atoms == 146
+    assert pl.topology.n_chains == 1
 
 
 def test_has_hydrogens(pl_complex):
@@ -297,5 +295,16 @@ def test_mol_to_traj(estradiol_mol):
     assert traj.xyz.shape == (1, 20, 3)
 
 
-def test_add_fixed_ligand():
-    assert False
+def test_add_fixed_ligand(mocker):
+    lig_traj = mdt.load(data.pdb["estradiol.pdb"])
+    mock_mol_to_traj = mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex._mol_to_traj",
+        return_value=lig_traj
+    )
+
+    pl = PLComplex(data.pdb["test_no_lig_2.pdb"])
+    assert pl.topology.n_atoms == 146
+
+    pl.add_fixed_ligand()
+    assert pl.topology.n_atoms == 166
+    assert pl._coords.shape == (1, 166, 3)

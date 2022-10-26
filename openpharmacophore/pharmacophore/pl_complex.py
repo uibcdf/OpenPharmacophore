@@ -1,6 +1,7 @@
 from .._private_tools import exceptions as exc
 from ..data import pdb_to_smi
 import mdtraj as mdt
+from nglview import show_mdtraj
 import numpy as np
 from openmm.app import Modeller
 import pyunitwizard as puw
@@ -24,16 +25,12 @@ class PLComplex:
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
+        self._coords = self.traj.xyz
 
-        self._ligand_ids = self.find_ligands()
-        if len(self._ligand_ids) == 0:
-            raise exc.NoLigandError
-
-        self.coords = self.traj.xyz
-        self.mol_graph = Chem.MolFromPDBFile(file_path)
-
+        self._mol_graph = None
         self._receptor_indices = []
 
+        self._ligand_ids = self.find_ligands()
         self._lig_indices = []
         self._ligand = None
         self._ligand_id = ""
@@ -74,7 +71,7 @@ class PLComplex:
         """
         self.traj = traj
         self.topology = traj.topology
-        self.coords = traj.xyz
+        self._coords = traj.xyz
 
     @staticmethod
     def _is_ligand_atom(atom):
@@ -127,7 +124,7 @@ class PLComplex:
         """ Extract the ligand from the trajectory and create and rdkit mol.
         """
         if len(self._lig_indices) == 0:
-            raise exc.NoLigandIndicesError
+            self.ligand_and_receptor_indices()
 
         # TODO: implement the conversion from trajectory to rdkit mol without using
         #  a file.
@@ -146,7 +143,7 @@ class PLComplex:
         """ Remove a ligand from the trajectory.
         """
         if len(self._lig_indices) == 0:
-            raise exc.NoLigandIndicesError
+            self.ligand_and_receptor_indices()
 
         self._update_traj(self.traj.atom_slice(self._receptor_indices))
 
@@ -273,3 +270,16 @@ class PLComplex:
         mol_file.close()
 
         return traj
+
+    def add_fixed_ligand(self):
+        """ Adds the fixed ligand back to the receptor.
+        """
+        lig_traj = self._mol_to_traj(self.ligand)
+        coords = np.concatenate((self.traj.xyz, lig_traj.xyz), axis=1)
+        topology = self.traj.topology.join(lig_traj.topology)
+
+        self._update_traj(mdt.Trajectory(coords, topology))
+
+    def show(self):
+        """ Returns a view of the complex. """
+        return show_mdtraj(self.traj)
