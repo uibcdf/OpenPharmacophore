@@ -104,3 +104,23 @@ def angle_between_normals(normal_1, normal_2):
     if not 180 - angle < 0:
         return min(angle, 180 - angle)
     return angle
+
+
+def maximum_distance(centroid, coords):
+    """ Get the maximum distance from the centroid to the given
+        coordinates
+
+        Parameters
+        ----------
+        centroid : puw.Quantity
+            Shape (3, )
+        coords : puw.Quantity
+            Shape (n_atoms, 3)
+
+        Returns
+        -------
+        puw.Quantity
+            Scalar
+    """
+    distance = np.sqrt(np.sum(np.power(coords - centroid, 2), axis=1))
+    return np.amax(distance)

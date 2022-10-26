@@ -57,3 +57,15 @@ def test_angle_between_normals():
     n1 = np.array([0, 0, 1])
     n2 = np.array([-1, 0, 0])
     assert maths.angle_between_normals(n1, n2) == 90
+
+
+def test_maximum_distance():
+    centroid = puw.quantity(np.array([0., 0., 0.]), "angstroms")
+    coordinates = puw.quantity(np.array([
+        [1., 1., 1.],
+        [2., 2., 2.],
+        [3., 3., 3.],
+        [4., 4., 4.],
+    ]), "angstroms")
+    expected = puw.quantity(np.sqrt(48), "angstroms")
+    assert maths.maximum_distance(centroid, coordinates) == expected
