@@ -9,3 +9,5 @@ Add todos in this file. Organize by file name
 - [ ] Convert from rdkit.Mol to mdtraj.Trajectory.
 - [ ] What if we don't have a smiles for the ligand in the complex?
 - [ ] Find hydrogen bonds only in binding site.
+- [ ] Converting from rdkit.Mol to mdtraj.Trajectory changes the name of the ligand to UNL
+- [ ] Test indices after adding hydrogens

@@ -1,5 +1,6 @@
 from .._private_tools import exceptions as exc
 from ..data import pdb_to_smi
+from ..utils import maths
 import mdtraj as mdt
 from nglview import show_mdtraj
 import numpy as np
@@ -22,10 +23,12 @@ class PLComplex:
                    "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
                    "W", "X", "Y", "Z"]
 
+    BS_DIST_MAX = puw.quantity(0.85, "nanometers")
+
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
-        self._coords = self.traj.xyz
+        self._coords = puw.quantity(self.traj.xyz, "nanometer")
 
         self._mol_graph = None
         self._receptor_indices = []
@@ -58,7 +61,9 @@ class PLComplex:
                 Ligand id.
         """
         if lig_id not in self._ligand_ids:
-            raise ValueError("Invalid ligand id")
+            raise ValueError(
+                f"Invalid ligand id: {lig_id}. "
+                f"Ligands in this complex:{self._ligand_ids}")
         self._ligand_id = lig_id
 
     def _update_traj(self, traj):
@@ -71,7 +76,7 @@ class PLComplex:
         """
         self.traj = traj
         self.topology = traj.topology
-        self._coords = traj.xyz
+        self._coords = puw.quantity(traj.xyz, "nanometer")
 
     @staticmethod
     def _is_ligand_atom(atom):
@@ -122,6 +127,8 @@ class PLComplex:
 
     def ligand_to_mol(self):
         """ Extract the ligand from the trajectory and create and rdkit mol.
+
+            This will also update the ligand and receptor indices in the complex.
         """
         if len(self._lig_indices) == 0:
             self.ligand_and_receptor_indices()
@@ -146,6 +153,8 @@ class PLComplex:
             self.ligand_and_receptor_indices()
 
         self._update_traj(self.traj.atom_slice(self._receptor_indices))
+        self._lig_indices.clear()
+        self._ligand_ids.remove(self._ligand_id)
 
     def has_hydrogens(self):
         """ Returns true if the topology contains hydrogens.
@@ -161,6 +170,9 @@ class PLComplex:
             If a smiles is not given, a smiles for the ligand will
             be searched for. In case it is not found this will raise
             an error.
+
+            This method should be called before finding chemical features,
+            otherwise they will be incorrect.
 
             Parameters
             ----------
@@ -239,8 +251,9 @@ class PLComplex:
         return mdt.Trajectory(coords, topology)
 
     def add_hydrogens(self):
-        """ Add hydrogens to the receptor. Necessary to get
-            hydrogen bond protein-ligand interactions.
+        """ Add hydrogens to the receptor.
+
+            Necessary to get hydrogen bond protein-ligand interactions.
         """
         modeller = Modeller(
             topology=self.topology.to_openmm(),
@@ -268,18 +281,91 @@ class PLComplex:
 
         traj = mdt.load(mol_file.name)
         mol_file.close()
-
+        # TODO: converting to traj changes the name of the ligand to UNL
         return traj
 
     def add_fixed_ligand(self):
         """ Adds the fixed ligand back to the receptor.
+
+            This method should be called after fix_ligand if the original
+            topology didn't have hydrogens.
         """
         lig_traj = self._mol_to_traj(self.ligand)
+
+        lig_name = lig_traj.topology.atom(0).residue.name
+        n_chains = self.topology.n_chains
+        # The ligand will be added to a new chain
+        lig_name += ":" + self.chain_names[n_chains]
+
         coords = np.concatenate((self.traj.xyz, lig_traj.xyz), axis=1)
         topology = self.traj.topology.join(lig_traj.topology)
 
         self._update_traj(mdt.Trajectory(coords, topology))
+        self._ligand_ids = self.find_ligands()
+        self.set_ligand(lig_name)
+        self.ligand_and_receptor_indices()
 
     def show(self):
         """ Returns a view of the complex. """
         return show_mdtraj(self.traj)
+
+    def _lig_centroid(self, frame):
+        """ Returns the centroid of the ligand at the given frame.
+
+            Parameters
+            ----------
+            frame : int
+                Frame of the trajectory
+
+            Returns
+            -------
+            puw.Quantity
+                Centroid, quantity of shape (3,)
+        """
+        return np.mean(self._coords[frame, self._lig_indices, :], axis=0)
+
+    def _lig_max_extent(self, centroid, frame):
+        """ Returns the maximum extent of the ligand. This is the maximum distance
+            from the centroid to any of its atoms.
+
+            Parameters
+            ----------
+            centroid : puw.Quantity
+                Centroid, quantity of shape (3,)
+
+            frame : int
+                Frame of the trajectory
+
+            Returns
+            -------
+            puw.Quantity
+                The maximum extent in angstroms, scalar.
+       """
+        return maths.maximum_distance(
+            centroid, self._coords[frame, self._lig_indices, :])
+
+    def binding_site_indices(self, frame):
+        """ Obtain the indices of the atoms in the binding site. This corresponds to the
+            atoms in the sphere with radius BS_DIST_MAX + ligand maximum extent
+            with center in the ligand centroid.
+
+            Parameters
+            ----------
+            frame : int
+                Frame of the trajectory
+
+        """
+        self.ligand_and_receptor_indices()
+        lig_center = self._lig_centroid(frame)
+        lig_extent = self._lig_max_extent(lig_center, frame)
+        bs_cutoff = lig_extent + self.BS_DIST_MAX
+        distance = np.sqrt(np.sum(np.power(self._coords[0] - lig_center, 2), axis=1))
+        return np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
+
+    def ligand_feature_centroids(self, feat_name, frame):
+        """ Get the chemical features of the ligand.
+
+            Hydrogen bonds cannot be obtained with this method.
+        """
+        if self.ligand is None:
+            raise exc.NoLigandError

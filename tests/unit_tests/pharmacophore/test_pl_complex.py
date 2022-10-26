@@ -3,6 +3,7 @@ import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
 from openpharmacophore.pharmacophore.pl_complex import PLComplex
+import pyunitwizard as puw
 import pytest
 from copy import deepcopy
 from rdkit import Chem
@@ -78,12 +79,17 @@ def test_ligand_to_mol_empty_indices_list(pl_complex):
 
 def test_remove_ligand(pl_complex):
     pl = deepcopy(pl_complex)
+    n_ligands = len(pl.ligand_ids)
     pl.ligand_and_receptor_indices()
     pl.remove_ligand()
     assert pl.traj.n_atoms == 146
     assert pl.traj.n_chains == 1
     assert pl.topology.n_atoms == 146
     assert pl.topology.n_chains == 1
+
+    assert len(pl._lig_indices) == 0
+    assert len(pl._receptor_indices) == 146
+    assert len(pl.ligand_ids) == n_ligands - 1
 
 
 def test_remove_ligand_empty_indices_list(pl_complex):
@@ -173,7 +179,6 @@ END
 
 
 def test_fix_ligand_smiles_is_given(pl_complex, estradiol_mol):
-
     smiles = "CC12CCC3C(C1CCC2O)CCC4=C3C=CC(=C4)O"
     pl = deepcopy(pl_complex)
     pl._ligand = deepcopy(estradiol_mol)
@@ -264,25 +269,25 @@ def test_modeller_to_trajectory():
     assert traj.topology.n_residues == 2
 
     expected_coords = np.array([
-        [44.235,  80.308,  18.419],
-        [43.549,  79.243,  17.706],
-        [44.528,  78.252,  17.077],
-        [45.699,  78.559,  16.853],
-        [42.608,  79.792,  16.611],
-        [43.375,  80.468,  15.608],
-        [41.586,  80.762,  17.208],
-        [44.030,  77.052,  16.814],
-        [44.799,  76.021,  16.156],
-        [44.189,  75.782,  14.791],
-        [43.007,  76.033,  14.583],
-        [44.721,  74.725,  16.954],
-        [45.253,  74.836,  18.355],
-        [46.598,  74.629,  18.621],
-        [44.412,  75.147,  19.416],
-        [47.098,  74.729,  19.906],
-        [44.895,  75.245,  20.707],
-        [46.246,  75.036,  20.946],
-        [46.748,  75.126,  22.224],
+        [44.235, 80.308, 18.419],
+        [43.549, 79.243, 17.706],
+        [44.528, 78.252, 17.077],
+        [45.699, 78.559, 16.853],
+        [42.608, 79.792, 16.611],
+        [43.375, 80.468, 15.608],
+        [41.586, 80.762, 17.208],
+        [44.030, 77.052, 16.814],
+        [44.799, 76.021, 16.156],
+        [44.189, 75.782, 14.791],
+        [43.007, 76.033, 14.583],
+        [44.721, 74.725, 16.954],
+        [45.253, 74.836, 18.355],
+        [46.598, 74.629, 18.621],
+        [44.412, 75.147, 19.416],
+        [47.098, 74.729, 19.906],
+        [44.895, 75.245, 20.707],
+        [46.246, 75.036, 20.946],
+        [46.748, 75.126, 22.224],
     ]) / 10  # convert to nanometers
 
     assert np.allclose(traj.xyz, expected_coords)
@@ -297,14 +302,96 @@ def test_mol_to_traj(estradiol_mol):
 
 def test_add_fixed_ligand(mocker):
     lig_traj = mdt.load(data.pdb["estradiol.pdb"])
-    mock_mol_to_traj = mocker.patch(
+    mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex._mol_to_traj",
         return_value=lig_traj
     )
 
     pl = PLComplex(data.pdb["test_no_lig_2.pdb"])
-    assert pl.topology.n_atoms == 146
-
     pl.add_fixed_ligand()
+
     assert pl.topology.n_atoms == 166
     assert pl._coords.shape == (1, 166, 3)
+    assert len(pl._lig_indices) == 20
+    assert len(pl._receptor_indices) == 146
+
+    assert pl._ligand_ids == ["EST:B"]
+    assert pl._ligand_id == "EST:B"
+
+
+def test_binding_site_indices(mocker, pl_complex):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_max_extent",
+        return_value=puw.quantity(0.15, "nanometers")
+    )
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_centroid",
+        return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
+    )
+
+    pl = deepcopy(pl_complex)
+    pl._coords = puw.quantity(np.array([[
+        [0.01, 0.01, 0.01],
+        [0.02, 0.02, 0.02],
+        [0.3, 0.3, 0.3],
+        [0.4, 0.4, 0.4],
+        [0.5, 0.5, 0.5],
+        [1., 1., 1.],
+        [2., 2., 2.],
+    ]]), "nanometers")
+    bsite = pl.binding_site_indices(frame=0)
+    assert np.all(bsite == np.array([2, 3, 4]))
+    assert len(pl._lig_indices) == 20
+    assert len(pl._receptor_indices) == 146
+
+
+@pytest.fixture()
+def expected_centroid():
+    lig_coords = puw.quantity(np.array([
+        [10.4106, 1.7203, 2.4775],
+        [10.2995, 1.7834, 2.537],
+        [10.1695, 1.7355, 2.512],
+        [10.0598, 1.799, 2.5704],
+        [10.1506, 1.624, 2.4274],
+        [10.2621, 1.5588, 2.366],
+        [10.2371, 1.4379, 2.2735],
+        [10.3644, 1.3753, 2.2086],
+        [10.4898, 1.3873, 2.2953],
+        [10.5178, 1.5388, 2.3261],
+        [10.3957, 1.6078, 2.3918],
+        [10.6462, 1.5459, 2.4125],
+        [10.7711, 1.4803, 2.3508],
+        [10.7463, 1.3343, 2.3124],
+        [10.617, 1.327, 2.2242],
+        [10.6228, 1.1821, 2.1792],
+        [10.7701, 1.1713, 2.1263],
+        [10.8494, 1.2719, 2.2135],
+        [10.961, 1.2027, 2.2746],
+        [10.7379, 1.2449, 2.4419]
+    ]), "nanometers")
+    centroid = np.mean(lig_coords, axis=0)
+    assert centroid.shape == (3,)
+    return centroid
+
+
+def test_lig_centroid(expected_centroid):
+    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+    pl_complex._lig_indices = list(range(146, 166))
+
+    centroid = pl_complex._lig_centroid(frame=0)
+    assert puw.is_quantity(centroid)
+    assert np.allclose(expected_centroid, centroid)
+
+
+def test_lig_max_extent(expected_centroid):
+    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+    pl_complex._lig_indices = list(range(146, 166))
+    assert np.allclose(
+        pl_complex._lig_max_extent(expected_centroid, frame=0),
+        puw.quantity(0.59849, "nanometers"))
+
+
+def test_ligand_feature_centroids_null_ligand_raises_error():
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    with pytest.raises(exc.NoLigandError):
+        pl_complex.ligand_feature_centroids("aromatic ring", 0)
