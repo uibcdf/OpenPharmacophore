@@ -8,6 +8,7 @@ from openmm.app import Modeller
 import pyunitwizard as puw
 import rdkit.Chem.AllChem as Chem
 import tempfile
+from matplotlib.colors import to_rgb
 
 
 class PLComplex:
@@ -532,8 +533,115 @@ class PLComplex:
 
             criterion : str
                 The criterion used to compute the hydrogen bonds.
+
+            Returns
+            -------
+            np.ndarray
+                Array of shape (n_hbonds, 3)
         """
         if criterion == "baker":
+            # TODO: This function searches for hbonds in all the pl complex
+            #   we are only interested in protein-ligand hbonds, we can write
+            #   a new function that only searches hbonds between the protein and the ligand.
             return mdt.baker_hubbard(self.traj[frame])
         else:
             raise NotImplementedError
+
+    def hbonds_acceptors(self, hbond_indices, frame):
+        """ Returns the coordinates of the hydrogen bond acceptors between the ligand
+            and the receptor.
+
+            Parameters
+            ----------
+            hbond_indices : numpy.ndarray
+                Array of shape (n_hbonds, 3)
+
+             frame : int
+                Frame of the trajectory
+
+            Returns
+            -------
+            acceptors : list[puw.Quantity]
+
+        """
+        if len(self._lig_indices) == 0:
+            self.ligand_and_receptor_indices()
+
+        acceptors = []
+        for hbond in hbond_indices:
+            don_idx, _, acc_idx = hbond
+            if don_idx in self._lig_indices or acc_idx in self._lig_indices:
+                acceptors.append(self._coords[frame, acc_idx, :])
+
+        return acceptors
+
+    def hbonds_donors(self, hbond_indices, frame):
+        """ Returns the coordinates of the hydrogen bond acceptors between the ligand
+           and the receptor.
+
+           Parameters
+           ----------
+           hbond_indices : numpy.ndarray
+               Array of shape (n_hbonds, 3)
+
+            frame : int
+               Frame of the trajectory
+
+           Returns
+           -------
+           acceptors : list[puw.Quantity]
+
+               """
+        if len(self._lig_indices) == 0:
+            self.ligand_and_receptor_indices()
+
+        donors = []
+        for hbond in hbond_indices:
+            don_idx, _, acc_idx = hbond
+            if don_idx in self._lig_indices or acc_idx in self._lig_indices:
+                donors.append(self._coords[frame, don_idx, :])
+
+        return donors
+
+    def interactions_view(self, bsite_indices, feats=None):
+        """ Returns a view of the binding site and the ligand,
+            optionally with the specified chemical features highlighted
+            as spheres.
+
+            Parameters
+            ----------
+            bsite_indices : list[int] or numpy.ndarray
+                A list of indices that define the binding site.
+
+            feats : list[dict[str, list[puw.Quantity]]
+                A list of dictionaries containing a list of the
+                coordinates of each feature type.
+
+            Returns
+            -------
+            view : nglview.NGLWidget
+        """
+        palette = {
+            'positive charge': '#3498DB',  # Blue
+            'negative charge': '#884EA0',  # Purple
+            'hb acceptor': '#B03A2E',  # Red
+            'hb donor': '#17A589',  # Green
+            'hydrophobicity': '#F5B041',  # Orange
+            'aromatic ring': '#F1C40F',  # Yellow
+        }
+
+        bsite_traj = self.traj.atom_slice(bsite_indices)
+        view = show_mdtraj(bsite_traj)
+
+        for feats_dict in feats:
+            for feat_name, coord_list in feats_dict.items():
+                for coord in coord_list:
+                    value = puw.get_value(coord, "angstroms").tolist()
+                    view.shape.add_sphere(
+                        value, to_rgb(palette[feat_name]), 1.0, feat_name
+                    )
+                    n_components = len(view._ngl_component_ids)
+                    view.update_representation(
+                        component=n_components, repr_index=0, opacity=0.5)
+
+        return view

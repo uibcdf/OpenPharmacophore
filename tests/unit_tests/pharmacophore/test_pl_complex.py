@@ -8,6 +8,7 @@ import pytest
 from copy import deepcopy
 from rdkit import Chem
 from openmm.app import PDBFile
+from matplotlib.colors import to_rgb
 
 
 @pytest.fixture()
@@ -480,3 +481,80 @@ def test_hbond_indices_baker_criterion(mocker):
     _, args, _ = mock_bh.mock_calls[0]
 
     assert args[0].n_atoms == 19
+
+
+@pytest.fixture()
+def setup_hbonds():
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex._coords = puw.quantity(np.array([[
+        [0., 0., 0.],
+        [1., 1., 1.],
+        [2., 2., 2.],
+        [3., 3., 3.],
+        [4., 4., 4.],
+        [5., 5., 5.],
+    ]]), "angstroms")
+    pl_complex._lig_indices = [2, 3]
+
+    hbond_indices = np.array([
+        [0, 1, 2],
+        [3, 4, 5]
+    ])
+
+    return pl_complex, hbond_indices
+
+
+def test_hbonds_acceptors(setup_hbonds):
+    pl_complex, hbond_indices = setup_hbonds
+
+    acceptors = pl_complex.hbonds_acceptors(hbond_indices, 0)
+    expected = [
+        puw.quantity(np.array([2., 2., 2.]), "angstroms"),
+        puw.quantity(np.array([5., 5., 5.]), "angstroms")
+    ]
+
+    assert len(acceptors) == 2
+    assert np.all(acceptors[0] == expected[0])
+    assert np.all(acceptors[1] == expected[1])
+
+
+def test_hbonds_donors(setup_hbonds):
+    pl_complex, hbond_indices = setup_hbonds
+
+    donors = pl_complex.hbonds_donors(hbond_indices, 0)
+    expected = [
+        puw.quantity(np.array([0., 0., 0.]), "angstroms"),
+        puw.quantity(np.array([3., 3., 3.]), "angstroms")
+    ]
+
+    assert len(donors) == 2
+    assert np.all(donors[0] == expected[0])
+    assert np.all(donors[1] == expected[1])
+
+
+def test_interactions_view(mocker, pl_complex):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.show_mdtraj"
+    )
+
+    hbonds = {
+        "hb acceptor": [puw.quantity(np.array([1., 1., 1.]), "angstroms")]
+    }
+    feats = {
+        "aromatic ring": [puw.quantity(np.array([2., 2., 2.]), "angstroms")]
+    }
+    indices = list(range(10))
+
+    view = pl_complex.interactions_view(indices, feats=[hbonds, feats])
+    assert view.shape.add_sphere.call_count == 2
+    assert view.update_representation.call_count == 2
+
+    add_sphere_expected = [
+        mocker.call([1., 1., 1.], to_rgb("#B03A2E"),
+                    1.0, "hb acceptor"),
+        mocker.call([2., 2., 2.], to_rgb("#F1C40F"),
+                    1.0, "aromatic ring"),
+    ]
+
+    calls = view.shape.add_sphere.mock_calls
+    assert calls == add_sphere_expected

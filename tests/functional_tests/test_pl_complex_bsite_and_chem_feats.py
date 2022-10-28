@@ -38,6 +38,7 @@ def test_pl_complex_bsite_and_chem_feats():
     }
 
     # Finally we visualize the binding site with the chemical features
-    view = pl_complex.interactions_view(feats=[ligand_feats, receptor_feats, hbonds])
+    bsite_indices = pl_complex.binding_site_indices(frame=0)
+    view = pl_complex.interactions_view(bsite_indices, feats=[ligand_feats, receptor_feats, hbonds])
     assert "nglview.adaptor.MDTrajTrajectory" in view._ngl_component_names
     assert "nglview.shape.Shape" in view._ngl_component_names
