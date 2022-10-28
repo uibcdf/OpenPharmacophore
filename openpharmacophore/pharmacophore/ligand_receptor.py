@@ -206,6 +206,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         if features is None:
             features = PharmacophoricPoint.get_valid_features()
 
+        pl: PLComplex
         pl = self._pl_complex
         pl.prepare(lig_id=ligand_id, smiles=smiles, *args, **kwargs)
 
@@ -215,35 +216,35 @@ class LigandReceptorPharmacophore(Pharmacophore):
             self._num_frames += 1
 
             if "hydrophobicity" in features:
-                lig_hyd_centers = pl.ligand_hyd_centers(frame)
+                lig_hyd_centers, _ = pl.ligand_features("hydrophobicity", frame)
                 if len(lig_hyd_centers) > 0:
-                    rec_hyd_centers = pl.receptor_hyd_centers(frame)
+                    rec_hyd_centers, _ = pl.receptor_features("hydrophobicity", frame)
                     self._hydrophobic_pharmacophoric_points(
                         lig_hyd_centers, rec_hyd_centers, frame
                     )
 
             if "positive charge" in features:
-                lig_pos_charge_cent = pl.ligand_pos_charge_centers(frame)
+                lig_pos_charge_cent, _ = pl.ligand_features("positive charge", frame)
                 if len(lig_pos_charge_cent) > 0:
-                    rec_neg_charge_cent = pl.receptor_neg_charge_centers(frame)
+                    rec_neg_charge_cent, _ = pl.receptor_features("negative charge", frame)
                     self._charge_pharmacophoric_points(
                         lig_pos_charge_cent, rec_neg_charge_cent,
                         "positive charge", frame
                     )
 
             if "negative charge" in features:
-                lig_neg_charge_cent = pl.ligand_neg_charge_centers(frame)
+                lig_neg_charge_cent, _ = pl.ligand_features("negative charge", frame)
                 if len(lig_neg_charge_cent) > 0:
-                    rec_pos_charge_cent = pl.receptor_pos_charge_centers(frame)
+                    rec_pos_charge_cent, _ = pl.receptor_features("positive charge", frame)
                     self._charge_pharmacophoric_points(
                         lig_neg_charge_cent, rec_pos_charge_cent,
                         "negative charge", frame
                     )
 
             if "aromatic ring" in features:
-                lig_aro_cent, lig_aro_ind = pl.ligand_aromatic_feats(frame)
+                lig_aro_cent, lig_aro_ind = pl.ligand_features("aromatic ring", frame)
                 if len(lig_aro_cent) > 0:
-                    rec_aro_cent, rec_aro_ind = pl.receptor_aromatic_feats(frame)
+                    rec_aro_cent, rec_aro_ind = pl.receptor_features("aromatic ring", frame)
                     self._aromatic_pharmacophoric_points(
                         lig_aro_cent, lig_aro_ind,
                         rec_aro_cent, rec_aro_ind, frame
@@ -323,7 +324,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
             lig_centers : list[puw.Quantity]
                 Centroids of the aromatic rings in the ligand.
 
-            rec_indices : list[list[int]]
+            lig_indices : list[list[int]]
                 Indices of the rings atoms in the ligand.
 
             rec_centers : list[puw.Quantity]

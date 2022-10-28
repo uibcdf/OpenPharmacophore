@@ -405,23 +405,32 @@ def test_charge_pharmacophoric_points(ligand_chem_feats, receptor_chem_feats):
     assert not pharmacophore[0][0].has_direction
 
 
-def setup_extract(mocker, ligand_chem_feats, receptor_chem_feats):
+def setup_extract(mocker, ligand_chem_feats, receptor_chem_feats, index=None):
     """ Set up a test for the extract method of LigandReceptorPharmacophore. """
     pharma = LigandReceptorPharmacophore()
     pharma._pl_complex = mocker.Mock()
     pl = pharma._pl_complex
 
-    pl.ligand_hyd_centers.return_value = ligand_chem_feats.hyd_cent
-    pl.ligand_pos_charge_centers.return_value = ligand_chem_feats.charge_cent
-    pl.ligand_neg_charge_centers.return_value = ligand_chem_feats.charge_cent
-    pl.ligand_aromatic_feats.return_value = (
-        ligand_chem_feats.aro_cent, ligand_chem_feats.aro_ind)
+    ligand_side_effect = [
+        (ligand_chem_feats.hyd_cent, []),
+        (ligand_chem_feats.charge_cent, []),
+        (ligand_chem_feats.charge_cent, []),
+        (ligand_chem_feats.aro_cent, ligand_chem_feats.aro_ind)
+    ]
+    receptor_side_effect = [
+        (receptor_chem_feats.hyd_cent, []),
+        (receptor_chem_feats.charge_cent, []),
+        (receptor_chem_feats.charge_cent, []),
+        (receptor_chem_feats.aro_cent, receptor_chem_feats.aro_ind)
+    ]
 
-    pl.receptor_hyd_centers.return_value = receptor_chem_feats.hyd_cent
-    pl.receptor_pos_charge_centers.return_value = receptor_chem_feats.charge_cent
-    pl.receptor_neg_charge_centers.return_value = receptor_chem_feats.charge_cent
-    pl.receptor_aromatic_feats.return_value = (
-        receptor_chem_feats.aro_cent, receptor_chem_feats.aro_ind)
+    if index is None:
+        pl.ligand_features.side_effect = ligand_side_effect
+        pl.receptor_features.side_effect = receptor_side_effect
+    else:
+        # Take just one feature
+        pl.ligand_features.side_effect = ligand_side_effect[index:index + 1]
+        pl.receptor_features.side_effect = receptor_side_effect[index:index + 1]
 
     pl.coords = puw.quantity(np.array([
         # Aromatic ring ligand
@@ -481,10 +490,10 @@ def test_extract_all_features(
 
 
 def setup_test_extract_feature(mocker, lig_feats,
-                               rec_feats, feature):
+                               rec_feats, feature, index):
     """ Set up a test for the extract method with a particular feature."""
     pharma, pl = setup_extract(
-        mocker, lig_feats, rec_feats)
+        mocker, lig_feats, rec_feats, index)
     pharma.extract("EST:B", features=[feature])
     assert len(pharma[0]) == 1
     assert pharma[0][0].feature_name == feature
@@ -494,15 +503,7 @@ def test_extract_hydrophobic_features(
         mocker, ligand_chem_feats, receptor_chem_feats):
     setup_test_extract_feature(
         mocker, ligand_chem_feats,
-        receptor_chem_feats, "hydrophobicity"
-    )
-
-
-def test_extract_aromatic_features(
-        mocker, ligand_chem_feats, receptor_chem_feats):
-    setup_test_extract_feature(
-        mocker, ligand_chem_feats,
-        receptor_chem_feats, "aromatic ring"
+        receptor_chem_feats, "hydrophobicity", 0
     )
 
 
@@ -510,7 +511,7 @@ def test_extract_positive_charge_features(
         mocker, ligand_chem_feats, receptor_chem_feats):
     setup_test_extract_feature(
         mocker, ligand_chem_feats,
-        receptor_chem_feats, "positive charge"
+        receptor_chem_feats, "positive charge", 1
     )
 
 
@@ -518,7 +519,15 @@ def test_extract_negative_charge_features(
         mocker, ligand_chem_feats, receptor_chem_feats):
     setup_test_extract_feature(
         mocker, ligand_chem_feats,
-        receptor_chem_feats, "negative charge"
+        receptor_chem_feats, "negative charge", 2
+    )
+
+
+def test_extract_aromatic_features(
+        mocker, ligand_chem_feats, receptor_chem_feats):
+    setup_test_extract_feature(
+        mocker, ligand_chem_feats,
+        receptor_chem_feats, "aromatic ring", 3
     )
 
 
@@ -526,7 +535,7 @@ def test_extract_acceptor_features(
         mocker, ligand_chem_feats, receptor_chem_feats):
     setup_test_extract_feature(
         mocker, ligand_chem_feats,
-        receptor_chem_feats, "hb acceptor"
+        receptor_chem_feats, "hb acceptor", None
     )
 
 
@@ -534,5 +543,5 @@ def test_extract_donor_features(
         mocker, ligand_chem_feats, receptor_chem_feats):
     setup_test_extract_feature(
         mocker, ligand_chem_feats,
-        receptor_chem_feats, "hb donor"
+        receptor_chem_feats, "hb donor", None
     )

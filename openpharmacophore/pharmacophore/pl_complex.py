@@ -227,8 +227,8 @@ class PLComplex:
                 return True
         return False
 
-    def fix_ligand(self, smiles=""):
-        """ Add hydrogens to the ligand and correct its bond orders.
+    def fix_ligand(self, smiles="", add_hydrogens=True):
+        """ Correct the ligand bond order and add hydrogens if specified.
 
             If a smiles is not given, a smiles for the ligand will
             be searched for. In case it is not found this will raise
@@ -241,6 +241,9 @@ class PLComplex:
             ----------
             smiles : str, optional
                 The smiles of the ligand.
+
+            add_hydrogens : bool
+                Whether to add hydrogens to the molecule
 
             Raises
             ------
@@ -257,7 +260,10 @@ class PLComplex:
             )
 
         fixed_lig = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
-        self._ligand = Chem.AddHs(fixed_lig, addCoords=True)
+        if add_hydrogens:
+            self._ligand = Chem.AddHs(fixed_lig, addCoords=True)
+        else:
+            self._ligand = fixed_lig
 
     @staticmethod
     def _pdb_id_to_smi(pdb_id):
@@ -425,8 +431,8 @@ class PLComplex:
         distance = np.sqrt(np.sum(np.power(self._coords[0] - lig_center, 2), axis=1))
         return np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
 
-    def ligand_feature_centroids(self, feat_name, frame):
-        """ Get the centroid of chemical features in the ligand.
+    def ligand_features(self, feat_name, frame):
+        """ Returns the centroids and indices of a chemical feature in the ligand.
 
             Hydrogen bonds cannot be obtained with this method.
 
@@ -441,6 +447,10 @@ class PLComplex:
             -------
             centers : list[puw.Quantity]
                 List with quantities of shape (3, ).
+
+            indices_list : list[list[int]]
+                The indices of the atoms in the topology that correspond
+                to the chemical features.
 
         """
         if self.ligand is None:
@@ -449,14 +459,17 @@ class PLComplex:
         centers = []
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._ligand)
+        indices_list = []
         for indices_set in indices:
             feat_coords = self._coords[frame, indices_set, :]
             centers.append(np.mean(feat_coords, axis=0))
+            indices_list.append(list(indices_set))
 
-        return centers
+        return centers, indices_list
 
-    def receptor_feature_centroids(self, feat_name, frame):
-        """ Get the centroid of chemical features in the receptor.
+    def receptor_features(self, feat_name, frame):
+        """ Get the centroid and indices of a chemical feature contained
+            in the binding site of the receptor.
 
             Hydrogen bonds cannot be obtained with this method.
 
@@ -464,6 +477,7 @@ class PLComplex:
             ----------
             feat_name : str
                 Name of the feature
+
             frame : int
                 Frame of the trajectory
 
@@ -471,6 +485,10 @@ class PLComplex:
             -------
             centers : list[puw.Quantity]
                 List with quantities of shape (3, ).
+
+            indices : list[list[int]]
+                The indices of the atoms in the topology that correspond
+                to the chemical features.
 
         """
         if self._mol_graph is None:
@@ -485,14 +503,17 @@ class PLComplex:
         centers = []
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._mol_graph)
+        indices_bs = []
+
         for indices_set in indices:
             feat_coords = self._coords[frame, indices_set, :]
             centroid = np.mean(feat_coords, axis=0)
             # Only keep features in the binding site
             if maths.points_distance(centroid, lig_center) < bs_cutoff:
                 centers.append(centroid)
+                indices_bs.append(list(indices_set))
 
-        return centers
+        return centers, indices_bs
 
     @staticmethod
     def feature_indices(feat_def, mol):
@@ -645,3 +666,27 @@ class PLComplex:
                         component=n_components, repr_index=0, opacity=0.5)
 
         return view
+
+    def prepare(self, lig_id, smiles="", add_hydrogens=True):
+        """ Fix the ligand bond order, and optionally add hydrogens to
+            both the ligand and the receptor.
+
+            Adding hydrogens is necessary to find hydrogen bonds.
+
+            If a smiles is not given, a smiles for the ligand will
+            be searched for. In case it is not found this will raise
+            an error.
+
+            Parameters
+            ----------
+            lig_id: str
+                Id of the ligand that will be fixed.
+
+            smiles : str, optional
+                The smiles of the ligand.
+
+            add_hydrogens: bool, optional.
+                Whether to add hydrogens to the ligand and the receptor.
+
+        """
+        pass

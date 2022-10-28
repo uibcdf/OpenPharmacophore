@@ -8,6 +8,7 @@ def test_pl_complex_bsite_and_chem_feats():
     # required for extracting a protein-ligand receptor pharmacophore.
     pl_complex = PLComplex(data.pdb["3bbh_hyd.pdb"])
     assert len(pl_complex.ligand_ids) == 1
+    assert pl_complex.has_hydrogens()
 
     # We set the ligand whose chemical features we want to obtain, and we
     # see that its bond orders are not correct
@@ -25,10 +26,10 @@ def test_pl_complex_bsite_and_chem_feats():
     feats = ["hydrophobicity", "positive charge", "negative charge"]
     ligand_feats = {}
     for feat_name in feats:
-        ligand_feats[feat_name] = pl_complex.ligand_feature_centroids(feat_name, frame=0)
+        ligand_feats[feat_name] = pl_complex.ligand_features(feat_name, frame=0)[0]
     receptor_feats = {}
     for feat_name in feats:
-        ligand_feats[feat_name] = pl_complex.receptor_feature_centroids(feat_name, frame=0)
+        ligand_feats[feat_name] = pl_complex.receptor_features(feat_name, frame=0)[0]
 
     # Also the hydrogen bonds
     hbond_indices = pl_complex.hbond_indices(frame=0, criterion="baker")

@@ -1,10 +1,6 @@
 import openpharmacophore as oph
 import openpharmacophore.data as data
 import nglview as nv
-import pytest
-
-pytest.skip("Extract method not implemented yet",
-            allow_module_level=True)
 
 
 def assert_view_contains_pharmacophore(view, n_points):
@@ -46,12 +42,13 @@ def test_ligand_receptor_pharmacophore_hydrogen_bonding_points():
 
     # We create a view of the binding site, so we can the residues that
     # are involved in hydrogen bonding clearly.
-    view = pharmacophore.bsite_view()
+    bsite_indices = pharmacophore.receptor.binding_site_indices(0)
+    view = pharmacophore.show(indices=bsite_indices)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
 def test_ligand_receptor_pharmacophore_hydrophobic_points():
-    # We create a pharmacophore that contains only hydrogen donor and acceptor points
+    # We create a pharmacophore that contains only hydrophobic points
     pharmacophore = oph.load(data.pdb["1m7w_A_chain.pdb"])
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We know that the file contains a single ligand
@@ -81,7 +78,8 @@ def test_ligand_receptor_pharmacophore_hydrophobic_points():
 
     # We create a view of the binding site, so we can the residues that
     # are involved in hydrophobic interactions clearly.
-    view = pharmacophore.bsite_view()
+    bsite_indices = pharmacophore.receptor.binding_site_indices(0)
+    view = pharmacophore.show(indices=bsite_indices)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
@@ -114,7 +112,8 @@ def test_ligand_receptor_pharmacophore_aromatic_points():
 
     # We create a view of the binding site, so we can see the residues that
     # are involved in aromatic interactions.
-    view = pharmacophore.bsite_view()
+    bsite_indices = pharmacophore.receptor.binding_site_indices(0)
+    view = pharmacophore.show(indices=bsite_indices)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
@@ -149,6 +148,7 @@ def test_ligand_receptor_pharmacophore_from_pdb():
 
     # We create a view of the binding site, so we can see the residues that
     # are involved in protein ligand interactions clearly.
-    view = pharmacophore.bsite_view()
+    bsite_indices = pharmacophore.receptor.binding_site_indices(0)
+    view = pharmacophore.show(indices=bsite_indices)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
