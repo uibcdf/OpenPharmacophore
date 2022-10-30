@@ -19,7 +19,8 @@ def test_pl_complex_bsite_and_chem_feats():
     # We fix the ligand. Its bond orders are correct now and it contains
     # hydrogens
     pl_complex.fix_ligand(
-        smiles="c1nc(c2c(n1)n(cn2)[C@H]3[C@@H]([C@@H]([C@H](O3)C[C@H](CC[C@@H](C(=O)O)N)N)O)O)N")
+        smiles="c1nc(c2c(n1)n(cn2)[C@H]3[C@@H]([C@@H]([C@H](O3)C[C@H](CC[C@@H](C(=O)O)N)N)O)O)N",
+        add_hydrogens=True)
     assert pl_complex.ligand.GetNumAtoms() == 50
 
     # We get the centroids of the ligand chemical features so, we can visualize them

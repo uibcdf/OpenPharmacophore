@@ -451,13 +451,20 @@ class PLComplex:
             frame : int
                 Frame of the trajectory
 
+            Returns
+            -------
+            indices : np.ndarray
+                Array of integers.
+
         """
         self.ligand_and_receptor_indices()
         lig_center = self._lig_centroid(frame)
         lig_extent = self._lig_max_extent(lig_center, frame)
         bs_cutoff = lig_extent + self.BS_DIST_MAX
         distance = np.sqrt(np.sum(np.power(self._coords[0] - lig_center, 2), axis=1))
-        return np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
+        indices = np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
+
+        return indices
 
     def ligand_features(self, feat_name, frame):
         """ Returns the centroids and indices of a chemical feature in the ligand.
@@ -489,9 +496,12 @@ class PLComplex:
             self.smarts_ligand[feat_name], self._ligand)
         indices_list = []
         for indices_set in indices:
-            feat_coords = self._coords[frame, indices_set, :]
+            # Map indices of the ligand rdkit molecule to those of the ligand
+            # in the topology
+            indices_top = [self._lig_indices[ii] for ii in indices_set]
+            feat_coords = self._coords[frame, indices_top, :]
             centers.append(np.mean(feat_coords, axis=0))
-            indices_list.append(list(indices_set))
+            indices_list.append(indices_top)
 
         return centers, indices_list
 
@@ -725,3 +735,28 @@ class PLComplex:
             self.add_hydrogens()
             self.add_fixed_ligand()
         self.ligand_and_receptor_indices()
+
+    def slice_traj(self, indices):
+        """ Slice the complex trajectory but only keep residues that
+            are complete.
+
+            Parameters
+            ----------
+            indices : np.ndarray or list[int]
+                Indices of the atoms of the new trajectory.
+
+            Returns
+            -------
+            mdtraj.Trajectory
+                The new trajectory
+        """
+        new_traj = self.traj.atom_slice(indices)
+        new_topology = new_traj.topology
+        # List of the atoms in the final traj
+        atoms = []
+        for index_new, index_ori in enumerate(indices):
+            if self.topology.atom(index_ori).residue.n_atoms == \
+                    new_topology.atom(index_new).residue.n_atoms:
+                atoms.append(index_new)
+
+        return new_traj.atom_slice(atoms)

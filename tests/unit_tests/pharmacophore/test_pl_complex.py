@@ -347,16 +347,16 @@ def test_binding_site_indices(mocker, pl_complex):
 
     pl = deepcopy(pl_complex)
     pl._coords = puw.quantity(np.array([[
-        [0.01, 0.01, 0.01],
-        [0.02, 0.02, 0.02],
         [0.3, 0.3, 0.3],
         [0.4, 0.4, 0.4],
         [0.5, 0.5, 0.5],
+        [0.01, 0.01, 0.01],
+        [0.02, 0.02, 0.02],
         [1., 1., 1.],
         [2., 2., 2.],
     ]]), "nanometers")
     bsite = pl.binding_site_indices(frame=0)
-    assert np.all(bsite == np.array([2, 3, 4]))
+    assert np.all(bsite == np.array([0, 1, 2]))
     assert len(pl._lig_indices) == 20
     assert len(pl._receptor_indices) == 146
 
@@ -421,17 +421,20 @@ def test_ligand_feature_centroids(mocker, estradiol_mol):
     pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
     pl_complex._coords = puw.quantity(np.array(
         [[
-            [2., 2., 2.],
+            [0., 0., 0.],  # Receptor
+            [1., 1., 1.],
+            [2., 2., 2.],  # Ligand
             [4., 4., 4.],
         ]]
     ), "nanometers")
     pl_complex._ligand = estradiol_mol
+    pl_complex._lig_indices = [2, 3]
 
     centers, indices = pl_complex.ligand_features("hydrophobicity", frame=0)
     expected_cent = [puw.quantity(np.array([3., 3., 3.]), "nanometer")]
 
     assert np.all(centers[0] == expected_cent[0])
-    assert indices == [[0, 1]]
+    assert indices == [[2, 3]]
 
     mock_feat_indices.assert_called_once()
     _, args, _ = mock_feat_indices.mock_calls[0]
@@ -469,7 +472,7 @@ def test_receptor_feature_centroids(mocker):
         [[
             [.2, .2, .2],
             [.4, .4, .4],
-            [6., 6., 6.],
+            [1., 1., 1.],
         ]]
     ), "nanometers")
 
@@ -575,3 +578,17 @@ def test_interactions_view(mocker, pl_complex):
 
     calls = view.shape.add_sphere.mock_calls
     assert calls == add_sphere_expected
+
+
+def test_slice_traj():
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+
+    indices = list(range(0, 12))
+    traj = pl_complex.slice_traj(indices)
+    assert traj.n_atoms == 7
+    assert traj.n_residues == 1
+
+    indices = list(range(6, 19))
+    traj = pl_complex.slice_traj(indices)
+    assert traj.n_atoms == 12
+    assert traj.n_residues == 1

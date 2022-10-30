@@ -1,6 +1,5 @@
 import openpharmacophore as oph
 import openpharmacophore.data as data
-import nglview as nv
 
 
 def assert_view_contains_pharmacophore(view, n_points):
@@ -9,7 +8,7 @@ def assert_view_contains_pharmacophore(view, n_points):
     assert "nglview.shape.Shape" in view._ngl_component_names
 
     n_shapes = len([comp for comp in view._ngl_component_names
-                    if comp == "nglview.shape.shape"])
+                    if comp == "nglview.shape.Shape"])
     assert n_shapes >= n_points  # Direction arrows can make n_shapes greater
 
 
@@ -100,14 +99,13 @@ def test_ligand_receptor_pharmacophore_aromatic_points():
 
     # We inspect the ligand to see that it was correctly extracted.
     # ATP has 31 atoms excluding hydrogens
-    assert pharmacophore.ligand.GetNumAtoms() == 31
+    assert pharmacophore.receptor.ligand.GetNumAtoms() == 31
 
     # The protein should not contain hydrogens
     assert not pharmacophore.receptor.has_hydrogens()
 
-    # Finally we add the pharmacophore to an existing view.
-    view = nv.NGLWidget()
-    pharmacophore.add_to_view(view)
+    # Finally we visualize the pharmacophore.
+    view = pharmacophore.show()
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
     # We create a view of the binding site, so we can see the residues that

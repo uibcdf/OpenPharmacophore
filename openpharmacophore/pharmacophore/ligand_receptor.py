@@ -24,17 +24,17 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
     """
     # Values from ligandscout and plip
-    HB_DIST_MIN = puw.quantity(2.5, "angstroms")
-    HB_DIST_MAX = puw.quantity(4.1, "angstroms")
+    HB_DIST_MIN = puw.quantity(0.25, "nanometers")
+    HB_DIST_MAX = puw.quantity(0.41, "nanometers")
     HB_DON_ANG_MIN = 100  # degrees
 
-    HYD_DIST_MAX = puw.quantity(5.0, "angstroms")
-    HYD_MERGE_DIST = puw.quantity(2.0, "angstroms")  # value from pharmer
+    HYD_DIST_MAX = puw.quantity(0.5, "nanometers")
+    HYD_MERGE_DIST = puw.quantity(0.2, "nanometers")  # value from pharmer
 
-    CHARGE_DIST_MAX = puw.quantity(5.6, "angstroms")
+    CHARGE_DIST_MAX = puw.quantity(0.56, "nanometers")
 
-    PISTACK_DIST_MAX = puw.quantity(7.5, "angstroms")
-    PISTACK_OFFSET_MAX = puw.quantity(2.0, "angstroms")
+    PISTACK_DIST_MAX = puw.quantity(0.75, "nanometers")
+    PISTACK_OFFSET_MAX = puw.quantity(0.20, "nanometers")
     PISTACK_ANG_DEV = 30  # degrees
 
     def __init__(self):
@@ -131,7 +131,14 @@ class LigandReceptorPharmacophore(Pharmacophore):
         raise NotImplementedError
 
     def add_to_view(self, view, frame=0):
-        """ Add pharmacophore(s) to a ngl view.
+        """ Add pharmacophoric points to a ngl view.
+
+            Parameters
+            ----------
+            view : nglview.NGLWidget
+                A view object where the pharmacophoric points will be added.
+            frame : int or list[int]
+                Frame or frames to  add the pharmacophoric points.
         """
         if isinstance(frame, list):
             raise NotImplementedError
@@ -139,10 +146,53 @@ class LigandReceptorPharmacophore(Pharmacophore):
             for point in self[frame]:
                 point.add_to_ngl_view(view)
 
-    def show(self, frame=0):
-        """ Shows a 3D representation of the pharmacophore model. """
-        view = nv.NGLWidget()
-        self.add_to_view(view, frame)
+    def show(self, frame=0, ligand=True, receptor=True,
+             points=True, indices=None):
+        """ Shows a 3D representation of the pharmacophore model.
+
+            Parameters
+            ----------
+            frame : int or list[int]
+                Which frame or frames to show
+            ligand : bool, optional
+                Whether to show the ligand.
+            receptor : bool, optional
+                Whether to show the receptor.
+            points : bool, optional
+                Whether to show pharmacophoric points.
+            indices : np.ndarray or list[int]
+                A list of the indices of the atoms that will be shown.
+        """
+        if not all([ligand, receptor, points]):
+            return nv.NGLWidget()
+
+        if indices is None:
+            view = nv.show_mdtraj(self.receptor.traj)
+            prot_style = "cartoon"
+        else:
+            traj = self.receptor.slice_traj(indices)
+            view = nv.show_mdtraj(traj)
+            prot_style = "ball+stick"
+
+        representations = []
+        if receptor:
+            representations.append({
+              "type": prot_style,
+              "params": {
+                  "sele": "protein",
+                  "color": "residueindex",
+              }
+            })
+        if ligand:
+            representations.append({
+                "type": "ball+stick",
+                "params": {
+                    "sele": "( not polymer or hetero ) and not ( water or ion )",
+                }
+            })
+        view.representations = representations
+        if points:
+            self.add_to_view(view, frame)
         return view
 
     def to_json(self, file_name, frame):
@@ -389,7 +439,8 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for lig_center in ligand_centers:
             for prot_center in receptor_centers:
-                if maths.points_distance(lig_center, prot_center) < self.HYD_DIST_MAX:
+                dist = maths.points_distance(lig_center, prot_center)
+                if dist < self.HYD_DIST_MAX:
                     centers.append(lig_center)
 
         points_clustered = self._merge_hydrophobic_points(centers, radius)
