@@ -103,6 +103,12 @@ class PLComplex:
 
     @property
     def ligand_ids(self):
+        """ Returns a list with the ligand ids in the complex.
+
+            Returns
+            -------
+            list[str]
+        """
         return self._ligand_ids
 
     @property
@@ -114,6 +120,28 @@ class PLComplex:
             rdkit.Mol
         """
         return self._ligand
+
+    @property
+    def lig_indices(self):
+        """ Returns the indices of the ligand atoms.
+
+            Returns
+            -------
+            list[int]
+        """
+        return self._lig_indices
+
+    @property
+    def coords(self):
+        """ Return the coordinates of the complex.
+
+        Returns
+        -------
+        puw.Quantity
+            Shape (n_frames, n_atoms, 3)
+
+        """
+        return self._coords
 
     def set_ligand(self, lig_id):
         """ Set the ligand that will be used to do all computations.
@@ -689,4 +717,11 @@ class PLComplex:
                 Whether to add hydrogens to the ligand and the receptor.
 
         """
-        pass
+        self.set_ligand(lig_id)
+        self.ligand_to_mol()
+        self.fix_ligand(smiles, add_hydrogens)
+        if add_hydrogens:
+            self.remove_ligand()
+            self.add_hydrogens()
+            self.add_fixed_ligand()
+        self.ligand_and_receptor_indices()

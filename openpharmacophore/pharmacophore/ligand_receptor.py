@@ -181,7 +181,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         return rdkit_pharmacophore(self[frame])
 
     def extract(self, ligand_id, frames=0, smiles="", features=None,
-                *args, **kwargs):
+                add_hydrogens=True):
         """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
             can contain multiple ligands or small molecules, pharmacophore(s) is
             extracted only for the selected one.
@@ -199,6 +199,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
             features : list[str], optional
                 A list of the chemical features that will be used in the extraction.
+
+            add_hydrogens : bool
+                Whether to add hydrogens to the ligand and the receptor. Necessary
+                to extrac hydrogen bond pharmacophoric points.
         """
         if isinstance(frames, int):
             frames = [frames]
@@ -208,7 +212,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
         pl: PLComplex
         pl = self._pl_complex
-        pl.prepare(lig_id=ligand_id, smiles=smiles, *args, **kwargs)
+        pl.prepare(lig_id=ligand_id, smiles=smiles, add_hydrogens=add_hydrogens)
 
         for frame in frames:
             self._pharmacophores.append([])
@@ -279,10 +283,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for bond in h_bonds:
             if bond[0] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[bond[1]] -
-                                          self._pl_complex.coords[bond[0]])
+                direction = puw.get_value(self._pl_complex.coords[frame, bond[1], :] -
+                                          self._pl_complex.coords[frame, bond[0], :])
                 pharma_point = PharmacophoricPoint(
-                    "hb donor", self._pl_complex.coords[bond[0]],
+                    "hb donor", self._pl_complex.coords[frame, bond[0], :],
                     radius, direction
                 )
                 self._pharmacophores[frame].append(pharma_point)
@@ -306,10 +310,10 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for bond in h_bonds:
             if bond[2] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[bond[1]] -
-                                          self._pl_complex.coords[bond[0]])
+                direction = puw.get_value(self._pl_complex.coords[frame, bond[1], :] -
+                                          self._pl_complex.coords[frame, bond[0], :])
                 pharma_point = PharmacophoricPoint(
-                    "hb acceptor", self._pl_complex.coords[bond[2]],
+                    "hb acceptor", self._pl_complex.coords[frame, bond[2], :],
                     radius, direction
                 )
                 self._pharmacophores[frame].append(pharma_point)
@@ -344,8 +348,8 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 if maths.points_distance(rec_centers[jj], lig_centers[ii]) <= self.PISTACK_DIST_MAX:
                     # Calculate deviation from ideal angle by taking the angle between the normals
                     # defined by the planes of each ring
-                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords, lig_centers[ii])
-                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords, rec_centers[jj])
+                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords[frame], lig_centers[ii])
+                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords[frame], rec_centers[jj])
                     angle = maths.angle_between_normals(lig_normal, rec_normal)
                     assert 0 <= angle <= 360, f"Angle is {angle}"
 

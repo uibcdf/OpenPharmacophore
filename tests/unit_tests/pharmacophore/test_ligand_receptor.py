@@ -204,10 +204,11 @@ def empty_pharmacophore_one_frame():
 def set_up_hbond_pharmacophoric_points(mocker):
     pharma = empty_pharmacophore_one_frame()
     pharma._pl_complex = mocker.Mock()
-    pharma._pl_complex.coords = puw.quantity(
+    pharma.receptor.coords = puw.quantity(
         np.array([[float(ii)] * 3 for ii in range(0, 9)]), "angstroms")
-    assert pharma._pl_complex.coords.shape == (9, 3)
-    pharma._pl_complex.lig_indices = [5, 6, 7, 8]
+    pharma.receptor.coords = pharma.receptor.coords.reshape((1, 9, 3))
+    assert pharma.receptor.coords.shape == (1, 9, 3)
+    pharma.receptor.lig_indices = [5, 6, 7, 8]
 
     h_bonds = np.array([
         [0, 2, 5],
@@ -283,6 +284,8 @@ def test_aromatic_pharmacophoric_points_pstack(mocker, ligand_chem_feats, recept
         [1/2, -np.sqrt(3)/2, 3],
         [3/2, -np.sqrt(3)/2, 3],
     ]), "angstroms")
+    pharmacophore._pl_complex.coords = pharmacophore._pl_complex.coords.reshape((1, 12, 3))
+    assert pharmacophore._pl_complex.coords.shape == (1, 12, 3)
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -317,6 +320,8 @@ def test_aromatic_pharmacophoric_points_exceeds_max_offset(mocker, ligand_chem_f
         [11 / 2, -np.sqrt(3) / 2, 3],
         [9 / 2, -np.sqrt(3) / 2, 3],
     ]), "angstroms")
+    pharmacophore._pl_complex.coords = pharmacophore._pl_complex.coords.reshape((1, 12, 3))
+    assert pharmacophore._pl_complex.coords.shape == (1, 12, 3)
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -346,6 +351,8 @@ def test_aromatic_pharmacophoric_points_t_stack(mocker, ligand_chem_feats, recep
         [2, -1/2, -np.sqrt(3) / 2],
         [2, 1/2, -np.sqrt(3) / 2],
     ]), "angstroms")
+    pharmacophore._pl_complex.coords = pharmacophore._pl_complex.coords.reshape((1, 12, 3))
+    assert pharmacophore._pl_complex.coords.shape == (1, 12, 3)
     pharmacophore._aromatic_pharmacophoric_points(
         ligand_chem_feats.aro_cent,
         ligand_chem_feats.aro_ind,
@@ -456,6 +463,9 @@ def setup_extract(mocker, ligand_chem_feats, receptor_chem_feats, index=None):
         [4, 4, 4],  # hydrogen atom
         [5, 5, 5],  # donor atom
     ]), "angstroms")
+    # Coords must be a 3D array
+    pl.coords = pl.coords.reshape((1, 18, 3))
+    assert pl.coords.shape == (1, 18, 3)
     pl.hbond_indices.return_value = np.array([
         [12, 13, 14],
         [15, 16, 17],
@@ -471,7 +481,7 @@ def test_extract_all_features(
     pharma.extract("EST:B")
 
     pl.prepare.assert_called_once_with(
-        lig_id="EST:B", smiles=""
+        lig_id="EST:B", smiles="", add_hydrogens=True
     )
 
     assert len(pharma[0]) == 6

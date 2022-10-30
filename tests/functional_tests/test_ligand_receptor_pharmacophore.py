@@ -25,13 +25,13 @@ def test_ligand_receptor_pharmacophore_hydrogen_bonding_points():
     pharmacophore.extract(lig_ids[0],
                           features=["hb donor", "hb acceptor"])
     assert len(pharmacophore[0]) > 0
-    feat_names = [p.feat_name for p in pharmacophore[0]]
+    feat_names = [p.feature_name for p in pharmacophore[0]]
     for name in feat_names:
         assert name == "hb acceptor" or name == "hb donor"
 
     # We inspect the ligand to see that it was correctly extracted.
     # SFG has 50 atoms including hydrogens
-    assert pharmacophore.ligand.GetNumAtoms() == 50
+    assert pharmacophore.receptor.ligand.GetNumAtoms() == 50
 
     # The protein should contain hydrogens
     assert pharmacophore.receptor.has_hydrogens()
@@ -63,11 +63,11 @@ def test_ligand_receptor_pharmacophore_hydrophobic_points():
                           smiles=smiles,
                           add_hydrogens=False)
     assert len(pharmacophore[0]) > 0
-    assert all([p.feat_name == "hydrophobicity" for p in pharmacophore[0]])
+    assert all([p.feature_name == "hydrophobicity" for p in pharmacophore[0]])
 
     # We inspect the ligand to see that it was correctly extracted.
     # DAO has 14 atoms excluding hydrogens
-    assert pharmacophore.ligand.GetNumAtoms() == 14
+    assert pharmacophore.receptor.ligand.GetNumAtoms() == 14
 
     # The protein should not contain hydrogens
     assert not pharmacophore.receptor.has_hydrogens()
@@ -96,7 +96,7 @@ def test_ligand_receptor_pharmacophore_aromatic_points():
                           features=["aromatic ring"],
                           add_hydrogens=False)
     assert len(pharmacophore[0]) == 1
-    assert all([p.feat_name == "aromatic ring" for p in pharmacophore[0]])
+    assert all([p.feature_name == "aromatic ring" for p in pharmacophore[0]])
 
     # We inspect the ligand to see that it was correctly extracted.
     # ATP has 31 atoms excluding hydrogens
@@ -137,7 +137,7 @@ def test_ligand_receptor_pharmacophore_from_pdb():
 
     # We inspect the ligand to see that it was correctly extracted.
     # Estradiol has 18 Carbons, 2 Oxygens and 24 Hydrogens.
-    assert pharmacophore.ligand.GetNumAtoms() == 44
+    assert pharmacophore.receptor.ligand.GetNumAtoms() == 44
 
     # The protein should contain hydrogens
     assert pharmacophore.receptor.has_hydrogens()

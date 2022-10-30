@@ -1,9 +1,7 @@
 from openpharmacophore import PLComplex
 import openpharmacophore.data as data
-import pytest
 
 
-@pytest.mark.skip(reason="Skip temporarily")
 def test_pl_complex_preparation():
     # We want to prepare the protein ligand complex of the pdb 1M7W
     # to be ready for pharmacophore extraction. This complex contains
