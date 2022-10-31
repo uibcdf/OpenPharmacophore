@@ -556,6 +556,9 @@ def test_interactions_view(mocker, pl_complex):
     mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.show_mdtraj"
     )
+    mock_slice = mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.slice_traj"
+    )
 
     hbonds = {
         "hb acceptor": [puw.quantity(np.array([1., 1., 1.]), "angstroms")]
@@ -566,6 +569,9 @@ def test_interactions_view(mocker, pl_complex):
     indices = list(range(10))
 
     view = pl_complex.interactions_view(indices, feats=[hbonds, feats])
+
+    mock_slice.assert_called_once_with(indices)
+    view.add_component.assert_called_once()
     assert view.shape.add_sphere.call_count == 2
     assert view.update_representation.call_count == 2
 
@@ -578,6 +584,7 @@ def test_interactions_view(mocker, pl_complex):
 
     calls = view.shape.add_sphere.mock_calls
     assert calls == add_sphere_expected
+    assert "ball+stick" in view.representations[0]["type"]
 
 
 def test_slice_traj():

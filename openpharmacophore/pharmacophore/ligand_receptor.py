@@ -24,10 +24,6 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
     """
     # Values from ligandscout and plip
-    HB_DIST_MIN = puw.quantity(0.25, "nanometers")
-    HB_DIST_MAX = puw.quantity(0.41, "nanometers")
-    HB_DON_ANG_MIN = 100  # degrees
-
     HYD_DIST_MAX = puw.quantity(0.5, "nanometers")
     HYD_MERGE_DIST = puw.quantity(0.2, "nanometers")  # value from pharmer
 
@@ -163,34 +159,33 @@ class LigandReceptorPharmacophore(Pharmacophore):
             indices : np.ndarray or list[int]
                 A list of the indices of the atoms that will be shown.
         """
-        if not all([ligand, receptor, points]):
-            return nv.NGLWidget()
+        view = nv.NGLWidget()
+        if not any([ligand, receptor, points]):
+            return view
 
         if indices is None:
-            view = nv.show_mdtraj(self.receptor.traj)
-            prot_style = "cartoon"
+
+            if receptor and ligand:
+                view = nv.show_mdtraj(self.receptor.traj.atom_slice(
+                    self.receptor.receptor_indices))
+                view.add_component(self.receptor.ligand)
+            elif receptor:
+                view = nv.show_mdtraj(self.receptor.traj.atom_slice(
+                    self.receptor.receptor_indices))
+            elif ligand:
+                view = nv.show_rdkit(self.receptor.ligand)
         else:
             traj = self.receptor.slice_traj(indices)
             view = nv.show_mdtraj(traj)
-            prot_style = "ball+stick"
-
-        representations = []
-        if receptor:
-            representations.append({
-              "type": prot_style,
-              "params": {
-                  "sele": "protein",
-                  "color": "residueindex",
-              }
-            })
-        if ligand:
-            representations.append({
+            view.representations = [{
                 "type": "ball+stick",
                 "params": {
-                    "sele": "( not polymer or hetero ) and not ( water or ion )",
+                    "sele": "all",
                 }
-            })
-        view.representations = representations
+            }]
+            if ligand:
+                view.add_component(self.receptor.ligand)
+
         if points:
             self.add_to_view(view, frame)
         return view

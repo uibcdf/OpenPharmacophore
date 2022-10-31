@@ -557,29 +557,77 @@ def test_adding_single_frame_to_view_updates_components(pharmacophore_one_frame)
     assert len(view._ngl_component_ids) == 3
 
 
-def test_show_all_single_frame(mocker, pharmacophore_one_frame):
+@pytest.fixture()
+def pharma_with_pl_complex():
+    """ Returns a pharmacophore with a PLComplex object.
+    """
+    ph = LigandReceptorPharmacophore()
+    ph.load_pdb(data.pdb["test_with_lig.pdb"])
+
+    acceptor = PharmacophoricPoint(
+        "hb acceptor",
+        puw.quantity([1.0, 1.0, 1.0], "angstroms"),
+        puw.quantity(1.0, "angstroms")
+
+    )
+
+    ph.add_points_to_frame([acceptor], 0)
+
+    return ph
+
+
+def test_show_all_single_frame(mocker, pharma_with_pl_complex):
     mock_nv = mocker.patch(
         "openpharmacophore.pharmacophore.ligand_receptor.nv"
     )
-    mock_add = mocker.patch(
-        "openpharmacophore.pharmacophore.LigandReceptorPharmacophore.add_to_view"
-    )
-    pharma = pharmacophore_one_frame
-    pharma._pl_complex = mocker.Mock()
-
+    pharma = pharma_with_pl_complex
+    pharma._pl_complex._receptor_indices = list(range(0, 10))
     view = pharma.show(
         frame=0, ligand=True, receptor=True, points=True
     )
 
     mock_nv.show_mdtraj.assert_called_once()
-    mock_add.assert_called_once_with(view, 0)
-    assert len(view.representations) == 2
-    assert view.representations[0]["type"] == "cartoon"
-    assert view.representations[0]["params"]["sele"] == "protein"
-    assert view.representations[1]["params"]["sele"] == "( not polymer or hetero ) and not ( water or ion )"
+    mock_nv.show_rdkit.assert_not_called()
+    _, args, _ = mock_nv.show_mdtraj.mock_calls[0]
+    assert args[0].n_atoms == 10
+
+    view.add_component.assert_called_once()
 
 
-def test_show_custom_indices_single_frame(mocker, pharmacophore_one_frame):
+def test_show_ligand_no_receptor(mocker, pharmacophore_one_frame):
+    mock_nv = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+    )
+    pharma = pharmacophore_one_frame
+    pharma._pl_complex = mocker.Mock()
+    view = pharma.show(
+        frame=0, ligand=True, receptor=False, points=True
+    )
+
+    mock_nv.show_rdkit.assert_called_once()
+    mock_nv.show_mdtraj.assert_not_called()
+    view.add_component.assert_not_called()
+
+
+def test_show_receptor_no_ligand(mocker, pharma_with_pl_complex):
+    mock_nv = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+    )
+    pharma = pharma_with_pl_complex
+    pharma._pl_complex._receptor_indices = list(range(0, 10))
+    view = pharma.show(
+        frame=0, ligand=False, receptor=True, points=True
+    )
+
+    mock_nv.show_mdtraj.assert_called_once()
+    mock_nv.show_rdkit.assert_not_called()
+    _, args, _ = mock_nv.show_mdtraj.mock_calls[0]
+    assert args[0].n_atoms == 10
+
+    view.add_component.assert_not_called()
+
+
+def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     mocker.patch(
         "openpharmacophore.pharmacophore.ligand_receptor.nv"
     )
@@ -598,8 +646,10 @@ def test_show_custom_indices_single_frame(mocker, pharmacophore_one_frame):
     _, args, _ = pharma.receptor.slice_traj.mock_calls[0]
     assert np.all(args[0] == np.array([0, 1, 2]))
 
+    view.add_component.assert_called_once()
+
     mock_add.assert_called_once_with(view, 0)
-    assert len(view.representations) == 2
+    assert len(view.representations) == 1
     assert view.representations[0]["type"] == "ball+stick"
-    assert view.representations[0]["params"]["sele"] == "protein"
-    assert view.representations[1]["params"]["sele"] == "( not polymer or hetero ) and not ( water or ion )"
+    assert view.representations[0]["params"]["sele"] == "all"
+

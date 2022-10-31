@@ -132,6 +132,16 @@ class PLComplex:
         return self._lig_indices
 
     @property
+    def receptor_indices(self):
+        """ Returns the indices of the receptor atoms.
+
+            Returns
+            -------
+            list[int]
+        """
+        return self._receptor_indices
+
+    @property
     def coords(self):
         """ Return the coordinates of the complex.
 
@@ -208,6 +218,9 @@ class PLComplex:
         """ Get the indices of the ligand with the given id and
             those of the receptor.
         """
+        self._receptor_indices.clear()
+        self._lig_indices.clear()
+
         ligand, chain = self._ligand_id.split(":")
         chain_index = self.chain_names.index(chain)
         for atom in self.topology.atoms:
@@ -689,8 +702,9 @@ class PLComplex:
             'aromatic ring': '#F1C40F',  # Yellow
         }
 
-        bsite_traj = self.traj.atom_slice(bsite_indices)
+        bsite_traj = self.slice_traj(bsite_indices)
         view = show_mdtraj(bsite_traj)
+        view.add_component(self.ligand)
 
         for feats_dict in feats:
             for feat_name, coord_list in feats_dict.items():
@@ -702,6 +716,16 @@ class PLComplex:
                     n_components = len(view._ngl_component_ids)
                     view.update_representation(
                         component=n_components, repr_index=0, opacity=0.5)
+                    # TODO: opacity is not working
+
+        view.representations = [
+            {
+                "type": "ball+stick",
+                "params": {
+                    "sele": "all"
+                }
+            }
+        ]
 
         return view
 
