@@ -143,6 +143,12 @@ def test_ligand_receptor_pharmacophore_from_pdb():
     # The protein should contain hydrogens
     assert pharmacophore.receptor.has_hydrogens()
 
+    # We know that the pharmacophore of ERalpha should contain one aromatic point and
+    # at least one hydrophobic point
+    feats = [p.feature_name for p in pharmacophore[0]]
+    assert "aromatic ring" in feats
+    assert "hydrophobicity" in feats
+
     # Finally we want to view our pharmacophore using nglview.
     view = pharmacophore.show(ligand=True, receptor=True)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
@@ -152,4 +158,3 @@ def test_ligand_receptor_pharmacophore_from_pdb():
     bsite_indices = pharmacophore.receptor.binding_site_indices(0)
     view = pharmacophore.show(indices=bsite_indices)
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
-

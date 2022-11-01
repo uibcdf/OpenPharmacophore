@@ -11,5 +11,10 @@ Add todos in this file. Organize by file name
 - [ ] Find hydrogen bonds only in binding site.
 - [ ] Converting from rdkit.Mol to mdtraj.Trajectory changes the name of the ligand to UNL
 - [ ] Test indices after adding hydrogens
-- [ ] Interactions view is not updating opacity on spheres, the trajectory should be
-      sliced properly and  view.representations must be updated
+- [ ] Interactions view is not updating opacity on spheres.
+
+
+#### pharmacophore/ligand_receptor.py
+
+- [ ]  Hydrogen bond direction is not computed correctly
+- [ ]  Aromatic direction is incorrect.

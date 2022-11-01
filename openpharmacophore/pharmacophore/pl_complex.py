@@ -101,6 +101,10 @@ class PLComplex:
 
         self._file_path = file_path
 
+        # Maps the indices of the atoms in the original topology after
+        # adding hydrogens
+        self._non_hyd_indices = []
+
     @property
     def ligand_ids(self):
         """ Returns a list with the ligand ids in the complex.
@@ -415,6 +419,11 @@ class PLComplex:
         self.set_ligand(lig_name)
         self.ligand_and_receptor_indices()
 
+        # Save the original atoms indices
+        self._non_hyd_indices = [
+            a.index for a in self.topology.atoms if a.element.symbol != "H"
+        ]
+
     def show(self):
         """ Returns a view of the complex. """
         return show_mdtraj(self.traj)
@@ -547,6 +556,8 @@ class PLComplex:
             if self._mol_graph is None:
                 raise exc.MolGraphError(self._file_path)
 
+        # TODO: ligand centroid and extent is computed each time we get features for
+        #  a specific frame
         lig_center = self._lig_centroid(frame)
         lig_extent = self._lig_max_extent(lig_center, frame)
         bs_cutoff = lig_extent + self.BS_DIST_MAX
@@ -557,12 +568,17 @@ class PLComplex:
         indices_bs = []
 
         for indices_set in indices:
-            feat_coords = self._coords[frame, indices_set, :]
+            # If hydrogens were added the indices must be mapped to those of the original mol
+            if len(self._non_hyd_indices) > 0:
+                indices_top = [self._non_hyd_indices[ii] for ii in indices_set]
+            else:
+                indices_top = list(indices_set)
+            feat_coords = self._coords[frame, indices_top, :]
             centroid = np.mean(feat_coords, axis=0)
             # Only keep features in the binding site
             if maths.points_distance(centroid, lig_center) < bs_cutoff:
                 centers.append(centroid)
-                indices_bs.append(list(indices_set))
+                indices_bs.append(indices_top)
 
         return centers, indices_bs
 
@@ -758,6 +774,7 @@ class PLComplex:
             self.remove_ligand()
             self.add_hydrogens()
             self.add_fixed_ligand()
+            self.get_original_indices()
         self.ligand_and_receptor_indices()
 
     def slice_traj(self, indices):
@@ -784,3 +801,14 @@ class PLComplex:
                 atoms.append(index_new)
 
         return new_traj.atom_slice(atoms)
+
+    def get_original_indices(self):
+        """ Stores the ligand of the topology before adding hydrogens.
+
+            This method should be called after add_hydrogens and/or after
+            add_fixed_ligand. Otherwise, the chemical features obtained
+            will be incorrect
+        """
+        self._non_hyd_indices = [
+            a.index for a in self.topology.atoms if a.element.symbol != "H"
+        ]

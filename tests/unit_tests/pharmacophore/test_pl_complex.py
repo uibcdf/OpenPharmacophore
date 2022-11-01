@@ -454,7 +454,7 @@ def test_feature_indices(mocker):
     assert indices == [(0, 1), (2, 3), (4,), ]
 
 
-def test_receptor_feature_centroids(mocker):
+def set_receptor_feature_centroids(mocker):
     mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_max_extent",
         return_value=puw.quantity(0.15, "nanometers")
@@ -467,6 +467,10 @@ def test_receptor_feature_centroids(mocker):
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
         return_value=[(0, 1), (2,)]
     )
+
+
+def test_receptor_feature_centroids(mocker):
+    set_receptor_feature_centroids(mocker)
     pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
     pl_complex._coords = puw.quantity(np.array(
         [[
@@ -481,6 +485,27 @@ def test_receptor_feature_centroids(mocker):
     expected_cent = puw.quantity(np.array([.3, .3, .3]), "nanometer")
     assert np.allclose(centers[0], expected_cent)
     assert indices == [[0, 1]]
+
+
+def test_receptor_feature_centroids_receptor_has_hydrogens(mocker):
+    set_receptor_feature_centroids(mocker)
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex._coords = puw.quantity(np.array(
+        [[
+            [.2, .2, .2],
+            [.1, .1, .1],
+            [.3, .3, .3],
+            [.4, .4, .4],
+            [1., 1., 1.],
+        ]]
+    ), "nanometers")
+    pl_complex._non_hyd_indices = [0, 3, 4]
+
+    centers, indices = pl_complex.receptor_features("aromatic ring", frame=0)
+    assert len(centers) == 1
+    expected_cent = puw.quantity(np.array([.3, .3, .3]), "nanometer")
+    assert np.allclose(centers[0], expected_cent)
+    assert indices == [[0, 3]]
 
 
 def test_receptor_features_invalid_mol_graph_raises_error():
@@ -599,3 +624,8 @@ def test_slice_traj():
     traj = pl_complex.slice_traj(indices)
     assert traj.n_atoms == 12
     assert traj.n_residues == 1
+
+
+def test_get_original_indices(pl_complex):
+    pl_complex.get_original_indices()
+    assert len(pl_complex._non_hyd_indices) == 166

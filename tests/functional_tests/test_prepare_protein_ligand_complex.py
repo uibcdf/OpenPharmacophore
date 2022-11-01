@@ -7,7 +7,7 @@ def test_pl_complex_preparation():
     # to be ready for pharmacophore extraction. This complex contains
     # lauric acid (id DAO, C12H24O2) as its ligand.
     pl = PLComplex(data.pdb["1m7w_A_chain.pdb"])
-    n_atoms = pl.topology.n_atoms
+    n_atoms_start = pl.topology.n_atoms
     assert pl.ligand_ids == ["DAO:B"]
     assert not pl.has_hydrogens()
 
@@ -30,7 +30,7 @@ def test_pl_complex_preparation():
 
     # We remove the unfixed ligand from the complex
     pl.remove_ligand()
-    assert pl.topology.n_atoms == n_atoms - 14
+    assert pl.topology.n_atoms == n_atoms_start - 14
     n_atoms = pl.topology.n_atoms
 
     # We add hydrogens to the receptor
@@ -42,6 +42,9 @@ def test_pl_complex_preparation():
     # Finally we concatenate the fixed ligand with the receptor
     pl.add_fixed_ligand()
     assert pl.topology.n_atoms == n_atoms + 38
+
+    pl.get_original_indices()
+    assert len(pl._non_hyd_indices) == n_atoms_start
 
     # We create a view of our protein-ligand complex
     view = pl.show()
