@@ -151,7 +151,7 @@ def test_add_to_ngl_view_point_with_direction(aromatic_ring):
     ring_color = to_rgb("#F1C40F")
     radius = 1.5
     center = puw.get_value(aromatic_ring.center, "angstroms").tolist()
-    arrow_end = (center + radius * aromatic_ring.direction).tolist()
+    arrow_end = (center + radius * aromatic_ring.direction*2.0).tolist()
 
     assert mock_view.shape.add_sphere.call_args == call(
         center, ring_color, radius, "aromatic ring"

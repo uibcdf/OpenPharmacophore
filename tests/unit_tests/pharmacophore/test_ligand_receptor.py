@@ -221,7 +221,7 @@ def test_hbond_donor_pharmacophoric_points(mocker):
                   np.array([7., 7., 7.]))
 
     # All points lie on the same line, they all have the same direction
-    expected_direction = np.array([1 / np.sqrt(3)] * 3)
+    expected_direction = np.array([1 / np.sqrt(3)] * 3) * -1
     assert pharma[0][0].has_direction
     assert np.allclose(pharma[0][0].direction, expected_direction)
 
@@ -238,7 +238,7 @@ def test_hb_acceptor_pharmacophoric_points(mocker):
     assert np.all(puw.get_value(pharma[0][1].center) ==
                   np.array([6., 6., 6.]))
 
-    expected_direction = np.array([1 / np.sqrt(3)] * 3)
+    expected_direction = np.array([1 / np.sqrt(3)] * 3) * -1
     assert all(p.has_direction for p in pharma[0])
     assert all(np.allclose(pharma[0][ii].direction, expected_direction)
                for ii in range(len(pharma[0])))

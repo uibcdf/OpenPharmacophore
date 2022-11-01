@@ -327,8 +327,9 @@ class LigandReceptorPharmacophore(Pharmacophore):
         """
         radius = puw.quantity(1.0, "angstroms")
         for bond in h_bonds:
+            # There is an acceptor in the receptor
             if bond[0] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[1], :] -
+                direction = puw.get_value(self._pl_complex.coords[frame, bond[2], :] -
                                           self._pl_complex.coords[frame, bond[0], :])
                 pharma_point = PharmacophoricPoint(
                     "hb donor", self._pl_complex.coords[frame, bond[0], :],
@@ -355,8 +356,9 @@ class LigandReceptorPharmacophore(Pharmacophore):
         radius = puw.quantity(1.0, "angstroms")
         for bond in h_bonds:
             if bond[2] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[1], :] -
-                                          self._pl_complex.coords[frame, bond[0], :])
+                # There is a donor in the ligand
+                direction = puw.get_value(self._pl_complex.coords[frame, bond[0], :] -
+                                          self._pl_complex.coords[frame, bond[2], :])
                 pharma_point = PharmacophoricPoint(
                     "hb acceptor", self._pl_complex.coords[frame, bond[2], :],
                     radius, direction

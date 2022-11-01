@@ -186,7 +186,8 @@ class PharmacophoricPoint:
 
         if self.has_direction:
             arrow_radius = 0.2
-            end_arrow = puw.get_value(self._center + self._radius * self._direction, to_unit='angstroms').tolist()
+            end_arrow = puw.get_value(self._center + self._radius * self._direction*2.0,
+                                      to_unit='angstroms').tolist()
 
             view.shape.add_arrow(center, end_arrow, color, arrow_radius)
             view.update_representation(component=n_components + 1, repr_index=0, opacity=0.9)
