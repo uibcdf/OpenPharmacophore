@@ -24,16 +24,22 @@ def test_pl_complex_bsite_and_chem_feats():
     assert pl_complex.ligand.GetNumAtoms() == 50
 
     # We get the centroids of the ligand chemical features so, we can visualize them
+    frame = 0
     feats = ["hydrophobicity", "positive charge", "negative charge"]
     ligand_feats = {}
     for feat_name in feats:
-        ligand_feats[feat_name] = pl_complex.ligand_features(feat_name, frame=0)[0]
+        ligand_feats[feat_name] = pl_complex.ligand_features(feat_name, frame)[0]
+
+    # To obtain the receptor features we need to compute the ligand centroid
+    # and maximum extent first
+    pl_complex.lig_cent = pl_complex.lig_centroid(frame)
+    pl_complex.lig_extent = pl_complex.lig_max_extent(pl_complex.lig_cent, frame)
     receptor_feats = {}
     for feat_name in feats:
-        ligand_feats[feat_name] = pl_complex.receptor_features(feat_name, frame=0)[0]
+        ligand_feats[feat_name] = pl_complex.receptor_features(feat_name, 0)[0]
 
     # Also the hydrogen bonds
-    hbond_indices = pl_complex.hbond_indices(frame=0, criterion="baker")
+    hbond_indices = pl_complex.hbond_indices(frame, criterion="baker")
     hbonds = {
         "hb acceptor": pl_complex.hbonds_acceptors(hbond_indices, frame=0),
         "hb donor": pl_complex.hbonds_donors(hbond_indices, frame=0)

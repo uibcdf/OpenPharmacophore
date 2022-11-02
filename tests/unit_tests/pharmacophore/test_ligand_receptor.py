@@ -500,6 +500,8 @@ def setup_test_extract_feature(mocker, lig_feats,
     pharma.extract("EST:B", features=[feature])
     assert len(pharma[0]) == 1
     assert pharma[0][0].feature_name == feature
+    pl.lig_centroid.assert_called_once_with(0)
+    pl.lig_max_extent.assert_called_once()
 
 
 def test_extract_hydrophobic_features(
@@ -652,4 +654,3 @@ def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     assert len(view.representations) == 1
     assert view.representations[0]["type"] == "ball+stick"
     assert view.representations[0]["params"]["sele"] == "all"
-

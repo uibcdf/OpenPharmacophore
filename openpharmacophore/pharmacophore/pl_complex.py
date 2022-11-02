@@ -105,6 +105,10 @@ class PLComplex:
         # adding hydrogens
         self._non_hyd_indices = []
 
+        # Store for current frame
+        self.lig_cent = None
+        self.lig_extent = None
+
     @property
     def ligand_ids(self):
         """ Returns a list with the ligand ids in the complex.
@@ -428,7 +432,7 @@ class PLComplex:
         """ Returns a view of the complex. """
         return show_mdtraj(self.traj)
 
-    def _lig_centroid(self, frame):
+    def lig_centroid(self, frame):
         """ Returns the centroid of the ligand at the given frame.
 
             Parameters
@@ -443,7 +447,7 @@ class PLComplex:
         """
         return np.mean(self._coords[frame, self._lig_indices, :], axis=0)
 
-    def _lig_max_extent(self, centroid, frame):
+    def lig_max_extent(self, centroid, frame):
         """ Returns the maximum extent of the ligand. This is the maximum distance
             from the centroid to any of its atoms.
 
@@ -480,8 +484,8 @@ class PLComplex:
 
         """
         self.ligand_and_receptor_indices()
-        lig_center = self._lig_centroid(frame)
-        lig_extent = self._lig_max_extent(lig_center, frame)
+        lig_center = self.lig_centroid(frame)
+        lig_extent = self.lig_max_extent(lig_center, frame)
         bs_cutoff = lig_extent + self.BS_DIST_MAX
         distance = np.sqrt(np.sum(np.power(self._coords[0] - lig_center, 2), axis=1))
         indices = np.where(np.logical_and(distance > lig_extent, distance <= bs_cutoff))[0]
@@ -556,11 +560,7 @@ class PLComplex:
             if self._mol_graph is None:
                 raise exc.MolGraphError(self._file_path)
 
-        # TODO: ligand centroid and extent is computed each time we get features for
-        #  a specific frame
-        lig_center = self._lig_centroid(frame)
-        lig_extent = self._lig_max_extent(lig_center, frame)
-        bs_cutoff = lig_extent + self.BS_DIST_MAX
+        bs_cutoff = self.lig_extent + self.BS_DIST_MAX
 
         centers = []
         indices = self.feature_indices(
@@ -576,7 +576,7 @@ class PLComplex:
             feat_coords = self._coords[frame, indices_top, :]
             centroid = np.mean(feat_coords, axis=0)
             # Only keep features in the binding site
-            if maths.points_distance(centroid, lig_center) < bs_cutoff:
+            if maths.points_distance(centroid, self.lig_cent) < bs_cutoff:
                 centers.append(centroid)
                 indices_bs.append(indices_top)
 

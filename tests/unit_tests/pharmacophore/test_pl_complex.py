@@ -337,11 +337,11 @@ def test_add_fixed_ligand(mocker):
 
 def test_binding_site_indices(mocker, pl_complex):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_max_extent",
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_max_extent",
         return_value=puw.quantity(0.15, "nanometers")
     )
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_centroid",
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_centroid",
         return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
     )
 
@@ -394,7 +394,7 @@ def test_lig_centroid(expected_centroid):
     pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
     pl_complex._lig_indices = list(range(146, 166))
 
-    centroid = pl_complex._lig_centroid(frame=0)
+    centroid = pl_complex.lig_centroid(frame=0)
     assert puw.is_quantity(centroid)
     assert np.allclose(expected_centroid, centroid)
 
@@ -403,7 +403,7 @@ def test_lig_max_extent(expected_centroid):
     pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
     pl_complex._lig_indices = list(range(146, 166))
     assert np.allclose(
-        pl_complex._lig_max_extent(expected_centroid, frame=0),
+        pl_complex.lig_max_extent(expected_centroid, frame=0),
         puw.quantity(0.59849, "nanometers"))
 
 
@@ -456,22 +456,18 @@ def test_feature_indices(mocker):
 
 def set_receptor_feature_centroids(mocker):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_max_extent",
-        return_value=puw.quantity(0.15, "nanometers")
-    )
-    mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._lig_centroid",
-        return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
-    )
-    mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
         return_value=[(0, 1), (2,)]
     )
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex.lig_cent = puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
+    pl_complex.lig_extent = puw.quantity(0.15, "nanometers")
+
+    return pl_complex
 
 
 def test_receptor_feature_centroids(mocker):
-    set_receptor_feature_centroids(mocker)
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex = set_receptor_feature_centroids(mocker)
     pl_complex._coords = puw.quantity(np.array(
         [[
             [.2, .2, .2],
@@ -488,8 +484,7 @@ def test_receptor_feature_centroids(mocker):
 
 
 def test_receptor_feature_centroids_receptor_has_hydrogens(mocker):
-    set_receptor_feature_centroids(mocker)
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex = set_receptor_feature_centroids(mocker)
     pl_complex._coords = puw.quantity(np.array(
         [[
             [.2, .2, .2],
