@@ -579,6 +579,7 @@ def test_show_all_single_frame(mocker, pharma_with_pl_complex):
     )
     pharma = pharma_with_pl_complex
     pharma._pl_complex._receptor_indices = list(range(0, 10))
+
     view = pharma.show(
         frame=0, ligand=True, receptor=True, points=True
     )
@@ -642,6 +643,7 @@ def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     pharma.receptor.slice_traj.assert_called_once()
     _, args, _ = pharma.receptor.slice_traj.mock_calls[0]
     assert np.all(args[0] == np.array([0, 1, 2]))
+    assert args[1] == 0  # Frame
 
     view.add_component.assert_called_once()
 
@@ -649,3 +651,38 @@ def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     assert len(view.representations) == 1
     assert view.representations[0]["type"] == "ball+stick"
     assert view.representations[0]["params"]["sele"] == "all"
+
+
+def test_show_all_traj_contains_multiple_frames(mocker):
+    mock_nv = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+    )
+
+    ph = LigandReceptorPharmacophore()
+    ph.load_receptor(data.trajectories["pentalanine_small.gro"])
+    ph.receptor._receptor_indices = list(range(10))
+    ph.receptor.get_lig_conformer = mocker.Mock()
+
+    ph.add_frame()
+    ph.add_frame()
+    acceptor = PharmacophoricPoint(
+        "hb acceptor",
+        puw.quantity([1.0, 1.0, 1.0], "angstroms"),
+        puw.quantity(1.0, "angstroms")
+
+    )
+    ph.add_points_to_frame([acceptor], 1)
+
+    view = ph.show(
+        frame=1, ligand=True, receptor=True, points=True
+    )
+
+    mock_nv.show_mdtraj.assert_called_once()
+    mock_nv.show_rdkit.assert_not_called()
+    _, args, _ = mock_nv.show_mdtraj.mock_calls[0]
+    traj = args[0]
+    assert traj.n_atoms == 10
+    assert traj.n_frames == 1
+
+    ph.receptor.get_lig_conformer.assert_called_once_with(1)
+    view.add_component.assert_called_once()

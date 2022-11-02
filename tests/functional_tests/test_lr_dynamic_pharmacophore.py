@@ -25,8 +25,9 @@ def test_dynamic_ligand_receptor_pharmacophore():
     assert len(pharmacophore[1]) > 0
     assert len(pharmacophore[2]) > 0
 
-    # We inspect the ligand to see that it was correctly extracted.
-    assert pharmacophore.receptor.ligand.GetNumAtoms() == 20
+    # We inspect the ligand to see that it was correctly extracted. It should
+    # have hydrogens, because the receptor has too
+    assert pharmacophore.receptor.ligand.GetNumAtoms() == 44
 
     # We create a view of the second frame
     view = pharmacophore.show(frame=1, ligand=True, receptor=True)

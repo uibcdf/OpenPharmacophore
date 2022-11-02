@@ -593,9 +593,9 @@ def test_interactions_view(mocker, pl_complex):
     }
     indices = list(range(10))
 
-    view = pl_complex.interactions_view(indices, feats=[hbonds, feats])
+    view = pl_complex.interactions_view(indices, 0, feats=[hbonds, feats])
 
-    mock_slice.assert_called_once_with(indices)
+    mock_slice.assert_called_once_with(indices, 0)
     view.add_component.assert_called_once()
     assert view.shape.add_sphere.call_count == 2
     assert view.update_representation.call_count == 2
@@ -616,12 +616,12 @@ def test_slice_traj():
     pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
 
     indices = list(range(0, 12))
-    traj = pl_complex.slice_traj(indices)
+    traj = pl_complex.slice_traj(indices, 0)
     assert traj.n_atoms == 7
     assert traj.n_residues == 1
 
     indices = list(range(6, 19))
-    traj = pl_complex.slice_traj(indices)
+    traj = pl_complex.slice_traj(indices, 0)
     assert traj.n_atoms == 12
     assert traj.n_residues == 1
 
@@ -646,3 +646,44 @@ def test_create_mol_graph_from_traj_file():
     pl_complex._create_mol_graph()
     # Doesn't load hydrogens
     assert pl_complex._mol_graph.GetNumAtoms() == 30
+
+
+def test_get_lig_conformer(estradiol_mol):
+    pl = PLComplex(data.trajectories["ligand_traj.gro"])
+    pl._ligand = estradiol_mol
+    pl._lig_indices = list(range(20))
+
+    mol = pl.get_lig_conformer(1)
+    n_atoms = 20
+    assert mol.GetNumAtoms() == n_atoms
+
+    coords = np.zeros((n_atoms, 3))
+    conf = mol.GetConformer(0)
+    for ii in range(n_atoms):
+        pos = conf.GetAtomPosition(ii)
+        coords[ii][0] = pos.x
+        coords[ii][1] = pos.y
+        coords[ii][2] = pos.z
+
+    expected = np.array([
+        [30.058996, 19.800585, 23.294134],
+        [28.71066, 20.192085, 23.23175],
+        [27.80967, 19.451231, 22.472225],
+        [26.493471, 19.81232, 22.4454],
+        [28.17411, 18.286795, 21.931494],
+        [29.51899, 17.838257, 21.90852],
+        [29.758055, 16.657393, 21.098923],
+        [31.217573, 16.271263, 20.938414],
+        [32.02769, 16.571, 22.312746],
+        [31.88681, 18.083992, 22.709368],
+        [30.463049, 18.561434, 22.648584],
+        [32.683704, 18.347963, 24.055729],
+        [34.05264, 17.752693, 24.154547],
+        [34.150806, 16.258833, 23.64093],
+        [33.56477, 16.15493, 22.23642],
+        [33.983757, 14.81229, 21.751375],
+        [35.410973, 14.556562, 22.259155],
+        [35.55814, 15.64381, 23.291952],
+        [36.178825, 15.285156, 24.4787],
+        [33.49326, 15.415669, 24.809036]])
+    assert np.allclose(coords, expected, rtol=0.1)

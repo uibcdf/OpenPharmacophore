@@ -171,19 +171,24 @@ class LigandReceptorPharmacophore(Pharmacophore):
         if not any([ligand, receptor, points]):
             return view
 
+        if ligand and frame != 0:
+            conformer = self.receptor.get_lig_conformer(frame)
+        else:
+            conformer = self.receptor.ligand
+
         if indices is None:
 
             if receptor and ligand:
                 view = nv.show_mdtraj(self.receptor.traj.atom_slice(
-                    self.receptor.receptor_indices))
-                view.add_component(self.receptor.ligand)
+                    self.receptor.receptor_indices)[frame])
+                view.add_component(conformer)
             elif receptor:
                 view = nv.show_mdtraj(self.receptor.traj.atom_slice(
                     self.receptor.receptor_indices))
             elif ligand:
-                view = nv.show_rdkit(self.receptor.ligand)
+                view = nv.show_rdkit(conformer)
         else:
-            traj = self.receptor.slice_traj(indices)
+            traj = self.receptor.slice_traj(indices, frame)
             view = nv.show_mdtraj(traj)
             view.representations = [{
                 "type": "ball+stick",
@@ -192,7 +197,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
                 }
             }]
             if ligand:
-                view.add_component(self.receptor.ligand)
+                view.add_component(conformer)
 
         if points:
             self.add_to_view(view, frame)

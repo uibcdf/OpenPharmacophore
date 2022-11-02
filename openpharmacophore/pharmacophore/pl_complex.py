@@ -1,14 +1,16 @@
 from .._private_tools import exceptions as exc
 from ..data import pdb_to_smi
 from ..utils import maths
+from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj
 import numpy as np
 from openmm.app import Modeller
 import pyunitwizard as puw
 import rdkit.Chem.AllChem as Chem
+from rdkit.Geometry.rdGeometry import Point3D
+from copy import deepcopy
 import tempfile
-from matplotlib.colors import to_rgb
 
 
 class PLComplex:
@@ -701,7 +703,7 @@ class PLComplex:
 
         return donors
 
-    def interactions_view(self, bsite_indices, feats=None):
+    def interactions_view(self, bsite_indices, frame, feats=None):
         """ Returns a view of the binding site and the ligand,
             optionally with the specified chemical features highlighted
             as spheres.
@@ -728,7 +730,7 @@ class PLComplex:
             'aromatic ring': '#F1C40F',  # Yellow
         }
 
-        bsite_traj = self.slice_traj(bsite_indices)
+        bsite_traj = self.slice_traj(bsite_indices, frame)
         view = show_mdtraj(bsite_traj)
         view.add_component(self.ligand)
 
@@ -779,16 +781,19 @@ class PLComplex:
         """
         self.set_ligand(lig_id)
         self.ligand_to_mol()
-        self.fix_ligand(smiles, add_hydrogens)
+
+        rec_has_hyd = self.has_hydrogens()
+        add_hyd_lig = add_hydrogens or rec_has_hyd
+        self.fix_ligand(smiles, add_hyd_lig)
         if add_hydrogens:
             self.remove_ligand()
             self.add_hydrogens()
             self.add_fixed_ligand()
-        if self.has_hydrogens():
+        if rec_has_hyd:
             self.get_non_hyd_indices()
         self.ligand_and_receptor_indices()
 
-    def slice_traj(self, indices):
+    def slice_traj(self, indices, frame):
         """ Slice the complex trajectory but only keep residues that
             are complete.
 
@@ -796,6 +801,9 @@ class PLComplex:
             ----------
             indices : np.ndarray or list[int]
                 Indices of the atoms of the new trajectory.
+
+            frame : int
+                Frame of the trajectory
 
             Returns
             -------
@@ -811,7 +819,7 @@ class PLComplex:
                     new_topology.atom(index_new).residue.n_atoms:
                 atoms.append(index_new)
 
-        return new_traj.atom_slice(atoms)
+        return new_traj.atom_slice(atoms)[frame]
 
     def get_non_hyd_indices(self):
         """ Stores the indices of the atoms that are not hydrogen.
@@ -841,3 +849,31 @@ class PLComplex:
 
         if self._mol_graph is None:
             raise exc.MolGraphError(self._file_path)
+
+    def get_lig_conformer(self, frame):
+        """ Returns the ligand with a conformer of the
+            specified frame.
+
+            Parameters
+            ----------
+            frame : int
+                Frame number.
+
+            Returns
+            ------
+            ligand : rdkit.Chem.Mol
+                Molecule with a conformer.
+        """
+        ligand = deepcopy(self._ligand)
+        conf = ligand.GetConformer(0)
+
+        for ii, ind in enumerate(self._lig_indices):
+            coord = puw.get_value(self.coords[frame, ind, :], "angstroms")
+            coord = [float(co) for co in coord]
+            # Map the atom index in the trajectory to its position
+            # on the ligand Mol object.
+            conf.SetAtomPosition(
+                ii, Point3D(*coord)
+            )
+
+        return ligand
