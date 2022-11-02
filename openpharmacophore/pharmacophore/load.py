@@ -4,6 +4,7 @@ import os
 
 
 traj_file_formats = [
+    "pdb",
     "h5",
     # TODO: add trajectory formats
 ]
@@ -32,13 +33,10 @@ def load(pharmacophore_data):
     """
     if os.path.isfile(pharmacophore_data):
         file_extension = pharmacophore_data.split(".")[-1]
-        if file_extension == "pdb":
-            pharmacophore = LigandReceptorPharmacophore()
-            pharmacophore.load_pdb(pharmacophore_data)
-            return pharmacophore
-
         if file_extension in traj_file_formats:
-            raise NotImplementedError
+            pharmacophore = LigandReceptorPharmacophore()
+            pharmacophore.load_receptor(pharmacophore_data)
+            return pharmacophore
 
         elif file_extension in molecular_file_formats:
             pharmacophore = LigandBasedPharmacophore()

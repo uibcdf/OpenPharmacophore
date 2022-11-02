@@ -48,6 +48,12 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
     @property
     def receptor(self):
+        """ Return the receptor.
+
+            Returns
+            -------
+            PLComplex
+        """
         return self._pl_complex
 
     @staticmethod
@@ -82,11 +88,17 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
         return res.content
 
-    def load_pdb(self, file_path):
-        """ Loads the receptor file.
+    def load_receptor(self, file_path):
+        """ Loads the receptor (or protein-ligand complex) file.
+
+            Can be a pdb or a trajectory file format.
+
+            Parameters
+            ----------
+            file_path : str
+
         """
         self._pl_complex = PLComplex(file_path)
-        self.add_frame()
 
     def load_pdb_id(self, pdb_id):
         """ Download the pdb with given id and save it to a temporary file.
@@ -96,7 +108,6 @@ class LigandReceptorPharmacophore(Pharmacophore):
             fp.seek(0)
             fp.write(pdb_str)
             self._pl_complex = PLComplex(fp)
-        self.add_frame()
 
     def add_frame(self):
         """ Add a new frame to the pharmacophore. """
@@ -133,14 +144,11 @@ class LigandReceptorPharmacophore(Pharmacophore):
             ----------
             view : nglview.NGLWidget
                 A view object where the pharmacophoric points will be added.
-            frame : int or list[int]
-                Frame or frames to  add the pharmacophoric points.
+            frame : int
+                Adds the points of this frame.
         """
-        if isinstance(frame, list):
-            raise NotImplementedError
-        else:
-            for point in self[frame]:
-                point.add_to_ngl_view(view)
+        for point in self[frame]:
+            point.add_to_ngl_view(view)
 
     def show(self, frame=0, ligand=True, receptor=True,
              points=True, indices=None):
@@ -148,8 +156,8 @@ class LigandReceptorPharmacophore(Pharmacophore):
 
             Parameters
             ----------
-            frame : int or list[int]
-                Which frame or frames to show
+            frame : int
+                Which frame to show
             ligand : bool, optional
                 Whether to show the ligand.
             receptor : bool, optional
@@ -260,9 +268,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         pl.prepare(lig_id=ligand_id, smiles=smiles, add_hydrogens=add_hydrogens)
 
         for frame in frames:
-            self._pharmacophores.append([])
-            self._pharmacophores_frames.append(frames)
-            self._num_frames += 1
+            self.add_frame()
 
             if "hydrophobicity" in features:
                 lig_hyd_centers, _ = pl.ligand_features("hydrophobicity", frame)

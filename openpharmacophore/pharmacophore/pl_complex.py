@@ -86,6 +86,11 @@ class PLComplex:
         ]
     }
 
+    traj_files = [
+        "h5",
+        "gro",
+    ]
+
     def __init__(self, file_path):
         self.traj = mdt.load(file_path)
         self.topology = self.traj.topology
@@ -248,7 +253,8 @@ class PLComplex:
 
         # TODO: implement the conversion from trajectory to rdkit mol without using
         #  a file.
-        lig_traj = self.traj.atom_slice(self._lig_indices)
+        # We only need one conformer
+        lig_traj = self.traj.atom_slice(self._lig_indices)[0]
         pdb_file = tempfile.NamedTemporaryFile()
         lig_traj.save_pdb(pdb_file.name)
 
@@ -557,9 +563,7 @@ class PLComplex:
 
         """
         if self._mol_graph is None:
-            self._mol_graph = Chem.MolFromPDBFile(self._file_path)
-            if self._mol_graph is None:
-                raise exc.MolGraphError(self._file_path)
+            self._create_mol_graph()
 
         if frame > self._curr_frame:
             self._lig_cent = self.lig_centroid(frame)
@@ -780,7 +784,8 @@ class PLComplex:
             self.remove_ligand()
             self.add_hydrogens()
             self.add_fixed_ligand()
-            self.get_original_indices()
+        if self.has_hydrogens():
+            self.get_non_hyd_indices()
         self.ligand_and_receptor_indices()
 
     def slice_traj(self, indices):
@@ -808,13 +813,31 @@ class PLComplex:
 
         return new_traj.atom_slice(atoms)
 
-    def get_original_indices(self):
-        """ Stores the ligand of the topology before adding hydrogens.
+    def get_non_hyd_indices(self):
+        """ Stores the indices of the atoms that are not hydrogen.
 
-            This method should be called after add_hydrogens and/or after
-            add_fixed_ligand. Otherwise, the chemical features obtained
-            will be incorrect
+            This method should be called before obtaining receptor chemical features
+            if hydrogens were added to the receptor, or if it already contained hydrogen.
+            Otherwise, the chemical features obtained will be incorrect.
         """
         self._non_hyd_indices = [
             a.index for a in self.topology.atoms if a.element.symbol != "H"
         ]
+
+    def _create_mol_graph(self):
+        """ Creates the molecular graph of the receptor. Necessary
+            to obtain its chemical features.
+        """
+        if self._file_path.endswith(".pdb"):
+            self._mol_graph = Chem.MolFromPDBFile(self._file_path)
+
+        elif self._file_path.split(".")[-1] in self.traj_files:
+            pdb_file = tempfile.NamedTemporaryFile()
+            self.traj[0].save_pdb(pdb_file.name)
+            pdb_file.seek(0)
+
+            self._mol_graph = Chem.MolFromPDBFile(pdb_file.name)
+            pdb_file.close()
+
+        if self._mol_graph is None:
+            raise exc.MolGraphError(self._file_path)
