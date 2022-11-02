@@ -18,10 +18,8 @@ def test_load_pdb_file(mocker):
     mock_pl_complex = mocker.patch(
         "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
     pharmacophore = LigandReceptorPharmacophore()
-    pharmacophore.load_pdb(data.pdb["1ncr.pdb"])
-    assert pharmacophore.num_frames == 1
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 0
+    pharmacophore.load_receptor(data.pdb["1ncr.pdb"])
+    assert len(pharmacophore) == 0
 
     mock_pl_complex.assert_called_once_with(data.pdb["1ncr.pdb"])
 
@@ -33,9 +31,7 @@ def test_load_pdb_id(mocker):
         "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
     pharmacophore = LigandReceptorPharmacophore()
     pharmacophore.load_pdb_id("1NCR")
-    assert len(pharmacophore) == 1
-    assert len(pharmacophore[0]) == 0
-    assert pharmacophore.num_frames == 1
+    assert len(pharmacophore) == 0
     # TODO: check that PLComplex is instantiated with the name of the temporary file
     mock_pl_complex.assert_called_once()
 
@@ -562,7 +558,8 @@ def pharma_with_pl_complex():
     """ Returns a pharmacophore with a PLComplex object.
     """
     ph = LigandReceptorPharmacophore()
-    ph.load_pdb(data.pdb["test_with_lig.pdb"])
+    ph.load_receptor(data.pdb["test_with_lig.pdb"])
+    ph.add_frame()
 
     acceptor = PharmacophoricPoint(
         "hb acceptor",

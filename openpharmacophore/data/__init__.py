@@ -29,7 +29,7 @@ for dir_path, _, filenames in os.walk(parent):
             pdb[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))
-        elif "trajectories" in dir_path:
+        elif "traj" in dir_path:
             trajectories[file_name] = str(parent.joinpath(
                 os.path.join(dir_path, file_name)
             ))

@@ -626,6 +626,23 @@ def test_slice_traj():
     assert traj.n_residues == 1
 
 
-def test_get_original_indices(pl_complex):
-    pl_complex.get_original_indices()
+def test_get_non_hyd_indices(pl_complex):
+    pl_complex.get_non_hyd_indices()
     assert len(pl_complex._non_hyd_indices) == 166
+
+
+def test_create_mol_graph_from_pdb():
+    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    assert pl_complex._mol_graph is None
+
+    pl_complex._create_mol_graph()
+    assert pl_complex._mol_graph.GetNumAtoms() == 19
+
+
+def test_create_mol_graph_from_traj_file():
+    pl_complex = PLComplex(data.trajectories["pentalanine_small.gro"])
+    assert pl_complex._mol_graph is None
+
+    pl_complex._create_mol_graph()
+    # Doesn't load hydrogens
+    assert pl_complex._mol_graph.GetNumAtoms() == 30

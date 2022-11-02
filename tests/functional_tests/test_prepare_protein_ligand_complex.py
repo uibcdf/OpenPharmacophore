@@ -43,7 +43,7 @@ def test_pl_complex_preparation():
     pl.add_fixed_ligand()
     assert pl.topology.n_atoms == n_atoms + 38
 
-    pl.get_original_indices()
+    pl.get_non_hyd_indices()
     assert len(pl._non_hyd_indices) == n_atoms_start
 
     # We create a view of our protein-ligand complex

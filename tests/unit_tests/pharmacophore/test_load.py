@@ -9,9 +9,7 @@ def test_load_ligand_based_pharmacophore_from_mol_file():
     assert len(pharmacophore.ligands) == 5
 
 
-def test_load_ligand_receptor_pharmacophore_from_pdb_file():
+def test_load_ligand_receptor_pharmacophore_from_traj_file():
     pharmacophore = load(data.pdb["1ncr.pdb"])
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
-    assert pharmacophore.num_frames == 1
-
-# TODO: tests for loading from pdb ids and trajectory files
+    assert pharmacophore.num_frames == 0
