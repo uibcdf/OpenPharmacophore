@@ -264,9 +264,6 @@ class LigandReceptorPharmacophore(Pharmacophore):
             self._pharmacophores_frames.append(frames)
             self._num_frames += 1
 
-            pl.lig_cent = pl.lig_centroid(frame)
-            pl.lig_extent = pl.lig_max_extent(pl.lig_cent, frame)
-
             if "hydrophobicity" in features:
                 lig_hyd_centers, _ = pl.ligand_features("hydrophobicity", frame)
                 if len(lig_hyd_centers) > 0:

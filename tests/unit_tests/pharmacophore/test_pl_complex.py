@@ -459,10 +459,15 @@ def set_receptor_feature_centroids(mocker):
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
         return_value=[(0, 1), (2,)]
     )
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_centroid",
+        return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
+    )
+    mocker.patch(
+        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_max_extent",
+        return_value=puw.quantity(0.15, "nanometers")
+    )
     pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
-    pl_complex.lig_cent = puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
-    pl_complex.lig_extent = puw.quantity(0.15, "nanometers")
-
     return pl_complex
 
 

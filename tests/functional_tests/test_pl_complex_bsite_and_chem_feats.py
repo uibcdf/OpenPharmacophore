@@ -32,8 +32,6 @@ def test_pl_complex_bsite_and_chem_feats():
 
     # To obtain the receptor features we need to compute the ligand centroid
     # and maximum extent first
-    pl_complex.lig_cent = pl_complex.lig_centroid(frame)
-    pl_complex.lig_extent = pl_complex.lig_max_extent(pl_complex.lig_cent, frame)
     receptor_feats = {}
     for feat_name in feats:
         ligand_feats[feat_name] = pl_complex.receptor_features(feat_name, 0)[0]

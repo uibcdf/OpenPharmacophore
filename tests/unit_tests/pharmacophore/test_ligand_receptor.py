@@ -500,8 +500,6 @@ def setup_test_extract_feature(mocker, lig_feats,
     pharma.extract("EST:B", features=[feature])
     assert len(pharma[0]) == 1
     assert pharma[0][0].feature_name == feature
-    pl.lig_centroid.assert_called_once_with(0)
-    pl.lig_max_extent.assert_called_once()
 
 
 def test_extract_hydrophobic_features(

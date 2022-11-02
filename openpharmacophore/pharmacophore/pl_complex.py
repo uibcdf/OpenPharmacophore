@@ -106,8 +106,9 @@ class PLComplex:
         self._non_hyd_indices = []
 
         # Store for current frame
-        self.lig_cent = None
-        self.lig_extent = None
+        self._curr_frame = -1
+        self._lig_cent = None
+        self._lig_extent = None
 
     @property
     def ligand_ids(self):
@@ -560,7 +561,12 @@ class PLComplex:
             if self._mol_graph is None:
                 raise exc.MolGraphError(self._file_path)
 
-        bs_cutoff = self.lig_extent + self.BS_DIST_MAX
+        if frame > self._curr_frame:
+            self._lig_cent = self.lig_centroid(frame)
+            self._lig_extent = self.lig_max_extent(self._lig_cent, frame)
+            self._curr_frame = frame
+
+        bs_cutoff = self._lig_extent + self.BS_DIST_MAX
 
         centers = []
         indices = self.feature_indices(
@@ -576,7 +582,7 @@ class PLComplex:
             feat_coords = self._coords[frame, indices_top, :]
             centroid = np.mean(feat_coords, axis=0)
             # Only keep features in the binding site
-            if maths.points_distance(centroid, self.lig_cent) < bs_cutoff:
+            if maths.points_distance(centroid, self._lig_cent) < bs_cutoff:
                 centers.append(centroid)
                 indices_bs.append(indices_top)
 

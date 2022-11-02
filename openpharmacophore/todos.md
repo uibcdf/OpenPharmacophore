@@ -17,4 +17,3 @@ Add todos in this file. Organize by file name
 #### pharmacophore/ligand_receptor.py
 
 - [X]  Hydrogen bond direction is not computed correctly
-- [ ]  Aromatic direction is incorrect.
