@@ -6,15 +6,16 @@ channels:
 dependencies:
 - python
 - setuptools
+- openmm
 - numpy
 - pyunitwizard
 - sabueso
 - mdtraj
 - mdanalysis
 - nglview
-- plip
 - rdkit
 - requests
+- networkx
 - tqdm
 - sphinx
 - sphinx_rtd_theme
