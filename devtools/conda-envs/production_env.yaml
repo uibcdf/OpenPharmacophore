@@ -7,14 +7,12 @@ channels:
 dependencies:
 - pyunitwizard
 - pandas
+- openmm
 - mdtraj
 - mdanalysis
 - nglview
-- plip
 - matplotlib
 - networkx
 - rdkit
 - requests
-- scikit-learn
 - tqdm
-- chembl_webresource_client

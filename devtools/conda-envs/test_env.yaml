@@ -7,12 +7,13 @@ dependencies:
 - python
 - setuptools
 - numpy
+- openmm
 - pyunitwizard
 - sabueso
 - mdtraj
 - mdanalysis
 - nglview
-- plip
+- networkx
 - rdkit
 - requests
 - tqdm
