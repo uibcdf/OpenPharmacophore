@@ -9,6 +9,7 @@ from copy import deepcopy
 from rdkit import Chem
 from openmm.app import PDBFile
 from matplotlib.colors import to_rgb
+from tst_data import estradiol
 
 
 @pytest.fixture()
@@ -126,56 +127,6 @@ def test_add_hydrogens(mocker, pl_complex):
 def estradiol_mol():
     """ Returns estradiol as an rdkit.Mol object.
     """
-    pdb_string = """
-REMARK   1 CREATED WITH MDTraj 1.9.7, 2022-10-17
-CRYST1  105.500  105.500  136.080  90.00  90.00 120.00 P 1           1 
-MODEL        0
-ATOM   5944  C1  EST A 600     104.106  17.203  24.775  1.00  0.00           C  
-ATOM   5945  C2  EST A 600     102.995  17.834  25.370  1.00  0.00           C  
-ATOM   5946  C3  EST A 600     101.695  17.355  25.120  1.00  0.00           C  
-ATOM   5947  O3  EST A 600     100.598  17.990  25.704  1.00  0.00           O  
-ATOM   5948  C4  EST A 600     101.506  16.240  24.274  1.00  0.00           C  
-ATOM   5949  C5  EST A 600     102.621  15.588  23.660  1.00  0.00           C  
-ATOM   5950  C6  EST A 600     102.371  14.379  22.735  1.00  0.00           C  
-ATOM   5951  C7  EST A 600     103.644  13.753  22.086  1.00  0.00           C  
-ATOM   5952  C8  EST A 600     104.898  13.873  22.953  1.00  0.00           C  
-ATOM   5953  C9  EST A 600     105.178  15.388  23.261  1.00  0.00           C  
-ATOM   5954  C10 EST A 600     103.957  16.078  23.918  1.00  0.00           C  
-ATOM   5955  C11 EST A 600     106.462  15.459  24.125  1.00  0.00           C  
-ATOM   5956  C12 EST A 600     107.711  14.803  23.508  1.00  0.00           C  
-ATOM   5957  C13 EST A 600     107.463  13.343  23.124  1.00  0.00           C  
-ATOM   5958  C14 EST A 600     106.170  13.270  22.242  1.00  0.00           C  
-ATOM   5959  C15 EST A 600     106.228  11.821  21.792  1.00  0.00           C  
-ATOM   5960  C16 EST A 600     107.701  11.713  21.263  1.00  0.00           C  
-ATOM   5961  C17 EST A 600     108.494  12.719  22.135  1.00  0.00           C  
-ATOM   5962  O17 EST A 600     109.610  12.027  22.746  1.00  0.00           O  
-ATOM   5963  C18 EST A 600     107.379  12.449  24.419  1.00  0.00           C  
-TER    5964      EST A 600
-ENDMDL
-CONECT    1    2   11
-CONECT    2    1    3
-CONECT    3    2    4    5
-CONECT    4    3
-CONECT    5    3    6
-CONECT    6    5    7   11
-CONECT    7    6    8
-CONECT    8    7    9
-CONECT    9    8   10   15
-CONECT   10    9   11   12
-CONECT   11    1    6   10
-CONECT   12   10   13
-CONECT   13   12   14
-CONECT   14   13   15   18   20
-CONECT   15    9   14   16
-CONECT   16   15   17
-CONECT   17   16   18
-CONECT   18   14   17   19
-CONECT   19   18
-CONECT   20   14
-END
-    """
-    estradiol = Chem.MolFromPDBBlock(pdb_string)
-    assert estradiol is not None
     return estradiol
 
 
@@ -274,6 +225,18 @@ def test_fix_ligand_template_and_lig_atom_number_different():
         pl.fix_ligand(smiles="CCCCCCCCCCCC(=O)O")
 
 
+@pytest.fixture()
+def pl_complex_no_lig():
+    """ Returns a PLComplex object whose trajectory does not contain
+        any ligand.
+
+        Returns
+        -------
+        PLComplex
+    """
+    return PLComplex(data.pdb["test_no_lig.pdb"])
+
+
 def test_modeller_to_trajectory():
     modeller = PDBFile(data.pdb["test_no_lig.pdb"])
     traj = PLComplex._modeller_to_trajectory(modeller)
@@ -316,7 +279,7 @@ def test_mol_to_traj(estradiol_mol):
     assert traj.xyz.shape == (1, 20, 3)
 
 
-def test_add_fixed_ligand(mocker):
+def test_add_fixed_ligand(mocker, pl_complex_no_lig):
     lig_traj = mdt.load(data.pdb["estradiol.pdb"])
     mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex._mol_to_traj",
@@ -407,18 +370,19 @@ def test_lig_max_extent(expected_centroid):
         puw.quantity(0.59849, "nanometers"))
 
 
-def test_ligand_feature_centroids_null_ligand_raises_error():
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+def test_ligand_feature_centroids_null_ligand_raises_error(pl_complex_no_lig):
+    pl_complex = pl_complex_no_lig
     with pytest.raises(exc.NoLigandError):
         pl_complex.ligand_features("aromatic ring", 0)
 
 
-def test_ligand_feature_centroids(mocker, estradiol_mol):
+def test_ligand_feature_centroids(mocker, estradiol_mol,
+                                  pl_complex_no_lig):
     mock_feat_indices = mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
         return_value=[(0, 1)]
     )
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex = deepcopy(pl_complex_no_lig)
     pl_complex._coords = puw.quantity(np.array(
         [[
             [0., 0., 0.],  # Receptor
@@ -454,7 +418,7 @@ def test_feature_indices(mocker):
     assert indices == [(0, 1), (2, 3), (4,), ]
 
 
-def set_receptor_feature_centroids(mocker):
+def set_receptor_feature_centroids(mocker, pl_complex_no_lig):
     mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
         return_value=[(0, 1), (2,)]
@@ -467,12 +431,13 @@ def set_receptor_feature_centroids(mocker):
         "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_max_extent",
         return_value=puw.quantity(0.15, "nanometers")
     )
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex = deepcopy(pl_complex_no_lig)
     return pl_complex
 
 
-def test_receptor_feature_centroids(mocker):
-    pl_complex = set_receptor_feature_centroids(mocker)
+def test_receptor_feature_centroids(mocker, pl_complex_no_lig):
+    pl_complex = set_receptor_feature_centroids(
+        mocker, pl_complex_no_lig)
     pl_complex._coords = puw.quantity(np.array(
         [[
             [.2, .2, .2],
@@ -488,8 +453,9 @@ def test_receptor_feature_centroids(mocker):
     assert indices == [[0, 1]]
 
 
-def test_receptor_feature_centroids_receptor_has_hydrogens(mocker):
-    pl_complex = set_receptor_feature_centroids(mocker)
+def test_receptor_feature_centroids_receptor_has_hydrogens(mocker, pl_complex_no_lig):
+    pl_complex = set_receptor_feature_centroids(
+        mocker, pl_complex_no_lig)
     pl_complex._coords = puw.quantity(np.array(
         [[
             [.2, .2, .2],
@@ -508,18 +474,18 @@ def test_receptor_feature_centroids_receptor_has_hydrogens(mocker):
     assert indices == [[0, 3]]
 
 
-def test_receptor_features_invalid_mol_graph_raises_error():
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+def test_receptor_features_invalid_mol_graph_raises_error(pl_complex_no_lig):
+    pl_complex = deepcopy(pl_complex_no_lig)
     pl_complex._file_path = data.ligands["mols.smi"]
     with pytest.raises(exc.MolGraphError):
         pl_complex.receptor_features("aromatic ring", frame=0)
 
 
-def test_hbond_indices_baker_criterion(mocker):
+def test_hbond_indices_baker_criterion(mocker, pl_complex_no_lig):
     mock_bh = mocker.patch(
         "openpharmacophore.pharmacophore.pl_complex.mdt.baker_hubbard",
     )
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+    pl_complex = pl_complex_no_lig
     pl_complex.hbond_indices(frame=0, criterion="baker")
 
     mock_bh.assert_called_once()
@@ -529,8 +495,8 @@ def test_hbond_indices_baker_criterion(mocker):
 
 
 @pytest.fixture()
-def setup_hbonds():
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+def setup_hbonds(pl_complex_no_lig):
+    pl_complex = deepcopy(pl_complex_no_lig)
     pl_complex._coords = puw.quantity(np.array([[
         [0., 0., 0.],
         [1., 1., 1.],
@@ -612,8 +578,8 @@ def test_interactions_view(mocker, pl_complex):
     assert "ball+stick" in view.representations[0]["type"]
 
 
-def test_slice_traj():
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+def test_slice_traj(pl_complex_no_lig):
+    pl_complex = pl_complex_no_lig
 
     indices = list(range(0, 12))
     traj = pl_complex.slice_traj(indices, 0)
@@ -631,8 +597,8 @@ def test_get_non_hyd_indices(pl_complex):
     assert len(pl_complex._non_hyd_indices) == 166
 
 
-def test_create_mol_graph_from_pdb():
-    pl_complex = PLComplex(data.pdb["test_no_lig.pdb"])
+def test_create_mol_graph_from_pdb(pl_complex_no_lig):
+    pl_complex = deepcopy(pl_complex_no_lig)
     assert pl_complex._mol_graph is None
 
     pl_complex._create_mol_graph()
