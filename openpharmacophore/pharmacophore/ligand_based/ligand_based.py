@@ -1,16 +1,11 @@
-from .pharmacophoric_point import distance_between_pharmacophoric_points, PharmacophoricPoint
-from .pharmacophore import Pharmacophore
-from .rdkit_pharmacophore import rdkit_pharmacophore
-from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
-                  mol2_file_info, ph4_string)
-from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
-                  pharmacophoric_points_from_ph4_file, read_ligandscout)
-from ..io import mol_file_to_list
-from .._private_tools.exceptions import InvalidFileFormat
+from openpharmacophore import distance_between_pharmacophoric_points, PharmacophoricPoint
+from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
+from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
+import openpharmacophore.io as io
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
-import os
 import json
 
 
@@ -55,7 +50,7 @@ class LigandBasedPharmacophore(Pharmacophore):
         """ Load ligands from a file and store them as a
             list of molecules.
         """
-        self._ligands = mol_file_to_list(ligand_file)
+        self._ligands = io.mol_file_to_list(ligand_file)
 
     def from_file(self, file_name):
         """ Load a pharmacophore from a file.
@@ -67,13 +62,13 @@ class LigandBasedPharmacophore(Pharmacophore):
 
        """
         if file_name.endswith(".json"):
-            self._points = load_json_pharmacophore(file_name)[0]
+            self._points = io.load_json_pharmacophore(file_name)[0]
         elif file_name.endswith(".mol2"):
-            self._points = load_mol2_pharmacophoric_points(file_name)[0]
+            self._points = io.load_mol2_pharmacophoric_points(file_name)[0]
         elif file_name.endswith(".pml"):
-            self._points = read_ligandscout(file_name)
+            self._points = io.read_ligandscout(file_name)
         elif file_name.endswith(".ph4"):
-            self._points = pharmacophoric_points_from_ph4_file(file_name)
+            self._points = io.pharmacophoric_points_from_ph4_file(file_name)
         else:
             raise InvalidFileFormat(file_name.split(".")[-1])
 
@@ -253,7 +248,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             file_name: str
                 Name of the json file.
         """
-        data = json_pharmacophoric_elements(self.pharmacophoric_points)
+        data = io.json_pharmacophoric_elements(self.pharmacophoric_points)
         with open(file_name, "w") as fp:
             json.dump(data, fp)
 
@@ -265,7 +260,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             file_name: str
                 Name of the json file.
         """
-        xml_tree = ligandscout_xml_tree(self.pharmacophoric_points)
+        xml_tree = io.ligandscout_xml_tree(self.pharmacophoric_points)
         xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_moe(self, file_name):
@@ -276,7 +271,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             file_name: str
                 Name of the json file.
         """
-        pharmacophore_str = ph4_string(self.pharmacophoric_points)
+        pharmacophore_str = io.ph4_string(self.pharmacophoric_points)
         with open(file_name, "w") as fp:
             fp.write(pharmacophore_str)
 
@@ -288,7 +283,7 @@ class LigandBasedPharmacophore(Pharmacophore):
             file_name: str
                 Name of the json file.
         """
-        pharmacophore_data = mol2_file_info([self.pharmacophoric_points])
+        pharmacophore_data = io.mol2_file_info([self.pharmacophoric_points])
         with open(file_name, "w") as fp:
             fp.writelines(pharmacophore_data[0])
 

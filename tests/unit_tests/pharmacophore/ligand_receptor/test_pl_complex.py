@@ -2,7 +2,7 @@ import mdtraj as mdt
 import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
-from openpharmacophore.pharmacophore.pl_complex import PLComplex
+from openpharmacophore import PLComplex
 import pyunitwizard as puw
 import pytest
 from copy import deepcopy
@@ -10,6 +10,11 @@ from rdkit import Chem
 from openmm.app import PDBFile
 from matplotlib.colors import to_rgb
 from tst_data import estradiol
+
+
+# Import for mocking
+pl_module = "openpharmacophore.pharmacophore.ligand_receptor.pl_complex"
+pl_class = pl_module + ".PLComplex"
 
 
 @pytest.fixture()
@@ -108,10 +113,10 @@ def test_has_hydrogens(pl_complex):
 
 def test_add_hydrogens(mocker, pl_complex):
     mock_model_to_traj = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._modeller_to_trajectory"
+        pl_class + "._modeller_to_trajectory"
     )
     mock_modeller = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.Modeller"
+        pl_module + ".Modeller"
     )
     pl_complex.add_hydrogens()
 
@@ -162,7 +167,7 @@ def test_fix_ligand_do_not_add_hydrogens(pl_complex, estradiol_mol):
 
 def test_fix_ligand_no_smiles_given(mocker, pl_complex, estradiol_mol):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._pdb_id_to_smi",
+        pl_class + "._pdb_id_to_smi",
         return_value="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
     )
 
@@ -181,7 +186,7 @@ def test_fix_ligand_no_smiles_given(mocker, pl_complex, estradiol_mol):
 
 def test_pdb_id_to_smi(mocker):
     mock_open = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.open",
+        pl_module + ".open",
         new=mocker.mock_open())
     mock_open.return_value.readlines.return_value = [
         "EST C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
@@ -195,7 +200,7 @@ def test_pdb_id_to_smi(mocker):
 
 def test_fix_ligand_no_smiles_found(mocker):
     mock_open = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.open",
+        pl_module + ".open",
         new=mocker.mock_open())
     mock_open.return_value.readlines.return_value = [
         "EST C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
@@ -282,7 +287,7 @@ def test_mol_to_traj(estradiol_mol):
 def test_add_fixed_ligand(mocker, pl_complex_no_lig):
     lig_traj = mdt.load(data.pdb["estradiol.pdb"])
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex._mol_to_traj",
+        pl_class + "._mol_to_traj",
         return_value=lig_traj
     )
 
@@ -300,11 +305,11 @@ def test_add_fixed_ligand(mocker, pl_complex_no_lig):
 
 def test_binding_site_indices(mocker, pl_complex):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_max_extent",
+        pl_class + ".lig_max_extent",
         return_value=puw.quantity(0.15, "nanometers")
     )
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_centroid",
+        pl_class + ".lig_centroid",
         return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
     )
 
@@ -379,7 +384,7 @@ def test_ligand_feature_centroids_null_ligand_raises_error(pl_complex_no_lig):
 def test_ligand_feature_centroids(mocker, estradiol_mol,
                                   pl_complex_no_lig):
     mock_feat_indices = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
+        pl_class + ".feature_indices",
         return_value=[(0, 1)]
     )
     pl_complex = deepcopy(pl_complex_no_lig)
@@ -420,15 +425,15 @@ def test_feature_indices(mocker):
 
 def set_receptor_feature_centroids(mocker, pl_complex_no_lig):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.feature_indices",
+        pl_class + ".feature_indices",
         return_value=[(0, 1), (2,)]
     )
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_centroid",
+        pl_class + ".lig_centroid",
         return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
     )
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.lig_max_extent",
+        pl_class + ".lig_max_extent",
         return_value=puw.quantity(0.15, "nanometers")
     )
     pl_complex = deepcopy(pl_complex_no_lig)
@@ -483,7 +488,7 @@ def test_receptor_features_invalid_mol_graph_raises_error(pl_complex_no_lig):
 
 def test_hbond_indices_baker_criterion(mocker, pl_complex_no_lig):
     mock_bh = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.mdt.baker_hubbard",
+        pl_module + ".mdt.baker_hubbard",
     )
     pl_complex = pl_complex_no_lig
     pl_complex.hbond_indices(frame=0, criterion="baker")
@@ -545,10 +550,10 @@ def test_hbonds_donors(setup_hbonds):
 
 def test_interactions_view(mocker, pl_complex):
     mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.show_mdtraj"
+        pl_module + ".show_mdtraj"
     )
     mock_slice = mocker.patch(
-        "openpharmacophore.pharmacophore.pl_complex.PLComplex.slice_traj"
+        pl_class + ".slice_traj"
     )
 
     hbonds = {

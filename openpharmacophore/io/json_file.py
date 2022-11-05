@@ -1,4 +1,4 @@
-from ..pharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint
 from rdkit import Chem
 import pyunitwizard as puw
 import json

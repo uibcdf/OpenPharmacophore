@@ -8,6 +8,10 @@ from copy import deepcopy
 from collections import namedtuple
 import os
 
+# Imports for mocking
+lr_module = "openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor"
+lr_class = lr_module + ".LigandReceptorPharmacophore"
+
 
 def test_init_ligand_receptor_pharmacophore():
     pharmacophore = LigandReceptorPharmacophore()
@@ -16,7 +20,7 @@ def test_init_ligand_receptor_pharmacophore():
 
 def test_load_pdb_file(mocker):
     mock_pl_complex = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
+        lr_module + ".PLComplex")
     pharmacophore = LigandReceptorPharmacophore()
     pharmacophore.load_receptor(data.pdb["1ncr.pdb"])
     assert len(pharmacophore) == 0
@@ -25,10 +29,10 @@ def test_load_pdb_file(mocker):
 
 
 def test_load_pdb_id(mocker):
-    mocker.patch("openpharmacophore.LigandReceptorPharmacophore._fetch_pdb",
+    mocker.patch(lr_class + "._fetch_pdb",
                  return_value=b"pdb")
     mock_pl_complex = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.PLComplex")
+        lr_module + ".PLComplex")
     pharmacophore = LigandReceptorPharmacophore()
     pharmacophore.load_pdb_id("1NCR")
     assert len(pharmacophore) == 0
@@ -575,7 +579,7 @@ def pharma_with_pl_complex():
 
 def test_show_all_single_frame(mocker, pharma_with_pl_complex):
     mock_nv = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+        lr_module + ".nv"
     )
     pharma = pharma_with_pl_complex
     pharma._pl_complex._receptor_indices = list(range(0, 10))
@@ -594,7 +598,7 @@ def test_show_all_single_frame(mocker, pharma_with_pl_complex):
 
 def test_show_ligand_no_receptor(mocker, pharmacophore_one_frame):
     mock_nv = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+        lr_module + ".nv"
     )
     pharma = pharmacophore_one_frame
     pharma._pl_complex = mocker.Mock()
@@ -609,7 +613,7 @@ def test_show_ligand_no_receptor(mocker, pharmacophore_one_frame):
 
 def test_show_receptor_no_ligand(mocker, pharma_with_pl_complex):
     mock_nv = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+        lr_module + ".nv"
     )
     pharma = pharma_with_pl_complex
     pharma._pl_complex._receptor_indices = list(range(0, 10))
@@ -627,10 +631,10 @@ def test_show_receptor_no_ligand(mocker, pharma_with_pl_complex):
 
 def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+        lr_module + ".nv"
     )
     mock_add = mocker.patch(
-        "openpharmacophore.pharmacophore.LigandReceptorPharmacophore.add_to_view"
+        lr_class + ".add_to_view"
     )
     pharma = pharmacophore_one_frame
     pharma._pl_complex = mocker.Mock()
@@ -655,7 +659,7 @@ def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
 
 def test_show_all_traj_contains_multiple_frames(mocker):
     mock_nv = mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_receptor.nv"
+        lr_module + ".nv"
     )
 
     ph = LigandReceptorPharmacophore()

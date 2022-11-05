@@ -1,6 +1,6 @@
-from .._private_tools import exceptions as exc
-from ..data import pdb_to_smi
-from ..utils import maths
+from openpharmacophore._private_tools import exceptions as exc
+from openpharmacophore.data import pdb_to_smi
+from openpharmacophore.utils import maths
 from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj

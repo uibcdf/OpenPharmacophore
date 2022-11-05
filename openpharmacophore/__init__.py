@@ -8,12 +8,12 @@ from ._version import get_versions
 
 # Add imports here
 from ._pyunitwizard import puw
-from .pharmacophore import PharmacophoricPoint, distance_between_pharmacophoric_points
-from .pharmacophore import PLComplex
-from .pharmacophore import LigandBasedPharmacophore
-from .pharmacophore import LigandReceptorPharmacophore
-from .pharmacophore import load_from_file
-from .pharmacophore import load
+from .point.pharmacophoric_point import PharmacophoricPoint, distance_between_pharmacophoric_points
+from .pharmacophore.ligand_receptor.pl_complex import PLComplex
+from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
+from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
+from .pharmacophore.load_from_file import load_from_file
+from .pharmacophore.load import load
 from .screening import VirtualScreening
 
 

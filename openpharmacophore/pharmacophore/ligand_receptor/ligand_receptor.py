@@ -1,11 +1,10 @@
-from .pharmacophore import Pharmacophore
-from .pharmacophoric_point import PharmacophoricPoint
-from .rdkit_pharmacophore import rdkit_pharmacophore
-from .pl_complex import PLComplex
-from ..io import (json_pharmacophoric_elements, ligandscout_xml_tree,
-                  mol2_file_info, ph4_string)
-from .._private_tools.exceptions import PDBFetchError
-from ..utils import maths
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
+from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
+from openpharmacophore import PLComplex
+import openpharmacophore.io as io
+from openpharmacophore._private_tools.exceptions import PDBFetchError
+from openpharmacophore.utils import maths
 import networkx as nx
 import numpy as np
 import nglview as nv
@@ -206,20 +205,20 @@ class LigandReceptorPharmacophore(Pharmacophore):
     def to_json(self, file_name, frame):
         """ Save pharmacophore(s) to a json file.
         """
-        data = json_pharmacophoric_elements(self[frame])
+        data = io.json_pharmacophoric_elements(self[frame])
         with open(file_name, "w") as fp:
             json.dump(data, fp)
 
     def to_ligand_scout(self, file_name, frame):
         """ Save a pharmacophore at a given frame to ligand scout format (pml).
         """
-        xml_tree = ligandscout_xml_tree(self[frame])
+        xml_tree = io.ligandscout_xml_tree(self[frame])
         xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
 
     def to_moe(self, file_name, frame):
         """ Save a pharmacophore at a given frame to moe format (ph4).
         """
-        pharmacophore_str = ph4_string(self[frame])
+        pharmacophore_str = io.ph4_string(self[frame])
         with open(file_name, "w") as fp:
             fp.write(pharmacophore_str)
 
@@ -229,7 +228,7 @@ class LigandReceptorPharmacophore(Pharmacophore):
         # TODO: save multiple pharmacophores
         if frame is None or isinstance(frame, list):
             raise NotImplementedError
-        pharmacophore_data = mol2_file_info([self[frame]])
+        pharmacophore_data = io.mol2_file_info([self[frame]])
         with open(file_name, "w") as fp:
             fp.writelines(pharmacophore_data[0])
 

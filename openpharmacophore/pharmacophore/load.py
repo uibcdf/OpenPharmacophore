@@ -1,5 +1,4 @@
-from .ligand_based import LigandBasedPharmacophore
-from .ligand_receptor import LigandReceptorPharmacophore
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
 import os
 
 

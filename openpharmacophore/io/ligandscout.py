@@ -1,7 +1,7 @@
 from collections import namedtuple
 import pyunitwizard as puw
 import xml.etree.ElementTree as ET
-from ..pharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint
 
 ligandscout_to_oph = {
     "PI": "positive charge",
