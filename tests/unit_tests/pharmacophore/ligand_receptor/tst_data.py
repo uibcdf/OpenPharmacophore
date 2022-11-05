@@ -72,3 +72,6 @@ END
 
 threonine = Chem.MolFromPDBBlock(threonine_pdb_str)
 assert threonine.GetNumAtoms() == 7
+
+del estradiol_pdb_str
+del threonine_pdb_str
