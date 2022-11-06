@@ -19,6 +19,11 @@ def mol_to_topology(mol):
         Returns
         -------
         mdtraj.Topology
+
+        Raises
+        ------
+        ValueError
+            If the molecule does not contain pdb residue info.
     """
     topology = mdt.Topology()
     if mol.GetNumAtoms() == 0:
@@ -93,3 +98,11 @@ def mol_to_traj(mol):
             coords[ii, jj, 2] = pos.z / 10
 
     return mdt.Trajectory(coords, topology)
+
+
+def topology_to_mol():
+    raise NotImplementedError
+
+
+def traj_to_mol():
+    raise NotImplementedError

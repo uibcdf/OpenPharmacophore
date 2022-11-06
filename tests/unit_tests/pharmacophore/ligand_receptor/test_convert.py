@@ -1,10 +1,21 @@
-from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj, mol_to_topology
+import openpharmacophore.pharmacophore.ligand_receptor.convert as convert
 from openpharmacophore._private_tools.exceptions import NoConformersError
 from tst_data import threonine, estradiol
 import numpy as np
 import pytest
-from rdkit import Chem
+from rdkit.Chem import AllChem as Chem
 from copy import deepcopy
+
+
+def sort_bonds(bonds):
+    sorted_bonds = []
+    for bnd in bonds:
+        if bnd[0] < bnd[1]:
+            sorted_bonds.append((bnd[0], bnd[1]))
+        else:
+            sorted_bonds.append((bnd[1], bnd[0]))
+    sorted_bonds.sort()
+    return sorted_bonds
 
 
 def assert_mol_and_topology_equal(mol, topology):
@@ -35,26 +46,32 @@ def assert_mol_and_topology_equal(mol, topology):
     assert residues_mol == residues_top, "Different residues"
 
     bonds_mol = [
-        (b.GetEndAtomIdx(), b.GetBeginAtomIdx()) for b in mol.GetBonds()
+        (b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in mol.GetBonds()
     ]
+    bonds_mol = sort_bonds(bonds_mol)
+
     bonds_top = [
         (b[0].index, b[1].index) for b in topology.bonds
     ]
+    bonds_top = sort_bonds(bonds_top)
+
     assert bonds_top == bonds_mol, "Different bonds"
 
 
 def test_mol_with_no_residue_info_raises_error():
     mol = Chem.MolFromSmiles("CC(C(C(=O)O)N)O")
     with pytest.raises(ValueError):
-        mol_to_topology(mol)
+        convert.mol_to_topology(mol)
 
 
 def test_mol_with_single_residue_to_topology():
-    thr_topology = mol_to_topology(threonine)
+    thr_topology = convert.mol_to_topology(threonine)
     assert_mol_and_topology_equal(threonine, thr_topology)
+    assert thr_topology.residue(0).name == "THR"
 
-    est_topology = mol_to_topology(estradiol)
+    est_topology = convert.mol_to_topology(estradiol)
     assert_mol_and_topology_equal(estradiol, est_topology)
+    assert est_topology.residue(0).name == "EST"
 
 
 def test_mol_with_no_conformers_raises_error():
@@ -62,11 +79,11 @@ def test_mol_with_no_conformers_raises_error():
     mol.RemoveAllConformers()
     assert mol.GetNumConformers() == 0
     with pytest.raises(NoConformersError):
-        mol_to_traj(mol)
+        convert.mol_to_traj(mol)
 
 
 def test_mol_to_traj_mol_with_single_conformer():
-    thr_traj = mol_to_traj(threonine)
+    thr_traj = convert.mol_to_traj(threonine)
     n_atoms = threonine.GetNumAtoms()
     expected_coords = np.array([
         [44.235,  80.308,  18.419],
@@ -82,7 +99,38 @@ def test_mol_to_traj_mol_with_single_conformer():
     assert thr_traj.xyz.shape == (1, n_atoms, 3)
     assert np.allclose(thr_traj.xyz, expected_coords)
 
-    est_traj = mol_to_traj(estradiol)
+    est_traj = convert.mol_to_traj(estradiol)
     n_atoms = estradiol.GetNumAtoms()
     assert est_traj.n_atoms == n_atoms
     assert est_traj.xyz.shape == (1, n_atoms, 3)
+
+
+@pytest.fixture()
+def est_hyd():
+    """ Returns estradiol molecule with hydrogens. """
+    template = Chem.MolFromSmiles("C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O")
+    mol = Chem.AssignBondOrdersFromTemplate(template, estradiol)
+    mol = Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
+    assert mol.GetNumAtoms() == 44
+    return mol
+
+
+def test_molecule_with_hydrogens_to_topology(est_hyd):
+    est_topology = convert.mol_to_topology(est_hyd)
+    assert_mol_and_topology_equal(est_hyd, est_topology)
+
+
+# @pytest.fixture()
+# def estradiol_traj():
+#     return mdt.load(data.pdb["estradiol.pdb"])
+#
+#
+# def test_topology_to_mol(estradiol_traj):
+#     est_mol = convert.topology_to_mol()
+#     assert_mol_and_topology_equal(est_mol, estradiol_traj.topology)
+#     assert est_mol.GetNumConformers() == 0
+#
+#
+# def test_traj_to_mol():
+#     est_mol = convert.trajectory_to_mol()
+#     assert est_mol.GetNumConformers() == 1

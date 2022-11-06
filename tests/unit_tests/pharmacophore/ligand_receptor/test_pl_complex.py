@@ -76,6 +76,9 @@ def test_ligand_to_mol(pl_complex):
     pl.ligand_and_receptor_indices()
     pl.ligand_to_mol()
     assert pl.ligand.GetNumAtoms() == 20
+    assert all([
+        a.GetPDBResidueInfo() is not None for a in pl.ligand.GetAtoms()
+    ])
 
 
 def test_ligand_to_mol_empty_indices_list(pl_complex):
@@ -277,17 +280,10 @@ def test_modeller_to_trajectory():
     assert np.allclose(traj.xyz, expected_coords)
 
 
-def test_mol_to_traj(estradiol_mol):
-    traj = PLComplex._mol_to_traj(estradiol_mol)
-    assert traj.n_atoms == 20
-    assert traj.topology.n_atoms == 20
-    assert traj.xyz.shape == (1, 20, 3)
-
-
 def test_add_fixed_ligand(mocker, pl_complex_no_lig):
     lig_traj = mdt.load(data.pdb["estradiol.pdb"])
     mocker.patch(
-        pl_class + "._mol_to_traj",
+        pl_module + ".mol_to_traj",
         return_value=lig_traj
     )
 

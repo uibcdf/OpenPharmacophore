@@ -1,6 +1,7 @@
 from openpharmacophore._private_tools import exceptions as exc
 from openpharmacophore.data import pdb_to_smi
 from openpharmacophore.utils import maths
+from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
 from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj
@@ -319,7 +320,7 @@ class PLComplex:
 
         fixed_lig = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
         if add_hydrogens:
-            self._ligand = Chem.AddHs(fixed_lig, addCoords=True)
+            self._ligand = Chem.AddHs(fixed_lig, addCoords=True, addResidueInfo=True)
         else:
             self._ligand = fixed_lig
 
@@ -389,35 +390,13 @@ class PLComplex:
         modeller.addHydrogens()
         self._update_traj(self._modeller_to_trajectory(modeller))
 
-    @staticmethod
-    def _mol_to_traj(mol):
-        """ Transform a rdkit.Mol to mdtraj.Trajectory
-
-            Parameters
-            ----------
-            mol : rdkit.Chem.Mol
-
-            Returns
-            -------
-            traj : mdtraj.Trajectory
-        """
-        # TODO: convert directly from mol to traj without using file.
-        mol_file = tempfile.NamedTemporaryFile(suffix=".pdb")
-        Chem.MolToPDBFile(mol, mol_file.name)
-        mol_file.seek(0)
-
-        traj = mdt.load(mol_file.name)
-        mol_file.close()
-        # TODO: converting to traj changes the name of the ligand to UNL
-        return traj
-
     def add_fixed_ligand(self):
         """ Adds the fixed ligand back to the receptor.
 
             This method should be called after fix_ligand if the original
             topology didn't have hydrogens.
         """
-        lig_traj = self._mol_to_traj(self.ligand)
+        lig_traj = mol_to_traj(self.ligand)
 
         lig_name = lig_traj.topology.atom(0).residue.name
         n_chains = self.topology.n_chains
