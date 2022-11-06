@@ -3,6 +3,7 @@ from openpharmacophore._private_tools.exceptions import NoConformersError
 from tst_data import threonine, estradiol
 import numpy as np
 import pytest
+from rdkit import Chem
 from copy import deepcopy
 
 
@@ -14,12 +15,12 @@ def assert_mol_and_topology_equal(mol, topology):
         mol : rdkit.Chem.Mol
         topology : mdtraj.Topology
     """
-    assert mol.GetNumAtoms() == topology.n_atoms
-    assert mol.GetNumBonds() == topology.n_bonds
+    assert mol.GetNumAtoms() == topology.n_atoms, "Num atoms"
+    assert mol.GetNumBonds() == topology.n_bonds, "Num bonds"
 
     elements_mol = [a.GetSymbol() for a in mol.GetAtoms()]
     elements_top = [a.element.symbol for a in topology.atoms]
-    assert elements_mol == elements_top
+    assert elements_mol == elements_top, "Element symbols"
 
     chains_mol = set()
     residues_mol = []
@@ -27,19 +28,25 @@ def assert_mol_and_topology_equal(mol, topology):
         info = atom.GetPDBResidueInfo()
         chains_mol.add(info.GetChainId())
         residues_mol.append(info.GetResidueName())
-    assert len(chains_mol) == topology.n_chains
-    assert len(set(residues_mol)) == topology.n_residues
+    assert len(chains_mol) == topology.n_chains, "Num chain"
+    assert len(set(residues_mol)) == topology.n_residues, "Num residues"
 
     residues_top = [a.residue.name for a in topology.atoms]
-    assert residues_mol == residues_top
+    assert residues_mol == residues_top, "Different residues"
 
     bonds_mol = [
-        (b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in mol.GetBonds()
+        (b.GetEndAtomIdx(), b.GetBeginAtomIdx()) for b in mol.GetBonds()
     ]
     bonds_top = [
         (b[0].index, b[1].index) for b in topology.bonds
     ]
-    assert bonds_top == bonds_mol
+    assert bonds_top == bonds_mol, "Different bonds"
+
+
+def test_mol_with_no_residue_info_raises_error():
+    mol = Chem.MolFromSmiles("CC(C(C(=O)O)N)O")
+    with pytest.raises(ValueError):
+        mol_to_topology(mol)
 
 
 def test_mol_with_single_residue_to_topology():
@@ -77,5 +84,5 @@ def test_mol_to_traj_mol_with_single_conformer():
 
     est_traj = mol_to_traj(estradiol)
     n_atoms = estradiol.GetNumAtoms()
-    assert thr_traj.n_atoms == n_atoms
-    assert thr_traj.xyz.shape == (1, n_atoms, 3)
+    assert est_traj.n_atoms == n_atoms
+    assert est_traj.xyz.shape == (1, n_atoms, 3)
