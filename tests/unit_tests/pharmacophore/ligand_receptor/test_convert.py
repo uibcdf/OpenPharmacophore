@@ -118,19 +118,3 @@ def est_hyd():
 def test_molecule_with_hydrogens_to_topology(est_hyd):
     est_topology = convert.mol_to_topology(est_hyd)
     assert_mol_and_topology_equal(est_hyd, est_topology)
-
-
-# @pytest.fixture()
-# def estradiol_traj():
-#     return mdt.load(data.pdb["estradiol.pdb"])
-#
-#
-# def test_topology_to_mol(estradiol_traj):
-#     est_mol = convert.topology_to_mol()
-#     assert_mol_and_topology_equal(est_mol, estradiol_traj.topology)
-#     assert est_mol.GetNumConformers() == 0
-#
-#
-# def test_traj_to_mol():
-#     est_mol = convert.trajectory_to_mol()
-#     assert est_mol.GetNumConformers() == 1

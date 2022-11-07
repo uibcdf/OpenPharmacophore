@@ -254,8 +254,6 @@ class PLComplex:
         if len(self._lig_indices) == 0:
             self.ligand_and_receptor_indices()
 
-        # TODO: implement the conversion from trajectory to rdkit mol without using
-        #  a file.
         # We only need one conformer
         lig_traj = self.traj.atom_slice(self._lig_indices)[0]
         pdb_file = tempfile.NamedTemporaryFile()
