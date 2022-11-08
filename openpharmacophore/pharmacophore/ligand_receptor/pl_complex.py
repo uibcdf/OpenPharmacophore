@@ -504,6 +504,7 @@ class PLComplex:
             raise exc.NoLigandError
 
         centers = []
+        # TODO: indices are computed for each frame
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._ligand)
         indices_list = []
@@ -552,6 +553,7 @@ class PLComplex:
         bs_cutoff = self._lig_extent + self.BS_DIST_MAX
 
         centers = []
+        # TODO: indices are computed for each frame
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._mol_graph)
         indices_bs = []
@@ -792,6 +794,7 @@ class PLComplex:
         # List of the atoms in the final traj
         atoms = []
         for index_new, index_ori in enumerate(indices):
+            # TODO: instead of removing an incomplete resiude, add its missing atoms and keep it
             if self.topology.atom(index_ori).residue.n_atoms == \
                     new_topology.atom(index_new).residue.n_atoms:
                 atoms.append(index_new)
@@ -813,6 +816,7 @@ class PLComplex:
         """ Creates the molecular graph of the receptor. Necessary
             to obtain its chemical features.
         """
+        # TODO: Create the graph of the binding site instead of the whole molecule
         if self._file_path.endswith(".pdb"):
             self._mol_graph = Chem.MolFromPDBFile(self._file_path)
 
