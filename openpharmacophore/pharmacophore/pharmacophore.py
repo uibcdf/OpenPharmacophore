@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 class Pharmacophore(metaclass=ABCMeta):
     """ Abstract base class for pharmacophores.
 
-        Parent class of LigandBasedPharmacophore and StructureBasedPharmacophore.
+        Parent class of all pharmacophore classes.
     """
     @abstractmethod
     def add_point(self, *args, **kwargs):

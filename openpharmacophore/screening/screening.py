@@ -1,6 +1,6 @@
-from .._private_tools.exceptions import NotAPharmacophoreError
-from ..pharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
-from ..io import mol_file_iterator
+from openpharmacophore._private_tools.exceptions import NotAPharmacophoreError
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
+from openpharmacophore.io import mol_file_iterator
 from rdkit import RDConfig, Geometry, RDLogger
 from rdkit import Chem
 from rdkit.Chem import ChemicalFeatures, rdDistGeom, rdMolTransforms

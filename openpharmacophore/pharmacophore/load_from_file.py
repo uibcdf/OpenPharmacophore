@@ -1,8 +1,7 @@
-from .ligand_based import LigandBasedPharmacophore
-from .ligand_receptor import LigandReceptorPharmacophore
-from ..io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
-                  pharmacophoric_points_from_ph4_file, read_ligandscout)
-from .._private_tools.exceptions import InvalidFileFormat, PDBFetchError
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
+from openpharmacophore.io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
+                                  pharmacophoric_points_from_ph4_file, read_ligandscout)
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat, PDBFetchError
 
 
 def ligand_receptor_from_pharma_file(file_name):

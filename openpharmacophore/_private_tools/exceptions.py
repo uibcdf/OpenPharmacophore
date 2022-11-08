@@ -186,3 +186,9 @@ class MolGraphError(ValueError):
     def __init__(self, pdb_file):
         self.message = f"Failed to create molecule for {pdb_file}"
         super().__init__(self.message)
+
+
+class NoConformersError(ValueError):
+    """ Exception raised when a molecule contains no conformers.
+    """
+    pass

@@ -1,4 +1,4 @@
-from ..pharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint
 import pyunitwizard as puw
 import datetime
 import re

@@ -1,6 +1,7 @@
-from .._private_tools import exceptions as exc
-from ..data import pdb_to_smi
-from ..utils import maths
+from openpharmacophore._private_tools import exceptions as exc
+from openpharmacophore.data import pdb_to_smi
+from openpharmacophore.utils import maths
+from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
 from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj
@@ -253,8 +254,6 @@ class PLComplex:
         if len(self._lig_indices) == 0:
             self.ligand_and_receptor_indices()
 
-        # TODO: implement the conversion from trajectory to rdkit mol without using
-        #  a file.
         # We only need one conformer
         lig_traj = self.traj.atom_slice(self._lig_indices)[0]
         pdb_file = tempfile.NamedTemporaryFile()
@@ -319,7 +318,7 @@ class PLComplex:
 
         fixed_lig = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
         if add_hydrogens:
-            self._ligand = Chem.AddHs(fixed_lig, addCoords=True)
+            self._ligand = Chem.AddHs(fixed_lig, addCoords=True, addResidueInfo=True)
         else:
             self._ligand = fixed_lig
 
@@ -389,35 +388,13 @@ class PLComplex:
         modeller.addHydrogens()
         self._update_traj(self._modeller_to_trajectory(modeller))
 
-    @staticmethod
-    def _mol_to_traj(mol):
-        """ Transform a rdkit.Mol to mdtraj.Trajectory
-
-            Parameters
-            ----------
-            mol : rdkit.Chem.Mol
-
-            Returns
-            -------
-            traj : mdtraj.Trajectory
-        """
-        # TODO: convert directly from mol to traj without using file.
-        mol_file = tempfile.NamedTemporaryFile(suffix=".pdb")
-        Chem.MolToPDBFile(mol, mol_file.name)
-        mol_file.seek(0)
-
-        traj = mdt.load(mol_file.name)
-        mol_file.close()
-        # TODO: converting to traj changes the name of the ligand to UNL
-        return traj
-
     def add_fixed_ligand(self):
         """ Adds the fixed ligand back to the receptor.
 
             This method should be called after fix_ligand if the original
             topology didn't have hydrogens.
         """
-        lig_traj = self._mol_to_traj(self.ligand)
+        lig_traj = mol_to_traj(self.ligand)
 
         lig_name = lig_traj.topology.atom(0).residue.name
         n_chains = self.topology.n_chains
@@ -527,6 +504,7 @@ class PLComplex:
             raise exc.NoLigandError
 
         centers = []
+        # TODO: indices are computed for each frame
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._ligand)
         indices_list = []
@@ -575,6 +553,7 @@ class PLComplex:
         bs_cutoff = self._lig_extent + self.BS_DIST_MAX
 
         centers = []
+        # TODO: indices are computed for each frame
         indices = self.feature_indices(
             self.smarts_ligand[feat_name], self._mol_graph)
         indices_bs = []
@@ -815,6 +794,7 @@ class PLComplex:
         # List of the atoms in the final traj
         atoms = []
         for index_new, index_ori in enumerate(indices):
+            # TODO: instead of removing an incomplete resiude, add its missing atoms and keep it
             if self.topology.atom(index_ori).residue.n_atoms == \
                     new_topology.atom(index_new).residue.n_atoms:
                 atoms.append(index_new)
@@ -836,6 +816,7 @@ class PLComplex:
         """ Creates the molecular graph of the receptor. Necessary
             to obtain its chemical features.
         """
+        # TODO: Create the graph of the binding site instead of the whole molecule
         if self._file_path.endswith(".pdb"):
             self._mol_graph = Chem.MolFromPDBFile(self._file_path)
 
