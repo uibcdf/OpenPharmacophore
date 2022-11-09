@@ -109,9 +109,9 @@ class PLComplex:
 
         self._file_path = file_path
 
-        # Maps the indices of the atoms in the original topology after
-        # adding hydrogens
-        self._non_hyd_indices = []
+        # Maps the indices of the atoms in the mol graph to those of
+        # the topology
+        self._rec_ind_map = []
 
         # Store for current frame
         self._curr_frame = -1
@@ -423,11 +423,6 @@ class PLComplex:
         self.set_ligand(lig_name)
         self.ligand_and_receptor_indices()
 
-        # Save the original atoms indices
-        self._non_hyd_indices = [
-            a.index for a in self.topology.atoms if a.element.symbol != "H"
-        ]
-
     def show(self):
         """ Returns a view of the complex. """
         return show_mdtraj(self.traj)
@@ -483,7 +478,8 @@ class PLComplex:
                 Array of integers.
 
         """
-        self.ligand_and_receptor_indices()
+        if len(self._lig_indices) == 0 or len(self._receptor_indices) == 0:
+            self.ligand_and_receptor_indices()
         lig_center = self.lig_centroid(frame)
         lig_extent = self.lig_max_extent(lig_center, frame)
         bs_cutoff = lig_extent + self.BS_DIST_MAX
@@ -576,11 +572,7 @@ class PLComplex:
         indices_bs = []
         centers = []
         for indices_set in self._rec_feats[feat_name]:
-            # If hydrogens were added the indices must be mapped to those of the original mol
-            if len(self._non_hyd_indices) > 0:
-                indices_top = [self._non_hyd_indices[ii] for ii in indices_set]
-            else:
-                indices_top = list(indices_set)
+            indices_top = [self._rec_ind_map[ii] for ii in indices_set]
             feat_coords = self._coords[frame, indices_top, :]
             centroid = np.mean(feat_coords, axis=0)
             # Only keep features in the binding site
@@ -785,11 +777,9 @@ class PLComplex:
             self.remove_ligand()
             self.add_hydrogens()
             self.add_fixed_ligand()
-        if rec_has_hyd:
-            self.get_non_hyd_indices()
         self.ligand_and_receptor_indices()
 
-    def slice_traj(self, indices, frame):
+    def slice_traj(self, indices, frame, return_indices=False):
         """ Slice the complex trajectory but keep the residues in the
             new trajectory complete.
 
@@ -801,6 +791,10 @@ class PLComplex:
             frame : int
                 Frame of the trajectory
 
+            return_indices : bool
+                If true returns the indices that were used to slice
+                the trajectory.
+
             Returns
             -------
             mdtraj.Trajectory
@@ -808,7 +802,9 @@ class PLComplex:
         """
         residues = set()
         for ii in indices:
-            residues.add(self.topology.atom(ii).residue.index)
+            res = self.topology.atom(ii).residue
+            if res.name != "HOH":
+                residues.add(self.topology.atom(ii).residue.index)
 
         # Add only whole residues
         atom_ind = []
@@ -816,6 +812,8 @@ class PLComplex:
             for atom in self.topology.residue(ii).atoms:
                 atom_ind.append(atom.index)
 
+        if return_indices:
+            return self.traj.atom_slice(atom_ind)[frame], atom_ind
         return self.traj.atom_slice(atom_ind)[frame]
 
     def get_non_hyd_indices(self):
@@ -830,23 +828,27 @@ class PLComplex:
         ]
 
     def _create_mol_graph(self):
-        """ Creates the molecular graph of the receptor. Necessary
+        """ Creates the molecular graph of the receptor biding site. Necessary
             to obtain its chemical features.
         """
-        # TODO: Create the graph of the binding site instead of the whole molecule
-        if self._file_path.endswith(".pdb"):
-            self._mol_graph = Chem.MolFromPDBFile(self._file_path)
+        bsite_ind = self.binding_site_indices(0)
+        bsite_traj, indices = self.slice_traj(
+            bsite_ind, 0, return_indices=True)
 
-        elif self._file_path.split(".")[-1] in self.traj_files:
-            pdb_file = tempfile.NamedTemporaryFile()
-            self.traj[0].save_pdb(pdb_file.name)
-            pdb_file.seek(0)
+        pdb_file = tempfile.NamedTemporaryFile()
+        bsite_traj.save_pdb(pdb_file.name)
+        pdb_file.seek(0)
 
-            self._mol_graph = Chem.MolFromPDBFile(pdb_file.name)
-            pdb_file.close()
+        self._mol_graph = Chem.MolFromPDBFile(pdb_file.name)
+        pdb_file.close()
 
         if self._mol_graph is None:
             raise exc.MolGraphError(self._file_path)
+
+        # Store indices of atoms that are not hydrogen
+        self._rec_ind_map = [
+            ii for ii in indices if self.topology.atom(ii).element.symbol != "H"
+        ]
 
     def get_lig_conformer(self, frame):
         """ Returns the ligand with a conformer of the

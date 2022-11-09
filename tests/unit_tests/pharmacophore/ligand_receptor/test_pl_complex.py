@@ -435,11 +435,12 @@ def test_feature_indices(mocker):
     assert indices == [(0, 1), (2, 3), (4,), ]
 
 
-def set_receptor_feature_centroids(mocker, pl_complex_no_lig):
-    mocker.patch(
-        pl_class + ".feature_indices",
-        return_value=[(0, 1), (2,)]
-    )
+def set_receptor_feature_centroids(mocker, pl_complex_no_lig, indices=True):
+    if indices:
+        mocker.patch(
+            pl_class + ".feature_indices",
+            return_value=[(0, 1), (2,)]
+        )
     mocker.patch(
         pl_class + ".lig_centroid",
         return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
@@ -449,6 +450,8 @@ def set_receptor_feature_centroids(mocker, pl_complex_no_lig):
         return_value=puw.quantity(0.15, "nanometers")
     )
     pl_complex = deepcopy(pl_complex_no_lig)
+    # Set the mol graph not null to avoid its creation
+    pl_complex._mol_graph = 10
     return pl_complex
 
 
@@ -462,6 +465,7 @@ def test_receptor_feature_centroids(mocker, pl_complex_no_lig):
             [1., 1., 1.],
         ]]
     ), "nanometers")
+    pl_complex._rec_ind_map = [0, 1, 2]
 
     centers, indices = pl_complex.receptor_features("aromatic ring", frame=0)
     assert len(centers) == 1
@@ -482,7 +486,7 @@ def test_receptor_feature_centroids_receptor_has_hydrogens(mocker, pl_complex_no
             [1., 1., 1.],
         ]]
     ), "nanometers")
-    pl_complex._non_hyd_indices = [0, 3, 4]
+    pl_complex._rec_ind_map = [0, 3, 4]
 
     centers, indices = pl_complex.receptor_features("aromatic ring", frame=0)
     assert len(centers) == 1
@@ -492,15 +496,8 @@ def test_receptor_feature_centroids_receptor_has_hydrogens(mocker, pl_complex_no
 
 
 def test_receptor_feature_centroids_indices_precomputed(mocker, pl_complex_no_lig):
-    mocker.patch(
-        pl_class + ".lig_centroid",
-        return_value=puw.quantity(np.array([0.0, 0.0, 0.0]), "nanometers")
-    )
-    mocker.patch(
-        pl_class + ".lig_max_extent",
-        return_value=puw.quantity(0.15, "nanometers")
-    )
-    pl_complex = deepcopy(pl_complex_no_lig)
+    pl_complex = set_receptor_feature_centroids(
+        mocker, pl_complex_no_lig)
     pl_complex._rec_feats = {
         "aromatic ring": [(0, 1), (2,)]
     }
@@ -511,19 +508,13 @@ def test_receptor_feature_centroids_indices_precomputed(mocker, pl_complex_no_li
             [1., 1., 1.],
         ]]
     ), "nanometers")
+    pl_complex._rec_ind_map = [0, 1, 2]
 
     centers, indices = pl_complex.receptor_features("aromatic ring", frame=0)
     assert len(centers) == 1
     expected_cent = puw.quantity(np.array([.3, .3, .3]), "nanometer")
     assert np.allclose(centers[0], expected_cent)
     assert indices == [[0, 1]]
-
-
-def test_receptor_features_invalid_mol_graph_raises_error(pl_complex_no_lig):
-    pl_complex = deepcopy(pl_complex_no_lig)
-    pl_complex._file_path = data.ligands["mols.smi"]
-    with pytest.raises(exc.MolGraphError):
-        pl_complex.receptor_features("aromatic ring", frame=0)
 
 
 def test_hbond_indices_baker_criterion(mocker, pl_complex_no_lig):
@@ -627,17 +618,18 @@ def test_slice_traj(pl_complex_no_lig):
     pl_complex = pl_complex_no_lig
 
     indices = list(range(0, 12))
-    traj = pl_complex.slice_traj(indices, 0)
+    traj = pl_complex.slice_traj(indices, 0, return_indices=False)
     assert traj.n_atoms == 19
     assert traj.n_residues == 2
 
     indices = list(range(6, 19))
-    traj = pl_complex.slice_traj(indices, 0)
+    traj = pl_complex.slice_traj(indices, 0, return_indices=False)
     assert traj.n_atoms == 19
     assert traj.n_residues == 2
 
     indices = list(range(0, 7))
-    traj = pl_complex.slice_traj(indices, 0)
+    traj, new_ind = pl_complex.slice_traj(indices, 0, return_indices=True)
+    assert indices == new_ind
     assert traj.n_atoms == 7
     assert traj.n_residues == 1
 
@@ -647,21 +639,31 @@ def test_get_non_hyd_indices(pl_complex):
     assert len(pl_complex._non_hyd_indices) == 166
 
 
-def test_create_mol_graph_from_pdb(pl_complex_no_lig):
+def test_create_mol_graph_from_pdb(mocker, pl_complex_no_lig):
+    mocker.patch(pl_class + ".binding_site_indices",
+                 return_value=list(range(0, 7)))
+
     pl_complex = deepcopy(pl_complex_no_lig)
     assert pl_complex._mol_graph is None
 
     pl_complex._create_mol_graph()
-    assert pl_complex._mol_graph.GetNumAtoms() == 19
+    assert pl_complex._mol_graph.GetNumAtoms() == 7
+    assert pl_complex._mol_graph.GetNumConformers() == 1
+    assert pl_complex._rec_ind_map == [0, 1, 2, 3, 4, 5, 6]
 
 
-def test_create_mol_graph_from_traj_file():
+def test_create_mol_graph_from_traj_file(mocker):
+    mocker.patch(pl_class + ".binding_site_indices",
+                 return_value=list(range(6, 26)))
     pl_complex = PLComplex(data.trajectories["pentalanine_small.gro"])
     assert pl_complex._mol_graph is None
 
     pl_complex._create_mol_graph()
+    expected_map = [6, 8, 10, 14, 15, 16, 18, 20, 24, 25]
     # Doesn't load hydrogens
-    assert pl_complex._mol_graph.GetNumAtoms() == 30
+    assert pl_complex._mol_graph.GetNumAtoms() == 10
+    assert pl_complex._mol_graph.GetNumConformers() == 1
+    assert pl_complex._rec_ind_map == expected_map
 
 
 def test_get_lig_conformer(estradiol_mol):
