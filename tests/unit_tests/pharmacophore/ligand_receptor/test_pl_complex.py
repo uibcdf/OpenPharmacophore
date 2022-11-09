@@ -628,12 +628,17 @@ def test_slice_traj(pl_complex_no_lig):
 
     indices = list(range(0, 12))
     traj = pl_complex.slice_traj(indices, 0)
-    assert traj.n_atoms == 7
-    assert traj.n_residues == 1
+    assert traj.n_atoms == 19
+    assert traj.n_residues == 2
 
     indices = list(range(6, 19))
     traj = pl_complex.slice_traj(indices, 0)
-    assert traj.n_atoms == 12
+    assert traj.n_atoms == 19
+    assert traj.n_residues == 2
+
+    indices = list(range(0, 7))
+    traj = pl_complex.slice_traj(indices, 0)
+    assert traj.n_atoms == 7
     assert traj.n_residues == 1
 
 

@@ -790,8 +790,8 @@ class PLComplex:
         self.ligand_and_receptor_indices()
 
     def slice_traj(self, indices, frame):
-        """ Slice the complex trajectory but only keep residues that
-            are complete.
+        """ Slice the complex trajectory but keep the residues in the
+            new trajectory complete.
 
             Parameters
             ----------
@@ -806,17 +806,17 @@ class PLComplex:
             mdtraj.Trajectory
                 The new trajectory
         """
-        new_traj = self.traj.atom_slice(indices)
-        new_topology = new_traj.topology
-        # List of the atoms in the final traj
-        atoms = []
-        for index_new, index_ori in enumerate(indices):
-            # TODO: instead of removing an incomplete resiude, add its missing atoms and keep it
-            if self.topology.atom(index_ori).residue.n_atoms == \
-                    new_topology.atom(index_new).residue.n_atoms:
-                atoms.append(index_new)
+        residues = set()
+        for ii in indices:
+            residues.add(self.topology.atom(ii).residue.index)
 
-        return new_traj.atom_slice(atoms)[frame]
+        # Add only whole residues
+        atom_ind = []
+        for ii in residues:
+            for atom in self.topology.residue(ii).atoms:
+                atom_ind.append(atom.index)
+
+        return self.traj.atom_slice(atom_ind)[frame]
 
     def get_non_hyd_indices(self):
         """ Stores the indices of the atoms that are not hydrogen.
