@@ -118,6 +118,20 @@ class PLComplex:
         self._lig_cent = None
         self._lig_extent = None
 
+        # Store indices of chemical features
+        self._lig_feats = {
+            "hydrophobicity": None,
+            "aromatic ring": None,
+            "positive charge": None,
+            "negative charge": None,
+        }
+        self._rec_feats = {
+            "hydrophobicity": None,
+            "aromatic ring": None,
+            "positive charge": None,
+            "negative charge": None,
+        }
+
     @property
     def ligand_ids(self):
         """ Returns a list with the ligand ids in the complex.
@@ -503,12 +517,14 @@ class PLComplex:
         if self.ligand is None:
             raise exc.NoLigandError
 
+        # Chemical feature indices are not dependent on the frame
+        if self._lig_feats[feat_name] is None:
+            self._lig_feats[feat_name] = self.feature_indices(
+                self.smarts_ligand[feat_name], self._ligand)
+
         centers = []
-        # TODO: indices are computed for each frame
-        indices = self.feature_indices(
-            self.smarts_ligand[feat_name], self._ligand)
         indices_list = []
-        for indices_set in indices:
+        for indices_set in self._lig_feats[feat_name]:
             # Map indices of the ligand rdkit molecule to those of the ligand
             # in the topology
             indices_top = [self._lig_indices[ii] for ii in indices_set]
@@ -552,13 +568,14 @@ class PLComplex:
 
         bs_cutoff = self._lig_extent + self.BS_DIST_MAX
 
-        centers = []
-        # TODO: indices are computed for each frame
-        indices = self.feature_indices(
-            self.smarts_ligand[feat_name], self._mol_graph)
-        indices_bs = []
+        # Chemical feature indices are not dependent on the frame
+        if self._rec_feats[feat_name] is None:
+            self._rec_feats[feat_name] = self.feature_indices(
+                self.smarts_ligand[feat_name], self._mol_graph)
 
-        for indices_set in indices:
+        indices_bs = []
+        centers = []
+        for indices_set in self._rec_feats[feat_name]:
             # If hydrogens were added the indices must be mapped to those of the original mol
             if len(self._non_hyd_indices) > 0:
                 indices_top = [self._non_hyd_indices[ii] for ii in indices_set]
