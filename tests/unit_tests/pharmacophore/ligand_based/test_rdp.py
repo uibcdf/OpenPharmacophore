@@ -18,6 +18,28 @@ def test_init_feat_list_distances_shape_incorrect_raises_error():
 def test_init_flcontainer():
     rdp.FLContainer()  # Should not raise
     rdp.FLContainer(bin=(0, 1))
+    rdp.FLContainer(variant="")
+
+
+def test_flcontainer_append():
+    container = rdp.FLContainer()
+    container.append(rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])))
+    assert container.variant == "AAR"
+    assert container.mols == {0}
+    assert len(container.flists) == 1
+    assert container[0].id == (0, 0)
+
+    container.append(rdp.FeatureList("AAR", (1, 0), np.array([4.8, 2.8, 7.0])))
+    assert container.mols == {0, 1}
+    assert len(container.flists) == 2
+    assert container[1].id == (1, 0)
+
+
+def test_flcontainer_append_different_variant_raises_error():
+    container = rdp.FLContainer()
+    container.append(rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])))
+    with pytest.raises(ValueError):
+        container.append(rdp.FeatureList("DHR", (0, 0), np.array([4.8, 2.8, 7.0])))
 
 
 def test_recursive_partitioning():
@@ -47,7 +69,7 @@ def test_recursive_partitioning():
     assert n_pair == 3
 
     boxes = []
-    rdp.recursive_partitioning(f_lists, 0, n_pair, boxes)
+    rdp.recursive_partitioning(f_lists, 0, n_pair, boxes, 4)
 
     assert len(boxes) == 1
     assert len(boxes[0]) == 5
@@ -55,4 +77,8 @@ def test_recursive_partitioning():
     assert boxes[0][1].id == (0, 3)
     assert boxes[0][2].id == (1, 0)
     assert boxes[0][3].id == (2, 2)
-    assert boxes[0][4].id == (3, 1)
+    assert boxes[0][4].id == (3, 0)
+
+
+def test_retrieve_cps():
+    assert False
