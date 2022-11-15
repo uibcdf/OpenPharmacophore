@@ -84,6 +84,27 @@ class FLContainer:
         return len(self.flists)
 
 
+def nearest_bins(num, bin_size):
+    """ Return the index of the nearest bins of the given number
+        in the bins array.
+
+        Parameters
+        ----------
+        num : float
+        bin_size : float
+
+        Returns
+        -------
+        tuple[int, int]
+    """
+    if num % 1 <= 0.5:
+        low_bin = math.floor(num - bin_size)
+        return low_bin, low_bin + 1
+    else:
+        low_bin = math.ceil(num - bin_size)
+        return low_bin, low_bin + 1
+
+
 def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
     """ Obtain common pharmacophores by recursive distance partitioning.
 
@@ -102,8 +123,9 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
 
     for flist in container:
         # Assign each distance to the two closest bins
-        low_bin = math.floor(flist.distances[dim] - BIN_SIZE)
-        upp_bin = low_bin + 1
+        # low_bin = math.floor(flist.distances[dim] - BIN_SIZE)
+        # upp_bin = low_bin + 1
+        low_bin, upp_bin = nearest_bins(flist.distances[dim], BIN_SIZE)
         bins[low_bin].append(flist)
         bins[upp_bin].append(flist)
 
@@ -117,3 +139,20 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
                 )
             else:
                 boxes.append(container)
+
+
+def retrieve_cps(box):
+    """ Retrieve a common pharmacophore from a box by taking the pairwise RMSD
+        between feature lists and taking the one with best score.
+
+        Parameters
+        ----------
+        box : FLContainer
+
+        Returns
+        -------
+        FeatureList
+    """
+    # RMSD
+    # np.sqrt(((predictions - targets) ** 2).mean())
+    pass

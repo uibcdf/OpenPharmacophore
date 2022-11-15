@@ -42,6 +42,34 @@ def test_flcontainer_append_different_variant_raises_error():
         container.append(rdp.FeatureList("DHR", (0, 0), np.array([4.8, 2.8, 7.0])))
 
 
+def test_nearest_bins():
+    bin_size = 1.0
+    bins = np.arange(0, 16, step=bin_size)
+
+    nearest = rdp.nearest_bins(2.3, bin_size)
+    assert nearest == (1, 2)
+    assert bins[nearest[0]] == 1
+    assert bins[nearest[1]] == 2
+
+    nearest = rdp.nearest_bins(4.9, bin_size)
+    assert nearest == (4, 5)
+    assert bins[nearest[0]] == 4
+    assert bins[nearest[1]] == 5
+
+    bin_size = 2.0
+    bins = np.arange(0, 16, step=bin_size)
+
+    nearest = rdp.nearest_bins(2.5, bin_size)
+    assert nearest == (0, 1)
+    assert bins[nearest[0]] == 0
+    assert bins[nearest[1]] == 2
+
+    nearest = rdp.nearest_bins(3.9, bin_size)
+    assert nearest == (2, 3)
+    assert bins[nearest[0]] == 4
+    assert bins[nearest[1]] == 6
+
+
 def test_recursive_partitioning():
 
     lists = [
