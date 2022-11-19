@@ -108,5 +108,29 @@ def test_recursive_partitioning():
     assert boxes[0][4].id == (3, 0)
 
 
-def test_retrieve_cps():
+def test_point_score():
+    box = rdp.FLContainer(variant="AAR")
+    box.append(
+        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+    )
+    box.append(
+        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+    )
+    box.append(
+        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+    )
+
+    scores = rdp.point_score(box)
+    assert len(scores) == 3
+    assert scores[0] == (0.2, 1, 2)
+    assert scores[1] == (0.3, 0, 1)
+    assert scores[2] == (0.4, 0, 2)
+
+
+def test_vector_score():
     assert False
+
+
+def test_molecule_feature_lists():
+    pass
+

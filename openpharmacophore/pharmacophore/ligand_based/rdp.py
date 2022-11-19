@@ -141,9 +141,9 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
                 boxes.append(container)
 
 
-def retrieve_cps(box):
-    """ Retrieve a common pharmacophore from a box by taking the pairwise RMSD
-        between feature lists and taking the one with best score.
+def point_score(box):
+    """ Calculate the point score of all feature lists in a container
+        by taking the pairwise RMSD between feature lists and taking the one with best score.
 
         Parameters
         ----------
@@ -151,7 +151,7 @@ def retrieve_cps(box):
 
         Returns
         -------
-        FeatureList
+
     """
     # RMSD
     # np.sqrt(((predictions - targets) ** 2).mean())
