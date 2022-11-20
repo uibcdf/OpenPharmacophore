@@ -12,10 +12,6 @@ import json
 class LigandBasedPharmacophore(Pharmacophore):
     """ Class to store and extract pharmacophores from a set of ligands.
 
-        Parameters
-        ----------
-        ligands : str or list[rdkit.Mol]
-            A file with ligands or a list of molecules
     """
 
     def __init__(self):

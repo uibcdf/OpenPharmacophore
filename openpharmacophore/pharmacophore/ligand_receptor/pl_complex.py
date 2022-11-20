@@ -628,9 +628,6 @@ class PLComplex:
                 Array of shape (n_hbonds, 3)
         """
         if criterion == "baker":
-            # TODO: This function searches for hbonds in all the pl complex
-            #   we are only interested in protein-ligand hbonds, we can write
-            #   a new function that only searches hbonds between the protein and the ligand.
             return mdt.baker_hubbard(self.traj[frame])
         else:
             raise NotImplementedError

@@ -99,38 +99,57 @@ def test_recursive_partitioning():
     boxes = []
     rdp.recursive_partitioning(f_lists, 0, n_pair, boxes, 4)
 
-    assert len(boxes) == 1
-    assert len(boxes[0]) == 5
-    assert boxes[0][0].id == (0, 2)
-    assert boxes[0][1].id == (0, 3)
-    assert boxes[0][2].id == (1, 0)
-    assert boxes[0][3].id == (2, 2)
-    assert boxes[0][4].id == (3, 0)
+    assert len(boxes) == 3
+
+    ids = [b.id for b in boxes[0]]
+    assert ids == [
+        (0, 4), (1, 0), (1, 1), (2, 2), (3, 0)
+    ]
+    ids = [b.id for b in boxes[1]]
+    assert ids == [
+        (0, 2), (0, 3), (0, 4), (1, 0), (2, 2), (3, 0)
+    ]
+    ids = [b.id for b in boxes[2]]
+    assert ids == [
+        (0, 2), (0, 3), (1, 0), (2, 2), (3, 0)
+    ]
 
 
-def test_point_score():
+def test_score_common_pharmacophores():
     box = rdp.FLContainer(variant="AAR")
     box.append(
-        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+        rdp.FeatureList("AAR", (0, 0), np.array([1.4, 0.6, 2.7]))
     )
     box.append(
-        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+        rdp.FeatureList("AAR", (1, 0), np.array([1.2, 0.8, 3.1]))
     )
     box.append(
-        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0]))
+        rdp.FeatureList("AAR", (2, 0), np.array([1.1, 0.9, 3.0]))
     )
 
-    scores = rdp.point_score(box)
+    scores = rdp.score_common_pharmacophores(box)
     assert len(scores) == 3
-    assert scores[0] == (0.2, 1, 2)
-    assert scores[1] == (0.3, 0, 1)
-    assert scores[2] == (0.4, 0, 2)
+    assert scores[0] == (0.9166666666666667, 1, 2)
+    assert scores[1] == (0.7642977396044842, 0, 1)
+    assert scores[2] == (0.75, 0, 2)
 
 
-def test_vector_score():
-    assert False
+def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
+    box = rdp.FLContainer(variant="AAR")
+    box.append(
+        rdp.FeatureList("AAR", (0, 0), np.array([1.4, 0.6, 2.7]))
+    )
+    box.append(
+        rdp.FeatureList("AAR", (1, 0), np.array([1.8, 1.0, 3.2]))
+    )
+    box.append(
+        rdp.FeatureList("AAR", (2, 0), np.array([3.0, 1.6, 3.7],))
+    )
+    scores = rdp.score_common_pharmacophores(box)
+    assert len(scores) == 1
+    assert scores[0] == (0.311133512909042, 1, 2)
 
 
 def test_molecule_feature_lists():
-    pass
+    assert False
 

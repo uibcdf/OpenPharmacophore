@@ -6,6 +6,12 @@ BIN_SIZE = 1.0  # In angstroms
 MAX_DIST = 15.0
 BINS = np.arange(0, MAX_DIST + BIN_SIZE, step=BIN_SIZE)
 
+# Scoring function values
+W_POINT = 1.0
+W_VECTOR = 1.0
+RMSD_CUTOFF = 1.2
+COS_CUTOFF = 0.5
+
 
 class FeatureList:
     """ Class to store feature lists.
@@ -141,9 +147,8 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
                 boxes.append(container)
 
 
-def point_score(box):
-    """ Calculate the point score of all feature lists in a container
-        by taking the pairwise RMSD between feature lists and taking the one with best score.
+def score_common_pharmacophores(box):
+    """ Calculate the score of all feature lists in a container and sort them by score.
 
         Parameters
         ----------
@@ -151,8 +156,30 @@ def point_score(box):
 
         Returns
         -------
+        scores [list[tuple]]
+            A list of tuples with the scores between each feature list pairs, ordered in descending
+            order of score.
 
     """
-    # RMSD
-    # np.sqrt(((predictions - targets) ** 2).mean())
-    pass
+    scores = []
+    exclude = []
+    for ii in range(len(box)):
+        for jj in range(ii + 1, len(box)):
+            rmsd = np.sqrt(((box[ii].distances - box[jj].distances) ** 2).mean())
+            if rmsd >= RMSD_CUTOFF:
+                exclude.append(ii)
+            point_score = 1 - rmsd / RMSD_CUTOFF
+            vec_score = vector_score(box[ii].id, box[jj].id)
+            score = W_POINT * point_score + W_VECTOR * vec_score
+            scores.append((score, ii, jj))
+
+    scores.sort(reverse=True)
+    if len(exclude) > 0:
+        # Filter pharmacophores that exceed rmsd cutoff
+        return [s for s in scores if s[1] not in exclude]
+    else:
+        return scores
+
+
+def vector_score(id_1, id_2):
+    return 0
