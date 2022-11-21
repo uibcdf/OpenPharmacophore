@@ -3,6 +3,7 @@ import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
 import openpharmacophore.data as data
 from openpharmacophore import PLComplex
+from openpharmacophore.pharmacophore.chem_feats import smarts_ligand
 import pyunitwizard as puw
 import pytest
 from copy import deepcopy
@@ -394,7 +395,7 @@ def set_ligand_feature_centroids_test(pl_complex_no_lig, estradiol_mol):
 def test_ligand_feature_centroids_indices_not_computed(
         mocker, estradiol_mol, pl_complex_no_lig):
     mock_feat_indices = mocker.patch(
-        pl_class + ".feature_indices",
+        pl_module + ".feature_indices",
         return_value=[(0, 1)]
     )
     pl_complex = set_ligand_feature_centroids_test(pl_complex_no_lig, estradiol_mol)
@@ -408,7 +409,7 @@ def test_ligand_feature_centroids_indices_not_computed(
     mock_feat_indices.assert_called_once()
     _, args, _ = mock_feat_indices.mock_calls[0]
     assert len(args) == 2
-    assert args[0] == pl_complex.smarts_ligand["hydrophobicity"]
+    assert args[0] == smarts_ligand["hydrophobicity"]
 
 
 def test_ligand_feature_centroids_indices_precomputed(
@@ -423,22 +424,10 @@ def test_ligand_feature_centroids_indices_precomputed(
     assert indices == [[2, 3]]
 
 
-def test_feature_indices(mocker):
-    mock_mol = mocker.Mock()
-    mock_mol.GetSubstructMatches.side_effect = [
-        ((0, 1), (2, 3)),
-        ((4,),),
-    ]
-
-    patterns = ['a1aaaa1', 'a1aaaaa1']
-    indices = PLComplex.feature_indices(patterns, mock_mol)
-    assert indices == [(0, 1), (2, 3), (4,), ]
-
-
 def set_receptor_feature_centroids(mocker, pl_complex_no_lig, indices=True):
     if indices:
         mocker.patch(
-            pl_class + ".feature_indices",
+            pl_module + ".feature_indices",
             return_value=[(0, 1), (2,)]
         )
     mocker.patch(
