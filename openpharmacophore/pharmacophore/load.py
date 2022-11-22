@@ -22,7 +22,7 @@ def load(pharmacophore_data):
         Parameters
         ----------
         pharmacophore_data : Any
-            Can be a file path or list of files, PDB id, or a list of molecules.
+            Can be a file path or list of files, PDB id, or a list of molecules or smiles.
 
         Returns
         -------
@@ -30,7 +30,7 @@ def load(pharmacophore_data):
             Can be ligand, receptor-ligand or receptor based, depending on the type
             of input.
     """
-    if os.path.isfile(pharmacophore_data):
+    if isinstance(pharmacophore_data, str) and os.path.isfile(pharmacophore_data):
         file_extension = pharmacophore_data.split(".")[-1]
         if file_extension in traj_file_formats:
             pharmacophore = LigandReceptorPharmacophore()

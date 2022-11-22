@@ -6,7 +6,9 @@ from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
+import rdkit.Chem.AllChem as Chem
 import json
+import os
 
 
 class LigandBasedPharmacophore(Pharmacophore):
@@ -42,11 +44,28 @@ class LigandBasedPharmacophore(Pharmacophore):
     def ligands(self):
         self._ligands.clear()
 
-    def load_ligands(self, ligand_file):
+    def load_ligands(self, ligands):
         """ Load ligands from a file and store them as a
-            list of molecules.
+            list of rdkit molecules.
+
+            Parameters
+            -----------
+            ligands : str
+                A path to a file.
         """
-        self._ligands = io.mol_file_to_list(ligand_file)
+        if isinstance(ligands, str) and os.path.isfile(ligands):
+            self._ligands = io.mol_file_to_list(ligands)
+
+    def load_ligands_from_smi(self, ligands):
+        """ Load ligands from a list of smiles and store them as a
+            list of rdkit molecules.
+
+            Parameters
+            -----------
+            ligands : list[str]
+                A path to a file.
+        """
+        self._ligands = [Chem.MolFromSmiles(mol) for mol in ligands]
 
     def from_file(self, file_name):
         """ Load a pharmacophore from a file.
@@ -323,10 +342,68 @@ class LigandBasedPharmacophore(Pharmacophore):
 
     @staticmethod
     def _is_ligand_file(file_name):
+        """ Check if a file belongs to a molecular file format.
+
+            Returns
+            -------
+            bool
+        """
         file_extension = file_name.split(".")[-1]
         if file_extension in ["mol2", "smi", "sdf"]:
             return True
         return False
+
+    def add_hydrogens(self, ligands="all"):
+        """ Add hydrogens to one or more ligands.
+
+            Ligands must have hydrogens added prior to pharmacophore extraction.
+
+            Parameters
+            ----------
+            ligands : 'all' or list[int]
+                The indices of the ligands to which hydrogens will be added.
+        """
+        if ligands == "all":
+            self._ligands = [Chem.AddHs(lig) for lig in self._ligands]
+        else:
+            lig_hyd = []
+            for ii, lig in enumerate(self._ligands):
+                if ii in ligands:
+                    lig_hyd.append(Chem.AddHs(lig))
+                else:
+                    lig_hyd.append(lig)
+            self._ligands = lig_hyd
+
+    def generate_conformers(self, n_confs, ligands="all", random_seed=-1):
+        """ Add conformers to a ligand. It is recommended to add hydrogens before
+            generating conformers.
+
+            Parameters
+            ----------
+            n_confs : int or list[int]
+                Number of conformers to generate for each ligand. If a single number is
+                given the same number of conformers will be generated for all ligands.
+
+            ligands : 'all' or list[int]
+                The indices of the ligands to which conformers will be added.
+
+            random_seed : int, optional
+                Random seed to use.
+        """
+        if ligands == "all":
+            lig_ind = list(range(len(self._ligands)))
+        else:
+            lig_ind = ligands
+
+        if isinstance(n_confs, int):
+            n_confs = [n_confs] * len(lig_ind)
+
+        if len(n_confs) != len(lig_ind):
+            raise ValueError("n_confs must have the same size as ligands")
+
+        for ii in range(len(lig_ind)):
+            Chem.EmbedMultipleConfs(
+                self._ligands[lig_ind[ii]], numConfs=n_confs[ii], randomSeed=random_seed)
 
     def extract(self):
         """ Extracts a pharmacophore from a set of ligands.

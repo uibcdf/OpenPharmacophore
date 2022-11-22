@@ -16,7 +16,7 @@ def test_init_ligand_based_pharmacophore():
     assert len(pharmacophore.ligands) == 0
 
 
-def test_load_ligands():
+def test_load_ligands_from_file():
     pharmacophore = LigandBasedPharmacophore()
     pharmacophore.load_ligands(data.ligands["clique_detection.smi"])
     assert len(pharmacophore.ligands) == 5
@@ -26,6 +26,64 @@ def test_load_ligands():
 def test_is_ligand_file():
     assert LigandBasedPharmacophore._is_ligand_file("mols.smi")
     assert not LigandBasedPharmacophore._is_ligand_file("mols.jpg")
+
+
+@pytest.fixture()
+def pharmacophore_two_ligands():
+    pharmacophore = LigandBasedPharmacophore()
+    pharmacophore.load_ligands_from_smi([
+        "CN[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)NCC3CCC(CC3)N",
+        "c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NC4CCC(CC4)c5cnc([nH]5)N",
+    ])
+    return pharmacophore
+
+
+def test_load_ligands_from_smi(pharmacophore_two_ligands):
+    assert len(pharmacophore_two_ligands.ligands) == 2
+    assert all([isinstance(lig, Chem.Mol) for lig in pharmacophore_two_ligands.ligands])
+
+
+def test_add_hydrogens_all(pharmacophore_two_ligands):
+    pharma = deepcopy(pharmacophore_two_ligands)
+    pharma.add_hydrogens("all")
+    assert len(
+        [a for a in pharma.ligands[0].GetAtoms() if a.GetSymbol() == "H"]) > 0
+    assert len(
+        [a for a in pharma.ligands[1].GetAtoms() if a.GetSymbol() == "H"]) > 0
+
+
+def test_add_hydrogens_selection(pharmacophore_two_ligands):
+    pharma = deepcopy(pharmacophore_two_ligands)
+    pharma.add_hydrogens([1])
+    assert len(
+        [a for a in pharma.ligands[0].GetAtoms() if a.GetSymbol() == "H"]) == 0
+    assert len(
+        [a for a in pharma.ligands[1].GetAtoms() if a.GetSymbol() == "H"]) > 0
+
+
+def test_generate_conformers_all(pharmacophore_two_ligands):
+    pharma = deepcopy(pharmacophore_two_ligands)
+    pharma.generate_conformers(n_confs=1, ligands="all")
+    assert pharma.ligands[0].GetNumConformers() == 1
+    assert pharma.ligands[1].GetNumConformers() == 1
+
+    pharma = deepcopy(pharmacophore_two_ligands)
+    pharma.generate_conformers(n_confs=[1, 2], ligands="all")
+    assert pharma.ligands[0].GetNumConformers() == 1
+    assert pharma.ligands[1].GetNumConformers() == 2
+
+
+def test_generate_conformers_selection(pharmacophore_two_ligands):
+    pharma = deepcopy(pharmacophore_two_ligands)
+    pharma.generate_conformers(n_confs=1, ligands=[1])
+    assert pharma.ligands[0].GetNumConformers() == 0
+    assert pharma.ligands[1].GetNumConformers() == 1
+
+
+def test_generate_conformers_incorrect_selection_len_raises_error(pharmacophore_two_ligands):
+    pharma = pharmacophore_two_ligands
+    with pytest.raises(ValueError):
+        pharma.generate_conformers(n_confs=[1, 2, 3], ligands="all")
 
 
 @pytest.fixture()
