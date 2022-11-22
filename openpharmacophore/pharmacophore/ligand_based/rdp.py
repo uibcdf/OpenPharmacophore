@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import itertools
 
 BIN_SIZE = 1.0  # In angstroms
 # Maximum interpoint distance in angstroms
@@ -182,4 +183,60 @@ def score_common_pharmacophores(box):
 
 
 def vector_score(id_1, id_2):
+    # TODO: complete me!
     return 0
+
+
+def common_k_point_variants(variants,  n_points, min_actives):
+    """ Find the common k-point variants.
+
+        Parameters
+        ----------
+        variants : list[str]
+            A list with the variant of each ligand. Each variant must include all
+            of its ligand chemical features.
+
+        n_points : int
+
+
+        min_actives : int
+            Number of actives that the variant must be present in to be
+            considered common
+
+        Returns
+        -------
+        list[str]
+            A list with all the common variants.
+
+    """
+    common = {}
+    for ii in range(len(variants)):
+        for k_var in itertools.combinations(variants[ii], n_points):
+            var = "".join(k_var)
+            try:
+                count = common[var]
+                # Only increase count if it is a different ligand
+                if count <= ii + 1:
+                    common[var] += 1
+            except KeyError:
+                common[var] = 1
+
+    return [var for var, count in common.items() if count >= min_actives]
+
+
+def find_common_pharmacophores(ligands, n_points, min_actives):
+    """ Find common pharmacophores in a set of ligands and assigns a score to each one.
+
+        Parameters
+        ----------
+        ligands : list[rdkit.Chem.Mol]
+            List of molecules with conformers.
+
+        n_points : int
+        min_actives : int
+
+        Returns
+        -------
+
+    """
+    pass

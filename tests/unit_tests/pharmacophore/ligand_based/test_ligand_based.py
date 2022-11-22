@@ -86,6 +86,13 @@ def test_generate_conformers_incorrect_selection_len_raises_error(pharmacophore_
         pharma.generate_conformers(n_confs=[1, 2, 3], ligands="all")
 
 
+def test_extract(pharmacophore_two_ligands):
+    pharma = pharmacophore_two_ligands
+    pharma.add_hydrogens()
+    pharma.generate_conformers(1)
+    pharma.extract(n_points=3, min_actives=2)  # Should not raise
+
+
 @pytest.fixture()
 def pharmacophore_three_points():
     radius = puw.quantity(1.0, "angstroms")

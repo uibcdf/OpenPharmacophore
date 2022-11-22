@@ -150,6 +150,12 @@ def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
     assert scores[0] == (0.311133512909042, 1, 2)
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_molecule_feature_lists():
-    assert False
+def test_common_k_point_variants():
+    variants = ["AAHP", "AAPR", "AADP"]
+    common_variants = rdp.common_k_point_variants(
+        variants, n_points=3, min_actives=3)
+    assert common_variants == ["AAP"]
+
+
+def test_find_common_pharmacophores():
+    pass

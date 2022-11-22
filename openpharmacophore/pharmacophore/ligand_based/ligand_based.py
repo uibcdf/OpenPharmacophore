@@ -1,4 +1,5 @@
 from openpharmacophore import distance_between_pharmacophoric_points, PharmacophoricPoint
+from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmacophores
 from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 import openpharmacophore.io as io
@@ -405,10 +406,21 @@ class LigandBasedPharmacophore(Pharmacophore):
             Chem.EmbedMultipleConfs(
                 self._ligands[lig_ind[ii]], numConfs=n_confs[ii], randomSeed=random_seed)
 
-    def extract(self):
-        """ Extracts a pharmacophore from a set of ligands.
+    def extract(self, n_points, min_actives=None):
+        """ Extracts and scores pharmacophores from a set of ligands.
+
+            Parameters
+            ----------
+            n_points : int
+                Extracted pharmacophores will have this number of pharmacophoric
+                points.
+
+            min_actives : int
+                Number of ligands that must match a common pharmacophore.
         """
-        return []
+        if min_actives is None:
+            min_actives = len(self._ligands)
+        self._pharmacophores, scores = find_common_pharmacophores(self.ligands, n_points, min_actives)
 
     def __len__(self):
         return len(self._points)
