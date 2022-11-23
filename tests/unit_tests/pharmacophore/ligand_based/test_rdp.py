@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import Mock
 from collections import Counter
 
+
 # Feature List Class Tests
 
 
@@ -70,7 +71,61 @@ def test_has_k_variant():
     assert not lig.has_k_variant("ADH")
 
 
+def test_find_features(mocker):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.rdp.feature_indices",
+        side_effect=[
+            [(1, 2, 3)],  # ring
+            [(4,)],  # hyd
+            [(5,)],  # neg charge
+            [],  # pos charge
+            [(6,), (7,)],  # acceptor
+            []  # donor
+        ]
+    )
+    mock_mol = mocker.Mock()
+    mock_mol.GetNumConformers.return_value = 2
+    lig = rdp.Ligand(mock_mol)
+    lig.find_features()
+    assert lig.variant == "AAHNR"
+    assert lig.feat_count == {
+        "A": 2,
+        "H": 1,
+        "N": 1,
+        "R": 1,
+    }
+    assert lig.feats == {
+        "R": [(1, 2, 3)],
+        "H": [(4,)],
+        "N": [(5,)],
+        "P": [],
+        "A": [(6,), (7,)],
+        "D": [],
+    }
+    assert lig.distances.shape == (2, 5, 5)
+
+
+def test_k_distances_values_precomputed():
+    lig = rdp.Ligand(None)
+    lig.variant = "AAHR"
+    lig.distances = np.array([
+        [[-1., 1., 2., 3.],
+         [1., -1., 4., 5.],
+         [2., 4., -1., 6.],
+         [3., 5., 6., -1.],
+         ],
+    ])
+    assert lig.distances.shape == (1, 4, 4)
+
+    expected = np.array([1., 3., 5.])
+    assert np.all(lig.k_distances((0, 1, 3), 0) == expected)
+
+    expected = np.array([4., 5., 6.])
+    assert np.all(lig.k_distances((1, 2, 3), 0) == expected)
+
+
 # Recursive partitioning and common pharmacophores tests
+
 
 def test_nearest_bins():
     bin_size = 1.0
@@ -101,7 +156,6 @@ def test_nearest_bins():
 
 
 def test_recursive_partitioning():
-
     lists = [
         rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])),
         rdp.FeatureList("AAR", (0, 1), np.array([3.1, 5.9, 3.0])),
@@ -173,7 +227,7 @@ def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
         rdp.FeatureList("AAR", (1, 0), np.array([1.8, 1.0, 3.2]))
     )
     box.append(
-        rdp.FeatureList("AAR", (2, 0), np.array([3.0, 1.6, 3.7],))
+        rdp.FeatureList("AAR", (2, 0), np.array([3.0, 1.6, 3.7], ))
     )
     scores = rdp.score_common_pharmacophores(box)
     assert len(scores) == 1
@@ -187,7 +241,7 @@ def ligands():
     mock_mol = Mock()
     ligands = [rdp.Ligand(mock_mol) for _ in range(4)]
     for lig in ligands:
-        lig.n_confs = 2
+        lig.num_confs = 2
 
     variants = ["AAHP", "AAPR", "AADP", "AADPR"]
     for ii in range(len(ligands)):
@@ -209,7 +263,7 @@ def test_common_k_point_variants_min_actives_less_than_variants(ligands):
 
 
 def test_common_k_point_feature_lists(mocker, ligands):
-    mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.distances",
+    mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
                  return_value=np.array([1., 1., 1.]))
     mock_mol = mocker.Mock()
     mock_mol.GetNumConformers.return_value = 2
@@ -232,4 +286,3 @@ def test_common_k_point_feature_lists(mocker, ligands):
 
     assert containers[4].variant == "ADP"
     assert len(containers[4]) == 4
-

@@ -1,3 +1,4 @@
+from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
 import numpy as np
 import math
 import itertools
@@ -23,16 +24,71 @@ class Ligand:
         ----------
         mol : rdkit.Chem.Mol
     """
+
+    feature_to_char = {
+        "hb acceptor": "A",
+        "hb donor": "D",
+        "aromatic ring": "R",
+        "hydrophobicity": "H",
+        "positive charge": "P",
+        "negative charge": "N",
+    }
+
     def __init__(self, mol):
         self.mol = mol
+        self.feats = {}
         self.variant = ""
         self.feat_count = {}
+        self.distances = None
 
-    def distances(self):
-        pass
+    def find_features(self):
+        """ Find chemical features in this ligand.
+
+            Updates the variant, feat_count and distances attributes.
+
+        """
+        for feat_type, smarts in smarts_ligand.items():
+            indices = feature_indices(smarts, self.mol)
+            short_name = self.feature_to_char[feat_type]
+            self.feats[short_name] = indices
+            self.variant += short_name * len(indices)
+
+        self.variant = "".join(sorted(self.variant, key=str.lower))
+        self.feat_count = Counter(self.variant)
+
+        self.distances = np.ones((
+            self.mol.GetNumConformers(), len(self.variant), len(self.variant)
+        ))
+
+    def k_distances(self, k_var, conf):
+        """ Returns an array with the interpoint distances of the k-variant
+            of the specified conformer.
+
+            Parameters
+            ----------
+            k_var : tuple[int]
+                Indices of the k-variant
+
+            conf : int
+                Index of the conformer
+
+            Returns
+            -------
+            dist : np.ndarray
+                Array of rank 1 with the interpoint distances of the k-variant.
+
+        """
+        shape = (int(len(k_var) * (len(k_var) - 1) / 2), )
+        dist = np.zeros(shape)
+        ii = 0  # index in dist array
+        for jj in range(len(k_var)):
+            for kk in range(jj + 1, len(k_var)):
+                dist[ii] = self.distances[conf, k_var[jj], k_var[kk]]
+                ii += 1
+        return dist
 
     def has_k_variant(self, var):
-        """ Returns true if the ligand contains a k-sub-variant.
+        """ Returns true if the ligand contains a k-variant.
 
             Parameters
             ----------
@@ -84,6 +140,7 @@ class FeatureList:
         self.id = fl_id
         self.distances = distances
         self.variant = variant
+        # TODO: store the indices of the variant in the original ligand
 
 
 class FLContainer:
@@ -285,10 +342,12 @@ def common_k_point_feature_lists(ligands, k_variants):
     for var in k_variants:
         for ii, lig in enumerate(ligands):
             if lig.has_k_variant(var):
+                # TODO: if a variant has repeated feature type. We must create a feat_list
+                #  for each possible combination of this repeated features.
                 container = all_containers[var]
-                for jj in range(lig.n_confs):
+                for jj in range(lig.num_confs):
                     fl_id = (ii, jj)
-                    distances = lig.distances(jj, var)
+                    distances = lig.k_distances(jj, var)
                     feat_list = FeatureList(var, fl_id, distances)
                     container.append(feat_list)
 
