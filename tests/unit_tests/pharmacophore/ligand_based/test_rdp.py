@@ -2,6 +2,9 @@ import openpharmacophore.pharmacophore.ligand_based.rdp as rdp
 import numpy as np
 import pytest
 from unittest.mock import Mock
+from collections import Counter
+
+# Feature List Class Tests
 
 
 def test_init_feature_list():
@@ -15,6 +18,8 @@ def test_init_feat_list_distances_shape_incorrect_raises_error():
     with pytest.raises(ValueError):
         rdp.FeatureList("AAR", (0, 1), np.array([1.0, 1.0]))
 
+
+# FLContainer Class Tests
 
 def test_init_flcontainer():
     rdp.FLContainer()  # Should not raise
@@ -42,6 +47,30 @@ def test_flcontainer_append_different_variant_raises_error():
     with pytest.raises(ValueError):
         container.append(rdp.FeatureList("DHR", (0, 0), np.array([4.8, 2.8, 7.0])))
 
+
+# Ligand Class tests
+
+def test_init_ligand(mocker):
+    lig = rdp.Ligand(mocker.Mock)
+
+
+def test_has_k_variant():
+    lig = rdp.Ligand(None)
+    lig.variant = "AADPR"
+    lig.feat_count = {
+        "A": 2,
+        "D": 1,
+        "P": 1,
+        "R": 1
+    }
+
+    assert lig.has_k_variant("AAR")
+    assert lig.has_k_variant("APR")
+    assert not lig.has_k_variant("ADD")
+    assert not lig.has_k_variant("ADH")
+
+
+# Recursive partitioning and common pharmacophores tests
 
 def test_nearest_bins():
     bin_size = 1.0
@@ -156,27 +185,26 @@ def ligands():
     """ Returns a list of rdp.Ligands with variants assigned.
     """
     mock_mol = Mock()
-    ligands = [rdp.Ligands(mock_mol)] * 4
+    ligands = [rdp.Ligand(mock_mol) for _ in range(4)]
     for lig in ligands:
         lig.n_confs = 2
 
     variants = ["AAHP", "AAPR", "AADP", "AADPR"]
     for ii in range(len(ligands)):
         ligands[ii].variant = variants[ii]
+        ligands[ii].feat_count = Counter(variants[ii])
     return ligands
 
 
-def test_common_k_point_variants():
-    variants = ["AAHP", "AAPR", "AADP", "AADPR"]
+def test_common_k_point_variants(ligands):
     common_variants = rdp.common_k_point_variants(
-        variants, n_points=3, min_actives=4)
+        ligands, n_points=3, min_actives=4)
     assert common_variants == ["AAP"]
 
 
-def test_common_k_point_variants_min_actives_less_than_variants():
-    variants = ["AAHP", "AAPR", "AADP", "AADPR"]
+def test_common_k_point_variants_min_actives_less_than_variants(ligands):
     common_variants = rdp.common_k_point_variants(
-        variants, n_points=3, min_actives=2)
+        ligands, n_points=3, min_actives=2)
     assert common_variants == ["AAP", "AAR", "APR", "AAD", "ADP"]
 
 
@@ -205,6 +233,3 @@ def test_common_k_point_feature_lists(mocker, ligands):
     assert containers[4].variant == "ADP"
     assert len(containers[4]) == 4
 
-
-def test_find_common_pharmacophores():
-    pass

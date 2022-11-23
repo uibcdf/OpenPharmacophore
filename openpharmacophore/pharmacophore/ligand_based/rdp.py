@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import itertools
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 
 BIN_SIZE = 1.0  # In angstroms
@@ -14,6 +14,44 @@ W_POINT = 1.0
 W_VECTOR = 1.0
 RMSD_CUTOFF = 1.2
 COS_CUTOFF = 0.5
+
+
+class Ligand:
+    """ Class to store ligands used for RDP algorithm.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.Mol
+    """
+    def __init__(self, mol):
+        self.mol = mol
+        self.variant = ""
+        self.feat_count = {}
+
+    def distances(self):
+        pass
+
+    def has_k_variant(self, var):
+        """ Returns true if the ligand contains a k-sub-variant.
+
+            Parameters
+            ----------
+            var : str
+
+            Returns
+            -------
+            bool
+        """
+        if len(var) <= len(self.variant):
+            count = Counter(var)
+            for feat, cnt in count.items():
+                try:
+                    if cnt > self.feat_count[feat]:
+                        return False
+                except KeyError:
+                    return False
+            return True
+        return False
 
 
 class FeatureList:
@@ -189,17 +227,18 @@ def vector_score(id_1, id_2):
     return 0
 
 
-def common_k_point_variants(variants,  n_points, min_actives):
-    """ Find the common k-point variants, that is the variants consisting
-        of k pharmacophoric points.
+def common_k_point_variants(ligands,  n_points, min_actives):
+    """ Find the common k-point variants, that is, the variants consisting
+        of k pharmacophoric points that are common to at least the specified
+        number of actives.
 
         Parameters
         ----------
-        variants : list[str]
-            A list with the variant of each ligand. Each variant must include all
-            of its ligand chemical features.
+        ligands : list[Ligand]
+            A list with the ligands.
 
         n_points : int
+            Number of pharmacophoric points
 
 
         min_actives : int
@@ -213,10 +252,10 @@ def common_k_point_variants(variants,  n_points, min_actives):
 
     """
     common = defaultdict(int)
-    for ii in range(len(variants)):
+    for ii in range(len(ligands)):
         # Keep track of the variants in this ligand
         mol_variant = {}
-        for k_var in itertools.combinations(variants[ii], n_points):
+        for k_var in itertools.combinations(ligands[ii].variant, n_points):
             var = "".join(k_var)
             try:
                 mol_variant[var] += 1
@@ -237,36 +276,58 @@ def common_k_point_feature_lists(ligands, k_variants):
 
         Returns
         -------
-        all_containers : list[FLContainer]
+        list[FLContainer]
 
     """
-    all_containers = []
+    all_containers = {
+        var: FLContainer(var) for var in k_variants
+    }
     for var in k_variants:
         for ii, lig in enumerate(ligands):
-            if lig.has_variant(var):
-                container = FLContainer(var)
-                for jj in lig.n_confs:
+            if lig.has_k_variant(var):
+                container = all_containers[var]
+                for jj in range(lig.n_confs):
                     fl_id = (ii, jj)
                     distances = lig.distances(jj, var)
                     feat_list = FeatureList(var, fl_id, distances)
                     container.append(feat_list)
 
-    return all_containers
+    return list(all_containers.values())
 
 
-def find_common_pharmacophores(ligands, n_points, min_actives):
+def find_common_pharmacophores(mols, n_points, min_actives):
     """ Find common pharmacophores in a set of ligands and assigns a score to each one.
 
         Parameters
         ----------
-        ligands : list[rdkit.Chem.Mol]
+        mols : list[rdkit.Chem.Mol]
             List of molecules with conformers.
 
         n_points : int
+            Number of pharmacophoric points the common pharmacophores will have.
+
         min_actives : int
+            Number of ligands that the common pharmacophores are present in.
 
         Returns
         -------
 
     """
-    pass
+    ligands = []
+    for mol in mols:
+        lig = Ligand(mol)
+        lig.find_features()
+        ligands.append(lig)
+
+    k_variants = common_k_point_variants(ligands, n_points, min_actives)
+    containers = common_k_point_feature_lists(ligands, k_variants)
+
+    boxes = []
+    for cont in containers:
+        box = []
+        recursive_partitioning(cont, 0, cont[0].n_pairs, box, min_actives)
+        boxes.append(box)
+
+    cps = []
+    for box in boxes:
+        cps.append(score_common_pharmacophores(box)[0])
