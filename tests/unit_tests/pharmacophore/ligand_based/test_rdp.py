@@ -1,6 +1,7 @@
 import openpharmacophore.pharmacophore.ligand_based.rdp as rdp
 import numpy as np
 import pytest
+from unittest.mock import Mock
 
 
 def test_init_feature_list():
@@ -150,11 +151,59 @@ def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
     assert scores[0] == (0.311133512909042, 1, 2)
 
 
+@pytest.fixture()
+def ligands():
+    """ Returns a list of rdp.Ligands with variants assigned.
+    """
+    mock_mol = Mock()
+    ligands = [rdp.Ligands(mock_mol)] * 4
+    for lig in ligands:
+        lig.n_confs = 2
+
+    variants = ["AAHP", "AAPR", "AADP", "AADPR"]
+    for ii in range(len(ligands)):
+        ligands[ii].variant = variants[ii]
+    return ligands
+
+
 def test_common_k_point_variants():
-    variants = ["AAHP", "AAPR", "AADP"]
+    variants = ["AAHP", "AAPR", "AADP", "AADPR"]
     common_variants = rdp.common_k_point_variants(
-        variants, n_points=3, min_actives=3)
+        variants, n_points=3, min_actives=4)
     assert common_variants == ["AAP"]
+
+
+def test_common_k_point_variants_min_actives_less_than_variants():
+    variants = ["AAHP", "AAPR", "AADP", "AADPR"]
+    common_variants = rdp.common_k_point_variants(
+        variants, n_points=3, min_actives=2)
+    assert common_variants == ["AAP", "AAR", "APR", "AAD", "ADP"]
+
+
+def test_common_k_point_feature_lists(mocker, ligands):
+    mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.distances",
+                 return_value=np.array([1., 1., 1.]))
+    mock_mol = mocker.Mock()
+    mock_mol.GetNumConformers.return_value = 2
+
+    k_variants = ["AAP", "AAR", "APR", "AAD", "ADP"]
+    containers = rdp.common_k_point_feature_lists(ligands, k_variants)
+    assert len(containers) == 5
+
+    assert containers[0].variant == "AAP"
+    assert len(containers[0]) == 8
+
+    assert containers[1].variant == "AAR"
+    assert len(containers[1]) == 4
+
+    assert containers[2].variant == "APR"
+    assert len(containers[2]) == 4
+
+    assert containers[3].variant == "AAD"
+    assert len(containers[3]) == 4
+
+    assert containers[4].variant == "ADP"
+    assert len(containers[4]) == 4
 
 
 def test_find_common_pharmacophores():

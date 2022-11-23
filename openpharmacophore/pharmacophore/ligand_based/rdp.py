@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import itertools
+from collections import defaultdict
+
 
 BIN_SIZE = 1.0  # In angstroms
 # Maximum interpoint distance in angstroms
@@ -188,7 +190,8 @@ def vector_score(id_1, id_2):
 
 
 def common_k_point_variants(variants,  n_points, min_actives):
-    """ Find the common k-point variants.
+    """ Find the common k-point variants, that is the variants consisting
+        of k pharmacophoric points.
 
         Parameters
         ----------
@@ -206,22 +209,49 @@ def common_k_point_variants(variants,  n_points, min_actives):
         Returns
         -------
         list[str]
-            A list with all the common variants.
+            A list with all the common k-point variants.
 
     """
-    common = {}
+    common = defaultdict(int)
     for ii in range(len(variants)):
+        # Keep track of the variants in this ligand
+        mol_variant = {}
         for k_var in itertools.combinations(variants[ii], n_points):
             var = "".join(k_var)
             try:
-                count = common[var]
-                # Only increase count if it is a different ligand
-                if count <= ii + 1:
-                    common[var] += 1
+                mol_variant[var] += 1
             except KeyError:
-                common[var] = 1
+                common[var] += 1
+                mol_variant[var] = 1
 
     return [var for var, count in common.items() if count >= min_actives]
+
+
+def common_k_point_feature_lists(ligands, k_variants):
+    """ Returns a feature list container for each of the k-point variants.
+
+        Parameters
+        ----------
+        ligands : list[Ligand]
+        k_variants : list[str]
+
+        Returns
+        -------
+        all_containers : list[FLContainer]
+
+    """
+    all_containers = []
+    for var in k_variants:
+        for ii, lig in enumerate(ligands):
+            if lig.has_variant(var):
+                container = FLContainer(var)
+                for jj in lig.n_confs:
+                    fl_id = (ii, jj)
+                    distances = lig.distances(jj, var)
+                    feat_list = FeatureList(var, fl_id, distances)
+                    container.append(feat_list)
+
+    return all_containers
 
 
 def find_common_pharmacophores(ligands, n_points, min_actives):
