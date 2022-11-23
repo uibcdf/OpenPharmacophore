@@ -10,6 +10,12 @@ def test_points_distance():
     )
     assert puw.get_value(distance) == 5.
 
+    distance = maths.points_distance(
+        puw.quantity(np.array([0., 0., 0.]), "angstroms"),
+        puw.quantity(np.array([1., 1., 1.]), "angstroms"),
+    )
+    assert puw.get_value(distance) == np.sqrt(3)
+
 
 def test_quantity_norm():
     qt = puw.quantity(np.array([4, 3, 0]), "angstroms")

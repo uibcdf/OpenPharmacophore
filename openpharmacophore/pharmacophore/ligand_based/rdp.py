@@ -1,4 +1,5 @@
-from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
+from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices, feature_centroids
+from openpharmacophore.utils.maths import points_distance
 import numpy as np
 import math
 import itertools
@@ -57,8 +58,34 @@ class Ligand:
         self.feat_count = Counter(self.variant)
 
         self.distances = np.ones((
-            self.mol.GetNumConformers(), len(self.variant), len(self.variant)
-        ))
+            self.mol.GetNumConformers(), len(self.variant), len(self.variant),
+        ), dtype=float) * -1
+
+    def interpoint_distances(self, conf):
+        """ Calculate the distances between the pharmacophoric points of
+            a conformer.
+
+            The distances attribute is updated with the computed distances.
+
+            Parameters
+            ----------
+            conf : int
+                The index of the conformer
+        """
+        centroids = np.zeros((len(self.variant), 3))
+        ii = 0
+
+        feats = "".join(sorted(self.feat_count.keys(), key=str.lower))
+        for feat_type in feats:
+            for indices in self.feats[feat_type]:
+                centroids[ii] = feature_centroids(self.mol, conf, indices)
+                ii += 1
+
+        for ii in range(centroids.shape[0]):
+            for jj in range(ii + 1, centroids.shape[0]):
+                dist = points_distance(centroids[ii], centroids[jj])
+                self.distances[conf, ii, jj] = dist
+                self.distances[conf, jj, ii] = dist
 
     def k_distances(self, k_var, conf):
         """ Returns an array with the interpoint distances of the k-variant
@@ -78,6 +105,9 @@ class Ligand:
                 Array of rank 1 with the interpoint distances of the k-variant.
 
         """
+        if self.distances[conf, 0, 1] == -1:
+            self.interpoint_distances(conf)
+
         shape = (int(len(k_var) * (len(k_var) - 1) / 2), )
         dist = np.zeros(shape)
         ii = 0  # index in dist array

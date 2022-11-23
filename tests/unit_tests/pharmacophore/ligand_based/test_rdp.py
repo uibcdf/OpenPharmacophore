@@ -124,6 +124,39 @@ def test_k_distances_values_precomputed():
     assert np.all(lig.k_distances((1, 2, 3), 0) == expected)
 
 
+def test_interpoint_distances(mocker):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.rdp.feature_centroids",
+        side_effect=[
+            np.array([0., 0., 0.]),
+            np.array([1., 1., 1.]),
+            np.array([3., 3., 3.]),
+        ]
+    )
+    lig = rdp.Ligand(None)
+    lig.feats = {
+        "A": [(0,), (6,)],
+        "R": [(1, 2, 3)],
+    }
+    lig.variant = "AAR"
+    lig.feat_count = Counter(lig.variant)
+    lig.distances = np.array([
+        [[-1, -1, -1],
+         [-1, -1, -1],
+         [-1, -1, -1]],
+    ], dtype=float)
+    lig.interpoint_distances(0)
+
+    d1 = np.sqrt(3)
+    d2 = np.sqrt(27)
+    d3 = 2 * d1
+    expected = np.array([
+        [[-1, d1, d2],
+         [d1, -1, d3],
+         [d2, d3, -1]],
+    ])
+    assert np.allclose(lig.distances, expected)
+
 # Recursive partitioning and common pharmacophores tests
 
 

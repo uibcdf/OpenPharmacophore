@@ -74,3 +74,25 @@ def feature_indices(feat_def, mol):
             feat_indices.append(indices)
 
     return feat_indices
+
+
+def feature_centroids(mol, conf, indices):
+    """ Get the centroid of a chemical feature.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.Mol
+            A molecule
+
+        conf : int
+            Index of conformer
+
+        indices : tuple[int]
+            Atom indices of the chemical feature.
+
+        Returns
+        -------
+        centroid : np.ndarray
+            Array of shape (3,)
+    """
+    pass
