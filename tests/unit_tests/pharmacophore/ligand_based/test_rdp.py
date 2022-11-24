@@ -286,7 +286,23 @@ def ligands():
 def test_common_k_point_variants(ligands):
     common_variants = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=4)
-    assert common_variants == ["AAP"]
+    assert len(common_variants) == 4
+
+    assert common_variants[0].var == "AAP"
+    assert common_variants[0].indices == (0, 1, 3)
+    assert common_variants[0].mol == 0
+
+    assert common_variants[1].var == "AAP"
+    assert common_variants[1].indices == (0, 1, 2)
+    assert common_variants[1].mol == 1
+
+    assert common_variants[2].var == "AAP"
+    assert common_variants[2].indices == (0, 1, 3)
+    assert common_variants[2].mol == 2
+
+    assert common_variants[3].var == "AAP"
+    assert common_variants[3].indices == (0, 1, 3)
+    assert common_variants[3].mol == 3
 
 
 def test_common_k_point_variants_min_actives_less_than_variants(ligands):
