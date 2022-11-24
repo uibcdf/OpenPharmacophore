@@ -1,3 +1,4 @@
+import numpy as np
 from rdkit import Chem
 
 
@@ -92,7 +93,13 @@ def feature_centroids(mol, conf, indices):
 
         Returns
         -------
-        centroid : np.ndarray
+        np.ndarray
             Array of shape (3,)
     """
-    pass
+    coords = np.zeros((len(indices), 3))
+    conformer = mol.GetConformer(conf)
+    for ii, atom in enumerate(indices):
+        pos = conformer.GetAtomPosition(atom)
+        coords[ii] = pos.x, pos.y, pos.z
+
+    return np.mean(coords, axis=0)
