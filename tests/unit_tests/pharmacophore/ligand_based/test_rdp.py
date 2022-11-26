@@ -9,15 +9,17 @@ from collections import Counter
 
 
 def test_init_feature_list():
-    f_list = rdp.FeatureList("AAR", (0, 1), np.array([1.0, 1.0, 1.0]))
+    f_list = rdp.FeatureList("AAR", (0, 1, 2), (0, 1),
+                             np.array([1.0, 1.0, 1.0]))
     assert f_list.id == (0, 1)
     assert f_list.variant == "AAR"
+    assert f_list.var_ind == (0, 1, 2)
     assert np.all(f_list.distances == np.array([1.0, 1.0, 1.0]))
 
 
 def test_init_feat_list_distances_shape_incorrect_raises_error():
     with pytest.raises(ValueError):
-        rdp.FeatureList("AAR", (0, 1), np.array([1.0, 1.0]))
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([1.0, 1.0]))
 
 
 # FLContainer Class Tests
@@ -30,13 +32,15 @@ def test_init_flcontainer():
 
 def test_flcontainer_append():
     container = rdp.FLContainer()
-    container.append(rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])))
+    container.append(rdp.FeatureList("AAR", (0, 1, 2), (0, 0),
+                                     np.array([4.8, 2.8, 7.0])))
     assert container.variant == "AAR"
     assert container.mols == {0}
     assert len(container.flists) == 1
     assert container[0].id == (0, 0)
 
-    container.append(rdp.FeatureList("AAR", (1, 0), np.array([4.8, 2.8, 7.0])))
+    container.append(rdp.FeatureList("AAR", (0, 1, 2),
+                                     (1, 0), np.array([4.8, 2.8, 7.0])))
     assert container.mols == {0, 1}
     assert len(container.flists) == 2
     assert container[1].id == (1, 0)
@@ -44,9 +48,11 @@ def test_flcontainer_append():
 
 def test_flcontainer_append_different_variant_raises_error():
     container = rdp.FLContainer()
-    container.append(rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])))
+    container.append(rdp.FeatureList("AAR", (0, 1, 2),
+                                     (0, 0), np.array([4.8, 2.8, 7.0])))
     with pytest.raises(ValueError):
-        container.append(rdp.FeatureList("DHR", (0, 0), np.array([4.8, 2.8, 7.0])))
+        container.append(rdp.FeatureList("DHR", (0, 1, 2),
+                                         (0, 0), np.array([4.8, 2.8, 7.0])))
 
 
 # Ligand Class tests
@@ -157,6 +163,7 @@ def test_interpoint_distances(mocker):
     ])
     assert np.allclose(lig.distances, expected)
 
+
 # Recursive partitioning and common pharmacophores tests
 
 
@@ -190,20 +197,20 @@ def test_nearest_bins():
 
 def test_recursive_partitioning():
     lists = [
-        rdp.FeatureList("AAR", (0, 0), np.array([4.8, 2.8, 7.0])),
-        rdp.FeatureList("AAR", (0, 1), np.array([3.1, 5.9, 3.0])),
-        rdp.FeatureList("AAR", (0, 2), np.array([4.3, 3.7, 6.8])),
-        rdp.FeatureList("AAR", (0, 3), np.array([3.7, 4.8, 6.7])),
-        rdp.FeatureList("AAR", (0, 4), np.array([2.6, 4.2, 6.4])),
-        rdp.FeatureList("AAR", (1, 0), np.array([4.4, 4.7, 6.1])),
-        rdp.FeatureList("AAR", (1, 1), np.array([2.6, 5.5, 5.1])),
-        rdp.FeatureList("AAR", (1, 2), np.array([5.5, 2.1, 4.9])),
-        rdp.FeatureList("AAR", (1, 3), np.array([6.0, 5.7, 4.3])),
-        rdp.FeatureList("AAR", (2, 0), np.array([4.9, 2.7, 2.9])),
-        rdp.FeatureList("AAR", (2, 1), np.array([6.8, 5.6, 5.2])),
-        rdp.FeatureList("AAR", (2, 2), np.array([4.5, 4.2, 5.8])),
-        rdp.FeatureList("AAR", (3, 0), np.array([3.8, 5.2, 5.9])),
-        rdp.FeatureList("AAR", (3, 1), np.array([5.1, 5.4, 4.6])),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([4.8, 2.8, 7.0])),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([3.1, 5.9, 3.0])),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 2), np.array([4.3, 3.7, 6.8])),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 3), np.array([3.7, 4.8, 6.7])),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 4), np.array([2.6, 4.2, 6.4])),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([4.4, 4.7, 6.1])),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 1), np.array([2.6, 5.5, 5.1])),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 2), np.array([5.5, 2.1, 4.9])),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 3), np.array([6.0, 5.7, 4.3])),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([4.9, 2.7, 2.9])),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 1), np.array([6.8, 5.6, 5.2])),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 2), np.array([4.5, 4.2, 5.8])),
+        rdp.FeatureList("AAR", (0, 1, 2), (3, 0), np.array([3.8, 5.2, 5.9])),
+        rdp.FeatureList("AAR", (0, 1, 2), (3, 1), np.array([5.1, 5.4, 4.6])),
     ]
 
     f_lists = rdp.FLContainer()
@@ -235,13 +242,13 @@ def test_recursive_partitioning():
 def test_score_common_pharmacophores():
     box = rdp.FLContainer(variant="AAR")
     box.append(
-        rdp.FeatureList("AAR", (0, 0), np.array([1.4, 0.6, 2.7]))
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]))
     )
     box.append(
-        rdp.FeatureList("AAR", (1, 0), np.array([1.2, 0.8, 3.1]))
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.2, 0.8, 3.1]))
     )
     box.append(
-        rdp.FeatureList("AAR", (2, 0), np.array([1.1, 0.9, 3.0]))
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([1.1, 0.9, 3.0]))
     )
 
     scores = rdp.score_common_pharmacophores(box)
@@ -254,13 +261,13 @@ def test_score_common_pharmacophores():
 def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
     box = rdp.FLContainer(variant="AAR")
     box.append(
-        rdp.FeatureList("AAR", (0, 0), np.array([1.4, 0.6, 2.7]))
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]))
     )
     box.append(
-        rdp.FeatureList("AAR", (1, 0), np.array([1.8, 1.0, 3.2]))
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]))
     )
     box.append(
-        rdp.FeatureList("AAR", (2, 0), np.array([3.0, 1.6, 3.7], ))
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7], ))
     )
     scores = rdp.score_common_pharmacophores(box)
     assert len(scores) == 1
@@ -283,32 +290,45 @@ def ligands():
     return ligands
 
 
-def test_common_k_point_variants(ligands):
+def test_common_k_point_feat_lists(ligands):
     common_variants = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=4)
+
     assert len(common_variants) == 4
 
-    assert common_variants[0].var == "AAP"
+    assert common_variants[0].name == "AAP"
     assert common_variants[0].indices == (0, 1, 3)
     assert common_variants[0].mol == 0
 
-    assert common_variants[1].var == "AAP"
+    assert common_variants[1].name == "AAP"
     assert common_variants[1].indices == (0, 1, 2)
     assert common_variants[1].mol == 1
 
-    assert common_variants[2].var == "AAP"
+    assert common_variants[2].name == "AAP"
     assert common_variants[2].indices == (0, 1, 3)
     assert common_variants[2].mol == 2
 
-    assert common_variants[3].var == "AAP"
+    assert common_variants[3].name == "AAP"
     assert common_variants[3].indices == (0, 1, 3)
     assert common_variants[3].mol == 3
 
 
-def test_common_k_point_variants_min_actives_less_than_variants(ligands):
-    common_variants = rdp.common_k_point_variants(
+def test_common_k_point_feat_lists_min_actives_less_than_variants(ligands):
+    common = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=2)
-    assert common_variants == ["AAP", "AAR", "APR", "AAD", "ADP"]
+
+    assert len(common) == 16
+    expected_var = ["AAP"] * 4
+    expected_var += ["AAR"] * 2
+    expected_var += ["APR"] * 4
+    expected_var += ["AAD"] * 2
+    expected_var += ["ADP"] * 4
+    var = [f.name for f in common]
+    assert var == expected_var
+
+    expected_mols = [0, 1, 2, 3, 1, 3, 1, 1, 3, 3, 2, 3, 2, 2, 3, 3]
+    mols = [f.mol for f in common]
+    assert mols == expected_mols
 
 
 def test_common_k_point_feature_lists(mocker, ligands):
@@ -335,3 +355,4 @@ def test_common_k_point_feature_lists(mocker, ligands):
 
     assert containers[4].variant == "ADP"
     assert len(containers[4]) == 4
+    

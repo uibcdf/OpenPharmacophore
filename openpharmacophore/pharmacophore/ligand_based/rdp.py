@@ -3,7 +3,7 @@ from openpharmacophore.utils.maths import points_distance
 import numpy as np
 import math
 import itertools
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, namedtuple
 
 
 BIN_SIZE = 1.0  # In angstroms
@@ -162,7 +162,7 @@ class FeatureList:
             distances given by n_points x (n_points - 1) / 2
     """
 
-    def __init__(self, variant, fl_id, distances):
+    def __init__(self, variant, var_ind, fl_id, distances):
         self.n_pairs = len(variant) * (len(variant) - 1) / 2
         if distances.shape[0] != self.n_pairs:
             raise ValueError
@@ -170,6 +170,7 @@ class FeatureList:
         self.id = fl_id
         self.distances = distances
         self.variant = variant
+        self.var_ind = var_ind
         # TODO: store the indices of the variant in the original ligand
 
 
@@ -314,9 +315,13 @@ def vector_score(id_1, id_2):
     return 0
 
 
+K_VARIANT = namedtuple("K_VARIANT", ["name", "indices", "mol"])
+
+
 def common_k_point_variants(ligands,  n_points, min_actives):
-    """ Find the common k-point variants, that is, the variants consisting
-        of k pharmacophoric points that are common to at least the specified
+    """ Find the common k-point feature lists, that is, the lists with variants
+        consisting of k pharmacophoric points that are common to at least the
+        specified
         number of actives.
 
         Parameters
@@ -327,44 +332,55 @@ def common_k_point_variants(ligands,  n_points, min_actives):
         n_points : int
             Number of pharmacophoric points
 
-
         min_actives : int
             Number of actives that the variant must be present in to be
             considered common
 
         Returns
         -------
-        list[str]
+        list[K_VARIANT]
             A list with all the common k-point variants.
 
     """
-    common = defaultdict(int)
+    count = defaultdict(int)
+    all_vars = defaultdict(list)
+
     for ii in range(len(ligands)):
         # Keep track of the variants in this ligand
         mol_variant = {}
-        for k_var in itertools.combinations(ligands[ii].variant, n_points):
-            var = "".join(k_var)
+        for k_var_indices in itertools.combinations(
+                range(len(ligands[ii].variant)), n_points):
+            var = ""
+            for jj in k_var_indices:
+                var += ligands[ii].variant[jj]
+
             try:
                 mol_variant[var] += 1
             except KeyError:
-                common[var] += 1
+                count[var] += 1
                 mol_variant[var] = 1
 
-    return [var for var, count in common.items() if count >= min_actives]
+            variant = K_VARIANT(var, k_var_indices, ii)
+            all_vars[var].append(variant)
+
+    common = []
+    for var_name, k_vars in all_vars.items():
+        if count[var_name] >= min_actives:
+            for k_var in k_vars:
+                common.append(k_var)
+
+    return common
 
 
 def common_k_point_feature_lists(ligands, k_variants):
     """ Returns a feature list container for each of the k-point variants.
-
         Parameters
         ----------
         ligands : list[Ligand]
         k_variants : list[str]
-
         Returns
         -------
         list[FLContainer]
-
     """
     all_containers = {
         var: FLContainer(var) for var in k_variants
