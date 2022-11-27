@@ -26,14 +26,14 @@ def test_ligand_based_pharmacophore_from_ligand_set():
     pharmacophore.add_hydrogens(ligands="all")
     pharmacophore.generate_conformers(ligands="all", n_confs=5)
 
-    # We extract pharmacophores of 3 points and visualize it
+    # We extract pharmacophores of 4 points and visualize it
     pharmacophore.extract(
         n_points=4, min_actives=7
     )
     assert len(pharmacophore) > 0
     assert len(pharmacophore.scores) > 0
 
-    # We inspect the features of the pharmacophore. We expect thrombin pharmacophore
+    # We inspect the features of a pharmacophore. We expect thrombin pharmacophore
     # to have an aromatic ring, at leas one hydrophobic and a positive charge
     feat_names = [p.feature_name for p in pharmacophore[0]]
     assert "hydrophobicity" in feat_names

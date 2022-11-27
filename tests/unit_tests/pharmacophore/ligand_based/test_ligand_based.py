@@ -6,7 +6,6 @@ import pyunitwizard as puw
 import pytest
 from rdkit import Chem
 from copy import deepcopy
-import os
 from unittest.mock import Mock, call
 
 
@@ -97,30 +96,19 @@ def test_extract(pharmacophore_two_ligands):
 def pharmacophore_three_points():
     radius = puw.quantity(1.0, "angstroms")
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
-    points = [
+    pharma = [
         PharmacophoricPoint("hb donor", center, radius),
         PharmacophoricPoint("aromatic ring", center * 2.0, radius),
         PharmacophoricPoint("hydrophobicity", center * -2.0, radius),
     ]
     pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = points
+    pharmacophore.add_pharmacophore(pharma)
     return pharmacophore
 
 
 def test_pharmacophore_len(pharmacophore_three_points):
-    assert len(pharmacophore_three_points) == 3
-
-
-def test_iterate_pharmacophore(pharmacophore_three_points):
-    short_names = ["D", "R", "H"]
-    ii = 0
-    iterated = False
-    for point in pharmacophore_three_points:
-        assert point.short_name == short_names[ii]
-        ii += 1
-        iterated = True
-
-    assert iterated
+    assert len(pharmacophore_three_points) == 1
+    assert len(pharmacophore_three_points[0]) == 3
 
 
 def test_add_point_to_pharmacophore(pharmacophore_three_points):
@@ -129,52 +117,26 @@ def test_add_point_to_pharmacophore(pharmacophore_three_points):
         "positive charge",
         puw.quantity([1., 2., 3.], "angstroms"),
         puw.quantity(1., "angstroms")
-    ))
-    assert len(ph) == 4
-    assert ph[3].feature_name == "positive charge"
+    ), pharma=0)
+    assert len(ph[0]) == 4
+    assert ph[0][3].feature_name == "positive charge"
 
 
 def test_remove_point_from_pharmacophore(pharmacophore_three_points):
     ph = deepcopy(pharmacophore_three_points)
-    ph.remove_point(1)
-    assert len(ph) == 2
-    assert ph[0].feature_name == "hb donor"
-    assert ph[1].feature_name == "hydrophobicity"
+    ph.remove_point(0, 1)
+    assert len(ph[0]) == 2
+    assert ph[0][0].feature_name == "hb donor"
+    assert ph[0][1].feature_name == "hydrophobicity"
 
 
 def test_pharmacophore_get_item(pharmacophore_three_points):
-    assert pharmacophore_three_points[0].feature_name == "hb donor"
-    assert pharmacophore_three_points[1].feature_name == "aromatic ring"
-    assert pharmacophore_three_points[2].feature_name == "hydrophobicity"
-
-
-def test_pharmacophore_equality(pharmacophore_three_points):
-    radius = puw.quantity(1.0, "angstroms")
-    donor = PharmacophoricPoint("hb donor",
-                                puw.quantity([1.0, 1.0, 1.0], "angstroms"),
-                                radius)
-    pharmacophore_1 = LigandBasedPharmacophore()
-    pharmacophore_1.pharmacophoric_points = [donor]
-    assert not pharmacophore_1 == pharmacophore_three_points
-
-    ring = PharmacophoricPoint("aromatic ring",
-                               puw.quantity([2.0, 2.0, 2.0], "angstroms"),
-                               radius)
-    hydrophobic = PharmacophoricPoint("hydrophobicity",
-                                      puw.quantity([-1.0, 2.0, 2.0], "angstroms"),
-                                      radius)
-    pharmacophore_2 = LigandBasedPharmacophore()
-    pharmacophore_2.pharmacophoric_points = [donor, ring, hydrophobic]
-    assert not pharmacophore_2 == pharmacophore_three_points
-
-    hydrophobic.center = puw.quantity([-2.0, -2.0, -2.0], "angstroms")
-    pharmacophore_3 = LigandBasedPharmacophore()
-    pharmacophore_3.pharmacophoric_points = [donor, ring, hydrophobic]
-    assert pharmacophore_3 == pharmacophore_three_points
+    assert pharmacophore_three_points[0][0].feature_name == "hb donor"
+    assert pharmacophore_three_points[0][1].feature_name == "aromatic ring"
 
 
 def test_to_rdkit(pharmacophore_three_points):
-    rdkit_ph = pharmacophore_three_points.to_rdkit()
+    rdkit_ph = pharmacophore_three_points.to_rdkit(0)
 
     feats = rdkit_ph.getFeatures()
     assert len(feats) == 3
@@ -198,63 +160,6 @@ def test_to_rdkit(pharmacophore_three_points):
     assert np.allclose(ring_2.GetPos().z, -2.0)
 
 
-def test_distance_matrix():
-    # Test pharmacophore with zero elements
-    pharmacophore = LigandBasedPharmacophore()
-    matrix = pharmacophore.distance_matrix()
-    assert matrix.shape == (0, 0)
-
-    radius = puw.quantity(1.0, "angstroms")
-    points = [
-        PharmacophoricPoint(feat_type="hb acceptor",
-                            center=puw.quantity([1, 0, -5], "angstroms"),
-                            radius=radius),
-        PharmacophoricPoint(feat_type="hb donor",
-                            center=puw.quantity([2, 1, 0], "angstroms"),
-                            radius=radius),
-        PharmacophoricPoint(feat_type="aromatic ring",
-                            center=puw.quantity([-3, 2, -1], "angstroms"),
-                            radius=radius),
-    ]
-
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = points
-    distance_matrix = pharmacophore.distance_matrix()
-
-    assert distance_matrix.shape == (3, 3)
-    assert np.allclose(distance_matrix,
-                       np.array([[0, np.sqrt(27), 6],
-                                 [np.sqrt(27), 0, np.sqrt(27)],
-                                 [6, np.sqrt(27), 0]])
-                       )
-
-    points = [
-        PharmacophoricPoint(feat_type="hb acceptor",
-                            center=puw.quantity([1, 2, 3], "angstroms"),
-                            radius=radius),
-        PharmacophoricPoint(feat_type="negative charge",
-                            center=puw.quantity([0, 0, 0], "angstroms"),
-                            radius=radius),
-        PharmacophoricPoint(feat_type="positive charge",
-                            center=puw.quantity([-1, 0, -1], "angstroms"),
-                            radius=radius),
-        PharmacophoricPoint(feat_type="aromatic ring",
-                            center=puw.quantity([2, -1, 1], "angstroms"),
-                            radius=radius),
-    ]
-
-    sq = np.sqrt
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = points
-    distance_matrix = pharmacophore.distance_matrix()
-    assert distance_matrix.shape == (4, 4)
-    assert np.allclose(distance_matrix,
-                       np.array([[0, sq(14), sq(24), sq(14)],
-                                 [sq(14), 0, sq(2), sq(6)],
-                                 [sq(24), sq(2), 0, sq(14)],
-                                 [sq(14), sq(6), sq(14), 0]]))
-
-
 def test_adding_pharmacophore_to_view_updates_components(pharmacophore_three_points):
     view = nv.NGLWidget()
     assert len(view._ngl_component_ids) == 0
@@ -266,42 +171,50 @@ def test_adding_pharmacophore_to_view_updates_components(pharmacophore_three_poi
         puw.quantity([2., 3., 1.], "angstroms"),
         puw.quantity(2., "angstroms"),
         direction=[0.3, 0.3, 0.3]
-    ))
-    ph.add_to_view(view)
+    ), 0)
+    ph.add_to_view(view, 0)
     assert len(view._ngl_component_ids) == 5
 
 
-def assert_file_is_created(file_name):
-    assert os.path.isfile(file_name)
-    os.remove(file_name)
+def setup_pharmacophore_to_file_test(func, file_name, mocker):
+    mock_open = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.ligand_based.open",
+        new=mocker.mock_open())
+    func(file_name)
+    mock_open.assert_called_once_with(file_name, "w")
 
 
-def test_to_json(pharmacophore_three_points):
+def test_to_json(mocker, pharmacophore_three_points):
     file_name = "ph.json"
-    pharmacophore_three_points.to_json(file_name)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_three_points.to_json, file_name, mocker)
 
 
-def test_to_ligand_scout(pharmacophore_three_points):
+def test_to_ligand_scout(mocker, pharmacophore_three_points):
+    mock_tree = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.ligand_based.io.ligandscout_xml_tree"
+    )
     file_name = "ph.pml"
     pharmacophore_three_points.to_ligand_scout(file_name)
-    assert_file_is_created(file_name)
+    mock_tree.return_value.write.assert_called_once_with(
+        file_name, encoding="UTF-8", xml_declaration=True
+    )
 
 
-def test_to_moe(pharmacophore_three_points):
+def test_to_moe(mocker, pharmacophore_three_points):
     file_name = "ph.ph4"
-    pharmacophore_three_points.to_moe(file_name)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_three_points.to_moe, file_name, mocker)
 
 
-def test_to_mol2(pharmacophore_three_points):
+def test_to_mol2(mocker, pharmacophore_three_points):
     file_name = "ph.mol2"
-    pharmacophore_three_points.to_mol2(file_name)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_three_points.to_mol2, file_name, mocker)
 
 
 def test_pharmacophore_string_representation(pharmacophore_three_points):
-    assert pharmacophore_three_points.__repr__() == "LigandBasedPharmacophore(n_pharmacophoric_points: 3)"
+    assert pharmacophore_three_points.__repr__() == "LigandBasedPharmacophore(n_pharmacophores: 1)"
 
 
 def test_remove_picked_point(pharmacophore_three_points):
@@ -315,10 +228,10 @@ def test_remove_picked_point(pharmacophore_three_points):
         "component": 1
     }
     pharmacophore = deepcopy(pharmacophore_three_points)
-    pharmacophore.remove_picked_point(mock_view)
-    assert len(pharmacophore) == 2
-    assert pharmacophore[0].short_name == "R"
-    assert pharmacophore[1].short_name == "H"
+    pharmacophore.remove_picked_point(mock_view, 0)
+    assert len(pharmacophore[0]) == 2
+    assert pharmacophore[0][0].short_name == "R"
+    assert pharmacophore[0][1].short_name == "H"
 
 
 def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points):
@@ -336,8 +249,8 @@ def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points):
         "component": 0
     }
     pharmacophore = deepcopy(pharmacophore_three_points)
-    pharmacophore.remove_picked_point(mock_view)
-    assert len(pharmacophore) == 3
+    pharmacophore.remove_picked_point(mock_view, 0)
+    assert len(pharmacophore[0]) == 3
 
 
 def test_edit_picked_point(pharmacophore_three_points):
@@ -354,10 +267,12 @@ def test_edit_picked_point(pharmacophore_three_points):
     pharmacophore.edit_picked_point(
         mock_view,
         center=puw.quantity([1.5, 1.5, 1.5], "angstroms"),
-        radius=puw.quantity(2.0, "angstroms"))
-    assert len(pharmacophore) == 3
-    assert np.all(puw.get_value(pharmacophore[0].center) == np.array([1.5, 1.5, 1.5]))
-    assert puw.get_value(pharmacophore[0].radius) == 2.0
+        radius=puw.quantity(2.0, "angstroms"),
+        pharma=0
+    )
+    assert len(pharmacophore[0]) == 3
+    assert np.all(puw.get_value(pharmacophore[0][0].center) == np.array([1.5, 1.5, 1.5]))
+    assert puw.get_value(pharmacophore[0][0].radius) == 2.0
 
 
 def test_add_point_in_picked_location(pharmacophore_three_points):
@@ -378,9 +293,9 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
     pharmacophore = deepcopy(pharmacophore_three_points)
     radius = puw.quantity(2.0, "angstroms")
     pharmacophore.add_point_in_picked_location(
-        mock_view, "hb acceptor", radius)
-    assert len(pharmacophore) == 4
-    assert pharmacophore[3].short_name == "A"
+        mock_view, "hb acceptor", radius, 0)
+    assert len(pharmacophore[0]) == 4
+    assert pharmacophore[0][3].short_name == "A"
 
 
 def test_add_ligands_to_view():

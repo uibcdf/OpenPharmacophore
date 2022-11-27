@@ -208,10 +208,9 @@ def nearest_bins(num, bin_size):
     """
     if num % 1 <= 0.5:
         low_bin = math.floor(num - bin_size)
-        return low_bin, low_bin + 1
     else:
         low_bin = math.ceil(num - bin_size)
-        return low_bin, low_bin + 1
+    return low_bin, low_bin + 1
 
 
 def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
@@ -240,8 +239,6 @@ def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
         bins[upp_bin].append(flist)
 
     for container in bins:
-        # We process a bin only if it contains at least one conformer
-        # from each molecule
         if len(container.mols) >= min_actives:
             if dim < n_pairs - 1:
                 recursive_partitioning(
