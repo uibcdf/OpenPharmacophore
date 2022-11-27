@@ -56,13 +56,13 @@ def ligand_based_from_file(file_name):
     """
     pharmacophore = LigandBasedPharmacophore()
     if file_name.endswith(".json"):
-        pharmacophore._points = load_json_pharmacophore(file_name)[0]
+        pharmacophore.add_pharmacophore(load_json_pharmacophore(file_name)[0])
     elif file_name.endswith(".mol2"):
-        pharmacophore._points = load_mol2_pharmacophoric_points(file_name)[0]
+        pharmacophore.add_pharmacophore(load_mol2_pharmacophoric_points(file_name)[0])
     elif file_name.endswith(".pml"):
-        pharmacophore._points = read_ligandscout(file_name)
+        pharmacophore.add_pharmacophore(read_ligandscout(file_name))
     elif file_name.endswith(".ph4"):
-        pharmacophore._points = pharmacophoric_points_from_ph4_file(file_name)
+        pharmacophore.add_pharmacophore(pharmacophoric_points_from_ph4_file(file_name))
     else:
         raise InvalidFileFormat(file_name.split(".")[-1])
     return pharmacophore

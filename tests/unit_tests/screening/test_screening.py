@@ -35,7 +35,7 @@ def test_init_virtual_screening_with_sbp(structure_based_pharmacophore):
 
 @pytest.fixture()
 def rdkit_pharmacophore(ligand_based_pharmacophore):
-    return ligand_based_pharmacophore.to_rdkit()
+    return ligand_based_pharmacophore.to_rdkit(0)
 
 
 def test_align_to_pharmacophore_mol_features_dont_match(mocker, rdkit_pharmacophore):

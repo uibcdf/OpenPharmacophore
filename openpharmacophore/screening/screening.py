@@ -28,16 +28,14 @@ class VirtualScreening:
         self._pharmacophores = []  # List of rdkit pharmacophores
         self._fails = []
 
-        if isinstance(pharmacophore, LigandBasedPharmacophore):
+        for ii in range(len(pharmacophore)):
             self._matches.append([])
-            self._pharmacophores.append(pharmacophore.to_rdkit())
+            self._pharmacophores.append(pharmacophore.to_rdkit(ii))
             self._fails.append(0)
-        elif isinstance(pharmacophore, LigandReceptorPharmacophore):
-            for ii in range(pharmacophore.num_frames):
-                self._matches.append([])
-                self._pharmacophores.append(pharmacophore.to_rdkit(ii))
-                self._fails.append(0)
-        else:
+
+        if not isinstance(pharmacophore,
+                          (LigandReceptorPharmacophore,
+                           LigandBasedPharmacophore)):
             raise NotAPharmacophoreError(type(pharmacophore))
 
     @property

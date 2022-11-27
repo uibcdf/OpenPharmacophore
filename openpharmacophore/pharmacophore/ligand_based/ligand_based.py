@@ -16,7 +16,7 @@ class LigandBasedPharmacophore(Pharmacophore):
 
         Attributes
         ----------
-        pharmacophores : list[PharmacophoricPoint]
+        pharmacophores : list[list[PharmacophoricPoint]]
             List with common pharmacophores.
     """
 
