@@ -1,6 +1,7 @@
 import openpharmacophore.pharmacophore.ligand_based.rdp as rdp
 import numpy as np
 import pytest
+import pyunitwizard as puw
 from unittest.mock import Mock
 from collections import Counter
 
@@ -343,3 +344,39 @@ def test_common_k_point_feature_lists(mocker, ligands):
     assert var_names == expected_variants
     assert size == expected_size
     assert mols == expected_mols
+
+
+def test_feat_list_to_pharma(mocker):
+    mock_centroids = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.rdp.feature_centroids",
+        side_effect=[
+            np.array([0., 0., 0.]),
+            np.array([1., 1., 1.]),
+            np.array([2., 2., 2.]),
+        ]
+    )
+    ligand = rdp.Ligand(None)
+    ligand.variant = "AAAPR"
+    ligand.feats = {
+        "A": [(9,), (10,)],
+        "P": [(2, 3, 4)],
+        "R": [(6, 7, 8)],
+    }
+
+    fl = rdp.FeatureList("APR", (1, 3, 4), (0, 2), np.zeros((3,)))
+    pharma = rdp.feat_list_to_pharma(fl, ligand)
+
+    assert mock_centroids.call_count == 3
+    calls = [
+        mocker.call(None, 2, (10, )),
+        mocker.call(None, 2, (2, 3, 4)),
+        mocker.call(None, 2, (6, 7, 8)),
+    ]
+    assert mock_centroids.call_args_list == calls
+
+    assert len(pharma) == 3
+    feat_names = [p.feature_name for p in pharma]
+    assert feat_names == ["hb acceptor", "positive charge", "aromatic ring"]
+    assert np.all(puw.get_value(pharma[0].center) == np.zeros((3,)))
+    assert np.all(puw.get_value(pharma[1].center) == np.ones((3,)))
+    assert np.all(puw.get_value(pharma[2].center) == np.ones((3,)) * 2)

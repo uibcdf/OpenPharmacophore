@@ -2,6 +2,7 @@ from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_in
 from openpharmacophore.utils.maths import points_distance
 from openpharmacophore import PharmacophoricPoint
 import numpy as np
+import pyunitwizard as puw
 import math
 import itertools
 from collections import defaultdict, Counter, namedtuple
@@ -27,15 +28,6 @@ class Ligand:
         mol : rdkit.Chem.Mol
     """
 
-    feature_to_char = {
-        "hb acceptor": "A",
-        "hb donor": "D",
-        "aromatic ring": "R",
-        "hydrophobicity": "H",
-        "positive charge": "P",
-        "negative charge": "N",
-    }
-
     def __init__(self, mol):
         self.mol = mol
         self.feats = {}
@@ -55,7 +47,7 @@ class Ligand:
         """
         for feat_type, smarts in smarts_ligand.items():
             indices = feature_indices(smarts, self.mol)
-            short_name = self.feature_to_char[feat_type]
+            short_name = PharmacophoricPoint.feature_to_char[feat_type]
             self.feats[short_name] = indices
             self.variant += short_name * len(indices)
 
@@ -234,6 +226,7 @@ def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
         min_actives : int
 
     """
+    # TODO: bin attribute in container is not necessary
     bins = [
         FLContainer(bin=(BINS[ii], BINS[ii + 1])) for ii in range(BINS.shape[0] - 1)
     ]
@@ -241,6 +234,8 @@ def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
     for flist in container:
         # Assign each distance to the two closest bins
         low_bin, upp_bin = nearest_bins(flist.distances[dim], BIN_SIZE)
+        if low_bin >= len(bins) or upp_bin >= (len(bins)):
+            continue
         bins[low_bin].append(flist)
         bins[upp_bin].append(flist)
 
@@ -379,7 +374,7 @@ def common_k_point_feature_lists(ligands, k_variants):
 
         k_variants : list[K_VARIANTS]
             A list sorted by variant name
-            
+
         Returns
         -------
         containers : list[FLContainer]
@@ -407,6 +402,33 @@ def common_k_point_feature_lists(ligands, k_variants):
 
     all_containers.append(container)
     return all_containers
+
+
+def feat_list_to_pharma(feat_list, ligand):
+    """ Retrieve a pharmacophore from a feature list.
+
+        Parameters
+        ----------
+        feat_list : FeatureList
+        ligand : Ligand
+
+        Returns
+        -------
+        pharmacophore : list[PharmacophoricPoint]
+    """
+    pharmacophore = []
+    for var_ind in feat_list.var_ind:
+        feat_name = ligand.variant[var_ind]
+        feat_start_ind = ligand.variant.index(feat_name)
+        feat_ind = ligand.feats[feat_name][var_ind - feat_start_ind]
+        center = feature_centroids(ligand.mol, feat_list.id[1], feat_ind)
+        pharmacophore.append(PharmacophoricPoint(
+            PharmacophoricPoint.char_to_feature[feat_name],
+            puw.quantity(center, "angstroms"),
+            puw.quantity(1.0, "angstroms"),
+        ))
+
+    return pharmacophore
 
 
 def find_common_pharmacophores(mols, n_points, min_actives):
@@ -444,6 +466,9 @@ def find_common_pharmacophores(mols, n_points, min_actives):
         boxes = pharmacophore_partitioning(cont, min_actives)
         for box in boxes:
             box_scores = score_common_pharmacophores(box)
+            if len(box_scores) == 0:
+                # All pharmacophores exceed RMSD cutoff
+                continue
             feat_list = box[box_scores[0][1]]
             lig = ligands[feat_list.id[0]]
             pharma = feat_list_to_pharma(feat_list, lig)
