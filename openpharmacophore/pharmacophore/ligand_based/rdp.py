@@ -1,5 +1,6 @@
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices, feature_centroids
 from openpharmacophore.utils.maths import points_distance
+from openpharmacophore import PharmacophoricPoint
 import numpy as np
 import math
 import itertools
@@ -41,6 +42,10 @@ class Ligand:
         self.variant = ""
         self.feat_count = {}
         self.distances = None
+
+    @property
+    def num_confs(self):
+        return self.mol.GetNumConformers()
 
     def find_features(self):
         """ Find chemical features in this ligand.
@@ -117,28 +122,6 @@ class Ligand:
                 ii += 1
         return dist
 
-    def has_k_variant(self, var):
-        """ Returns true if the ligand contains a k-variant.
-
-            Parameters
-            ----------
-            var : str
-
-            Returns
-            -------
-            bool
-        """
-        if len(var) <= len(self.variant):
-            count = Counter(var)
-            for feat, cnt in count.items():
-                try:
-                    if cnt > self.feat_count[feat]:
-                        return False
-                except KeyError:
-                    return False
-            return True
-        return False
-
 
 class FeatureList:
     """ Class to store feature lists.
@@ -171,7 +154,6 @@ class FeatureList:
         self.distances = distances
         self.variant = variant
         self.var_ind = var_ind
-        # TODO: store the indices of the variant in the original ligand
 
 
 class FLContainer:
@@ -240,7 +222,7 @@ def nearest_bins(num, bin_size):
         return low_bin, low_bin + 1
 
 
-def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
+def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
     """ Obtain common pharmacophores by recursive distance partitioning.
 
         Parameters
@@ -249,7 +231,7 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
         dim : int
         n_pairs : int
         boxes : list[FLContainer]
-        n_mols : int
+        min_actives : int
 
     """
     bins = [
@@ -258,8 +240,6 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
 
     for flist in container:
         # Assign each distance to the two closest bins
-        # low_bin = math.floor(flist.distances[dim] - BIN_SIZE)
-        # upp_bin = low_bin + 1
         low_bin, upp_bin = nearest_bins(flist.distances[dim], BIN_SIZE)
         bins[low_bin].append(flist)
         bins[upp_bin].append(flist)
@@ -267,13 +247,31 @@ def recursive_partitioning(container, dim, n_pairs, boxes, n_mols):
     for container in bins:
         # We process a bin only if it contains at least one conformer
         # from each molecule
-        if len(container.mols) == n_mols:
+        if len(container.mols) >= min_actives:
             if dim < n_pairs - 1:
                 recursive_partitioning(
-                    container, dim + 1, n_pairs, boxes, n_mols
+                    container, dim + 1, n_pairs, boxes, min_actives
                 )
             else:
                 boxes.append(container)
+
+
+def pharmacophore_partitioning(container, min_actives):
+    """ Partition pharmacophores by their interpoint distances to find common
+        pharmacophores.
+
+        Parameters
+        ----------
+        container : FLContainer
+        min_actives : int
+
+        Returns
+        -------
+        box : list[FLContainer]
+    """
+    box = []
+    recursive_partitioning(container, 0, container[0].n_pairs, box, min_actives)
+    return box
 
 
 def score_common_pharmacophores(box):
@@ -321,8 +319,7 @@ K_VARIANT = namedtuple("K_VARIANT", ["name", "indices", "mol"])
 def common_k_point_variants(ligands,  n_points, min_actives):
     """ Find the common k-point feature lists, that is, the lists with variants
         consisting of k pharmacophoric points that are common to at least the
-        specified
-        number of actives.
+        specified number of actives.
 
         Parameters
         ----------
@@ -374,30 +371,42 @@ def common_k_point_variants(ligands,  n_points, min_actives):
 
 def common_k_point_feature_lists(ligands, k_variants):
     """ Returns a feature list container for each of the k-point variants.
+
         Parameters
         ----------
         ligands : list[Ligand]
-        k_variants : list[str]
+            The ligands
+
+        k_variants : list[K_VARIANTS]
+            A list sorted by variant name
+            
         Returns
         -------
-        list[FLContainer]
+        containers : list[FLContainer]
+            List with a container for each variant
     """
-    all_containers = {
-        var: FLContainer(var) for var in k_variants
-    }
-    for var in k_variants:
-        for ii, lig in enumerate(ligands):
-            if lig.has_k_variant(var):
-                # TODO: if a variant has repeated feature type. We must create a feat_list
-                #  for each possible combination of this repeated features.
-                container = all_containers[var]
-                for jj in range(lig.num_confs):
-                    fl_id = (ii, jj)
-                    distances = lig.k_distances(jj, var)
-                    feat_list = FeatureList(var, fl_id, distances)
-                    container.append(feat_list)
+    all_containers = []
+    if len(k_variants) == 0:
+        return all_containers
 
-    return list(all_containers.values())
+    prev = k_variants[0].name
+    container = FLContainer(prev)
+    for k_var in k_variants:
+        lig = ligands[k_var.mol]
+
+        if k_var.name != prev:
+            all_containers.append(container)
+            container = FLContainer(k_var.name)
+            prev = k_var.name
+
+        for ii in range(lig.num_confs):
+            fl_id = (k_var.mol, ii)
+            distances = lig.k_distances(k_var.indices, ii)
+            feat_list = FeatureList(k_var.name, k_var.indices, fl_id, distances)
+            container.append(feat_list)
+
+    all_containers.append(container)
+    return all_containers
 
 
 def find_common_pharmacophores(mols, n_points, min_actives):
@@ -416,6 +425,8 @@ def find_common_pharmacophores(mols, n_points, min_actives):
 
         Returns
         -------
+        pharmacophores : list[PharmacophoricPoint]
+        scores : list[int]
 
     """
     ligands = []
@@ -427,12 +438,17 @@ def find_common_pharmacophores(mols, n_points, min_actives):
     k_variants = common_k_point_variants(ligands, n_points, min_actives)
     containers = common_k_point_feature_lists(ligands, k_variants)
 
-    boxes = []
+    pharmacophores = []
+    scores = []
     for cont in containers:
-        box = []
-        recursive_partitioning(cont, 0, cont[0].n_pairs, box, min_actives)
-        boxes.append(box)
+        boxes = pharmacophore_partitioning(cont, min_actives)
+        for box in boxes:
+            box_scores = score_common_pharmacophores(box)
+            feat_list = box[box_scores[0][1]]
+            lig = ligands[feat_list.id[0]]
+            pharma = feat_list_to_pharma(feat_list, lig)
 
-    cps = []
-    for box in boxes:
-        cps.append(score_common_pharmacophores(box)[0])
+            pharmacophores.append(pharma)
+            scores.append(box_scores[0][0])
+
+    return pharmacophores, scores

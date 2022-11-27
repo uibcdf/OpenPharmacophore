@@ -61,22 +61,6 @@ def test_init_ligand(mocker):
     lig = rdp.Ligand(mocker.Mock)
 
 
-def test_has_k_variant():
-    lig = rdp.Ligand(None)
-    lig.variant = "AADPR"
-    lig.feat_count = {
-        "A": 2,
-        "D": 1,
-        "P": 1,
-        "R": 1
-    }
-
-    assert lig.has_k_variant("AAR")
-    assert lig.has_k_variant("APR")
-    assert not lig.has_k_variant("ADD")
-    assert not lig.has_k_variant("ADH")
-
-
 def test_find_features(mocker):
     mocker.patch(
         "openpharmacophore.pharmacophore.ligand_based.rdp.feature_indices",
@@ -195,7 +179,8 @@ def test_nearest_bins():
     assert bins[nearest[1]] == 6
 
 
-def test_recursive_partitioning():
+@pytest.fixture()
+def fl_container():
     lists = [
         rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([4.8, 2.8, 7.0])),
         rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([3.1, 5.9, 3.0])),
@@ -212,17 +197,14 @@ def test_recursive_partitioning():
         rdp.FeatureList("AAR", (0, 1, 2), (3, 0), np.array([3.8, 5.2, 5.9])),
         rdp.FeatureList("AAR", (0, 1, 2), (3, 1), np.array([5.1, 5.4, 4.6])),
     ]
-
     f_lists = rdp.FLContainer()
     for fl in lists:
         f_lists.append(fl)
+    return f_lists
 
-    n_pair = f_lists[0].n_pairs
-    assert n_pair == 3
 
-    boxes = []
-    rdp.recursive_partitioning(f_lists, 0, n_pair, boxes, 4)
-
+def test_pharmacophore_partitioning(fl_container):
+    boxes = rdp.pharmacophore_partitioning(fl_container, 4)
     assert len(boxes) == 3
 
     ids = [b.id for b in boxes[0]]
@@ -237,6 +219,18 @@ def test_recursive_partitioning():
     assert ids == [
         (0, 2), (0, 3), (1, 0), (2, 2), (3, 0)
     ]
+
+
+def test_pharmacophore_partitioning_min_actives_less_than_ligands_size(fl_container):
+    boxes = rdp.pharmacophore_partitioning(fl_container, 3)
+    assert len(boxes) == 6
+
+    ids = [b.id for b in boxes[2]]
+    assert ids == [(0, 3), (1, 0), (3, 0)]
+    ids = [b.id for b in boxes[3]]
+    assert ids == [(1, 0), (2, 2), (3, 0), (3, 1)]
+    ids = [b.id for b in boxes[5]]
+    assert ids == [(0, 3), (1, 0), (3, 0)]
 
 
 def test_score_common_pharmacophores():
@@ -279,9 +273,8 @@ def ligands():
     """ Returns a list of rdp.Ligands with variants assigned.
     """
     mock_mol = Mock()
+    mock_mol.GetNumConformers.return_value = 2
     ligands = [rdp.Ligand(mock_mol) for _ in range(4)]
-    for lig in ligands:
-        lig.num_confs = 2
 
     variants = ["AAHP", "AAPR", "AADP", "AADPR"]
     for ii in range(len(ligands)):
@@ -334,25 +327,19 @@ def test_common_k_point_feat_lists_min_actives_less_than_variants(ligands):
 def test_common_k_point_feature_lists(mocker, ligands):
     mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
                  return_value=np.array([1., 1., 1.]))
-    mock_mol = mocker.Mock()
-    mock_mol.GetNumConformers.return_value = 2
 
-    k_variants = ["AAP", "AAR", "APR", "AAD", "ADP"]
+    k_variants = rdp.common_k_point_variants(ligands, n_points=3, min_actives=2)
     containers = rdp.common_k_point_feature_lists(ligands, k_variants)
+
     assert len(containers) == 5
+    expected_variants = ["AAP", "AAR", "APR", "AAD", "ADP"]
+    expected_size = [8, 4, 8, 4, 8]
+    expected_mols = [{0, 1, 2, 3}, {1, 3}, {1, 3},
+                     {2, 3}, {2, 3}]
+    var_names = [c.variant for c in containers]
+    size = [len(c) for c in containers]
+    mols = [c.mols for c in containers]
 
-    assert containers[0].variant == "AAP"
-    assert len(containers[0]) == 8
-
-    assert containers[1].variant == "AAR"
-    assert len(containers[1]) == 4
-
-    assert containers[2].variant == "APR"
-    assert len(containers[2]) == 4
-
-    assert containers[3].variant == "AAD"
-    assert len(containers[3]) == 4
-
-    assert containers[4].variant == "ADP"
-    assert len(containers[4]) == 4
-    
+    assert var_names == expected_variants
+    assert size == expected_size
+    assert mols == expected_mols
