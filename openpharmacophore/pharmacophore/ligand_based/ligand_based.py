@@ -2,13 +2,18 @@ from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmacophores
 from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
+from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
 import openpharmacophore.io as io
 from openpharmacophore._private_tools.exceptions import InvalidFileFormat
+from matplotlib.colors import to_rgb
 import nglview as nv
 import pyunitwizard as puw
 import rdkit.Chem.AllChem as Chem
+from rdkit.Chem.Draw.rdMolDraw2D import MolDraw2DSVG
+from copy import deepcopy
 import json
 import os
+import math
 
 
 class LigandBasedPharmacophore(Pharmacophore):
@@ -23,6 +28,7 @@ class LigandBasedPharmacophore(Pharmacophore):
     def __init__(self):
         self._pharmacophores = []
         self._ligands = []
+        self._feats = []
 
     @property
     def ligands(self):
@@ -39,6 +45,10 @@ class LigandBasedPharmacophore(Pharmacophore):
     @property
     def pharmacophores(self):
         return self._pharmacophores
+
+    @property
+    def feats(self):
+        return self._feats
 
     def add_pharmacophore(self, pharma):
         """ Add a new pharmacophore.
@@ -405,6 +415,19 @@ class LigandBasedPharmacophore(Pharmacophore):
             Chem.EmbedMultipleConfs(
                 self._ligands[lig_ind[ii]], numConfs=n_confs[ii], randomSeed=random_seed)
 
+    def find_chem_feats(self):
+        """ Find chemical features in the ligands associated with this pharmacophore.
+
+            The attribute feats is update with a dictionary containing the chemical
+            features of each ligand.
+        """
+        for ii, lig in enumerate(self._ligands):
+            self._feats.append({})
+            for feat_type, smarts in smarts_ligand.items():
+                indices = feature_indices(smarts, lig)
+                short_name = PharmacophoricPoint.feature_to_char[feat_type]
+                self._feats[ii][short_name] = indices
+
     def extract(self, n_points, min_actives=None):
         """ Extracts and scores pharmacophores from a set of ligands.
 
@@ -419,7 +442,95 @@ class LigandBasedPharmacophore(Pharmacophore):
         """
         if min_actives is None:
             min_actives = len(self._ligands)
-        self._pharmacophores, scores = find_common_pharmacophores(self.ligands, n_points, min_actives)
+        self._pharmacophores, scores = find_common_pharmacophores(self.ligands, self.feats,
+                                                                  n_points, min_actives)
+
+    def draw(self, mol_size):
+        """ Draw the ligands with their chemical features highlighted.
+
+            Parameters
+            ---------
+            mol_size : tuple[int, int]
+                A tuple with the width and height of each ligand drawing.
+
+            Returns
+            -------
+            drawing
+        """
+        ligands = [deepcopy(lig) for lig in self.ligands]
+        for lig in ligands:
+            lig.RemoveAllConformers()
+
+        width, height = self._drawing_size(mol_size[0], mol_size[1], len(self._ligands))
+        atoms, colors, radii = self._atom_highlights()
+        drawing = MolDraw2DSVG(width=width, height=height,
+                               panelWidth=mol_size[0], panelHeight=mol_size[1])
+        drawing.DrawMolecules(ligands,
+                              highlightAtoms=atoms,
+                              highlightAtomColors=colors,
+                              highlightAtomRadii=radii
+                              )
+        drawing.FinishDrawing()
+        return drawing
+
+    @staticmethod
+    def _drawing_size(mol_width, mol_height, n_mols):
+        """ Returns the width and height of a drawing consisting of n_mols
+            with the given width and height
+
+            Parameters
+            ----------
+            mol_width : int
+            mol_height : int
+            n_mols : int
+
+            Returns
+            -------
+            width : int
+            height : int
+        """
+        max_per_row = 4
+        max_width = max_per_row * mol_width
+        if mol_width * n_mols <= max_width:
+            width = mol_width * n_mols
+            n_rows = 1
+        else:
+            width = max_width
+            n_rows = math.ceil(mol_width * n_mols / width)
+        height = n_rows * mol_height
+        return width, height
+
+    def _atom_highlights(self):
+        """ Returns the indices, colors and radii of the atoms that will be
+            highlighted in a drawing
+
+            Returns
+            -------
+            atoms : list[tuple[int]]
+            colors : list[dict[int, tuple[int]]
+            radii : list[dict[int, float]]
+        """
+        atoms = []
+        colors = []
+        radii = []
+
+        for lig_feats in self._feats:
+            lig_ind = []
+            lig_color = {}
+            lig_radii = {}
+            for feat_type, ind_list in lig_feats.items():
+                color = PharmacophoricPoint.palette[PharmacophoricPoint.char_to_feature[feat_type]]
+                color = to_rgb(color)
+                for ind_tup in ind_list:
+                    for ind in ind_tup:
+                        lig_ind.append(ind)
+                        lig_color[ind] = color
+                        lig_radii[ind] = 0.5
+            atoms.append(tuple(lig_ind))
+            colors.append(lig_color)
+            radii.append(lig_radii)
+
+        return atoms, colors, radii
 
     def __len__(self):
         return len(self._pharmacophores)

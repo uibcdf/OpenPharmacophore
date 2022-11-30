@@ -59,33 +59,11 @@ def test_flcontainer_append_different_variant_raises_error():
 # Ligand Class tests
 
 def test_init_ligand(mocker):
-    lig = rdp.Ligand(mocker.Mock)
+    lig = rdp.Ligand(mocker.Mock, {"A": [(1,)]})  # Should not raise
 
 
-def test_find_features(mocker):
-    mocker.patch(
-        "openpharmacophore.pharmacophore.ligand_based.rdp.feature_indices",
-        side_effect=[
-            [(1, 2, 3)],  # ring
-            [(4,)],  # hyd
-            [(5,)],  # neg charge
-            [],  # pos charge
-            [(6,), (7,)],  # acceptor
-            []  # donor
-        ]
-    )
-    mock_mol = mocker.Mock()
-    mock_mol.GetNumConformers.return_value = 2
-    lig = rdp.Ligand(mock_mol)
-    lig.find_features()
-    assert lig.variant == "AAHNR"
-    assert lig.feat_count == {
-        "A": 2,
-        "H": 1,
-        "N": 1,
-        "R": 1,
-    }
-    assert lig.feats == {
+def test_update_variant(mocker):
+    feats = {
         "R": [(1, 2, 3)],
         "H": [(4,)],
         "N": [(5,)],
@@ -93,11 +71,21 @@ def test_find_features(mocker):
         "A": [(6,), (7,)],
         "D": [],
     }
-    assert lig.distances.shape == (2, 5, 5)
+    mock_mol = mocker.Mock()
+    mock_mol.GetNumConformers.return_value = 2
+    lig = rdp.Ligand(mock_mol, feats)
+    lig._update_variant()
+    assert lig.variant == "AAHNR"
+    assert lig.feat_count == {
+        "A": 2,
+        "H": 1,
+        "N": 1,
+        "R": 1,
+    }
 
 
 def test_k_distances_values_precomputed():
-    lig = rdp.Ligand(None)
+    lig = rdp.Ligand(None, {})
     lig.variant = "AAHR"
     lig.distances = np.array([
         [[-1., 1., 2., 3.],
@@ -124,11 +112,11 @@ def test_interpoint_distances(mocker):
             np.array([3., 3., 3.]),
         ]
     )
-    lig = rdp.Ligand(None)
-    lig.feats = {
+    feats = {
         "A": [(0,), (6,)],
         "R": [(1, 2, 3)],
     }
+    lig = rdp.Ligand(None, feats)
     lig.variant = "AAR"
     lig.feat_count = Counter(lig.variant)
     lig.distances = np.array([
@@ -275,7 +263,7 @@ def ligands():
     """
     mock_mol = Mock()
     mock_mol.GetNumConformers.return_value = 2
-    ligands = [rdp.Ligand(mock_mol) for _ in range(4)]
+    ligands = [rdp.Ligand(mock_mol, {}) for _ in range(4)]
 
     variants = ["AAHP", "AAPR", "AADP", "AADPR"]
     for ii in range(len(ligands)):
@@ -355,13 +343,13 @@ def test_feat_list_to_pharma(mocker):
             np.array([2., 2., 2.]),
         ]
     )
-    ligand = rdp.Ligand(None)
-    ligand.variant = "AAAPR"
-    ligand.feats = {
+    feats = {
         "A": [(9,), (10,)],
         "P": [(2, 3, 4)],
         "R": [(6, 7, 8)],
     }
+    ligand = rdp.Ligand(None, feats)
+    ligand.variant = "AAAPR"
 
     fl = rdp.FeatureList("APR", (1, 3, 4), (0, 2), np.zeros((3,)))
     pharma = rdp.feat_list_to_pharma(fl, ligand)

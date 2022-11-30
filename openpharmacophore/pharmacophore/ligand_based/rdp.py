@@ -1,4 +1,4 @@
-from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices, feature_centroids
+from openpharmacophore.pharmacophore.chem_feats import feature_centroids
 from openpharmacophore.utils.maths import points_distance
 from openpharmacophore import PharmacophoricPoint
 import numpy as np
@@ -28,9 +28,9 @@ class Ligand:
         mol : rdkit.Chem.Mol
     """
 
-    def __init__(self, mol):
+    def __init__(self, mol, chem_feats):
         self.mol = mol
-        self.feats = {}
+        self.feats = chem_feats
         self.variant = ""
         self.feat_count = {}
         self.distances = None
@@ -39,17 +39,11 @@ class Ligand:
     def num_confs(self):
         return self.mol.GetNumConformers()
 
-    def find_features(self):
-        """ Find chemical features in this ligand.
-
-            Updates the variant, feat_count and distances attributes.
-
+    def _update_variant(self):
+        """ Updates the variant, feat_count and distances attributes.
         """
-        for feat_type, smarts in smarts_ligand.items():
-            indices = feature_indices(smarts, self.mol)
-            short_name = PharmacophoricPoint.feature_to_char[feat_type]
-            self.feats[short_name] = indices
-            self.variant += short_name * len(indices)
+        for feat_type, indices in self.feats.items():
+            self.variant += feat_type * len(indices)
 
         self.variant = "".join(sorted(self.variant, key=str.lower))
         self.feat_count = Counter(self.variant)
@@ -328,7 +322,7 @@ def common_k_point_variants(ligands,  n_points, min_actives):
         Returns
         -------
         list[K_VARIANT]
-            A list with all the common k-point variants.
+            A list with all the common k-point variants sorted by variant name.
 
     """
     count = defaultdict(int)
@@ -428,13 +422,16 @@ def feat_list_to_pharma(feat_list, ligand):
     return pharmacophore
 
 
-def find_common_pharmacophores(mols, n_points, min_actives):
+def find_common_pharmacophores(mols, chem_feats, n_points, min_actives):
     """ Find common pharmacophores in a set of ligands and assigns a score to each one.
 
         Parameters
         ----------
         mols : list[rdkit.Chem.Mol]
             List of molecules with conformers.
+
+        chem_feats : list[dict]
+            List with the chemical features of each molecule
 
         n_points : int
             Number of pharmacophoric points the common pharmacophores will have.
@@ -448,10 +445,11 @@ def find_common_pharmacophores(mols, n_points, min_actives):
         scores : list[int]
 
     """
+    assert len(mols) == len(chem_feats)
+
     ligands = []
-    for mol in mols:
-        lig = Ligand(mol)
-        lig.find_features()
+    for ii in range(len(mols)):
+        lig = Ligand(mols[ii], chem_feats[ii])
         ligands.append(lig)
 
     k_variants = common_k_point_variants(ligands, n_points, min_actives)

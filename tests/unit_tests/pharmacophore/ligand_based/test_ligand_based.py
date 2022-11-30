@@ -1,5 +1,6 @@
 from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
 import openpharmacophore.data as data
+from matplotlib.colors import to_rgb
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -85,10 +86,44 @@ def test_generate_conformers_incorrect_selection_len_raises_error(pharmacophore_
         pharma.generate_conformers(n_confs=[1, 2, 3], ligands="all")
 
 
+def test_find_chem_feats(mocker, pharmacophore_two_ligands):
+    mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.ligand_based.feature_indices",
+        side_effect=[
+            [(1, 2, 3)],  # ring
+            [(4,)],  # hyd
+            [(5,)],  # neg charge
+            [],  # pos charge
+            [(6,), (7,)],  # acceptor
+            [],  # donor
+            [(1, 2, 3)],  # ring
+            [(4,)],  # hyd
+            [(5,)],  # neg charge
+            [],  # pos charge
+            [(6,), (7,)],  # acceptor
+            []  # donor
+        ]
+    )
+    pharma = pharmacophore_two_ligands
+    pharma.find_chem_feats()
+    assert len(pharma.feats) == 2
+    expected_feats = {
+        "R": [(1, 2, 3)],
+        "H": [(4,)],
+        "N": [(5,)],
+        "P": [],
+        "A": [(6,), (7,)],
+        "D": [],
+    }
+    assert pharma.feats[0] == expected_feats
+    assert pharma.feats[1] == expected_feats
+
+
 def test_extract(pharmacophore_two_ligands):
     pharma = pharmacophore_two_ligands
     pharma.add_hydrogens()
     pharma.generate_conformers(1)
+    pharma.find_chem_feats()
     pharma.extract(n_points=3, min_actives=2)  # Should not raise
 
 
@@ -328,3 +363,33 @@ def test_show_with_ligands(pharmacophore_three_points):
     pharmacophore.ligands = ligand_list()
     view = pharmacophore.show(ligands=True)
     assert len(view._ngl_component_ids) == 8
+
+
+def test_atom_highlights(pharmacophore_two_ligands):
+    pharma = pharmacophore_two_ligands
+    pharma._feats = [
+        {"R": [(1, 2, 3)]},
+        {"D": [(1,)]},
+    ]
+    atoms, colors, radii = pharma._atom_highlights()
+
+    ring_color = to_rgb(PharmacophoricPoint.palette["aromatic ring"])
+    donor_color = to_rgb(PharmacophoricPoint.palette["hb donor"])
+    expected_atoms = [(1, 2, 3), (1,)]
+    expected_colors = [
+        {1: ring_color, 2: ring_color, 3: ring_color},
+        {1: donor_color}
+    ]
+    expected_radii = [
+        {1: 0.5, 2: 0.5, 3: 0.5},
+        {1: 0.5}
+    ]
+    assert atoms == expected_atoms
+    assert expected_colors == colors
+    assert radii == expected_radii
+
+
+def test_drawing_size():
+    assert LigandBasedPharmacophore._drawing_size(300, 280, 2) == (600, 280)
+    assert LigandBasedPharmacophore._drawing_size(300, 280, 4) == (1200, 280)
+    assert LigandBasedPharmacophore._drawing_size(300, 280, 6) == (1200, 560)

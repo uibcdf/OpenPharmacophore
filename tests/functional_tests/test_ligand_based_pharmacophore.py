@@ -1,34 +1,64 @@
 import openpharmacophore as oph
+import openpharmacophore.data as data
+import pytest
 
 
-def test_ligand_based_pharmacophore_from_ligand_set():
-    # We want to create a ligand-based pharmacophore for the ligands of Thrombin
+def has_hydrogens(mol):
+    for atom in mol.GetAtoms():
+        if atom.GetSymbol() == "H":
+            return True
+    return False
 
-    # We start by creating a pharmacophore from a list of smiles representing
+
+def test_ligand_based_pharmacophore_ligands_preparation():
+    # We want to prepare the ligands of Thrombin for pharmacophore extraction
+
+    # We start by creating a LigandBasedPharmacophore object from a list of smiles representing
     # Thrombin ligands
     ligands_smi = [
-        "[H]/N=C(\C1CCC(CC1)CNC(=O)[C@@H]2C=C(CN3N2C(=O)N(C3=O)CC(c4ccccc4)c5ccccc5)C)/N",
-        "CN[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)NCC3CCC(CC3)N",
-        "c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NC4CCC(CC4)c5cnc([nH]5)N",
-        "c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NCC4CCC(CC4)N",
-        "[H]/N=C(/c1ccc(cc1)C[C@H](C(=O)N2CCCCC2)NC(=O)CNS(=O)(=O)c3ccc4ccccc4c3)\\N",
-        "[H]/N=C(\c1ccc2c(c1)cc([nH]2)C(=O)N3CCC(CC3)Cc4ccccc4)/N",
-        "CCC1CCN(C(=O)[C@H](CCCNC(N)=[NH2+])NS(=O)(=O)c2cccc3c(N(C)C)cccc23)CC1",
+        r"[H]/N=C(\C1CCC(CC1)CNC(=O)[C@@H]2C=C(CN3N2C(=O)N(C3=O)CC(c4ccccc4)c5ccccc5)C)/N",
+        r"CN[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)NCC3CCC(CC3)N",
+        r"c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NC4CCC(CC4)c5cnc([nH]5)N",
+        r"c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NCC4CCC(CC4)N",
     ]
     pharmacophore = oph.LigandBasedPharmacophore()
     pharmacophore.load_ligands_from_smi(ligands_smi)
 
     # We confirm that the molecules were correctly loaded
-    assert len(pharmacophore.ligands) == 7
+    assert len(pharmacophore.ligands) == 4
     assert all([mol is not None for mol in pharmacophore.ligands])
 
-    # We proceed to add hydrogens to the ligands and generate conformers
+    # We proceed to add hydrogens to the ligands
     pharmacophore.add_hydrogens(ligands="all")
-    pharmacophore.generate_conformers(ligands="all", n_confs=5)
+    assert all([has_hydrogens(mol) for mol in pharmacophore.ligands])
 
-    # We extract pharmacophores of 4 points and visualize it
+    # We generate conformers for each
+    pharmacophore.generate_conformers(ligands="all", n_confs=1)
+    assert all([mol.GetNumConformers() == 1 for mol in pharmacophore.ligands])
+
+    # Now we want to find chemical features in the ligands
+    pharmacophore.find_chem_feats()
+    # All ligands have aromatic rings, hydrophobic areas, acceptors and donors
+    assert len(pharmacophore.feats) == 4
+    assert all(["R" in f for f in pharmacophore.feats])
+    assert all(["A" in f for f in pharmacophore.feats])
+    assert all(["D" in f for f in pharmacophore.feats])
+    assert all(["H" in f for f in pharmacophore.feats])
+    # Finally we create a 2D representation of the ligands with their
+    # chemical features highlighted
+    pharmacophore.draw((300, 280))
+
+
+@pytest.mark.skip(reason="Missing ligands file")
+def test_ligand_based_pharmacophore_extraction():
+    # We want to extract a ligand based pharmacophore for thrombin.
+    # We start by loading the ligands from a sdf file
+    pharmacophore = oph.LigandBasedPharmacophore()
+    pharmacophore.load_ligands(data.ligands["thrombin.smi"])
+    assert len(pharmacophore.ligands) == 7
+    # We extract pharmacophores of 3 points and visualize them
     pharmacophore.extract(
-        n_points=4, min_actives=7
+        n_points=4, min_actives=5
     )
     assert len(pharmacophore) > 0
     assert len(pharmacophore.scores) > 0
