@@ -3,6 +3,7 @@ from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmac
 from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
+from openpharmacophore.utils.conformers import ConformerGenerator
 import openpharmacophore.io as io
 from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 from matplotlib.colors import to_rgb
@@ -384,8 +385,8 @@ class LigandBasedPharmacophore(Pharmacophore):
                     lig_hyd.append(lig)
             self._ligands = lig_hyd
 
-    def generate_conformers(self, n_confs, ligands="all", random_seed=-1):
-        """ Add conformers to a ligand. It is recommended to add hydrogens before
+    def generate_conformers(self, n_confs=-1, ligands="all",  *args, **kwargs):
+        """ Add conformers to ligands. It is recommended to add hydrogens before
             generating conformers.
 
             Parameters
@@ -397,8 +398,6 @@ class LigandBasedPharmacophore(Pharmacophore):
             ligands : 'all' or list[int]
                 The indices of the ligands to which conformers will be added.
 
-            random_seed : int, optional
-                Random seed to use.
         """
         if ligands == "all":
             lig_ind = list(range(len(self._ligands)))
@@ -412,8 +411,8 @@ class LigandBasedPharmacophore(Pharmacophore):
             raise ValueError("n_confs must have the same size as ligands")
 
         for ii in range(len(lig_ind)):
-            Chem.EmbedMultipleConfs(
-                self._ligands[lig_ind[ii]], numConfs=n_confs[ii], randomSeed=random_seed)
+            conf_gen = ConformerGenerator(n_confs[ii], *args, **kwargs)
+            self._ligands[lig_ind[ii]] = conf_gen(self._ligands[lig_ind[ii]])
 
     def find_chem_feats(self):
         """ Find chemical features in the ligands associated with this pharmacophore.

@@ -70,7 +70,7 @@ def sample_molecules():
         MolFromSmiles("o1cccc1")
     ]
     for ii in range(len(molecules)):
-        molecules[ii] = generate_conformers(molecules[ii])
+        molecules[ii] = generate_conformers(molecules[ii], 1)
 
     return molecules
 
