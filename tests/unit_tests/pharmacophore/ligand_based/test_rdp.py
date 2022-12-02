@@ -224,17 +224,13 @@ def test_pharmacophore_partitioning_min_actives_less_than_ligands_size(fl_contai
 
 def test_score_common_pharmacophores():
     box = rdp.FLContainer(variant="AAR")
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]))
-    )
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.2, 0.8, 3.1]))
-    )
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([1.1, 0.9, 3.0]))
-    )
+    box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.2, 0.8, 3.1]), index=2),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([1.1, 0.9, 3.0]), index=3),
+    ])
 
-    scores = rdp.score_common_pharmacophores(box)
+    scores = rdp.score_common_pharmacophores(box, {})
     assert len(scores) == 3
     assert scores[0] == (0.9166666666666667, 1, 2)
     assert scores[1] == (0.7642977396044842, 0, 1)
@@ -243,18 +239,33 @@ def test_score_common_pharmacophores():
 
 def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
     box = rdp.FLContainer(variant="AAR")
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]))
-    )
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]))
-    )
-    box.append(
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7], ))
-    )
-    scores = rdp.score_common_pharmacophores(box)
+    box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=0),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7], ), index=2)
+    ])
+    scores = rdp.score_common_pharmacophores(box, {})
     assert len(scores) == 1
     assert scores[0] == (0.311133512909042, 1, 2)
+
+
+def test_score_common_pharmacophores_scores_precomputed():
+    rmsd = {
+        (0, 1): 0.9,
+        (0, 2): 0.6,
+        (1, 2): 0.3
+    }
+    box = rdp.FLContainer(variant="AAR")
+    box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=0),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7]), index=2),
+    ])
+    scores = rdp.score_common_pharmacophores(box, rmsd)
+    assert len(scores) == 3
+    assert np.allclose(scores[0], (0.75, 1, 2))
+    assert np.allclose(scores[1], (0.5, 0, 2))
+    assert np.allclose(scores[2], (0.25, 0, 1))
 
 
 @pytest.fixture()
@@ -272,7 +283,7 @@ def ligands():
     return ligands
 
 
-def test_common_k_point_feat_lists(ligands):
+def test_common_k_point_variants(ligands):
     common_variants = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=4)
 
@@ -295,7 +306,7 @@ def test_common_k_point_feat_lists(ligands):
     assert common_variants[3].mol == 3
 
 
-def test_common_k_point_feat_lists_min_actives_less_than_variants(ligands):
+def test_common_k_point_variants_min_actives_less_than_variants(ligands):
     common = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=2)
 
@@ -332,6 +343,19 @@ def test_common_k_point_feature_lists(mocker, ligands):
     assert var_names == expected_variants
     assert size == expected_size
     assert mols == expected_mols
+
+
+def test_feat_list_index_is_updated_after_creation(mocker, ligands):
+    mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
+                 return_value=np.array([1., 1., 1.]))
+    k_variants = rdp.common_k_point_variants(
+        ligands, n_points=3, min_actives=4)
+    containers = rdp.common_k_point_feature_lists(ligands, k_variants)
+    assert len(containers) == 1
+    assert len(containers[0]) == 8
+    expected_indices = list(range(8))
+    indices = [fl.index for fl in containers[0]]
+    assert indices == expected_indices
 
 
 def test_feat_list_to_pharma(mocker):

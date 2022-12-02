@@ -130,8 +130,9 @@ class FeatureList:
             An array of shape (n_pairs,) where n_pairs is the number of interpoint
             distances given by n_points x (n_points - 1) / 2
     """
+    count = 0  # keep track of how many objects there are
 
-    def __init__(self, variant, var_ind, fl_id, distances):
+    def __init__(self, variant, var_ind, fl_id, distances, index=None):
         self.n_pairs = len(variant) * (len(variant) - 1) / 2
         if distances.shape[0] != self.n_pairs:
             raise ValueError
@@ -140,6 +141,7 @@ class FeatureList:
         self.distances = distances
         self.variant = variant
         self.var_ind = var_ind
+        self.index = index
 
 
 class FLContainer:
@@ -167,6 +169,16 @@ class FLContainer:
             self.mols.add(feat_list.id[0])
         else:
             raise ValueError("Incorrect variant")
+
+    def append_multiple(self, f_lists):
+        """ Append multiple feat lists to the container.
+
+            Parameters
+            ----------
+            f_lists : list[FeatureList]
+        """
+        for fl in f_lists:
+            self.append(fl)
 
     def __getitem__(self, item):
         return self.flists[item]
@@ -260,12 +272,17 @@ def pharmacophore_partitioning(container, min_actives):
     return box
 
 
-def score_common_pharmacophores(box):
+def score_common_pharmacophores(box, rmsd_dict):
     """ Calculate the score of all feature lists in a container and sort them by score.
 
         Parameters
         ----------
         box : FLContainer
+            A surviving box
+
+        rmsd_dict : dict[tuple, float]
+            Values of rmsd between feature lists to avoid repeated
+            computations.
 
         Returns
         -------
@@ -278,13 +295,19 @@ def score_common_pharmacophores(box):
     exclude = []
     for ii in range(len(box)):
         for jj in range(ii + 1, len(box)):
-            rmsd = np.sqrt(((box[ii].distances - box[jj].distances) ** 2).mean())
+            try:
+                rmsd = rmsd_dict[(box[ii].index, box[jj].index)]
+            except KeyError:
+                rmsd = np.sqrt(((box[ii].distances - box[jj].distances) ** 2).mean())
+                rmsd_dict[(box[ii].index, box[jj].index)] = rmsd
+
             if rmsd >= RMSD_CUTOFF:
                 exclude.append(ii)
+                break
             point_score = 1 - rmsd / RMSD_CUTOFF
-            vec_score = vector_score(box[ii].id, box[jj].id)
-            score = W_POINT * point_score + W_VECTOR * vec_score
-            scores.append((score, ii, jj))
+            # vec_score = vector_score(box[ii].id, box[jj].id)
+            # score = W_POINT * point_score + W_VECTOR * vec_score
+            scores.append((point_score, ii, jj))
 
     scores.sort(reverse=True)
     if len(exclude) > 0:
@@ -389,8 +412,11 @@ def common_k_point_feature_lists(ligands, k_variants):
             fl_id = (k_var.mol, ii)
             distances = lig.k_distances(k_var.indices, ii)
             feat_list = FeatureList(k_var.name, k_var.indices, fl_id, distances)
+            feat_list.index = FeatureList.count
+            FeatureList.count += 1
             container.append(feat_list)
 
+    FeatureList.count = 0
     all_containers.append(container)
     return all_containers
 
