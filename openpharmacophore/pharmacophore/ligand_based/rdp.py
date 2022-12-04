@@ -9,8 +9,8 @@ from collections import defaultdict, Counter, namedtuple
 
 
 BIN_SIZE = 1.0  # In angstroms
-# Maximum interpoint distance in angstroms
-MAX_DIST = 15.0
+MAX_DIST = 15.0  # Maximum interpoint distance in angstroms
+MIN_DIST = 2.0  # In angstroms
 BINS = np.arange(0, MAX_DIST + BIN_SIZE, step=BIN_SIZE)
 
 # Scoring function values
@@ -122,6 +122,9 @@ class FeatureList:
             a conformer with two hydrogen bond acceptors (A) and an aromatic
             ring (R) would have variant 'AAR'.
 
+        var_ind : tuple[int]
+            The indices of the features in the conformer.
+
         fl_id : tuple[int, int]
             The id of this list. The first number is the molecule index and the second
             the conformer index
@@ -129,14 +132,11 @@ class FeatureList:
         distances : np.ndarray
             An array of shape (n_pairs,) where n_pairs is the number of interpoint
             distances given by n_points x (n_points - 1) / 2
+
+        index : int, optional
+            An index to use as an identifier for a list
     """
-    count = 0  # keep track of how many objects there are
-
     def __init__(self, variant, var_ind, fl_id, distances, index=None):
-        self.n_pairs = len(variant) * (len(variant) - 1) / 2
-        if distances.shape[0] != self.n_pairs:
-            raise ValueError
-
         self.id = fl_id
         self.distances = distances
         self.variant = variant
@@ -145,12 +145,14 @@ class FeatureList:
 
 
 class FLContainer:
-    """ A container of feature lists of the same variant."""
-    def __init__(self, variant="", bin=None):
+    """ A container of feature lists of the same variant.
+    """
+    def __init__(self, n_mols, variant):
         self.variant = variant
-        self.bin = bin
-        self.flists = []
-        # Stores the ids of the mols
+        self.n_pairs = int(len(variant) * (len(variant) - 1) / 2)
+        # Each sublist "i" stores the feature list of the ith molecule
+        self._flists = [[] for _ in range(n_mols)]
+        self._num_flists = 0
         self.mols = set()
 
     def append(self, feat_list):
@@ -161,12 +163,11 @@ class FLContainer:
             feat_list : FeatureList
                 A feature list with the same variant as the container
         """
-        if self.variant == "":
-            self.variant = feat_list.variant
-
         if self.variant == feat_list.variant:
-            self.flists.append(feat_list)
-            self.mols.add(feat_list.id[0])
+            mol_ind = feat_list.id[0]
+            self._flists[mol_ind].append(feat_list)
+            self.mols.add(mol_ind)
+            self._num_flists += 1
         else:
             raise ValueError("Incorrect variant")
 
@@ -181,22 +182,30 @@ class FLContainer:
             self.append(fl)
 
     def __getitem__(self, item):
-        return self.flists[item]
+        return self._flists[item]
 
     def __iter__(self):
-        self.ii = 0
+        self._mol_ind = 0
+        self._fl_ind = 0
         return self
 
     def __next__(self):
-        if self.ii < len(self.flists):
-            flist = self.flists[self.ii]
-            self.ii += 1
+        if self._mol_ind < len(self._flists):
+            if self._fl_ind < len(self._flists[self._mol_ind]):
+                flist = self._flists[self._mol_ind][self._fl_ind]
+                self._fl_ind += 1
+            else:
+                self._mol_ind += 1
+                self._fl_ind = 0
+                return self.__next__()
             return flist
         else:
+            del self._fl_ind
+            del self._mol_ind
             raise StopIteration
 
     def __len__(self):
-        return len(self.flists)
+        return self._num_flists
 
 
 def nearest_bins(num, bin_size):
@@ -219,21 +228,29 @@ def nearest_bins(num, bin_size):
     return low_bin, low_bin + 1
 
 
-def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
+def recursive_partitioning(container, dim, n_pairs, boxes, min_actives, n_ligs):
     """ Obtain common pharmacophores by recursive distance partitioning.
 
         Parameters
         ----------
         container : FLContainer
+            A container of feature lists of the same variant.
         dim : int
+            The dimension of the distances array which will be used for
+            partitioning.
         n_pairs : int
+            Number of interpoint distance pairs.
         boxes : list[FLContainer]
+            A list where surviving boxes will be stored.
         min_actives : int
+            Minimum number of actives that a surviving box must contain
+        n_ligs : int
+            Total number of ligands.
 
     """
     # TODO: bin attribute in container is not necessary
     bins = [
-        FLContainer(bin=(BINS[ii], BINS[ii + 1])) for ii in range(BINS.shape[0] - 1)
+        FLContainer(n_ligs, container.variant) for _ in range(BINS.shape[0] - 1)
     ]
 
     for flist in container:
@@ -248,13 +265,13 @@ def recursive_partitioning(container, dim, n_pairs, boxes, min_actives):
         if len(container.mols) >= min_actives:
             if dim < n_pairs - 1:
                 recursive_partitioning(
-                    container, dim + 1, n_pairs, boxes, min_actives
+                    container, dim + 1, n_pairs, boxes, min_actives, n_ligs
                 )
             else:
                 boxes.append(container)
 
 
-def pharmacophore_partitioning(container, min_actives):
+def pharmacophore_partitioning(container, min_actives, n_ligs):
     """ Partition pharmacophores by their interpoint distances to find common
         pharmacophores.
 
@@ -268,58 +285,8 @@ def pharmacophore_partitioning(container, min_actives):
         box : list[FLContainer]
     """
     box = []
-    recursive_partitioning(container, 0, container[0].n_pairs, box, min_actives)
+    recursive_partitioning(container, 0, container.n_pairs, box, min_actives, n_ligs)
     return box
-
-
-def score_common_pharmacophores(box, rmsd_dict):
-    """ Calculate the score of all feature lists in a container and sort them by score.
-
-        Parameters
-        ----------
-        box : FLContainer
-            A surviving box
-
-        rmsd_dict : dict[tuple, float]
-            Values of rmsd between feature lists to avoid repeated
-            computations.
-
-        Returns
-        -------
-        scores [list[tuple]]
-            A list of tuples with the scores between each feature list pairs, ordered in descending
-            order of score.
-
-    """
-    scores = []
-    exclude = []
-    for ii in range(len(box)):
-        for jj in range(ii + 1, len(box)):
-            try:
-                rmsd = rmsd_dict[(box[ii].index, box[jj].index)]
-            except KeyError:
-                rmsd = np.sqrt(((box[ii].distances - box[jj].distances) ** 2).mean())
-                rmsd_dict[(box[ii].index, box[jj].index)] = rmsd
-
-            if rmsd >= RMSD_CUTOFF:
-                exclude.append(ii)
-                break
-            point_score = 1 - rmsd / RMSD_CUTOFF
-            # vec_score = vector_score(box[ii].id, box[jj].id)
-            # score = W_POINT * point_score + W_VECTOR * vec_score
-            scores.append((point_score, ii, jj))
-
-    scores.sort(reverse=True)
-    if len(exclude) > 0:
-        # Filter pharmacophores that exceed rmsd cutoff
-        return [s for s in scores if s[1] not in exclude]
-    else:
-        return scores
-
-
-def vector_score(id_1, id_2):
-    # TODO: complete me!
-    return 0
 
 
 K_VARIANT = namedtuple("K_VARIANT", ["name", "indices", "mol"])
@@ -399,26 +366,58 @@ def common_k_point_feature_lists(ligands, k_variants):
         return all_containers
 
     prev = k_variants[0].name
-    container = FLContainer(prev)
+    container = FLContainer(len(ligands), prev)
+    distances = None
+    fl_index = 0
+
     for k_var in k_variants:
         lig = ligands[k_var.mol]
 
         if k_var.name != prev:
             all_containers.append(container)
-            container = FLContainer(k_var.name)
+            container = FLContainer(len(ligands), k_var.name)
             prev = k_var.name
 
         for ii in range(lig.num_confs):
             fl_id = (k_var.mol, ii)
             distances = lig.k_distances(k_var.indices, ii)
+            if np.any(distances < MIN_DIST):
+                continue
+
             feat_list = FeatureList(k_var.name, k_var.indices, fl_id, distances)
-            feat_list.index = FeatureList.count
-            FeatureList.count += 1
+            feat_list.index = fl_index
+            fl_index += 1
             container.append(feat_list)
 
-    FeatureList.count = 0
-    all_containers.append(container)
+    if distances is not None and not np.any(distances < MIN_DIST):
+        all_containers.append(container)
     return all_containers
+
+
+def surviving_box_top_representative(surviving_box, point_scores):
+    """ Obtain the top ranked representative feature list from a surviving box
+
+        Parameters
+        ----------
+        surviving_box : FLContainer
+            A surviving box
+
+        point_scores : dict[tuple, float]
+            Values of point scores between feature lists to avoid repeated
+            computations.
+
+        Returns
+        -------
+        FeatureList
+            The best ranked feature list in the box
+
+    """
+    pass
+
+
+def vector_score(id_1, id_2):
+    # TODO: complete me!
+    return 0
 
 
 def feat_list_to_pharma(feat_list, ligand):
@@ -471,30 +470,21 @@ def find_common_pharmacophores(mols, chem_feats, n_points, min_actives):
         scores : list[int]
 
     """
-    assert len(mols) == len(chem_feats)
-
     ligands = []
     for ii in range(len(mols)):
         lig = Ligand(mols[ii], chem_feats[ii])
         ligands.append(lig)
 
     k_variants = common_k_point_variants(ligands, n_points, min_actives)
-    containers = common_k_point_feature_lists(ligands, k_variants)
+    boxes = common_k_point_feature_lists(ligands, k_variants)
 
-    pharmacophores = []
-    scores = []
-    for cont in containers:
-        boxes = pharmacophore_partitioning(cont, min_actives)
-        for box in boxes:
-            box_scores = score_common_pharmacophores(box)
-            if len(box_scores) == 0:
-                # All pharmacophores exceed RMSD cutoff
-                continue
-            feat_list = box[box_scores[0][1]]
-            lig = ligands[feat_list.id[0]]
-            pharma = feat_list_to_pharma(feat_list, lig)
+    top_queue = []
+    scores = {}
+    for box in boxes:
+        surviving_boxes = pharmacophore_partitioning(box, min_actives)
+        for suv_box in surviving_boxes:
+            top_representative = surviving_box_top_representative(suv_box, scores)
+        # Check for uniqueness, score and max_pharmacophores
+        add_feat_list_to_queue(top_queue, top_representative, max_pharmacophores)
 
-            pharmacophores.append(pharma)
-            scores.append(box_scores[0][0])
-
-    return pharmacophores, scores
+    return [pharmacophore_from_feat_list(t) for t in top_queue]

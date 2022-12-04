@@ -18,42 +18,63 @@ def test_init_feature_list():
     assert np.all(f_list.distances == np.array([1.0, 1.0, 1.0]))
 
 
-def test_init_feat_list_distances_shape_incorrect_raises_error():
-    with pytest.raises(ValueError):
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([1.0, 1.0]))
-
-
 # FLContainer Class Tests
 
-def test_init_flcontainer():
-    rdp.FLContainer()  # Should not raise
-    rdp.FLContainer(bin=(0, 1))
-    rdp.FLContainer(variant="")
+
+def test_init_fl_container_with_variant():
+    container = rdp.FLContainer(3, variant="AAP")
+    assert container.variant == "AAP"
+    assert len(container._flists) == 3
 
 
 def test_flcontainer_append():
-    container = rdp.FLContainer()
-    container.append(rdp.FeatureList("AAR", (0, 1, 2), (0, 0),
-                                     np.array([4.8, 2.8, 7.0])))
+    container = rdp.FLContainer(2, "AAR")
+    container.append(
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0),
+                        np.array([4.8, 2.8, 7.0]))
+    )
     assert container.variant == "AAR"
     assert container.mols == {0}
-    assert len(container.flists) == 1
-    assert container[0].id == (0, 0)
+    assert len(container) == 1
+    assert container[0][0].id == (0, 0)
 
-    container.append(rdp.FeatureList("AAR", (0, 1, 2),
-                                     (1, 0), np.array([4.8, 2.8, 7.0])))
+    container.append(
+        rdp.FeatureList("AAR", (0, 1, 2),
+                        (1, 0), np.array([4.8, 2.8, 7.0]))
+    )
     assert container.mols == {0, 1}
-    assert len(container.flists) == 2
-    assert container[1].id == (1, 0)
+    assert len(container) == 2
+    assert container[1][0].id == (1, 0)
 
 
 def test_flcontainer_append_different_variant_raises_error():
-    container = rdp.FLContainer()
-    container.append(rdp.FeatureList("AAR", (0, 1, 2),
-                                     (0, 0), np.array([4.8, 2.8, 7.0])))
+    container = rdp.FLContainer(n_mols=1, variant="AAR")
+    container.append(
+        rdp.FeatureList("AAR", (0, 1, 2),
+                        (0, 0), np.array([4.8, 2.8, 7.0]))
+    )
     with pytest.raises(ValueError):
-        container.append(rdp.FeatureList("DHR", (0, 1, 2),
-                                         (0, 0), np.array([4.8, 2.8, 7.0])))
+        container.append(
+            rdp.FeatureList("DHR", (0, 1, 2),
+                            (0, 0), np.array([4.8, 2.8, 7.0]))
+        )
+
+
+def test_iter_container():
+    container = rdp.FLContainer(n_mols=3, variant="AP")
+    container.append_multiple([
+        rdp.FeatureList("AP", (1,), (0, 0), np.ones(1,)),
+        rdp.FeatureList("AP", (1,), (0, 1), np.ones(1,)),
+        rdp.FeatureList("AP", (1,), (1, 0), np.ones(1,)),
+        rdp.FeatureList("AP", (1,), (2, 0), np.ones(1,)),
+    ])
+    iterator = iter(container)
+    assert next(iterator).id == (0, 0)
+    assert next(iterator).id == (0, 1)
+    assert next(iterator).id == (1, 0)
+    assert next(iterator).id == (2, 0)
+    with pytest.raises(StopIteration):
+        next(iterator)
 
 
 # Ligand Class tests
@@ -170,7 +191,8 @@ def test_nearest_bins():
 
 @pytest.fixture()
 def fl_container():
-    lists = [
+    container = rdp.FLContainer(variant="AAR", n_mols=4)
+    container.append_multiple([
         rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([4.8, 2.8, 7.0])),
         rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([3.1, 5.9, 3.0])),
         rdp.FeatureList("AAR", (0, 1, 2), (0, 2), np.array([4.3, 3.7, 6.8])),
@@ -185,15 +207,14 @@ def fl_container():
         rdp.FeatureList("AAR", (0, 1, 2), (2, 2), np.array([4.5, 4.2, 5.8])),
         rdp.FeatureList("AAR", (0, 1, 2), (3, 0), np.array([3.8, 5.2, 5.9])),
         rdp.FeatureList("AAR", (0, 1, 2), (3, 1), np.array([5.1, 5.4, 4.6])),
-    ]
-    f_lists = rdp.FLContainer()
-    for fl in lists:
-        f_lists.append(fl)
-    return f_lists
+    ])
+    return container
 
 
 def test_pharmacophore_partitioning(fl_container):
-    boxes = rdp.pharmacophore_partitioning(fl_container, 4)
+    boxes = rdp.pharmacophore_partitioning(
+        fl_container, min_actives=4, n_ligs=4
+    )
     assert len(boxes) == 3
 
     ids = [b.id for b in boxes[0]]
@@ -211,7 +232,9 @@ def test_pharmacophore_partitioning(fl_container):
 
 
 def test_pharmacophore_partitioning_min_actives_less_than_ligands_size(fl_container):
-    boxes = rdp.pharmacophore_partitioning(fl_container, 3)
+    boxes = rdp.pharmacophore_partitioning(
+        fl_container, min_actives=3, n_ligs=4
+    )
     assert len(boxes) == 6
 
     ids = [b.id for b in boxes[2]]
@@ -220,52 +243,6 @@ def test_pharmacophore_partitioning_min_actives_less_than_ligands_size(fl_contai
     assert ids == [(1, 0), (2, 2), (3, 0), (3, 1)]
     ids = [b.id for b in boxes[5]]
     assert ids == [(0, 3), (1, 0), (3, 0)]
-
-
-def test_score_common_pharmacophores():
-    box = rdp.FLContainer(variant="AAR")
-    box.append_multiple([
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=1),
-        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.2, 0.8, 3.1]), index=2),
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([1.1, 0.9, 3.0]), index=3),
-    ])
-
-    scores = rdp.score_common_pharmacophores(box, {})
-    assert len(scores) == 3
-    assert scores[0] == (0.9166666666666667, 1, 2)
-    assert scores[1] == (0.7642977396044842, 0, 1)
-    assert scores[2] == (0.75, 0, 2)
-
-
-def test_score_common_pharmacophores_rmsd_cutoff_exceeded():
-    box = rdp.FLContainer(variant="AAR")
-    box.append_multiple([
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=0),
-        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]), index=1),
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7], ), index=2)
-    ])
-    scores = rdp.score_common_pharmacophores(box, {})
-    assert len(scores) == 1
-    assert scores[0] == (0.311133512909042, 1, 2)
-
-
-def test_score_common_pharmacophores_scores_precomputed():
-    rmsd = {
-        (0, 1): 0.9,
-        (0, 2): 0.6,
-        (1, 2): 0.3
-    }
-    box = rdp.FLContainer(variant="AAR")
-    box.append_multiple([
-        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([1.4, 0.6, 2.7]), index=0),
-        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([1.8, 1.0, 3.2]), index=1),
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([3.0, 1.6, 3.7]), index=2),
-    ])
-    scores = rdp.score_common_pharmacophores(box, rmsd)
-    assert len(scores) == 3
-    assert np.allclose(scores[0], (0.75, 1, 2))
-    assert np.allclose(scores[1], (0.5, 0, 2))
-    assert np.allclose(scores[2], (0.25, 0, 1))
 
 
 @pytest.fixture()
@@ -326,7 +303,7 @@ def test_common_k_point_variants_min_actives_less_than_variants(ligands):
 
 def test_common_k_point_feature_lists(mocker, ligands):
     mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
-                 return_value=np.array([1., 1., 1.]))
+                 return_value=np.array([3., 4., 2.5]))
 
     k_variants = rdp.common_k_point_variants(ligands, n_points=3, min_actives=2)
     containers = rdp.common_k_point_feature_lists(ligands, k_variants)
@@ -345,14 +322,37 @@ def test_common_k_point_feature_lists(mocker, ligands):
     assert mols == expected_mols
 
 
+def test_feature_list_with_distance_pair_below_minimum_is_rejected(mocker):
+    mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
+                 side_effect=[
+                     np.array([3., 6., 4.]),
+                     np.array([6., 0.5, 4.])
+                 ])
+    mock_mol = mocker.Mock()
+    mock_mol.GetNumConformers.return_value = 1
+
+    ligands = [rdp.Ligand(mock_mol, {})] * 2
+    k_vars = [
+        rdp.K_VARIANT(name="AAR", indices=(0, 1, 2), mol=0),
+        rdp.K_VARIANT(name="AAP", indices=(0, 1, 2), mol=1),
+    ]
+    containers = rdp.common_k_point_feature_lists(ligands, k_vars)
+
+    assert len(containers) == 1
+    assert containers[0].variant == "AAR"
+    assert len(containers[0]) == 1
+
+
 def test_feat_list_index_is_updated_after_creation(mocker, ligands):
     mocker.patch("openpharmacophore.pharmacophore.ligand_based.rdp.Ligand.k_distances",
-                 return_value=np.array([1., 1., 1.]))
+                 return_value=np.array([4., 4., 4.]))
     k_variants = rdp.common_k_point_variants(
         ligands, n_points=3, min_actives=4)
     containers = rdp.common_k_point_feature_lists(ligands, k_variants)
+
     assert len(containers) == 1
     assert len(containers[0]) == 8
+
     expected_indices = list(range(8))
     indices = [fl.index for fl in containers[0]]
     assert indices == expected_indices
@@ -380,7 +380,7 @@ def test_feat_list_to_pharma(mocker):
 
     assert mock_centroids.call_count == 3
     calls = [
-        mocker.call(None, 2, (10, )),
+        mocker.call(None, 2, (10,)),
         mocker.call(None, 2, (2, 3, 4)),
         mocker.call(None, 2, (6, 7, 8)),
     ]
@@ -392,3 +392,74 @@ def test_feat_list_to_pharma(mocker):
     assert np.all(puw.get_value(pharma[0].center) == np.zeros((3,)))
     assert np.all(puw.get_value(pharma[1].center) == np.ones((3,)))
     assert np.all(puw.get_value(pharma[2].center) == np.ones((3,)) * 2)
+
+
+def test_surviving_box_top_representative():
+    surviving_box = rdp.FLContainer(variant="AAR", n_mols=3)
+    surviving_box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([5.4, 4.6, 6.7]), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([5.8, 4.2, 6.9]), index=2),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([5.2, 4.8, 7.1]), index=3),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 1), np.array([4.8, 5.0, 6.8]), index=4),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([5.1, 4.9, 7.0]), index=5),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 1), np.array([5.7, 4.2, 8.0]), index=6),
+
+    ])
+
+    top_representative = rdp.surviving_box_top_representative(
+        surviving_box, {}
+    )
+    assert top_representative.index == 5
+
+
+def test_surviving_box_representative_rmsd_cutoff_exceeded():
+    surviving_box = rdp.FLContainer(variant="AAR", n_mols=3)
+    surviving_box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.array([5.4, 4.6, 6.7]), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 1), np.array([5.8, 4.2, 6.9]), index=2),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([5.2, 4.8, 7.1]), index=3),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 1), np.array([4.8, 5.0, 6.8]), index=4),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([5.1, 4.9, 7.0]), index=5),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 1), np.array([5.7, 4.2, 8.0]), index=6),
+
+    ])
+
+    top_representative = rdp.surviving_box_top_representative(
+        surviving_box, {}
+    )
+    assert top_representative.index == 1
+
+
+def test_surviving_box_representatives_scores_precomputed():
+    scores = {
+        (0, 1): 0.9,
+        (0, 2): 0.6,
+        (1, 2): 0.3,
+    }
+    surviving_box = rdp.FLContainer(variant="AAR", n_mols=3)
+    surviving_box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.ones((3,)), index=0),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.ones((3,)), index=1),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.ones((3,)), index=2),
+    ])
+
+    top_representative = rdp.surviving_box_top_representative(
+        surviving_box, scores
+    )
+    assert top_representative.index == 0
+
+
+def test_surviving_box_representative_all_point_scores_negative():
+    scores = {
+        (0, 1): -0.52,
+    }
+    surviving_box = rdp.FLContainer(variant="AAR", n_mols=3)
+    surviving_box.append_multiple([
+        rdp.FeatureList("AAR", (0, 1, 2), (0, 0), np.ones((3,)), index=0),
+        rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.ones((3,)), index=1),
+    ])
+
+    top_representative = rdp.surviving_box_top_representative(
+        surviving_box, scores
+    )
+    assert top_representative is None
