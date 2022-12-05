@@ -173,7 +173,7 @@ def assert_screening_with_files(mocker, pharmacophore, path,
     if not directory:
         vs.from_file(path, 0)
     else:
-        vs.from_dir(path, 0)
+        vs.from_dir(path, 0, skip=["thrombin_ligands.sdf"])
 
     assert len(vs.matches[0]) == matches
     assert vs.fails(0) == fails

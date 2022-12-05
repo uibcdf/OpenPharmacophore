@@ -119,14 +119,6 @@ def test_find_chem_feats(mocker, pharmacophore_two_ligands):
     assert pharma.feats[1] == expected_feats
 
 
-def test_extract(pharmacophore_two_ligands):
-    pharma = pharmacophore_two_ligands
-    pharma.add_hydrogens()
-    pharma.generate_conformers(1)
-    pharma.find_chem_feats()
-    pharma.extract(n_points=3, min_actives=2)  # Should not raise
-
-
 @pytest.fixture()
 def pharmacophore_three_points():
     radius = puw.quantity(1.0, "angstroms")

@@ -1,6 +1,7 @@
 import openpharmacophore as oph
 import openpharmacophore.data as data
 import pytest
+from rdkit import Chem
 
 
 def has_hydrogens(mol):
@@ -49,19 +50,43 @@ def test_ligand_based_pharmacophore_ligands_preparation():
     pharmacophore.draw((300, 280))
 
 
-@pytest.mark.skip(reason="Missing ligands file")
+def read_sdf(file_path):
+    """ Reads a sdf file that can contain multiple conformers
+        for a molecule.
+
+        Parameters
+        ----------
+        file_path : str
+
+        Returns
+        -------
+        list : [rdkit.Chem.Mol]
+    """
+    supp = Chem.SDMolSupplier(file_path, removeHs=False)
+    molecules = {}
+
+    for mol in supp:
+        name = mol.GetProp("_Name")
+        try:
+            molecules[name].AddConformer(mol.GetConformer(), assignId=True)
+        except KeyError:
+            molecules[name] = mol
+
+    return list(molecules.values())
+
+
 def test_ligand_based_pharmacophore_extraction():
     # We want to extract a ligand based pharmacophore for thrombin.
     # We start by loading the ligands from a sdf file
     pharmacophore = oph.LigandBasedPharmacophore()
-    pharmacophore.load_ligands(data.ligands["thrombin.smi"])
+    pharmacophore.ligands = read_sdf(data.ligands["thrombin_ligands.sdf"])
     assert len(pharmacophore.ligands) == 7
     # We extract pharmacophores of 3 points and visualize them
+    pharmacophore.find_chem_feats()
     pharmacophore.extract(
-        n_points=4, min_actives=5
+        n_points=5, min_actives=5, max_pharmacophores=10
     )
     assert len(pharmacophore) > 0
-    assert len(pharmacophore.scores) > 0
 
     # We inspect the features of a pharmacophore. We expect thrombin pharmacophore
     # to have an aromatic ring, at leas one hydrophobic and a positive charge

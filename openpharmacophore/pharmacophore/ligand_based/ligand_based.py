@@ -427,7 +427,7 @@ class LigandBasedPharmacophore(Pharmacophore):
                 short_name = PharmacophoricPoint.feature_to_char[feat_type]
                 self._feats[ii][short_name] = indices
 
-    def extract(self, n_points, min_actives=None):
+    def extract(self, n_points, min_actives=None, max_pharmacophores=None):
         """ Extracts and scores pharmacophores from a set of ligands.
 
             Parameters
@@ -436,13 +436,18 @@ class LigandBasedPharmacophore(Pharmacophore):
                 Extracted pharmacophores will have this number of pharmacophoric
                 points.
 
-            min_actives : int
+            min_actives : int, optional
                 Number of ligands that must match a common pharmacophore.
+
+            max_pharmacophores : int, optional
+                Maximum number of pharmacophores to return. If set to null
+                all found pharmacophores will be returned.
         """
         if min_actives is None:
             min_actives = len(self._ligands)
-        self._pharmacophores, scores = find_common_pharmacophores(self.ligands, self.feats,
-                                                                  n_points, min_actives)
+        self._pharmacophores = find_common_pharmacophores(
+            self.ligands, self.feats, n_points, min_actives, max_pharmacophores
+        )
 
     def draw(self, mol_size):
         """ Draw the ligands with their chemical features highlighted.

@@ -136,13 +136,43 @@ class FeatureList:
         index : int, optional
             An index to use as an identifier for a list
     """
-    def __init__(self, variant, var_ind, fl_id, distances, index=None):
+    def __init__(self, variant, var_ind,
+                 fl_id, distances, index=None, score=None):
         self.id = fl_id
         self.distances = distances
         self.variant = variant
         self.var_ind = var_ind
         self.index = index
-        self.score = None
+        self.score = score
+
+    def to_pharmacophore(self, ligand):
+        """ Creates a pharmacophore object from this feature list.
+
+            Parameters
+            ----------
+            ligand : Ligand
+                The ligand associated with this feature list.
+
+            Returns
+            -------
+            pharma : Pharmacophore
+        """
+        pharmacophore = Pharmacophore()
+        for var_ind in self.var_ind:
+            feat_name = ligand.variant[var_ind]
+            feat_start_ind = ligand.variant.index(feat_name)
+            feat_ind = ligand.feats[feat_name][var_ind - feat_start_ind]
+            center = feature_centroids(ligand.mol, self.id[1], feat_ind)
+            pharmacophore.add(PharmacophoricPoint(
+                PharmacophoricPoint.char_to_feature[feat_name],
+                puw.quantity(center, "angstroms"),
+                puw.quantity(1.0, "angstroms"),
+            ))
+        pharmacophore.score = self.score
+        pharmacophore.ref_mol = self.id[0]
+        pharmacophore.ref_struct = self.id[1]
+
+        return pharmacophore
 
 
 class FLContainer:
@@ -211,6 +241,50 @@ class FLContainer:
 
     def __len__(self):
         return self._num_flists
+
+
+class FLQueue:
+    """ A queue to store the highest scoring feature lists.
+
+        Parameters
+        ----------
+        size : int, optional
+            The capacity of the queue. If none its capacity will
+            be unlimited.
+    """
+    def __init__(self, size=None):
+        self.size = size
+        self._items = []
+        self._min = float("inf")
+        self._min_idx = None
+
+    def append(self, feat_list):
+        """ Add a new feat list to the queue.
+        """
+        if self.size is None:
+            self._items.append(feat_list)
+        elif len(self) < self.size:
+            self._items.append(feat_list)
+            # The new score is the minimum
+            if feat_list.score < self._min:
+                self._min = feat_list.score
+                self._min_idx = len(self) - 1
+        else:
+            # Remove the lowest scoring item
+            if feat_list.score > self._min:
+                self._items.pop(self._min_idx)
+                self._items.append(feat_list)
+                # Find the new minimum
+                self._min_idx = self._items.index(
+                    min(self._items, key=lambda x: x.score)
+                )
+                self._min = self._min_idx
+
+    def __len__(self):
+        return len(self._items)
+
+    def __getitem__(self, item):
+        return self._items[item]
 
 
 def nearest_bins(num, bin_size):
@@ -418,7 +492,7 @@ def compute_point_score(reference, non_ref):
     return 1 - rmsd / RMSD_CUTOFF
 
 
-def surviving_box_top_representative(surviving_box, point_scores):
+def surviving_box_top_representative(surviving_box, point_scores, n_ligs):
     """ Obtain the top ranked representative feature list from a surviving box.
 
         Parameters
@@ -430,16 +504,19 @@ def surviving_box_top_representative(surviving_box, point_scores):
             Values of point scores between feature lists. Avoid repeated
             computations.
 
+        n_ligs : int
+            Number of ligands.
+
         Returns
         -------
-        tuple[FeatureList, float]
+        FeatureList
             The best ranked feature list in the box with its score. Can be null if the
             alignments of the feature list are above the rmsd threshold.
 
     """
     # Store the best score and reference for each molecule
-    best_score = [float("-inf")] * len(surviving_box.mols)
-    best_ref = [None] * len(surviving_box.mols)
+    best_score = [float("-inf")] * n_ligs
+    best_ref = [None] * n_ligs
     for reference in surviving_box:
         ref_mol = reference.id[0]
         avg_score = 0
@@ -518,7 +595,9 @@ def feat_list_to_pharma(feat_list, ligand):
     return pharmacophore
 
 
-def find_common_pharmacophores(mols, chem_feats, n_points, min_actives):
+def find_common_pharmacophores(mols, chem_feats, n_points,
+                               min_actives, max_pharmacophores
+                               ):
     """ Find common pharmacophores in a set of ligands and assigns a score to each one.
 
         Parameters
@@ -535,6 +614,8 @@ def find_common_pharmacophores(mols, chem_feats, n_points, min_actives):
         min_actives : int
             Number of ligands that the common pharmacophores are present in.
 
+        max_pharmacophores : int
+
         Returns
         -------
         pharmacophores : list[PharmacophoricPoint]
@@ -544,18 +625,20 @@ def find_common_pharmacophores(mols, chem_feats, n_points, min_actives):
     ligands = []
     for ii in range(len(mols)):
         lig = Ligand(mols[ii], chem_feats[ii])
+        lig._update_variant()
         ligands.append(lig)
 
     k_variants = common_k_point_variants(ligands, n_points, min_actives)
     boxes = common_k_point_feature_lists(ligands, k_variants)
 
-    top_queue = []
+    top_queue = FLQueue(size=max_pharmacophores)
     scores = {}
     for box in boxes:
-        surviving_boxes = pharmacophore_partitioning(box, min_actives)
+        surviving_boxes = pharmacophore_partitioning(box, min_actives, len(ligands))
         for suv_box in surviving_boxes:
-            top_representative = surviving_box_top_representative(suv_box, scores)
-        # Check for uniqueness, score and max_pharmacophores
-        add_feat_list_to_queue(top_queue, top_representative, max_pharmacophores)
+            top_representative = surviving_box_top_representative(suv_box, scores, len(ligands))
+            if top_representative is not None:
+                # Check for uniqueness, score and max_pharmacophores
+                top_queue.append(top_representative)
 
-    return [pharmacophore_from_feat_list(t) for t in top_queue]
+    return [t.to_pharmacophore(ligands[t.id[0]]) for t in top_queue]

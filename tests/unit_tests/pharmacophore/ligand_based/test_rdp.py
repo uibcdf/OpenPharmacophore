@@ -375,8 +375,8 @@ def test_feat_list_to_pharma(mocker):
     ligand = rdp.Ligand(None, feats)
     ligand.variant = "AAAPR"
 
-    fl = rdp.FeatureList("APR", (1, 3, 4), (0, 2), np.zeros((3,)))
-    pharma = rdp.feat_list_to_pharma(fl, ligand)
+    fl = rdp.FeatureList("APR", (1, 3, 4), (0, 2), np.zeros((3,)), score=0.7)
+    pharma = fl.to_pharmacophore(ligand)
 
     assert mock_centroids.call_count == 3
     calls = [
@@ -393,6 +393,10 @@ def test_feat_list_to_pharma(mocker):
     assert np.all(puw.get_value(pharma[1].center) == np.ones((3,)))
     assert np.all(puw.get_value(pharma[2].center) == np.ones((3,)) * 2)
 
+    assert pharma.score == 0.7
+    assert pharma.ref_mol == 0
+    assert pharma.ref_struct == 2
+
 
 def test_surviving_box_top_representative():
     surviving_box = rdp.FLContainer(variant="AAR", n_mols=3)
@@ -407,7 +411,7 @@ def test_surviving_box_top_representative():
     ])
 
     top_representative = rdp.surviving_box_top_representative(
-        surviving_box, {}
+        surviving_box, {}, 3
     )
     assert top_representative.index == 5
     assert np.allclose(top_representative.score, 0.7519831344581808)
@@ -426,7 +430,7 @@ def test_surviving_box_representative_rmsd_cutoff_exceeded():
     ])
 
     top_representative = rdp.surviving_box_top_representative(
-        surviving_box, {}
+        surviving_box, {}, 3
     )
     assert top_representative.index == 1
     assert np.allclose(top_representative.score, 0.5775301813539175)
@@ -446,7 +450,7 @@ def test_surviving_box_representatives_scores_precomputed():
     ])
 
     top_representative = rdp.surviving_box_top_representative(
-        surviving_box, scores
+        surviving_box, scores, 3
     )
     assert top_representative.index == 0
     assert top_representative.score == 0.75
@@ -463,6 +467,51 @@ def test_surviving_box_representative_all_point_scores_negative():
     ])
 
     top_representative = rdp.surviving_box_top_representative(
-        surviving_box, scores
+        surviving_box, scores, 3
     )
     assert top_representative is None
+
+
+def test_add_feat_list_to_queue_with_unlimited_space():
+    fl_1 = rdp.FeatureList("AP", (3, 5), (0, 0), np.array([4.]), score=0.9)
+    fl_2 = rdp.FeatureList("AR", (0, 4), (1, 0), np.array([4.]), score=0.4)
+    fl_3 = rdp.FeatureList("DP", (1, 2), (2, 0), np.array([4.]), score=1.6)
+
+    queue_unlimited_size = rdp.FLQueue()
+    queue_unlimited_size.append(fl_1)
+    queue_unlimited_size.append(fl_2)
+    queue_unlimited_size.append(fl_3)
+    assert len(queue_unlimited_size) == 3
+
+
+def test_add_to_queue_prefers_higher_scores():
+    fl_1 = rdp.FeatureList("AP", (3, 5), (0, 0), np.array([4.]), score=0.9)
+    fl_2 = rdp.FeatureList("AR", (0, 4), (1, 0), np.array([4.]), score=1.4)
+    fl_3 = rdp.FeatureList("DP", (1, 2), (2, 0), np.array([4.]), score=0.6)
+
+    queue_size_2 = rdp.FLQueue(size=2)
+    queue_size_2.append(fl_1)
+    queue_size_2.append(fl_3)
+
+    assert queue_size_2[0].score == 0.9
+    assert queue_size_2[1].score == 0.6
+
+    queue_size_2.append(fl_2)
+    assert len(queue_size_2) == 2
+    assert queue_size_2[0].score == 0.9
+    assert queue_size_2[1].score == 1.4
+
+
+def test_adding_to_full_queue_lower_score_does_not_alter_it():
+    fl_1 = rdp.FeatureList("AP", (3, 5), (0, 0), np.array([4.]), score=0.9)
+    fl_2 = rdp.FeatureList("AR", (0, 4), (1, 0), np.array([4.]), score=1.4)
+    fl_3 = rdp.FeatureList("DP", (1, 2), (2, 0), np.array([4.]), score=0.6)
+
+    queue_size_2 = rdp.FLQueue(size=2)
+    queue_size_2.append(fl_1)
+    queue_size_2.append(fl_2)
+    queue_size_2.append(fl_3)
+
+    assert len(queue_size_2) == 2
+    assert queue_size_2[0].score == 0.9
+    assert queue_size_2[1].score == 1.4

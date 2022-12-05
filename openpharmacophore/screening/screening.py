@@ -95,7 +95,7 @@ class VirtualScreening:
         molecules = mol_file_iterator(file_name)
         self._from_iterable(molecules, pharmacophore_index)
 
-    def from_dir(self, path, pharmacophore_index):
+    def from_dir(self, path, pharmacophore_index, skip=None):
         """ Screen molecules from a directory.
 
             Parameters
@@ -105,11 +105,16 @@ class VirtualScreening:
 
             pharmacophore_index : int
                 The index of the pharmacophore that will be used.
+
+            skip : list[str]
+                Skip files in this list.
         """
         # TODO: add progress bar
         file_formats = ["smi", "mol2", "sdf"]
         for root, dirs, files in os.walk(path):
             for file in files:
+                if file in skip:
+                    continue
                 if file.split(".")[-1] in file_formats:
                     self.from_file(os.path.join(root, file), pharmacophore_index)
 
