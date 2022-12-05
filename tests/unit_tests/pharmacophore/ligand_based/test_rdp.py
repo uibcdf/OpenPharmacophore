@@ -410,6 +410,7 @@ def test_surviving_box_top_representative():
         surviving_box, {}
     )
     assert top_representative.index == 5
+    assert np.allclose(top_representative.score, 0.7519831344581808)
 
 
 def test_surviving_box_representative_rmsd_cutoff_exceeded():
@@ -420,7 +421,7 @@ def test_surviving_box_representative_rmsd_cutoff_exceeded():
         rdp.FeatureList("AAR", (0, 1, 2), (1, 0), np.array([5.2, 4.8, 7.1]), index=3),
         rdp.FeatureList("AAR", (0, 1, 2), (1, 1), np.array([4.8, 5.0, 6.8]), index=4),
         rdp.FeatureList("AAR", (0, 1, 2), (2, 0), np.array([5.1, 4.9, 7.0]), index=5),
-        rdp.FeatureList("AAR", (0, 1, 2), (2, 1), np.array([5.7, 4.2, 8.0]), index=6),
+        rdp.FeatureList("AAR", (0, 1, 2), (2, 1), np.array([5.9, 3.5, 8.0]), index=6),
 
     ])
 
@@ -428,6 +429,7 @@ def test_surviving_box_representative_rmsd_cutoff_exceeded():
         surviving_box, {}
     )
     assert top_representative.index == 1
+    assert np.allclose(top_representative.score, 0.5775301813539175)
 
 
 def test_surviving_box_representatives_scores_precomputed():
@@ -447,6 +449,7 @@ def test_surviving_box_representatives_scores_precomputed():
         surviving_box, scores
     )
     assert top_representative.index == 0
+    assert top_representative.score == 0.75
 
 
 def test_surviving_box_representative_all_point_scores_negative():

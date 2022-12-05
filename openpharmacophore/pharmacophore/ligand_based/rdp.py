@@ -142,6 +142,7 @@ class FeatureList:
         self.variant = variant
         self.var_ind = var_ind
         self.index = index
+        self.score = None
 
 
 class FLContainer:
@@ -182,6 +183,10 @@ class FLContainer:
             self.append(fl)
 
     def __getitem__(self, item):
+        """ Returns
+            -------
+            list[FeatureList]
+        """
         return self._flists[item]
 
     def __iter__(self):
@@ -200,8 +205,8 @@ class FLContainer:
                 return self.__next__()
             return flist
         else:
-            del self._fl_ind
-            del self._mol_ind
+            # del self._fl_ind
+            # del self._mol_ind
             raise StopIteration
 
     def __len__(self):
@@ -394,8 +399,27 @@ def common_k_point_feature_lists(ligands, k_variants):
     return all_containers
 
 
+def compute_point_score(reference, non_ref):
+    """ Compute the point score function that is defined by
+        1 - RMSD / RMSD_cutoff
+
+        Parameters
+        ----------
+        reference : FeatureList
+        non_ref : FeatureList
+
+        Returns
+        -------
+        float
+    """
+    rmsd = np.sqrt(
+        np.power(reference.distances - non_ref.distances, 2).mean()
+    )
+    return 1 - rmsd / RMSD_CUTOFF
+
+
 def surviving_box_top_representative(surviving_box, point_scores):
-    """ Obtain the top ranked representative feature list from a surviving box
+    """ Obtain the top ranked representative feature list from a surviving box.
 
         Parameters
         ----------
@@ -403,16 +427,63 @@ def surviving_box_top_representative(surviving_box, point_scores):
             A surviving box
 
         point_scores : dict[tuple, float]
-            Values of point scores between feature lists to avoid repeated
+            Values of point scores between feature lists. Avoid repeated
             computations.
 
         Returns
         -------
-        FeatureList
-            The best ranked feature list in the box
+        tuple[FeatureList, float]
+            The best ranked feature list in the box with its score. Can be null if the
+            alignments of the feature list are above the rmsd threshold.
 
     """
-    pass
+    # Store the best score and reference for each molecule
+    best_score = [float("-inf")] * len(surviving_box.mols)
+    best_ref = [None] * len(surviving_box.mols)
+    for reference in surviving_box:
+        ref_mol = reference.id[0]
+        avg_score = 0
+        score = 0
+        # Score reference only with respect to feature lists of other molecules
+        for ii in surviving_box.mols:
+            if ii == ref_mol:
+                continue
+            for non_ref in surviving_box[ii]:
+                idx_1 = reference.index
+                idx_2 = non_ref.index
+                if idx_2 < idx_1:
+                    idx_1, idx_2 = idx_2, idx_1
+
+                try:
+                    score = point_scores[(idx_1, idx_2)]
+                except KeyError:
+                    score = compute_point_score(reference, non_ref)
+                    point_scores[(idx_1, idx_2)] = score
+
+                if score > 0:
+                    avg_score += score
+                else:
+                    break
+
+        if score < 0:
+            best_score[ref_mol] = float("-inf")
+            best_ref[ref_mol] = None
+            continue
+
+        n_non_ref_fl = len(surviving_box) - len(surviving_box[ref_mol])
+        avg_score /= n_non_ref_fl
+        if avg_score > best_score[ref_mol]:
+            best_score[ref_mol] = avg_score
+            best_ref[ref_mol] = reference
+
+    if all([r is None for r in best_ref]):
+        return None
+
+    # Choose the best among all molecules
+    max_ind = best_score.index(max(best_score))
+    if best_ref[max_ind] is not None:
+        best_ref[max_ind].score = best_score[max_ind]
+    return best_ref[max_ind]
 
 
 def vector_score(id_1, id_2):
