@@ -1,6 +1,5 @@
 from openpharmacophore import PharmacophoricPoint
 from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmacophores
-from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
 from openpharmacophore.utils.conformers import ConformerGenerator
@@ -17,7 +16,7 @@ import os
 import math
 
 
-class LigandBasedPharmacophore(Pharmacophore):
+class LigandBasedPharmacophore():
     """ Class to store and extract pharmacophores from a set of ligands.
 
         Attributes

@@ -1,5 +1,4 @@
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore import PLComplex
 import openpharmacophore.io as io
@@ -15,7 +14,7 @@ import requests
 import tempfile
 
 
-class LigandReceptorPharmacophore(Pharmacophore):
+class LigandReceptorPharmacophore():
     """ Class to store, and extract pharmacophores from protein-ligand complexes.
 
         The pharmacophores can be extracted from a pdb file or from a molecular
