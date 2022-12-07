@@ -16,12 +16,12 @@ import os
 import math
 
 
-class LigandBasedPharmacophore():
+class LigandBasedPharmacophore:
     """ Class to store and extract pharmacophores from a set of ligands.
 
         Attributes
         ----------
-        pharmacophores : list[list[PharmacophoricPoint]]
+        pharmacophores : list[Pharmacophore]
             List with common pharmacophores.
     """
 

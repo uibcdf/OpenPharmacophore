@@ -1,12 +1,11 @@
 from openpharmacophore.pharmacophore.chem_feats import feature_centroids
 from openpharmacophore.utils.maths import points_distance
-from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
 import numpy as np
 import pyunitwizard as puw
 import math
 import itertools
 from collections import defaultdict, Counter, namedtuple
-
 
 BIN_SIZE = 1.0  # In angstroms
 MAX_DIST = 15.0  # Maximum interpoint distance in angstroms
@@ -99,7 +98,7 @@ class Ligand:
         if self.distances[conf, 0, 1] == -1:
             self.interpoint_distances(conf)
 
-        shape = (int(len(k_var) * (len(k_var) - 1) / 2), )
+        shape = (int(len(k_var) * (len(k_var) - 1) / 2),)
         dist = np.zeros(shape)
         ii = 0  # index in dist array
         for jj in range(len(k_var)):
@@ -136,6 +135,7 @@ class FeatureList:
         index : int, optional
             An index to use as an identifier for a list
     """
+
     def __init__(self, variant, var_ind,
                  fl_id, distances, index=None, score=None):
         self.id = fl_id
@@ -174,10 +174,19 @@ class FeatureList:
 
         return pharmacophore
 
+    def __eq__(self, other):
+        if isinstance(other, FeatureList):
+            if self.id == other.id and \
+                    self.var_ind == other.var_ind and \
+                    self.variant == other.variant:
+                return True
+        return False
+
 
 class FLContainer:
     """ A container of feature lists of the same variant.
     """
+
     def __init__(self, n_mols, variant):
         self.variant = variant
         self.n_pairs = int(len(variant) * (len(variant) - 1) / 2)
@@ -252,6 +261,7 @@ class FLQueue:
             The capacity of the queue. If none its capacity will
             be unlimited.
     """
+
     def __init__(self, size=None):
         self.size = size
         self._items = []
@@ -260,25 +270,34 @@ class FLQueue:
 
     def append(self, feat_list):
         """ Add a new feat list to the queue.
+
+            It must be a unique feat list (not already in the queue). If
+            the queue is full it will only be appended if its score is greater
+            than the item with the lowest score.
+
+            Parameters
+            ----------
+            feat_list : FeatureList
         """
-        if self.size is None:
-            self._items.append(feat_list)
-        elif len(self) < self.size:
-            self._items.append(feat_list)
-            # The new score is the minimum
-            if feat_list.score < self._min:
-                self._min = feat_list.score
-                self._min_idx = len(self) - 1
-        else:
-            # Remove the lowest scoring item
-            if feat_list.score > self._min:
-                self._items.pop(self._min_idx)
+        if feat_list not in self._items:
+            if self.size is None:
                 self._items.append(feat_list)
-                # Find the new minimum
-                self._min_idx = self._items.index(
-                    min(self._items, key=lambda x: x.score)
-                )
-                self._min = self._min_idx
+            elif len(self) < self.size:
+                self._items.append(feat_list)
+                # The new score is the minimum
+                if feat_list.score < self._min:
+                    self._min = feat_list.score
+                    self._min_idx = len(self) - 1
+            else:
+                # Remove the lowest scoring item
+                if feat_list.score > self._min:
+                    self._items.pop(self._min_idx)
+                    self._items.append(feat_list)
+                    # Find the new minimum
+                    self._min_idx = self._items.index(
+                        min(self._items, key=lambda x: x.score)
+                    )
+                    self._min = self._min_idx
 
     def __len__(self):
         return len(self._items)
@@ -327,7 +346,6 @@ def recursive_partitioning(container, dim, n_pairs, boxes, min_actives, n_ligs):
             Total number of ligands.
 
     """
-    # TODO: bin attribute in container is not necessary
     bins = [
         FLContainer(n_ligs, container.variant) for _ in range(BINS.shape[0] - 1)
     ]
@@ -371,7 +389,7 @@ def pharmacophore_partitioning(container, min_actives, n_ligs):
 K_VARIANT = namedtuple("K_VARIANT", ["name", "indices", "mol"])
 
 
-def common_k_point_variants(ligands,  n_points, min_actives):
+def common_k_point_variants(ligands, n_points, min_actives):
     """ Find the common k-point feature lists, that is, the lists with variants
         consisting of k pharmacophoric points that are common to at least the
         specified number of actives.
@@ -615,6 +633,7 @@ def find_common_pharmacophores(mols, chem_feats, n_points,
             Number of ligands that the common pharmacophores are present in.
 
         max_pharmacophores : int
+            Maximum number of pharmacophores to return.
 
         Returns
         -------

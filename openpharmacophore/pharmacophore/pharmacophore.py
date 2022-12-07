@@ -23,7 +23,10 @@ class Pharmacophore:
     def __init__(self, points=None, score=None,
                  ref_mol=None, ref_struct=None
                  ):
-        self._points = points
+        if points is None:
+            self._points = []
+        else:
+            self._points = points
         self.score = score
         self.ref_mol = ref_mol
         self.ref_struct = ref_struct

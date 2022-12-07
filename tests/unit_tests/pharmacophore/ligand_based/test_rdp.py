@@ -8,14 +8,41 @@ from collections import Counter
 
 # Feature List Class Tests
 
+@pytest.fixture()
+def feat_list():
+    return rdp.FeatureList("AAR", (0, 1, 2), (0, 1),
+                           np.array([1.0, 1.0, 1.0]))
 
-def test_init_feature_list():
-    f_list = rdp.FeatureList("AAR", (0, 1, 2), (0, 1),
-                             np.array([1.0, 1.0, 1.0]))
-    assert f_list.id == (0, 1)
-    assert f_list.variant == "AAR"
-    assert f_list.var_ind == (0, 1, 2)
-    assert np.all(f_list.distances == np.array([1.0, 1.0, 1.0]))
+
+def test_init_feature_list(feat_list):
+    assert feat_list.id == (0, 1)
+    assert feat_list.variant == "AAR"
+    assert feat_list.var_ind == (0, 1, 2)
+    assert np.all(feat_list.distances == np.array([1.0, 1.0, 1.0]))
+
+
+def test_feat_list_with_different_id_are_not_equal(feat_list):
+    different_f_list = rdp.FeatureList("AAR", (0, 1, 2), (1, 4),
+                                       np.array([1.0, 1.0, 1.0]))
+    assert not feat_list == different_f_list
+
+
+def test_feat_lists_with_different_variant_indices_are_not_equal(feat_list):
+    different_f_list = rdp.FeatureList("AAR", (1, 1, 2), (0, 1),
+                                       np.array([1.0, 1.0, 1.0]))
+    assert not different_f_list == feat_list
+
+
+def test_feat_lists_with_different_variants_are_not_equal(feat_list):
+    different_f_list = rdp.FeatureList("AAP", (0, 1, 2), (0, 1),
+                                       np.array([1.0, 1.0, 1.0]))
+    assert not different_f_list == feat_list
+
+
+def test_feat_list_equality(feat_list):
+    same_f_list = rdp.FeatureList("AAR", (0, 1, 2), (0, 1),
+                                  np.array([1.0, 1.0, 1.0]))
+    assert feat_list == same_f_list
 
 
 # FLContainer Class Tests
@@ -63,10 +90,10 @@ def test_flcontainer_append_different_variant_raises_error():
 def test_iter_container():
     container = rdp.FLContainer(n_mols=3, variant="AP")
     container.append_multiple([
-        rdp.FeatureList("AP", (1,), (0, 0), np.ones(1,)),
-        rdp.FeatureList("AP", (1,), (0, 1), np.ones(1,)),
-        rdp.FeatureList("AP", (1,), (1, 0), np.ones(1,)),
-        rdp.FeatureList("AP", (1,), (2, 0), np.ones(1,)),
+        rdp.FeatureList("AP", (1,), (0, 0), np.ones(1, )),
+        rdp.FeatureList("AP", (1,), (0, 1), np.ones(1, )),
+        rdp.FeatureList("AP", (1,), (1, 0), np.ones(1, )),
+        rdp.FeatureList("AP", (1,), (2, 0), np.ones(1, )),
     ])
     iterator = iter(container)
     assert next(iterator).id == (0, 0)
@@ -515,3 +542,15 @@ def test_adding_to_full_queue_lower_score_does_not_alter_it():
     assert len(queue_size_2) == 2
     assert queue_size_2[0].score == 0.9
     assert queue_size_2[1].score == 1.4
+
+
+def test_repeated_items_are_not_added_to_queue():
+    fl_1 = rdp.FeatureList("AP", (3, 5), (0, 0), np.array([4.]), score=0.9)
+    fl_2 = rdp.FeatureList("AR", (0, 4), (1, 0), np.array([4.]), score=1.4)
+    queue = rdp.FLQueue(size=3)
+    queue.append(fl_1)
+    queue.append(fl_2)
+
+    repeated_fl = rdp.FeatureList("AP", (3, 5), (0, 0), np.array([4.]), score=0.9)
+    queue.append(repeated_fl)
+    assert len(queue) == 2
