@@ -35,3 +35,21 @@ def test_add_points_to_pharmacophore():
     assert pharma[0].feature_name == "hb donor"
     assert pharma[1].feature_name == "aromatic ring"
 
+
+def test_remove_point_from_pharmacophore():
+    radius = puw.quantity(1.0, "angstroms")
+    donor = PharmacophoricPoint(
+        "hb donor",
+        puw.quantity([1.0, 1.0, 1.0], "angstroms"),
+        radius
+    )
+    ring = PharmacophoricPoint(
+        "aromatic ring",
+        puw.quantity([1.0, 1.0, 1.0], "angstroms"),
+        radius
+    )
+    pharma = Pharmacophore([donor, ring])
+
+    pharma.remove(0)
+    assert len(pharma) == 1
+    assert pharma[0].feature_name == "aromatic ring"

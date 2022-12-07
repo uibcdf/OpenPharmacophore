@@ -40,6 +40,16 @@ class Pharmacophore:
         """
         self._points.append(point)
 
+    def remove(self, index):
+        """ Remove a pharmacophoric point.
+
+            Parameters
+            ----------
+            index : int
+                Index of the pharmacophoric point
+        """
+        self._points.pop(index)
+
     def __len__(self):
         return len(self._points)
 

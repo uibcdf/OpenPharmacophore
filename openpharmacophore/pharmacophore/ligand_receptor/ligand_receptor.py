@@ -14,7 +14,7 @@ import requests
 import tempfile
 
 
-class LigandReceptorPharmacophore():
+class LigandReceptorPharmacophore:
     """ Class to store, and extract pharmacophores from protein-ligand complexes.
 
         The pharmacophores can be extracted from a pdb file or from a molecular
@@ -32,8 +32,6 @@ class LigandReceptorPharmacophore():
     PISTACK_ANG_DEV = 30  # degrees
 
     def __init__(self):
-        # Pharmacophores will be stored as a list of pharmacophoric points.
-        # A list for each pharmacophore
         self._pharmacophores = []
         self._pharmacophores_frames = []  # Contains the frame to which each pharmacophore belongs
         self._num_frames = 0

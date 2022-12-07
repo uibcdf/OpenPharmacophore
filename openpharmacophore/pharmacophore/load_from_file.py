@@ -1,7 +1,7 @@
-from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, Pharmacophore
 from openpharmacophore.io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                                   pharmacophoric_points_from_ph4_file, read_ligandscout)
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat, PDBFetchError
+from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 
 
 def ligand_receptor_from_pharma_file(file_name):
@@ -56,13 +56,21 @@ def ligand_based_from_file(file_name):
     """
     pharmacophore = LigandBasedPharmacophore()
     if file_name.endswith(".json"):
-        pharmacophore.add_pharmacophore(load_json_pharmacophore(file_name)[0])
+        pharmacophore.add_pharmacophore(
+            Pharmacophore(load_json_pharmacophore(file_name)[0])
+        )
     elif file_name.endswith(".mol2"):
-        pharmacophore.add_pharmacophore(load_mol2_pharmacophoric_points(file_name)[0])
+        pharmacophore.add_pharmacophore(
+            Pharmacophore(load_mol2_pharmacophoric_points(file_name)[0])
+        )
     elif file_name.endswith(".pml"):
-        pharmacophore.add_pharmacophore(read_ligandscout(file_name))
+        pharmacophore.add_pharmacophore(
+            Pharmacophore(read_ligandscout(file_name))
+        )
     elif file_name.endswith(".ph4"):
-        pharmacophore.add_pharmacophore(pharmacophoric_points_from_ph4_file(file_name))
+        pharmacophore.add_pharmacophore(
+            Pharmacophore(pharmacophoric_points_from_ph4_file(file_name))
+        )
     else:
         raise InvalidFileFormat(file_name.split(".")[-1])
     return pharmacophore

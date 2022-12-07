@@ -1,4 +1,4 @@
-from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
+from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint, Pharmacophore
 import openpharmacophore.data as data
 from matplotlib.colors import to_rgb
 import numpy as np
@@ -123,14 +123,14 @@ def test_find_chem_feats(mocker, pharmacophore_two_ligands):
 def pharmacophore_three_points():
     radius = puw.quantity(1.0, "angstroms")
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
-    pharma = [
+    pharma = Pharmacophore([
         PharmacophoricPoint("hb donor", center, radius),
         PharmacophoricPoint("aromatic ring", center * 2.0, radius),
         PharmacophoricPoint("hydrophobicity", center * -2.0, radius),
-    ]
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.add_pharmacophore(pharma)
-    return pharmacophore
+    ])
+    lbp = LigandBasedPharmacophore()
+    lbp.add_pharmacophore(pharma)
+    return lbp
 
 
 def test_pharmacophore_len(pharmacophore_three_points):

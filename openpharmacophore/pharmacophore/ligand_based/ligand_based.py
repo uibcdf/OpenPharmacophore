@@ -1,4 +1,4 @@
-from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmacophores
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
@@ -26,7 +26,7 @@ class LigandBasedPharmacophore:
     """
 
     def __init__(self):
-        self._pharmacophores = []
+        self._pharmacophores = []  # type: list[Pharmacophore]
         self._ligands = []
         self._feats = []
 
@@ -55,7 +55,7 @@ class LigandBasedPharmacophore:
 
             Parameters
             ----------
-            pharma : list[PharmacophoricPoint]
+            pharma : Pharmacophore
         """
         self._pharmacophores.append(pharma)
 
@@ -114,7 +114,7 @@ class LigandBasedPharmacophore:
             pharma : int
                 Index of the pharmacophore to which the point will be added
         """
-        self._pharmacophores[pharma].append(point)
+        self._pharmacophores[pharma].add(point)
 
     def remove_point(self, pharma, point):
         """ Removes a pharmacophoric point from the pharmacophore.
@@ -127,7 +127,7 @@ class LigandBasedPharmacophore:
             point : int
                 The index of the pharmacophoric point.
         """
-        self._pharmacophores[pharma].pop(point)
+        self._pharmacophores[pharma].remove(point)
 
     @staticmethod
     def get_picked_point_index(view):
@@ -230,7 +230,7 @@ class LigandBasedPharmacophore:
 
         center = puw.quantity([atom["x"], atom["y"], atom["z"]], "angstroms")
         new_point = PharmacophoricPoint(feat_name, center, radius)
-        self._pharmacophores[pharma].append(new_point)
+        self._pharmacophores[pharma].add(new_point)
 
     def add_to_view(self, view, pharma=0, palette=None, opacity=0.5):
         """Add the pharmacophore representation to a view from NGLView.
