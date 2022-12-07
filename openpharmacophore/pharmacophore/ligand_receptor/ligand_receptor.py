@@ -1,4 +1,4 @@
-from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore import PLComplex
 import openpharmacophore.io as io
@@ -17,8 +17,8 @@ import tempfile
 class LigandReceptorPharmacophore:
     """ Class to store, and extract pharmacophores from protein-ligand complexes.
 
-        The pharmacophores can be extracted from a pdb file or from a molecular
-        dynamics simulation.
+        The pharmacophores can be extracted from a PDB structure or from a molecular
+        dynamics trajectory.
 
     """
     # Values from ligandscout and plip
@@ -32,15 +32,12 @@ class LigandReceptorPharmacophore:
     PISTACK_ANG_DEV = 30  # degrees
 
     def __init__(self):
-        self._pharmacophores = []
-        self._pharmacophores_frames = []  # Contains the frame to which each pharmacophore belongs
-        self._num_frames = 0
-
+        self._pharmacophores = []  # type: list[Pharmacophore]
         self._pl_complex = None
 
     @property
     def num_frames(self):
-        return self._num_frames
+        return len(self._pharmacophores)
 
     @property
     def receptor(self):
@@ -105,24 +102,31 @@ class LigandReceptorPharmacophore:
             fp.write(pdb_str)
             self._pl_complex = PLComplex(fp)
 
+    def add_pharmacophore(self, pharma):
+        """ Add a new pharmacophore.
+
+            Parameters
+            ----------
+            pharma : Pharmacophore
+        """
+        self._pharmacophores.append(pharma)
+
     def add_frame(self):
         """ Add a new frame to the pharmacophore. """
-        self._pharmacophores.append([])
-        self._pharmacophores_frames.append(self._num_frames)
-        self._num_frames += 1
+        self._pharmacophores.append(Pharmacophore())
 
     def add_points_to_frame(self, point_list, frame):
         """ Add pharmacophoric points from a list to a frame. """
         for point in point_list:
-            self._pharmacophores[frame].append(point)
+            self._pharmacophores[frame].add(point)
 
     def add_point(self, point, frame):
         """ Add a pharmacophoric point to a pharmacophore in a specific frame."""
-        self._pharmacophores[frame].append(point)
+        self._pharmacophores[frame].add(point)
 
     def remove_point(self, index, frame):
         """ Removes a pharmacophoric point from the pharmacophore at the given frame."""
-        self._pharmacophores[frame].pop(index)
+        self._pharmacophores[frame].remove(index)
 
     def remove_picked_point(self, view):
         raise NotImplementedError
@@ -342,7 +346,7 @@ class LigandReceptorPharmacophore:
                     "hb donor", self._pl_complex.coords[frame, bond[0], :],
                     radius, direction
                 )
-                self._pharmacophores[frame].append(pharma_point)
+                self._pharmacophores[frame].add(pharma_point)
 
     def _hbond_acceptor_pharmacophoric_points(self, h_bonds, frame):
         """ Compute hydrogen bond acceptor pharmacophoric points from
@@ -370,7 +374,7 @@ class LigandReceptorPharmacophore:
                     "hb acceptor", self._pl_complex.coords[frame, bond[2], :],
                     radius, direction
                 )
-                self._pharmacophores[frame].append(pharma_point)
+                self._pharmacophores[frame].add(pharma_point)
 
     def _aromatic_pharmacophoric_points(self, lig_centers, lig_indices,
                                         rec_centers, rec_indices, frame):
@@ -419,7 +423,7 @@ class LigandReceptorPharmacophore:
                             direction = puw.get_value(rec_centers[jj] - lig_centers[ii])
                             pharma_point = PharmacophoricPoint(
                                 "aromatic ring", lig_centers[ii], radius, direction)
-                            self._pharmacophores[frame].append(pharma_point)
+                            self._pharmacophores[frame].add(pharma_point)
 
     def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
         """ Compute hydrophobic pharmacophoric points from protein-ligand interactions.
@@ -448,7 +452,8 @@ class LigandReceptorPharmacophore:
                     centers.append(lig_center)
 
         points_clustered = self._merge_hydrophobic_points(centers, radius)
-        self._pharmacophores[frame] += points_clustered
+        for p in points_clustered:
+            self._pharmacophores[frame].add(p)
 
     @staticmethod
     def _merge_hydrophobic_points(centers, radius):
@@ -508,10 +513,15 @@ class LigandReceptorPharmacophore:
             for prot_center in receptor_centers:
                 if maths.points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
                     pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
-                    self._pharmacophores[frame].append(pharma_point)
+                    self._pharmacophores[frame].add(pharma_point)
 
     def __len__(self):
         return len(self._pharmacophores)
 
     def __getitem__(self, frame):
+        """
+            Returns
+            -------
+            Pharmacophore
+        """
         return self._pharmacophores[frame]
