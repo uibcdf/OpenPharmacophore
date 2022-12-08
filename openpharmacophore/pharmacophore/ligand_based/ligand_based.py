@@ -83,7 +83,7 @@ class LigandBasedPharmacophore:
         self._ligands = [Chem.MolFromSmiles(mol) for mol in ligands]
 
     def from_file(self, file_name):
-        """ Load a pharmacophore from a file.
+        """ Load pharmacophore(s) from a file.
 
            Parameters
            ---------
@@ -91,15 +91,24 @@ class LigandBasedPharmacophore:
                Name of the file containing the pharmacophore
 
        """
-        self._pharmacophores.append([])
         if file_name.endswith(".json"):
-            self._pharmacophores[0] = io.load_json_pharmacophore(file_name)[0]
+            for pnt_list in io.load_json_pharmacophore(file_name):
+                self._pharmacophores.append(
+                    Pharmacophore(pnt_list)
+                )
         elif file_name.endswith(".mol2"):
-            self._pharmacophores[0] = io.load_mol2_pharmacophoric_points(file_name)[0]
+            for pnt_list in io.load_mol2_pharmacophoric_points(file_name):
+                self._pharmacophores.append(
+                    Pharmacophore(pnt_list)
+                )
         elif file_name.endswith(".pml"):
-            self._pharmacophores[0] = io.read_ligandscout(file_name)
+            self._pharmacophores.append(
+                Pharmacophore(io.read_ligandscout(file_name))
+            )
         elif file_name.endswith(".ph4"):
-            self._pharmacophores[0] = io.pharmacophoric_points_from_ph4_file(file_name)
+            self._pharmacophores.append(
+                Pharmacophore(io.pharmacophoric_points_from_ph4_file(file_name))
+            )
         else:
             raise InvalidFileFormat(file_name.split(".")[-1])
 
@@ -232,7 +241,7 @@ class LigandBasedPharmacophore:
         new_point = PharmacophoricPoint(feat_name, center, radius)
         self._pharmacophores[pharma].add(new_point)
 
-    def add_to_view(self, view, pharma=0, palette=None, opacity=0.5):
+    def add_to_view(self, view, pharma, palette=None, opacity=0.5):
         """Add the pharmacophore representation to a view from NGLView.
 
            Parameters
@@ -240,7 +249,7 @@ class LigandBasedPharmacophore:
            view : nglview.NGLWidget
                View where the pharmacophore will be added.
 
-            pharma : int
+           pharma : int
                 Index of the pharmacophore
 
            palette : dict[str, str], optional
@@ -253,27 +262,50 @@ class LigandBasedPharmacophore:
         for point in self[pharma]:
             point.add_to_ngl_view(view, palette, opacity)
 
-    def add_ligands_to_view(self, view):
-        """ Adds the ligands to a ngl view.
+    @staticmethod
+    def add_ligand_to_view(view, ligand, conf_id):
+        """ Add a ligand to a view.
 
             Parameters
             ----------
             view : nglview.NGLWidget
                View where the pharmacophore will be added.
-        """
-        for ligand in self._ligands:
-            component = view.add_component(ligand)
-            component.clear()
-            component.add_ball_and_stick(multipleBond=True)
 
-    def show(self, ligands=True, palette=None):
+            ligand : rdkit.Chem.Mol
+
+            conf_id : int
+                Conformer index of the ligand.
+        """
+        # TODO: conf_id kwarg does not work in add_component
+        component = view.add_component(ligand, conf_id=conf_id)
+        component.clear()
+        component.add_ball_and_stick(multipleBond=True)
+
+    @staticmethod
+    def add_ligands_to_view(view, ligands, conf_ids):
+        """ Adds multiple ligands to a ngl view.
+
+            Parameters
+            ----------
+            view : nglview.NGLWidget
+               View where the pharmacophore will be added.
+
+            ligands : list[rdkit.Chem.Mol]
+
+            conf_ids : list[int]
+        """
+        for ii in range(len(ligands)):
+            LigandBasedPharmacophore.add_ligand_to_view(
+                view, ligands[ii], conf_ids[ii]
+            )
+
+    def show(self, pharma=0, palette=None):
         """ Show the pharmacophore model.
 
         Parameters
         ----------
-        ligands : bool
-            Whether to show the ligands from which this pharmacophore
-            was extracted from.
+        pharma : int
+            Index of the pharmacophore that will be shown
 
         palette : str or dict.
             Color palette name or dictionary. (Default: 'openpharmacophore')
@@ -283,10 +315,13 @@ class LigandBasedPharmacophore:
         nglview.NGLWidget
             A nglview.NGLWidget with the 'view' of the pharmacophoric model.
         """
-        view = nv.NGLWidget()
-        if ligands:
-            self.add_ligands_to_view(view)
-        self.add_to_view(view, palette=palette)
+        lig = self._pharmacophores[pharma].ref_mol
+        conf = self._pharmacophores[pharma].ref_struct
+        if lig is not None and conf is not None:
+            view = nv.show_rdkit(self._ligands[lig], conf_id=conf)
+        else:
+            view = nv.NGLWidget()
+        self.add_to_view(view, pharma, palette=palette)
         return view
 
     def to_json(self, file_name):
@@ -419,6 +454,7 @@ class LigandBasedPharmacophore:
             The attribute feats is update with a dictionary containing the chemical
             features of each ligand.
         """
+        self._feats.clear()
         for ii, lig in enumerate(self._ligands):
             self._feats.append({})
             for feat_type, smarts in smarts_ligand.items():

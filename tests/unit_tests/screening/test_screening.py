@@ -1,4 +1,5 @@
-from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, VirtualScreening
+from openpharmacophore import LigandBasedPharmacophore, VirtualScreening, Pharmacophore
+from openpharmacophore.io.pharmacophore_mol2 import load_mol2_pharmacophoric_points
 from openpharmacophore.utils.conformers import generate_conformers
 from openpharmacophore import load_from_file
 import openpharmacophore.data as data
@@ -8,9 +9,12 @@ from rdkit.Chem import MolFromSmiles
 
 @pytest.fixture()
 def ligand_based_pharmacophore():
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
-    return pharmacophore
+    points = load_mol2_pharmacophoric_points(
+        data.pharmacophores["elastase.mol2"]
+    )
+    pharma = LigandBasedPharmacophore()
+    pharma.add_pharmacophore(Pharmacophore(points[0]))
+    return pharma
 
 
 @pytest.fixture()

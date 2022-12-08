@@ -7,7 +7,6 @@ import pyunitwizard as puw
 import pytest
 from rdkit import Chem
 from copy import deepcopy
-from unittest.mock import Mock, call
 
 
 def test_init_ligand_based_pharmacophore():
@@ -244,8 +243,8 @@ def test_pharmacophore_string_representation(pharmacophore_three_points):
     assert pharmacophore_three_points.__repr__() == "LigandBasedPharmacophore(n_pharmacophores: 1)"
 
 
-def test_remove_picked_point(pharmacophore_three_points):
-    mock_view = Mock()
+def test_remove_picked_point(pharmacophore_three_points, mocker):
+    mock_view = mocker.Mock()
     mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
                                       'nglview.shape.Shape',
                                       'nglview.shape.Shape',
@@ -261,10 +260,10 @@ def test_remove_picked_point(pharmacophore_three_points):
     assert pharmacophore[0][1].short_name == "H"
 
 
-def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points):
+def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points, mocker):
     # Suppose we select an atom from the molecule
     # The pharmacophore should be intact
-    mock_view = Mock()
+    mock_view = mocker.Mock()
     mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
                                       'nglview.shape.Shape']
     mock_view.picked = {
@@ -280,8 +279,8 @@ def test_remove_picked_point_with_no_selected_point(pharmacophore_three_points):
     assert len(pharmacophore[0]) == 3
 
 
-def test_edit_picked_point(pharmacophore_three_points):
-    mock_view = Mock()
+def test_edit_picked_point(pharmacophore_three_points, mocker):
+    mock_view = mocker.Mock()
     mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
                                       'nglview.shape.Shape',
                                       'nglview.shape.Shape',
@@ -302,8 +301,8 @@ def test_edit_picked_point(pharmacophore_three_points):
     assert puw.get_value(pharmacophore[0][0].radius) == 2.0
 
 
-def test_add_point_in_picked_location(pharmacophore_three_points):
-    mock_view = Mock()
+def test_add_point_in_picked_location(pharmacophore_three_points, mocker):
+    mock_view = mocker.Mock()
     mock_view._ngl_component_names = ["nglview.adaptor.RdkitStructure",
                                       'nglview.shape.Shape',
                                       'nglview.shape.Shape',
@@ -325,36 +324,38 @@ def test_add_point_in_picked_location(pharmacophore_three_points):
     assert pharmacophore[0][3].short_name == "A"
 
 
-def test_add_ligands_to_view():
+@pytest.fixture()
+def ligands():
+    supp = Chem.SDMolSupplier((data.ligands["sdf_example.sdf"]))
+    ligs = [mol for mol in supp]
+    assert len(ligs) == 3
+    return ligs
 
-    mock_view = Mock()
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.load_ligands(data.ligands["clique_detection.smi"])
-    pharmacophore.add_ligands_to_view(mock_view)
-    ligands_call = [call(lig) for lig in pharmacophore.ligands]
 
-    assert mock_view.add_component.call_count == 5
+def test_add_ligands_to_view(ligands, mocker):
+    mock_view = mocker.Mock()
+    conf_ids = [0] * len(ligands)
+    LigandBasedPharmacophore().add_ligands_to_view(
+        mock_view, ligands, conf_ids
+    )
+    ligands_call = [mocker.call(lig, conf_id=0) for lig in ligands]
+
+    assert mock_view.add_component.call_count == 3
     assert mock_view.add_component.call_args_list == ligands_call
 
 
-def ligand_list():
-    supplier = Chem.SmilesMolSupplier(data.ligands["clique_detection.smi"],
-                                      titleLine=True)
-    return [mol for mol in supplier]
+def test_show_pharmacophore_with_no_ref_ligand(pharmacophore_three_points):
+    view = pharmacophore_three_points.show(pharma=0)
+    assert len(view._ngl_component_names) == 3
 
 
-def test_show_no_ligands(pharmacophore_three_points):
-
-    view = pharmacophore_three_points.show(ligands=False)
-    assert len(view._ngl_component_ids) == 3
-
-
-def test_show_with_ligands(pharmacophore_three_points):
-
+def test_show_pharmacophore_with_ref_ligand(pharmacophore_three_points, ligands):
     pharmacophore = deepcopy(pharmacophore_three_points)
-    pharmacophore.ligands = ligand_list()
-    view = pharmacophore.show(ligands=True)
-    assert len(view._ngl_component_ids) == 8
+    pharmacophore.ligands = ligands
+    pharmacophore[0].ref_mol = 1
+    pharmacophore[0].ref_struct = 0
+    view = pharmacophore.show(pharma=0)
+    assert len(view._ngl_component_names) == 4
 
 
 def test_atom_highlights(pharmacophore_two_ligands):

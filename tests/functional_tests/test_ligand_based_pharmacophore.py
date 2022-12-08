@@ -80,23 +80,24 @@ def test_ligand_based_pharmacophore_extraction():
     # We start by loading the ligands from a sdf file
     pharmacophore = oph.LigandBasedPharmacophore()
     pharmacophore.ligands = read_sdf(data.ligands["thrombin_ligands.sdf"])
-    assert len(pharmacophore.ligands) == 7
+    n_ligands = len(pharmacophore.ligands)
+    assert n_ligands == 7
     # We extract pharmacophores of 3 points and visualize them
     pharmacophore.find_chem_feats()
     pharmacophore.extract(
-        n_points=5, min_actives=5, max_pharmacophores=10
+        n_points=3, min_actives=n_ligands, max_pharmacophores=10
     )
-    assert len(pharmacophore) > 0
+    assert len(pharmacophore) == 10
 
     # We inspect the features of a pharmacophore. We expect thrombin pharmacophore
-    # to have an aromatic ring, at leas one hydrophobic and a positive charge
+    # to have an aromatic ring and acceptor and a donor
     feat_names = [p.feature_name for p in pharmacophore[0]]
-    assert "hydrophobicity" in feat_names
+    assert "hb acceptor" in feat_names
     assert "aromatic ring" in feat_names
-    assert "positive charge" in feat_names
+    assert "hb acceptor" in feat_names
 
     # We visualize the best scoring pharmacophore
-    view = pharmacophore.show(index=0, ligands=True)
-    # The view should contain a component for each ligand (5) + the pharmacophoric
+    view = pharmacophore.show(0)
+    # The view should contain a component for the ligand + 3 the pharmacophoric
     # points
-    assert len(view._ngl_component_names) > 5
+    assert len(view._ngl_component_names) == 4

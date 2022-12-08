@@ -586,33 +586,6 @@ def vector_score(id_1, id_2):
     return 0
 
 
-def feat_list_to_pharma(feat_list, ligand):
-    """ Retrieve a pharmacophore from a feature list.
-
-        Parameters
-        ----------
-        feat_list : FeatureList
-        ligand : Ligand
-
-        Returns
-        -------
-        pharmacophore : list[PharmacophoricPoint]
-    """
-    pharmacophore = []
-    for var_ind in feat_list.var_ind:
-        feat_name = ligand.variant[var_ind]
-        feat_start_ind = ligand.variant.index(feat_name)
-        feat_ind = ligand.feats[feat_name][var_ind - feat_start_ind]
-        center = feature_centroids(ligand.mol, feat_list.id[1], feat_ind)
-        pharmacophore.append(PharmacophoricPoint(
-            PharmacophoricPoint.char_to_feature[feat_name],
-            puw.quantity(center, "angstroms"),
-            puw.quantity(1.0, "angstroms"),
-        ))
-
-    return pharmacophore
-
-
 def find_common_pharmacophores(mols, chem_feats, n_points,
                                min_actives, max_pharmacophores
                                ):
@@ -660,4 +633,6 @@ def find_common_pharmacophores(mols, chem_feats, n_points,
                 # Check for uniqueness, score and max_pharmacophores
                 top_queue.append(top_representative)
 
-    return [t.to_pharmacophore(ligands[t.id[0]]) for t in top_queue]
+    pharmacophores = [t.to_pharmacophore(ligands[t.id[0]]) for t in top_queue]
+    pharmacophores.sort(key=lambda p: p.score)
+    return pharmacophores
