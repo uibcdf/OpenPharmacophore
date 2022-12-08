@@ -1,59 +1,57 @@
-from abc import ABCMeta, abstractmethod
 
 
-class Pharmacophore(metaclass=ABCMeta):
-    """ Abstract base class for pharmacophores.
+class Pharmacophore:
+    """ A PharmacophoricPoint container.
 
-        Parent class of all pharmacophore classes.
+        Parameters
+        ----------
+        points : list[PharmacophoricPoint], optional
+            List of pharmacophoric points.
+
+        score : float, optional
+            A score assigned to the pharmacophore.
+
+        ref_mol : int, optional
+            The index of the reference molecule from which the pharmacophore
+            was extracted.
+
+        ref_struct : int, optional
+            The index of the reference structure or conformer from which the pharmacophore
+            was extracted.
+
     """
-    @abstractmethod
-    def add_point(self, *args, **kwargs):
-        pass
+    def __init__(self, points=None, score=None,
+                 ref_mol=None, ref_struct=None
+                 ):
+        if points is None:
+            self._points = []
+        else:
+            self._points = points
+        self.score = score
+        self.ref_mol = ref_mol
+        self.ref_struct = ref_struct
 
-    @abstractmethod
-    def remove_point(self, *args, **kwargs):
-        pass
+    def add(self, point):
+        """ Add a pharmacophoric point.
 
-    @abstractmethod
-    def remove_picked_point(self, *args, **kwargs):
-        pass
+            Parameters
+            ----------
+            point : PharmacophoricPoint
+        """
+        self._points.append(point)
 
-    @abstractmethod
-    def edit_picked_point(self, *args, **kwargs):
-        pass
+    def remove(self, index):
+        """ Remove a pharmacophoric point.
 
-    @abstractmethod
-    def add_point_in_picked_location(self, *args, **kwargs):
-        pass
+            Parameters
+            ----------
+            index : int
+                Index of the pharmacophoric point
+        """
+        self._points.pop(index)
 
-    @abstractmethod
-    def extract(self, *args, **kwargs):
-        pass
+    def __len__(self):
+        return len(self._points)
 
-    @abstractmethod
-    def to_json(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def add_to_view(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def show(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def to_ligand_scout(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def to_moe(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def to_mol2(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def to_rdkit(self, *args, **kwargs):
-        pass
+    def __getitem__(self, item):
+        return self._points[item]

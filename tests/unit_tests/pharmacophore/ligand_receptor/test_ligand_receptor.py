@@ -1,4 +1,4 @@
-from openpharmacophore import LigandReceptorPharmacophore, PharmacophoricPoint
+from openpharmacophore import LigandReceptorPharmacophore, PharmacophoricPoint, Pharmacophore
 import openpharmacophore.data as data
 import nglview as nv
 import numpy as np
@@ -6,7 +6,6 @@ import pyunitwizard as puw
 import pytest
 from copy import deepcopy
 from collections import namedtuple
-import os
 
 # Imports for mocking
 lr_module = "openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor"
@@ -76,8 +75,9 @@ def pharmacophore_one_frame():
     )
 
     ph = LigandReceptorPharmacophore()
-    ph.add_frame()
-    ph.add_points_to_frame([acceptor, donor, aromatic], 0)
+    ph.add_pharmacophore(
+        Pharmacophore(points=[acceptor, donor, aromatic])
+    )
     return ph
 
 
@@ -100,33 +100,41 @@ def test_remove_point(pharmacophore_one_frame):
     assert ph[0][1].feature_name == "aromatic ring"
 
 
-def assert_file_is_created(file_name):
-    assert os.path.isfile(file_name)
-    os.remove(file_name)
+def setup_pharmacophore_to_file_test(func, file_name, mocker):
+    mock_open = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor.open",
+        new=mocker.mock_open())
+    func(file_name, frame=0)
+    mock_open.assert_called_once_with(file_name, "w")
 
 
-def test_to_json(pharmacophore_one_frame):
+def test_to_json(mocker, pharmacophore_one_frame):
     file_name = "ph.json"
-    pharmacophore_one_frame.to_json(file_name, 0)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_one_frame.to_json, file_name, mocker)
 
 
-def test_to_ligand_scout(pharmacophore_one_frame):
+def test_to_ligand_scout(mocker, pharmacophore_one_frame):
+    mock_tree = mocker.patch(
+        "openpharmacophore.pharmacophore.ligand_based.ligand_based.io.ligandscout_xml_tree"
+    )
     file_name = "ph.pml"
-    pharmacophore_one_frame.to_ligand_scout(file_name, 0)
-    assert_file_is_created(file_name)
+    pharmacophore_one_frame.to_ligand_scout(file_name, frame=0)
+    mock_tree.return_value.write.assert_called_once_with(
+        file_name, encoding="UTF-8", xml_declaration=True
+    )
 
 
-def test_to_moe(pharmacophore_one_frame):
+def test_to_moe(mocker, pharmacophore_one_frame):
     file_name = "ph.ph4"
-    pharmacophore_one_frame.to_moe(file_name, 0)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_one_frame.to_moe, file_name, mocker)
 
 
-def test_to_mol2(pharmacophore_one_frame):
+def test_to_mol2(mocker, pharmacophore_one_frame):
     file_name = "ph.mol2"
-    pharmacophore_one_frame.to_mol2(file_name, 0)
-    assert_file_is_created(file_name)
+    setup_pharmacophore_to_file_test(
+        pharmacophore_one_frame.to_mol2, file_name, mocker)
 
 
 def test_to_rdkit(pharmacophore_one_frame):

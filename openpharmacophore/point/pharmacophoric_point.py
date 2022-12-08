@@ -49,7 +49,7 @@ class PharmacophoricPoint:
             they were extracted.
     
     """
-
+    # TODO : move this dict to another file
     feature_to_char = {
         "hb acceptor": "A",
         "hb donor": "D",

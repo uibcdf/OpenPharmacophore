@@ -1,4 +1,4 @@
-from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint
 import pyunitwizard as puw
 
 
@@ -16,9 +16,7 @@ def two_element_pharmacophore():
         center=puw.quantity([1, 2, 2], "angstroms"),
         direction=[0, 1, 1],
         radius=radius)
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = [ring, acceptor]
-    return pharmacophore
+    return [ring, acceptor]
 
 
 def three_element_pharmacophore():
@@ -39,9 +37,7 @@ def three_element_pharmacophore():
         feat_type="excluded volume",
         center=puw.quantity([2, 1, 2], "angstroms"),
         radius=radius)
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = [acceptor, excluded, ring]
-    return pharmacophore
+    return [acceptor, excluded, ring]
 
 
 def five_element_pharmacophore():
@@ -75,7 +71,5 @@ def five_element_pharmacophore():
         center=puw.quantity([-1, 2, 2], "angstroms"),
         radius=radius,
     )
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.pharmacophoric_points = [acceptor, hb_donor,
-                                           hydrophobicity, ring_1, ring_2]
-    return pharmacophore
+    return [acceptor, hb_donor,
+            hydrophobicity, ring_1, ring_2]

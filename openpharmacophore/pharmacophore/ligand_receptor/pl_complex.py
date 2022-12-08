@@ -2,6 +2,7 @@ from openpharmacophore._private_tools import exceptions as exc
 from openpharmacophore.data import pdb_to_smi
 from openpharmacophore.utils import maths
 from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
+from openpharmacophore.pharmacophore.chem_feats import feature_indices, smarts_ligand
 from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj
@@ -28,43 +29,6 @@ class PLComplex:
                    "W", "X", "Y", "Z"]
 
     BS_DIST_MAX = puw.quantity(0.85, "nanometers")
-
-    smarts_ligand = {
-        "aromatic ring": [
-            "a1aaaa1",
-            "a1aaaaa1"
-        ],
-        "hydrophobicity": [
-            '[$([S]~[#6])&!$(S~[!#6])]',
-            '[C&r3]1~[C&r3]~[C&r3]1',
-            '[C&r4]1~[C&r4]~[C&r4]~[C&r4]1',
-            '[C&r5]1~[C&r5]~[C&r5]~[C&r5]~[C&r5]1',
-            '[C&r6]1~[C&r6]~[C&r6]~[C&r6]~[C&r6]~[C&r6]1',
-            '[C&r7]1~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]~[C&r7]1',
-            '[C&r8]1~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]~[C&r8]1',
-            '[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
-            '*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
-            '[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
-            'I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,'
-            'CH2X3,CH1X2,F,Cl,Br,I]',
-            '[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]',
-            '[$([CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,'
-            'CH0X2])])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2] ',
-            '[$([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(**[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]',
-        ],
-        "negative charge": [
-            '[$([-,-2,-3])&!$(*[+,+2,+3])]',
-            '[$([CX3,SX3,PX3](=O)[O-,OH])](=O)[O-,OH]',
-            '[$([SX4,PX4](=O)(=O)[O-,OH])](=O)(=O)[O-,OH]',
-            'c1nn[nH1]n1'
-        ],
-        "positive charge": [
-            'N=[CX3](N)-N',
-            '[$([+,+2,+3])&!$(*[-,-2,-3])]',
-            '[$([CX3](=N)(-N)[!N])](=N)-N',
-            '[$([NX3]([CX4])([CX4,#1])[CX4,#1])&!$([NX3]-*=[!#6])]',
-        ]
-    }
 
     smarts_protein = {
         "aromatic ring": [
@@ -515,8 +479,8 @@ class PLComplex:
 
         # Chemical feature indices are not dependent on the frame
         if self._lig_feats[feat_name] is None:
-            self._lig_feats[feat_name] = self.feature_indices(
-                self.smarts_ligand[feat_name], self._ligand)
+            self._lig_feats[feat_name] = feature_indices(
+                smarts_ligand[feat_name], self._ligand)
 
         centers = []
         indices_list = []
@@ -566,8 +530,8 @@ class PLComplex:
 
         # Chemical feature indices are not dependent on the frame
         if self._rec_feats[feat_name] is None:
-            self._rec_feats[feat_name] = self.feature_indices(
-                self.smarts_ligand[feat_name], self._mol_graph)
+            self._rec_feats[feat_name] = feature_indices(
+                self.smarts_protein[feat_name], self._mol_graph)
 
         indices_bs = []
         centers = []
@@ -581,34 +545,6 @@ class PLComplex:
                 indices_bs.append(indices_top)
 
         return centers, indices_bs
-
-    @staticmethod
-    def feature_indices(feat_def, mol):
-        """ Get the indices of the atoms that encompass a chemical
-            feature.
-
-            Parameters
-            ----------
-            feat_def : list[str]
-                A smart features definition to find chemical features.
-
-            mol : rdkit.Chem.Mol
-                Molecule that will be scanned for the desired features.
-
-            Returns
-            -------
-            list[tuple[int]]
-        """
-        feat_indices = []
-
-        for smarts in feat_def:
-            pattern = Chem.MolFromSmarts(smarts)
-            assert pattern is not None, f"{smarts}"
-            all_indices = mol.GetSubstructMatches(pattern)
-            for indices in all_indices:
-                feat_indices.append(indices)
-
-        return feat_indices
 
     def hbond_indices(self, frame, criterion="baker"):
         """ Get the indices of atoms involved in hydrogen bonding
@@ -628,9 +564,6 @@ class PLComplex:
                 Array of shape (n_hbonds, 3)
         """
         if criterion == "baker":
-            # TODO: This function searches for hbonds in all the pl complex
-            #   we are only interested in protein-ligand hbonds, we can write
-            #   a new function that only searches hbonds between the protein and the ligand.
             return mdt.baker_hubbard(self.traj[frame])
         else:
             raise NotImplementedError

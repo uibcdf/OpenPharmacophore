@@ -44,7 +44,7 @@ def test_pad_coordinate_with_zeros_negative_number():
 def test_mol2_file_info():
     # Test for two element pharmacophore
     ph_1 = two_element_pharmacophore()
-    mol2_list = mol2_file_info([ph_1.pharmacophoric_points])
+    mol2_list = mol2_file_info([ph_1])
     expected_output_1 = ['@<TRIPOS>MOLECULE\n',
                          '@<TRIPOS>ATOM\n',
                          '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
@@ -54,7 +54,7 @@ def test_mol2_file_info():
 
     # Test for five element pharmacophore
     ph_2 = five_element_pharmacophore()
-    mol2_list = mol2_file_info([ph_2.pharmacophoric_points])
+    mol2_list = mol2_file_info([ph_2])
     expected_output_2 = ['@<TRIPOS>MOLECULE\n',
                          '@<TRIPOS>ATOM\n',
                          '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',

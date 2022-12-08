@@ -1,4 +1,5 @@
-from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, VirtualScreening
+from openpharmacophore import LigandBasedPharmacophore, VirtualScreening, Pharmacophore
+from openpharmacophore.io.pharmacophore_mol2 import load_mol2_pharmacophoric_points
 from openpharmacophore.utils.conformers import generate_conformers
 from openpharmacophore import load_from_file
 import openpharmacophore.data as data
@@ -8,9 +9,12 @@ from rdkit.Chem import MolFromSmiles
 
 @pytest.fixture()
 def ligand_based_pharmacophore():
-    pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.from_file(data.pharmacophores["elastase.mol2"])
-    return pharmacophore
+    points = load_mol2_pharmacophoric_points(
+        data.pharmacophores["elastase.mol2"]
+    )
+    pharma = LigandBasedPharmacophore()
+    pharma.add_pharmacophore(Pharmacophore(points[0]))
+    return pharma
 
 
 @pytest.fixture()
@@ -35,7 +39,7 @@ def test_init_virtual_screening_with_sbp(structure_based_pharmacophore):
 
 @pytest.fixture()
 def rdkit_pharmacophore(ligand_based_pharmacophore):
-    return ligand_based_pharmacophore.to_rdkit()
+    return ligand_based_pharmacophore.to_rdkit(0)
 
 
 def test_align_to_pharmacophore_mol_features_dont_match(mocker, rdkit_pharmacophore):
@@ -70,7 +74,7 @@ def sample_molecules():
         MolFromSmiles("o1cccc1")
     ]
     for ii in range(len(molecules)):
-        molecules[ii] = generate_conformers(molecules[ii])
+        molecules[ii] = generate_conformers(molecules[ii], 1)
 
     return molecules
 
@@ -173,7 +177,7 @@ def assert_screening_with_files(mocker, pharmacophore, path,
     if not directory:
         vs.from_file(path, 0)
     else:
-        vs.from_dir(path, 0)
+        vs.from_dir(path, 0, skip=["thrombin_ligands.sdf"])
 
     assert len(vs.matches[0]) == matches
     assert vs.fails(0) == fails
