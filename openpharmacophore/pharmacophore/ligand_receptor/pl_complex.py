@@ -290,9 +290,13 @@ class PLComplex:
 
         template = Chem.MolFromSmiles(smiles)
         if self._ligand.GetNumAtoms() != template.GetNumAtoms():
-            raise exc.DifferentNumAtomsError(
-                self._ligand.GetNumAtoms(), template.GetNumAtoms()
-            )
+            # Removing Hs involved in double bonds can help with the
+            # matching
+            template = Chem.RemoveAllHs(template)
+            if self._ligand.GetNumAtoms() != template.GetNumAtoms():
+                raise exc.DifferentNumAtomsError(
+                    self._ligand.GetNumAtoms(), template.GetNumAtoms()
+                )
 
         fixed_lig = Chem.AssignBondOrdersFromTemplate(template, self._ligand)
         if add_hydrogens:
@@ -737,10 +741,11 @@ class PLComplex:
         for ii in indices:
             res = self.topology.atom(ii).residue
             if res.name != "HOH":
-                residues.add(self.topology.atom(ii).residue.index)
+                residues.add(res.index)
 
-        # Add only whole residues
+        residues = sorted(residues)
         atom_ind = []
+        # Add only whole residues
         for ii in residues:
             for atom in self.topology.residue(ii).atoms:
                 atom_ind.append(atom.index)
