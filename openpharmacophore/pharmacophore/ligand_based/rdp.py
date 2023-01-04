@@ -634,5 +634,5 @@ def find_common_pharmacophores(mols, chem_feats, n_points,
                 top_queue.append(top_representative)
 
     pharmacophores = [t.to_pharmacophore(ligands[t.id[0]]) for t in top_queue]
-    pharmacophores.sort(key=lambda p: p.score)
+    pharmacophores.sort(key=lambda p: p.score, reverse=True)
     return pharmacophores

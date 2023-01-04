@@ -94,8 +94,8 @@ def json_pharmacophoric_elements(pharmacophoric_points):
 
         Parameters
         ----------
-        pharmacophoric_points : list[PharmacophoricPoint]
-            Pharmacophore points that will be used to construct the dictionary
+        pharmacophoric_points : Pharmacophore
+            Pharmacophoric points that will be used to construct the dictionary
 
         Returns
         -------
