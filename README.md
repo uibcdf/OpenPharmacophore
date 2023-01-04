@@ -24,8 +24,14 @@ To be written.
 
 ### Copyright
 
-Copyright (c) 2021, UIBCDF
+Copyright (c) 2021 to 2023, UIBCDF
 
+## Contributors
+
+- Daniel Ibarrola Sánchez (UAM-I/HIMFG)    
+- Rafael A. Zubillaga Luna (UAM-I)    
+- Liliana M. Moreno Vargas (HIMFG)    
+- Diego Prada Gracia (HIMFG)    
 
 #### Acknowledgements
  
