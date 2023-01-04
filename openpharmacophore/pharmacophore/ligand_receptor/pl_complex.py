@@ -1,5 +1,5 @@
 from openpharmacophore._private_tools import exceptions as exc
-from openpharmacophore.data import pdb_to_smi
+from openpharmacophore.pharmacophore.ligand_receptor.pdb_to_smi import pdb_id_mapper
 from openpharmacophore.utils import maths
 from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
 from openpharmacophore.pharmacophore.chem_feats import feature_indices, smarts_ligand
@@ -322,16 +322,9 @@ class PLComplex:
         if lig_name == "UNL":
             raise exc.SmilesNotFoundError(lig_name)
 
-        with open(pdb_to_smi) as fp:
-            lines = fp.readlines()
-
-        pdb_id_mapper = {}
-        for line in lines:
-            lig_id, smi = line.split()
-            pdb_id_mapper[lig_id] = smi
-
+        mapper = pdb_id_mapper()
         try:
-            return pdb_id_mapper[lig_name]
+            return mapper[lig_name]
         except KeyError:
             raise exc.SmilesNotFoundError(lig_name)
 
