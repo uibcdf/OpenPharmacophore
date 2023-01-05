@@ -1,12 +1,11 @@
 import openpharmacophore as oph
-import openpharmacophore.data as data
 from assert_view import assert_view_contains_pharmacophore
 
 
-def test_dynamic_ligand_receptor_pharmacophore():
+def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     # We obtain pharmacophores from a md trajectory of er-alpha
     # that consists of three frames
-    pharmacophore = oph.load(data.trajectories["eralpha_small.h5"])
+    pharmacophore = oph.load(traj_er_alpha)
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We know that the file contains a single ligand
     lig_ids = pharmacophore.receptor.ligand_ids

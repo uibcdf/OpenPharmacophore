@@ -1,7 +1,6 @@
 import mdtraj as mdt
 import numpy as np
 import openpharmacophore._private_tools.exceptions as exc
-import openpharmacophore.data as data
 from openpharmacophore import PLComplex
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand
 import pyunitwizard as puw
@@ -18,9 +17,9 @@ pl_class = pl_module + ".PLComplex"
 
 
 @pytest.fixture()
-def pl_complex():
+def pl_complex(small_pdb_with_ligand):
     """ Returns a pl complex for testing. """
-    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+    pl_complex = PLComplex(small_pdb_with_ligand)
     pl_complex.set_ligand("EST:B")
     return pl_complex
 
@@ -187,38 +186,21 @@ def test_fix_ligand_no_smiles_given(mocker, pl_complex, estradiol_mol):
                 if a.GetSymbol() == "H"]) == 24
 
 
-def test_pdb_id_to_smi(mocker):
-    mock_open = mocker.patch(
-        pl_module + ".open",
-        new=mocker.mock_open())
-    mock_open.return_value.readlines.return_value = [
-        "EST C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
-        "DAO CCCCCCCCCCCC(=O)O"
-    ]
-
+def test_pdb_id_to_smi():
     smiles = PLComplex._pdb_id_to_smi("EST:B")
     assert smiles == "C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
-    mock_open.assert_called_once_with(data.pdb_to_smi)
 
 
-def test_fix_ligand_no_smiles_found(mocker):
-    mock_open = mocker.patch(
-        pl_module + ".open",
-        new=mocker.mock_open())
-    mock_open.return_value.readlines.return_value = [
-        "EST C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
-        "DAO CCCCCCCCCCCC(=O)O"
-    ]
-
-    pl = PLComplex(data.pdb["test_with_lig.pdb"])
-    pl._ligand_ids = ["ATP"]
-    pl.set_ligand("ATP")
+def test_fix_ligand_no_smiles_found(small_pdb_with_ligand):
+    pl = PLComplex(small_pdb_with_ligand)
+    pl._ligand_ids = ["NOT A LIGAND"]
+    pl.set_ligand("NOT A LIGAND")
     with pytest.raises(exc.SmilesNotFoundError):
         pl.fix_ligand()
 
 
-def test_fix_ligand_pdb_id_unl():
-    pl = PLComplex(data.pdb["test_with_lig.pdb"])
+def test_fix_ligand_pdb_id_unl(small_pdb_with_ligand):
+    pl = PLComplex(small_pdb_with_ligand)
     pl._ligand_ids = ["UNL"]
     pl.set_ligand("UNL")
 
@@ -226,15 +208,15 @@ def test_fix_ligand_pdb_id_unl():
         pl.fix_ligand()
 
 
-def test_fix_ligand_template_and_lig_atom_number_different():
-    pl = PLComplex(data.pdb["test_with_lig.pdb"])
+def test_fix_ligand_template_and_lig_atom_number_different(small_pdb_with_ligand):
+    pl = PLComplex(small_pdb_with_ligand)
     pl._ligand = Chem.MolFromSmiles("C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O")
     with pytest.raises(exc.DifferentNumAtomsError):
         pl.fix_ligand(smiles="CCCCCCCCCCCC(=O)O")
 
 
 @pytest.fixture()
-def pl_complex_no_lig():
+def pl_complex_no_lig(small_pdb_with_no_ligand_1):
     """ Returns a PLComplex object whose trajectory does not contain
         any ligand.
 
@@ -242,11 +224,11 @@ def pl_complex_no_lig():
         -------
         PLComplex
     """
-    return PLComplex(data.pdb["test_no_lig.pdb"])
+    return PLComplex(small_pdb_with_no_ligand_1)
 
 
-def test_modeller_to_trajectory():
-    modeller = PDBFile(data.pdb["test_no_lig.pdb"])
+def test_modeller_to_trajectory(small_pdb_with_no_ligand_1):
+    modeller = PDBFile(small_pdb_with_no_ligand_1)
     traj = PLComplex._modeller_to_trajectory(modeller)
     assert traj.n_frames == 1
     assert traj.n_atoms == 19
@@ -280,14 +262,17 @@ def test_modeller_to_trajectory():
     assert np.allclose(traj.xyz, expected_coords)
 
 
-def test_add_fixed_ligand(mocker, pl_complex_no_lig):
-    lig_traj = mdt.load(data.pdb["estradiol.pdb"])
+def test_add_fixed_ligand(
+        mocker, pl_complex_no_lig,
+        estradiol_pdb, small_pdb_with_no_ligand_2
+):
+    lig_traj = mdt.load(estradiol_pdb)
     mocker.patch(
         pl_module + ".mol_to_traj",
         return_value=lig_traj
     )
 
-    pl = PLComplex(data.pdb["test_no_lig_2.pdb"])
+    pl = PLComplex(small_pdb_with_no_ligand_2)
     pl.add_fixed_ligand()
 
     assert pl.topology.n_atoms == 166
@@ -354,8 +339,8 @@ def expected_centroid():
     return centroid
 
 
-def test_lig_centroid(expected_centroid):
-    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+def test_lig_centroid(expected_centroid, small_pdb_with_ligand):
+    pl_complex = PLComplex(small_pdb_with_ligand)
     pl_complex._lig_indices = list(range(146, 166))
 
     centroid = pl_complex.lig_centroid(frame=0)
@@ -363,8 +348,8 @@ def test_lig_centroid(expected_centroid):
     assert np.allclose(expected_centroid, centroid)
 
 
-def test_lig_max_extent(expected_centroid):
-    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+def test_lig_max_extent(expected_centroid, small_pdb_with_ligand):
+    pl_complex = PLComplex(small_pdb_with_ligand)
     pl_complex._lig_indices = list(range(146, 166))
     assert np.allclose(
         pl_complex.lig_max_extent(expected_centroid, frame=0),
@@ -641,10 +626,10 @@ def test_create_mol_graph_from_pdb(mocker, pl_complex_no_lig):
     assert pl_complex._rec_ind_map == [0, 1, 2, 3, 4, 5, 6]
 
 
-def test_create_mol_graph_from_traj_file(mocker):
+def test_create_mol_graph_from_traj_file(mocker, small_trajectory_path):
     mocker.patch(pl_class + ".binding_site_indices",
                  return_value=list(range(6, 26)))
-    pl_complex = PLComplex(data.trajectories["pentalanine_small.gro"])
+    pl_complex = PLComplex(small_trajectory_path)
     assert pl_complex._mol_graph is None
 
     pl_complex._create_mol_graph()
@@ -655,8 +640,8 @@ def test_create_mol_graph_from_traj_file(mocker):
     assert pl_complex._rec_ind_map == expected_map
 
 
-def test_get_lig_conformer(estradiol_mol):
-    pl = PLComplex(data.trajectories["ligand_traj.gro"])
+def test_get_lig_conformer(estradiol_mol, ligand_trajectory):
+    pl = PLComplex(ligand_trajectory)
     pl._ligand = estradiol_mol
     pl._lig_indices = list(range(20))
 

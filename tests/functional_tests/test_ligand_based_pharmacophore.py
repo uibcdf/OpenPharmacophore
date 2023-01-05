@@ -1,6 +1,4 @@
 import openpharmacophore as oph
-import openpharmacophore.data as data
-import pytest
 from rdkit import Chem
 
 
@@ -75,11 +73,11 @@ def read_sdf(file_path):
     return list(molecules.values())
 
 
-def test_ligand_based_pharmacophore_extraction():
+def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     # We want to extract a ligand based pharmacophore for thrombin.
     # We start by loading the ligands from a sdf file
     pharmacophore = oph.LigandBasedPharmacophore()
-    pharmacophore.ligands = read_sdf(data.ligands["thrombin_ligands.sdf"])
+    pharmacophore.ligands = read_sdf(thrombin_ligands)
     n_ligands = len(pharmacophore.ligands)
     assert n_ligands == 7
     # We extract pharmacophores of 3 points and visualize them

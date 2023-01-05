@@ -1,5 +1,4 @@
 from openpharmacophore import LigandBasedPharmacophore, PharmacophoricPoint, Pharmacophore
-import openpharmacophore.data as data
 from matplotlib.colors import to_rgb
 import numpy as np
 import nglview as nv
@@ -15,9 +14,9 @@ def test_init_ligand_based_pharmacophore():
     assert len(pharmacophore.ligands) == 0
 
 
-def test_load_ligands_from_file():
+def test_load_ligands_from_file(ligands_smi):
     pharmacophore = LigandBasedPharmacophore()
-    pharmacophore.load_ligands(data.ligands["clique_detection.smi"])
+    pharmacophore.load_ligands(ligands_smi)
     assert len(pharmacophore.ligands) == 5
     assert all([isinstance(lig, Chem.Mol) for lig in pharmacophore.ligands])
 
@@ -325,8 +324,8 @@ def test_add_point_in_picked_location(pharmacophore_three_points, mocker):
 
 
 @pytest.fixture()
-def ligands():
-    supp = Chem.SDMolSupplier((data.ligands["sdf_example.sdf"]))
+def ligands(ligands_sdf):
+    supp = Chem.SDMolSupplier(ligands_sdf)
     ligs = [mol for mol in supp]
     assert len(ligs) == 3
     return ligs
