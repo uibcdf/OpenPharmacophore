@@ -1,6 +1,6 @@
 import mdtraj as mdt
 import numpy as np
-import openpharmacophore.pharmacophore.ligand_receptor.exceptions as exc
+import openpharmacophore.pl_complex.exceptions as exc
 from openpharmacophore import PLComplex
 from openpharmacophore.chem_feats.chem_feats import smarts_ligand
 import pyunitwizard as puw
@@ -12,7 +12,7 @@ from matplotlib.colors import to_rgb
 from tst_data import estradiol
 
 # Import for mocking
-pl_module = "openpharmacophore.pharmacophore.ligand_receptor.pl_complex"
+pl_module = "openpharmacophore.pl_complex.pl_complex"
 pl_class = pl_module + ".PLComplex"
 
 

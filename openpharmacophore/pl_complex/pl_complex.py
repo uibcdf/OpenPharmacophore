@@ -1,6 +1,6 @@
-from openpharmacophore.pharmacophore.ligand_receptor.pdb_to_smi import pdb_id_mapper
-from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
-from openpharmacophore.pharmacophore.ligand_receptor.exceptions import DifferentNumAtomsError, \
+from openpharmacophore.pl_complex.pdb_to_smi import pdb_id_mapper
+from openpharmacophore.pl_complex.convert import mol_to_traj
+from openpharmacophore.pl_complex.exceptions import DifferentNumAtomsError, \
     SmilesNotFoundError, NoLigandError, MolGraphError
 from openpharmacophore.chem_feats.chem_feats import feature_indices, smarts_ligand
 from openpharmacophore.utils import maths
