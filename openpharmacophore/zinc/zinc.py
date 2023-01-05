@@ -1,5 +1,5 @@
 from .._private_tools.exceptions import ZincDownloadError
-from ..data import zinc
+from openpharmacophore.zinc.load_tranches import tranches_2d, tranches_3d
 from tqdm.auto import tqdm
 import requests
 import os
@@ -34,18 +34,10 @@ def _load_tranches_dict(name):
         tranches : dict[str, list[str]]
     """
     if name == "2d":
-        path = zinc["tranches_2D.txt"]
+        return tranches_2d()
     elif name == "3d":
-        path = zinc["tranches_3D.txt"]
-    else:
-        raise ValueError
-    tranches = {}
-    with open(path) as fp:
-        for line in fp.readlines():
-            sub_tranches = line.split()
-            tranche_name = line[0:2]
-            tranches[tranche_name] = sub_tranches
-    return tranches
+        return tranches_3d()
+    raise ValueError(name)
 
 
 def _closest_value(value, value_list):

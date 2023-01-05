@@ -1,5 +1,4 @@
 from openpharmacophore import LigandReceptorPharmacophore, PharmacophoricPoint, Pharmacophore
-import openpharmacophore.data as data
 import nglview as nv
 import numpy as np
 import pyunitwizard as puw
@@ -17,14 +16,14 @@ def test_init_ligand_receptor_pharmacophore():
     assert len(pharmacophore) == 0
 
 
-def test_load_pdb_file(mocker):
+def test_load_pdb_file(mocker, pdb_1ncr_path):
     mock_pl_complex = mocker.patch(
         lr_module + ".PLComplex")
     pharmacophore = LigandReceptorPharmacophore()
-    pharmacophore.load_receptor(data.pdb["1ncr.pdb"])
+    pharmacophore.load_receptor(pdb_1ncr_path)
     assert len(pharmacophore) == 0
 
-    mock_pl_complex.assert_called_once_with(data.pdb["1ncr.pdb"])
+    mock_pl_complex.assert_called_once_with(pdb_1ncr_path)
 
 
 def test_load_pdb_id(mocker):
@@ -566,11 +565,11 @@ def test_adding_single_frame_to_view_updates_components(pharmacophore_one_frame)
 
 
 @pytest.fixture()
-def pharma_with_pl_complex():
+def pharma_with_pl_complex(small_pdb_with_ligand):
     """ Returns a pharmacophore with a PLComplex object.
     """
     ph = LigandReceptorPharmacophore()
-    ph.load_receptor(data.pdb["test_with_lig.pdb"])
+    ph.load_receptor(small_pdb_with_ligand)
     ph.add_frame()
 
     acceptor = PharmacophoricPoint(
@@ -665,13 +664,13 @@ def test_show_custom_indices_and_ligand(mocker, pharmacophore_one_frame):
     assert view.representations[0]["params"]["sele"] == "all"
 
 
-def test_show_all_traj_contains_multiple_frames(mocker):
+def test_show_all_traj_contains_multiple_frames(mocker, small_trajectory_path):
     mock_nv = mocker.patch(
         lr_module + ".nv"
     )
 
     ph = LigandReceptorPharmacophore()
-    ph.load_receptor(data.trajectories["pentalanine_small.gro"])
+    ph.load_receptor(small_trajectory_path)
     ph.receptor._receptor_indices = list(range(10))
     ph.receptor.get_lig_conformer = mocker.Mock()
 

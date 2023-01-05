@@ -1,14 +1,12 @@
 from openpharmacophore.io.json_file import json_pharmacophoric_elements, load_json_pharmacophore
-import openpharmacophore.data as data
 import numpy as np
 import pyunitwizard as puw
-from example_pharmacophores import three_element_pharmacophore
 import math
 
 
-def test_load_json_pharmacophore():
+def test_load_json_pharmacophore(json_pharmacophore_path):
     points, molecular_system, ligand = load_json_pharmacophore(
-        data.pharmacophores["1M70.json"], load_mol_sys=False)
+        json_pharmacophore_path, load_mol_sys=False)
 
     assert len(points) == 5
     assert molecular_system is None
@@ -83,7 +81,7 @@ def create_json_pharmacophoric_element(name, coords, radius, direction=None):
     }
 
 
-def test_json_pharmacophoric_elements():
+def test_json_pharmacophoric_elements(three_element_pharmacophore):
 
     # Expected output from to_json
     expected = {"points": []}
@@ -110,4 +108,4 @@ def test_json_pharmacophoric_elements():
     expected["points"].append(excluded)
     expected["points"].append(aromatic)
 
-    assert json_pharmacophoric_elements(three_element_pharmacophore()) == expected
+    assert json_pharmacophoric_elements(three_element_pharmacophore) == expected

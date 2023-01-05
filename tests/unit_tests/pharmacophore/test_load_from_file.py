@@ -1,17 +1,16 @@
 from openpharmacophore import load_from_file, LigandReceptorPharmacophore, LigandBasedPharmacophore, Pharmacophore
-import openpharmacophore.data as data
 
 
-def test_load_ligand_receptor_pharma_ph4():
-    pharmacophore = load_from_file(data.pharmacophores["gmp.ph4"])
+def test_load_ligand_receptor_pharma_ph4(moe_pharmacophore_path):
+    pharmacophore = load_from_file(moe_pharmacophore_path)
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
     assert len(pharmacophore) == 1
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 10
 
 
-def test_load_ligand_receptor_pharma_mol2():
-    pharmacophore = load_from_file(data.pharmacophores["elastase.mol2"])
+def test_load_ligand_receptor_pharma_mol2(mol2_pharmacophore_path_elastase):
+    pharmacophore = load_from_file(mol2_pharmacophore_path_elastase)
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
     assert len(pharmacophore) == 8
     assert isinstance(pharmacophore[0], Pharmacophore)
@@ -22,48 +21,48 @@ def test_load_ligand_receptor_pharma_mol2():
     assert expected_frames == frames
 
 
-def test_load_ligand_receptor_pharma_json():
-    pharmacophore = load_from_file(data.pharmacophores["1M70.json"])
+def test_load_ligand_receptor_pharma_json(json_pharmacophore_path):
+    pharmacophore = load_from_file(json_pharmacophore_path)
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
     assert len(pharmacophore) == 1
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 5
 
 
-def test_load_ligand_receptor_pharma_pml():
-    pharmacophore = load_from_file(data.pharmacophores["ligscout.pml"])
+def test_load_ligand_receptor_pharma_pml(ligand_scout_pharmacophore_path):
+    pharmacophore = load_from_file(ligand_scout_pharmacophore_path)
     assert isinstance(pharmacophore, LigandReceptorPharmacophore)
     assert len(pharmacophore) == 1
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 4
 
 
-def test_load_ligand_based_pharma_ph4():
-    pharmacophore = load_from_file(data.pharmacophores["gmp.ph4"],
+def test_load_ligand_based_pharma_ph4(moe_pharmacophore_path):
+    pharmacophore = load_from_file(moe_pharmacophore_path,
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 10
 
 
-def test_load_ligand_based_pharma_mol2():
-    pharmacophore = load_from_file(data.pharmacophores["elastase.mol2"],
+def test_load_ligand_based_pharma_mol2(mol2_pharmacophore_path_elastase):
+    pharmacophore = load_from_file(mol2_pharmacophore_path_elastase,
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 4
 
 
-def test_load_ligand_based_pharma_json():
-    pharmacophore = load_from_file(data.pharmacophores["1M70.json"],
+def test_load_ligand_based_pharma_json(json_pharmacophore_path):
+    pharmacophore = load_from_file(json_pharmacophore_path,
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
     assert isinstance(pharmacophore[0], Pharmacophore)
     assert len(pharmacophore[0]) == 5
 
 
-def test_load_ligand_based_pharma_pml():
-    pharmacophore = load_from_file(data.pharmacophores["ligscout.pml"],
+def test_load_ligand_based_pharma_pml(ligand_scout_pharmacophore_path):
+    pharmacophore = load_from_file(ligand_scout_pharmacophore_path,
                                    pharma_type="ligand")
     assert isinstance(pharmacophore, LigandBasedPharmacophore)
     assert isinstance(pharmacophore[0], Pharmacophore)

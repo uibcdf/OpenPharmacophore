@@ -1,12 +1,11 @@
 from openpharmacophore import PLComplex
-import openpharmacophore.data as data
 
 
-def test_pl_complex_preparation():
+def test_pl_complex_preparation(pdb_1m7w):
     # We want to prepare the protein ligand complex of the pdb 1M7W
     # to be ready for pharmacophore extraction. This complex contains
     # lauric acid (id DAO, C12H24O2) as its ligand.
-    pl = PLComplex(data.pdb["1m7w_A_chain.pdb"])
+    pl = PLComplex(pdb_1m7w)
     n_atoms_start = pl.topology.n_atoms
     assert pl.ligand_ids == ["DAO:B"]
     assert not pl.has_hydrogens()
@@ -51,10 +50,10 @@ def test_pl_complex_preparation():
     assert ["nglview.adaptor.MDTrajTrajectory"] == view._ngl_component_names
 
 
-def test_prepare_add_hydrogens():
+def test_prepare_add_hydrogens(small_pdb_with_ligand):
     # We prepare the protein ligand complex using the method prepare of the PLComplex
     # class. In this case we want to add hydrogens to the complex.
-    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+    pl_complex = PLComplex(small_pdb_with_ligand)
     pl_complex.prepare(
         "EST:B", smiles="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
         add_hydrogens=True)
@@ -64,10 +63,10 @@ def test_prepare_add_hydrogens():
     assert any(b.GetIsAromatic() for b in pl_complex.ligand.GetBonds())
 
 
-def test_prepare_without_adding_hydrogens():
+def test_prepare_without_adding_hydrogens(small_pdb_with_ligand):
     # We prepare the protein ligand complex using the method prepare of the PLComplex
     # class. In this case we do not want to add hydrogens to the complex.
-    pl_complex = PLComplex(data.pdb["test_with_lig.pdb"])
+    pl_complex = PLComplex(small_pdb_with_ligand)
     pl_complex.prepare(
         "EST:B", smiles="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O",
         add_hydrogens=False)

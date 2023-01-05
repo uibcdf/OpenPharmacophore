@@ -1,15 +1,14 @@
 from openpharmacophore.io.moe import (pharmacophoric_points_from_ph4_file,
     ph4_string)
-import openpharmacophore.data as data
 import numpy as np
 import pyunitwizard as puw
 import datetime
-from example_pharmacophores import three_element_pharmacophore
 
 
-def test_pharmacophoric_points_from_ph4_file():
-    file_name = data.pharmacophores["gmp.ph4"]
-    points = pharmacophoric_points_from_ph4_file(file_name)
+def test_pharmacophoric_points_from_ph4_file(
+    moe_pharmacophore_path
+):
+    points = pharmacophoric_points_from_ph4_file(moe_pharmacophore_path)
     points = sorted(points, key=lambda p: p.short_name)
     assert len(points) == 10
 
@@ -89,8 +88,8 @@ def test_pharmacophoric_points_from_ph4_file():
     assert np.around(puw.get_value(aromatic_4.radius, "angstroms"), 2) == 1.25
 
 
-def test_ph4_string():
-    pharmacophore_str = ph4_string(three_element_pharmacophore())
+def test_ph4_string(three_element_pharmacophore):
+    pharmacophore_str = ph4_string(three_element_pharmacophore)
 
     now = datetime.datetime.now()
     month = str(now.month)

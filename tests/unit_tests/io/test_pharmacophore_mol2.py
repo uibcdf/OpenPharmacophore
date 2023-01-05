@@ -1,12 +1,13 @@
 from openpharmacophore.io.pharmacophore_mol2 import (
     load_mol2_pharmacophoric_points, mol2_file_info, pad_coordinate_with_zeros)
-import openpharmacophore.data as data
-from example_pharmacophores import two_element_pharmacophore, five_element_pharmacophore
 
 
-def test_load_mol2_pharmacophoric_points():
-    streptadivin_file = data.pharmacophores["streptadivin.mol2"]
-    pharmacophores_ = load_mol2_pharmacophoric_points(streptadivin_file)
+def test_load_mol2_pharmacophoric_points(
+    mol2_pharmacophore_path_elastase,
+    mol2_pharmacophore_path_streptadivin
+):
+    pharmacophores_ = load_mol2_pharmacophoric_points(mol2_pharmacophore_path_streptadivin)
+    # TODO: we can test with a smaller file
     assert len(pharmacophores_) == 6
     assert len(pharmacophores_[0]) == 9
     assert len(pharmacophores_[1]) == 10
@@ -15,8 +16,7 @@ def test_load_mol2_pharmacophoric_points():
     assert len(pharmacophores_[4]) == 13
     assert len(pharmacophores_[5]) == 13
 
-    elastase_file = data.pharmacophores["elastase.mol2"]
-    pharmacophores_ = load_mol2_pharmacophoric_points(elastase_file)
+    pharmacophores_ = load_mol2_pharmacophoric_points(mol2_pharmacophore_path_elastase)
 
     assert len(pharmacophores_) == 8
     assert len(pharmacophores_[0]) == 4
@@ -41,9 +41,12 @@ def test_pad_coordinate_with_zeros_negative_number():
     assert pad_coordinate_with_zeros(-0.25) == "-0.2500"
 
 
-def test_mol2_file_info():
+def test_mol2_file_info(
+        two_element_pharmacophore,
+        five_element_pharmacophore
+):
     # Test for two element pharmacophore
-    ph_1 = two_element_pharmacophore()
+    ph_1 = two_element_pharmacophore
     mol2_list = mol2_file_info([ph_1])
     expected_output_1 = ['@<TRIPOS>MOLECULE\n',
                          '@<TRIPOS>ATOM\n',
@@ -53,7 +56,7 @@ def test_mol2_file_info():
     assert mol2_list == expected_output_1
 
     # Test for five element pharmacophore
-    ph_2 = five_element_pharmacophore()
+    ph_2 = five_element_pharmacophore
     mol2_list = mol2_file_info([ph_2])
     expected_output_2 = ['@<TRIPOS>MOLECULE\n',
                          '@<TRIPOS>ATOM\n',

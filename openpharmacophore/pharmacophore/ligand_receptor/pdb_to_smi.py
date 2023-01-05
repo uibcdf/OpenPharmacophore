@@ -1,4 +1,5 @@
 import pickle
+from pathlib import Path
 
 
 def pdb_id_mapper():
@@ -9,6 +10,7 @@ def pdb_id_mapper():
         -------
         dict[str, str]
     """
-    with open("pdb_to_smi.pickle") as fp:
+    path = Path(__file__).parent / "pdb_to_smi.pickle"
+    with open(path, "rb") as fp:
         mapper = pickle.load(fp)
     return mapper

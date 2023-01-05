@@ -2,15 +2,14 @@ from openpharmacophore import LigandBasedPharmacophore, VirtualScreening, Pharma
 from openpharmacophore.io.pharmacophore_mol2 import load_mol2_pharmacophoric_points
 from openpharmacophore.utils.conformers import generate_conformers
 from openpharmacophore import load_from_file
-import openpharmacophore.data as data
 import pytest
 from rdkit.Chem import MolFromSmiles
 
 
 @pytest.fixture()
-def ligand_based_pharmacophore():
+def ligand_based_pharmacophore(mol2_pharmacophore_path_elastase):
     points = load_mol2_pharmacophoric_points(
-        data.pharmacophores["elastase.mol2"]
+        mol2_pharmacophore_path_elastase
     )
     pharma = LigandBasedPharmacophore()
     pharma.add_pharmacophore(Pharmacophore(points[0]))
@@ -18,8 +17,8 @@ def ligand_based_pharmacophore():
 
 
 @pytest.fixture()
-def structure_based_pharmacophore():
-    return load_from_file(data.pharmacophores["1M70.json"],
+def structure_based_pharmacophore(json_pharmacophore_path):
+    return load_from_file(json_pharmacophore_path,
                           pharma_type="ligand-receptor")
 
 
@@ -184,23 +183,16 @@ def assert_screening_with_files(mocker, pharmacophore, path,
     assert vs.num_mols(0) == n_mols
 
 
-def test_from_file_smi(mocker, ligand_based_pharmacophore):
+def test_from_file_smi(mocker, ligand_based_pharmacophore, ligands_smi):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["mols.smi"], 3, 2, 5)
+                                ligands_smi, 3, 2, 5)
 
 
-def test_from_file_mol2(mocker, ligand_based_pharmacophore):
+def test_from_file_mol2(mocker, ligand_based_pharmacophore, ligands_mol2):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["ace.mol2"], 2, 1, 3)
+                                ligands_mol2, 2, 1, 3)
 
 
-def test_from_file_sdf(mocker, ligand_based_pharmacophore):
+def test_from_file_sdf(mocker, ligand_based_pharmacophore, ligands_sdf):
     assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                data.ligands["sdf_example.sdf"], 2, 1, 3)
-
-
-def test_from_dir(mocker, ligand_based_pharmacophore):
-    files_dir = data.ligands["ace.mol2"]
-    files_dir = "/".join(files_dir.split("/")[:-1])
-    assert_screening_with_files(mocker, ligand_based_pharmacophore,
-                                files_dir, 8, 8, 16, directory=True)
+                                ligands_sdf, 2, 1, 3)

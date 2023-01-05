@@ -1,14 +1,14 @@
 from openpharmacophore.io.ligandscout import read_ligandscout, ligandscout_xml_tree
-import openpharmacophore.data as data
-from example_pharmacophores import three_element_pharmacophore, five_element_pharmacophore
 import numpy as np
 import pyunitwizard as puw
 import math
 import xml.etree.ElementTree as ET
 
 
-def test_from_ligandscout():
-    points = read_ligandscout(data.pharmacophores["ligscout.pml"])
+def test_from_ligandscout(
+    ligand_scout_pharmacophore_path
+):
+    points = read_ligandscout(ligand_scout_pharmacophore_path)
     assert len(points) == 4
 
     neg_ion = points[0]
@@ -50,7 +50,7 @@ def test_from_ligandscout():
     assert round(puw.get_value(excluded_vol.radius, "angstroms"), 1) == 1.0
 
 
-def test_to_ligandscout_with_tree_element_pharmacophore():
+def test_to_ligandscout_with_tree_element_pharmacophore(three_element_pharmacophore):
     # Test for three element pharmacophore
 
     expected_bytes = b'<pharmacophore name="pharmacophore.pml" pharmacophoreType="LIGAND_SCOUT">'
@@ -72,15 +72,15 @@ def test_to_ligandscout_with_tree_element_pharmacophore():
     # End of bytes
     expected_bytes += b'</pharmacophore>'
 
-    tree = ligandscout_xml_tree(three_element_pharmacophore())
+    tree = ligandscout_xml_tree(three_element_pharmacophore)
     pml_string = ET.tostring(tree.getroot())
 
     assert pml_string == expected_bytes
 
 
-def test_ligand_scout_xml_tree():
+def test_ligand_scout_xml_tree(five_element_pharmacophore):
 
-    tree = ligandscout_xml_tree(five_element_pharmacophore())
+    tree = ligandscout_xml_tree(five_element_pharmacophore)
     document = tree.getroot()
 
     assert len(document) == 5

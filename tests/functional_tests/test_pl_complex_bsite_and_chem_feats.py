@@ -1,12 +1,11 @@
 from openpharmacophore import PLComplex
-import openpharmacophore.data as data
 
 
-def test_pl_complex_bsite_and_chem_feats():
+def test_pl_complex_bsite_and_chem_feats(pdb_3bbh_with_hydrogen):
     # We want to extract the binding site of a protein-ligand complex
     # so, we can visualize protein-ligand interactions, which are also
     # required for extracting a protein-ligand receptor pharmacophore.
-    pl_complex = PLComplex(data.pdb["3bbh_hyd.pdb"])
+    pl_complex = PLComplex(pdb_3bbh_with_hydrogen)
     assert len(pl_complex.ligand_ids) == 1
     assert pl_complex.has_hydrogens()
 

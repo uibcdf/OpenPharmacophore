@@ -1,11 +1,10 @@
 import openpharmacophore as oph
-import openpharmacophore.data as data
 from assert_view import assert_view_contains_pharmacophore
 
 
-def test_ligand_receptor_pharmacophore_hydrogen_bonding_points():
+def test_ligand_receptor_pharmacophore_hydrogen_bonding_points(pdb_3bbh):
     # We create a pharmacophore that contains only hydrogen donor and acceptor points
-    pharmacophore = oph.load(data.pdb["3bbh_A_chain.pdb"])
+    pharmacophore = oph.load(pdb_3bbh)
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We know that the file contains a single ligand
     lig_ids = pharmacophore.receptor.ligand_ids
@@ -37,9 +36,9 @@ def test_ligand_receptor_pharmacophore_hydrogen_bonding_points():
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
-def test_ligand_receptor_pharmacophore_hydrophobic_points():
+def test_ligand_receptor_pharmacophore_hydrophobic_points(pdb_1m7w):
     # We create a pharmacophore that contains only hydrophobic points
-    pharmacophore = oph.load(data.pdb["1m7w_A_chain.pdb"])
+    pharmacophore = oph.load(pdb_1m7w)
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We know that the file contains a single ligand
     lig_ids = pharmacophore.receptor.ligand_ids
@@ -73,9 +72,9 @@ def test_ligand_receptor_pharmacophore_hydrophobic_points():
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
-def test_ligand_receptor_pharmacophore_aromatic_points():
+def test_ligand_receptor_pharmacophore_aromatic_points(pdb_1xdn):
     # We create a pharmacophore that contains only aromatic points
-    pharmacophore = oph.load(data.pdb["1xdn.pdb"])
+    pharmacophore = oph.load(pdb_1xdn)
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We know that the file contains a single ligand
     lig_ids = pharmacophore.receptor.ligand_ids
@@ -106,13 +105,13 @@ def test_ligand_receptor_pharmacophore_aromatic_points():
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))
 
 
-def test_ligand_receptor_pharmacophore_from_pdb():
+def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     # We want to create a pharmacophore for the protein-ligand complex of
     # estrogen receptor with estradiol.
 
     # We load a pharmacophore from a pdb file. This file contains
     # a single peptide chain with a ligand, it contains no hydrogens.
-    pharmacophore = oph.load(data.pdb["er_alpha_A_chain.pdb"])
+    pharmacophore = oph.load(pdb_er_alpha)
     assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
     # We call find ligands method to ensure our pdb contains a single ligand.
     # We know estradiol has the id EST.
