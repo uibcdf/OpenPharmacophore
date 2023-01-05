@@ -1,7 +1,22 @@
 from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore, Pharmacophore
 from openpharmacophore.io import (load_json_pharmacophore, load_mol2_pharmacophoric_points,
                                   pharmacophoric_points_from_ph4_file, read_ligandscout)
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat
+
+
+class InvalidFileFormat(ValueError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, file_format):
+
+        self.message = "Invalid file format"
+        if file_format:
+            self.message += f" {file_format}.\n"
+        else:
+            self.message += ".\n"
+
+        super().__init__(self.message)
 
 
 def ligand_receptor_from_pharma_file(file_name):

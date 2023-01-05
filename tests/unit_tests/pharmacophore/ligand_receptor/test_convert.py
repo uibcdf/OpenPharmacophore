@@ -1,5 +1,4 @@
 import openpharmacophore.pharmacophore.ligand_receptor.convert as convert
-from openpharmacophore._private_tools.exceptions import NoConformersError
 from tst_data import threonine, estradiol
 import numpy as np
 import pytest
@@ -78,7 +77,7 @@ def test_mol_with_no_conformers_raises_error():
     mol = deepcopy(threonine)
     mol.RemoveAllConformers()
     assert mol.GetNumConformers() == 0
-    with pytest.raises(NoConformersError):
+    with pytest.raises(convert.NoConformersError):
         convert.mol_to_traj(mol)
 
 

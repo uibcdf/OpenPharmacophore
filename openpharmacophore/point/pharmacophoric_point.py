@@ -1,6 +1,6 @@
 # OpenPharmacophore
-import openpharmacophore._private_tools.exceptions as exc
 from openpharmacophore.point.input_arguments import validate_input_array_like, validate_input_quantity
+from openpharmacophore.point.exceptions import InvalidFeatureError
 # Third Party
 from matplotlib.colors import to_rgb
 import numpy as np
@@ -81,7 +81,7 @@ class PharmacophoricPoint:
         try:
             self._feat_name = PharmacophoricPoint.feature_to_char[feat_type]
         except KeyError:
-            raise exc.InvalidFeatureError(feat_type)
+            raise InvalidFeatureError(feat_type)
 
         self._validate_input_arguments(center, radius, direction)
         self._center = puw.standardize(center)

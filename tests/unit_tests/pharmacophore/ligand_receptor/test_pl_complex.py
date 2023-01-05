@@ -1,6 +1,6 @@
 import mdtraj as mdt
 import numpy as np
-import openpharmacophore._private_tools.exceptions as exc
+import openpharmacophore.pharmacophore.ligand_receptor.exceptions as exc
 from openpharmacophore import PLComplex
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand
 import pyunitwizard as puw

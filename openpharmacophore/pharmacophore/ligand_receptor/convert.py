@@ -1,4 +1,3 @@
-from openpharmacophore._private_tools.exceptions import NoConformersError
 import mdtraj as mdt
 import mdtraj.core.element as mdt_element
 import numpy as np
@@ -7,6 +6,12 @@ import numpy as np
 chain_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
                "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
                "W", "X", "Y", "Z"]
+
+
+class NoConformersError(ValueError):
+    """ Exception raised when a molecule contains no conformers.
+    """
+    pass
 
 
 def mol_to_topology(mol):

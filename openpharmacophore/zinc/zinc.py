@@ -1,4 +1,4 @@
-from .._private_tools.exceptions import ZincDownloadError
+from openpharmacophore.zinc.exceptions import ZincDownloadError
 from openpharmacophore.zinc.load_tranches import tranches_2d, tranches_3d
 from tqdm.auto import tqdm
 import requests

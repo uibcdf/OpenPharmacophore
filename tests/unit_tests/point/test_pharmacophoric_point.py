@@ -1,5 +1,6 @@
 from openpharmacophore import PharmacophoricPoint, distance_between_pharmacophoric_points
-import openpharmacophore._private_tools.exceptions as exc
+from openpharmacophore.point.exceptions import WrongDimensionalityError, InvalidFeatureError, IncorrectShapeError, \
+    NotAQuantityError
 import numpy as np
 import nglview as nv
 import pyunitwizard as puw
@@ -55,32 +56,32 @@ def test_init_pharmacophoric_point(hydrogen_bond_donor, aromatic_ring):
 
 def test_init_pharmacophoric_point_center_is_not_quantity():
     radius = puw.quantity(1.0, "angstroms")
-    with pytest.raises(exc.NotAQuantityError, match="center is of type <class 'list'>"):
+    with pytest.raises(NotAQuantityError, match="center is of type <class 'list'>"):
         PharmacophoricPoint(feat_type="hb donor", center=[1, 2, 3], radius=radius)
 
 
 def test_init_pharmacophoric_point_center_has_wrong_dim():
     radius = puw.quantity(1.0, "angstroms")
-    with pytest.raises(exc.WrongDimensionalityError, match="center has incorrect dimensionality"):
+    with pytest.raises(WrongDimensionalityError, match="center has incorrect dimensionality"):
         PharmacophoricPoint(feat_type="hb donor", center=puw.quantity([1.0, 1.0, 1.0], "seconds"), radius=radius)
 
 
 def test_init_pharmacophoric_point_center_has_wrong_shape():
     radius = puw.quantity(1.0, "angstroms")
-    with pytest.raises(exc.IncorrectShapeError, match="center has incorrect shape"):
+    with pytest.raises(IncorrectShapeError, match="center has incorrect shape"):
         PharmacophoricPoint(feat_type="hb donor", center=puw.quantity([1.0, 1.0], "angstroms"), radius=radius)
 
 
 def test_init_pharmacophoric_point_radius_is_not_a_quantity():
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
 
-    with pytest.raises(exc.NotAQuantityError, match="radius is of type <class 'float'>"):
+    with pytest.raises(NotAQuantityError, match="radius is of type <class 'float'>"):
         PharmacophoricPoint(feat_type="hb donor", center=center, radius=1.0)
 
 
 def test_init_pharmacophoric_point_radius_has_wrong_dim():
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
-    with pytest.raises(exc.WrongDimensionalityError, match="radius has incorrect dimensionality"):
+    with pytest.raises(WrongDimensionalityError, match="radius has incorrect dimensionality"):
         PharmacophoricPoint(feat_type="hb donor", center=center, radius=puw.quantity(1.0, "seconds"))
 
 
@@ -88,7 +89,7 @@ def test_pharmacophoric_point_init_with_invalid_feature():
     radius = puw.quantity(1.0, "angstroms")
     center = puw.quantity([1.0, 1.0, 1.0], "angstroms")
 
-    with pytest.raises(exc.InvalidFeatureError, match="Invalid feature name rubber duck"):
+    with pytest.raises(InvalidFeatureError, match="Invalid feature name rubber duck"):
         PharmacophoricPoint(feat_type="rubber duck", center=center, radius=radius)
 
 
