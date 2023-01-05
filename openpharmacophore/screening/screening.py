@@ -1,4 +1,4 @@
-from openpharmacophore._private_tools.exceptions import NotAPharmacophoreError
+from openpharmacophore.screening.exceptions import NotAPharmacophoreError
 from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
 from openpharmacophore.io import mol_file_iterator
 from rdkit import RDConfig, Geometry, RDLogger

@@ -4,7 +4,6 @@ from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacoph
 from openpharmacophore.pharmacophore.chem_feats import smarts_ligand, feature_indices
 from openpharmacophore.utils.conformers import ConformerGenerator
 import openpharmacophore.io as io
-from openpharmacophore._private_tools.exceptions import InvalidFileFormat
 from matplotlib.colors import to_rgb
 import nglview as nv
 import pyunitwizard as puw
@@ -14,6 +13,22 @@ from copy import deepcopy
 import json
 import os
 import math
+
+
+class InvalidFileFormat(ValueError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, file_format):
+
+        self.message = "Invalid file format"
+        if file_format:
+            self.message += f" {file_format}.\n"
+        else:
+            self.message += ".\n"
+
+        super().__init__(self.message)
 
 
 class LigandBasedPharmacophore:

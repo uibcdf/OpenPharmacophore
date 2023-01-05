@@ -2,7 +2,6 @@ from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
 from openpharmacophore import PLComplex
 import openpharmacophore.io as io
-from openpharmacophore._private_tools.exceptions import PDBFetchError
 from openpharmacophore.utils import maths
 import networkx as nx
 import numpy as np
@@ -12,6 +11,17 @@ import json
 import re
 import requests
 import tempfile
+
+
+class PDBFetchError(IOError):
+    """ Exception raised when a file format is not supported or
+        is incorrect.
+    """
+
+    def __init__(self, pdb_id, url):
+
+        self.message = f"Error obtaining pdb with id {pdb_id} from {url}"
+        super().__init__(self.message)
 
 
 class LigandReceptorPharmacophore:

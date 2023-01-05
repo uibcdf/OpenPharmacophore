@@ -1,5 +1,5 @@
 import openpharmacophore.zinc.zinc as zinc
-import openpharmacophore._private_tools.exceptions as exc
+from openpharmacophore.zinc.exceptions import ZincDownloadError
 import pytest
 import os
 
@@ -19,7 +19,7 @@ def test_download_file_success(mocker):
 def test_download_file_unsuccessful_raises_error(mocker):
     mock_get = mocker.patch("openpharmacophore.zinc.zinc.requests.get")
     mock_get.return_value.status_code = 404
-    with pytest.raises(exc.ZincDownloadError):
+    with pytest.raises(ZincDownloadError):
         zinc._download_file("test_file.smi", "http://files.docking.org/3D/BA/AAML/BAAAML.smi")
 
 

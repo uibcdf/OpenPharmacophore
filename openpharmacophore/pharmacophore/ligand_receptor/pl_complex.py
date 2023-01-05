@@ -1,8 +1,10 @@
-from openpharmacophore._private_tools import exceptions as exc
 from openpharmacophore.pharmacophore.ligand_receptor.pdb_to_smi import pdb_id_mapper
-from openpharmacophore.utils import maths
 from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
+from openpharmacophore.pharmacophore.ligand_receptor.exceptions import DifferentNumAtomsError, \
+    SmilesNotFoundError, NoLigandError, MolGraphError
 from openpharmacophore.pharmacophore.chem_feats import feature_indices, smarts_ligand
+from openpharmacophore.utils import maths
+
 from matplotlib.colors import to_rgb
 import mdtraj as mdt
 from nglview import show_mdtraj
@@ -11,6 +13,7 @@ from openmm.app import Modeller
 import pyunitwizard as puw
 import rdkit.Chem.AllChem as Chem
 from rdkit.Geometry.rdGeometry import Point3D
+
 from copy import deepcopy
 import tempfile
 
@@ -294,7 +297,7 @@ class PLComplex:
             # matching
             template = Chem.RemoveAllHs(template)
             if self._ligand.GetNumAtoms() != template.GetNumAtoms():
-                raise exc.DifferentNumAtomsError(
+                raise DifferentNumAtomsError(
                     self._ligand.GetNumAtoms(), template.GetNumAtoms()
                 )
 
@@ -320,13 +323,13 @@ class PLComplex:
         """
         lig_name = pdb_id.split(":")[0]
         if lig_name == "UNL":
-            raise exc.SmilesNotFoundError(lig_name)
+            raise SmilesNotFoundError(lig_name)
 
         mapper = pdb_id_mapper()
         try:
             return mapper[lig_name]
         except KeyError:
-            raise exc.SmilesNotFoundError(lig_name)
+            raise SmilesNotFoundError(lig_name)
 
     @staticmethod
     def _modeller_to_trajectory(modeller):
@@ -472,7 +475,7 @@ class PLComplex:
 
         """
         if self.ligand is None:
-            raise exc.NoLigandError
+            raise NoLigandError
 
         # Chemical feature indices are not dependent on the frame
         if self._lig_feats[feat_name] is None:
@@ -774,7 +777,7 @@ class PLComplex:
         pdb_file.close()
 
         if self._mol_graph is None:
-            raise exc.MolGraphError(self._file_path)
+            raise MolGraphError(self._file_path)
 
         # Store indices of atoms that are not hydrogen
         self._rec_ind_map = [

@@ -7,15 +7,11 @@ from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
 def rdkit_pharmacophore(pharmacophoric_points):
     """ Transform a list of pharmacophoric points to a rdkit pharmacophore.
 
-        rdkit pharmacophores do not store the pharmacophoric_points radii, so they are returned as well.
-
         Returns
         -------
-        rdkit_pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
+        pharmacophore : rdkit.Chem.Pharm3D.Pharmacophore
             The rdkit pharmacophore.
 
-        radii : list[float]
-            List with the radius in angstroms of each pharmacophoric point.
     """
     rdkit_element_name = {
         "aromatic ring": "Aromatic",
