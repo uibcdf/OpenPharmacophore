@@ -2,7 +2,7 @@ from openpharmacophore.pharmacophore.ligand_receptor.pdb_to_smi import pdb_id_ma
 from openpharmacophore.pharmacophore.ligand_receptor.convert import mol_to_traj
 from openpharmacophore.pharmacophore.ligand_receptor.exceptions import DifferentNumAtomsError, \
     SmilesNotFoundError, NoLigandError, MolGraphError
-from openpharmacophore.pharmacophore.chem_feats import feature_indices, smarts_ligand
+from openpharmacophore.chem_feats.chem_feats import feature_indices, smarts_ligand
 from openpharmacophore.utils import maths
 
 from matplotlib.colors import to_rgb
