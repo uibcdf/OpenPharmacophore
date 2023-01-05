@@ -1,6 +1,6 @@
 # OpenPharmacophore
 import openpharmacophore._private_tools.exceptions as exc
-from openpharmacophore._private_tools.input_arguments import validate_input_array_like, validate_input_quantity
+from openpharmacophore.point.input_arguments import validate_input_array_like, validate_input_quantity
 # Third Party
 from matplotlib.colors import to_rgb
 import numpy as np

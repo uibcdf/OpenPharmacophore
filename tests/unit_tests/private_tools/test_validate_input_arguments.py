@@ -1,5 +1,4 @@
-from openpharmacophore._private_tools.input_arguments import (validate_input_quantity,
-                                                              validate_input_array_like)
+from openpharmacophore.point.input_arguments import validate_input_quantity, validate_input_array_like
 from openpharmacophore._private_tools import exceptions as exc
 import numpy as np
 import pyunitwizard as puw
