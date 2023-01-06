@@ -171,11 +171,6 @@ def thrombin_ligands():
 
 
 @pytest.fixture
-def pdb_3bbh():
-    return str(pdb_path / "3bbh_A_chain.pdb")
-
-
-@pytest.fixture
 def pdb_3bbh_with_hydrogen():
     return str(pdb_path / "3bbh_hyd.pdb")
 
@@ -183,11 +178,6 @@ def pdb_3bbh_with_hydrogen():
 @pytest.fixture
 def pdb_1m7w():
     return str(pdb_path / "1m7w_A_chain.pdb")
-
-
-@pytest.fixture
-def pdb_1xdn():
-    return str(pdb_path / "1xdn.pdb")
 
 
 @pytest.fixture

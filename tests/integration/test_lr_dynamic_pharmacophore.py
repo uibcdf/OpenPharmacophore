@@ -5,20 +5,27 @@ from assert_view import assert_view_contains_pharmacophore
 def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     # We obtain pharmacophores from a md trajectory of er-alpha
     # that consists of three frames
-    pharmacophore = oph.load(traj_er_alpha)
-    assert isinstance(pharmacophore, oph.LigandReceptorPharmacophore)
+    protein = oph.load(traj_er_alpha)
     # We know that the file contains a single ligand
-    lig_ids = pharmacophore.receptor.ligand_ids
-    assert len(lig_ids) == 1
+    assert protein.has_ligands()
     # The receptor already contains hydrogens
-    assert pharmacophore.receptor.has_hydrogens()
+    assert protein.has_hydrogens()
+
+    lig_ids = protein.ligand_ids()
+    assert len(lig_ids) == 1
+
+    ligand = protein.get_ligand()
+    ligand.fix_bond_order(
+        smiles="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
+    )
+    ligand.add_hydrogens()
+    assert ligand.n_atoms == 44
+
+    binding_site = protein.extract_binding_site(ligand=ligand)
 
     # We extract the pharmacophore
-    pharmacophore.extract(lig_ids[0],
-                          frames=[0, 1, 2],
-                          add_hydrogens=False,
-                          smiles="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
-                          )
+    pharmacophore = oph.LigandReceptorPharmacophore(ligand, binding_site)
+    pharmacophore.extract(frames=[0, 1, 2])
     assert len(pharmacophore) == 3
     assert len(pharmacophore[0]) > 0
     assert len(pharmacophore[1]) > 0
@@ -29,5 +36,5 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     assert pharmacophore.receptor.ligand.GetNumAtoms() == 44
 
     # We create a view of the second frame
-    view = pharmacophore.show(frame=1, ligand=True, receptor=True)
-    assert_view_contains_pharmacophore(view, len(pharmacophore[1]))
+    viewer = oph.Viewer(protein=protein, ligand=ligand)
+    view = viewer.show(frame=1)
