@@ -1,4 +1,4 @@
-from openpharmacophore.pharmacophore.chem_feats import feature_indices, feature_centroids
+from openpharmacophore.chem_feats.chem_feats import feature_indices, feature_centroids
 from rdkit import Chem
 import numpy as np
 

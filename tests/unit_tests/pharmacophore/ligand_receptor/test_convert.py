@@ -1,4 +1,4 @@
-import openpharmacophore.pharmacophore.ligand_receptor.convert as convert
+import openpharmacophore.pl_complex.convert as convert
 from tst_data import threonine, estradiol
 import numpy as np
 import pytest
