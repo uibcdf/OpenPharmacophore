@@ -12,7 +12,7 @@ def test_ligand_preparation():
         r"c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NC4CCC(CC4)c5cnc([nH]5)N",
         r"c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NCC4CCC(CC4)N",
     ]
-    ligands = oph.load_ligands(ligands_smi, format="smi")
+    ligands = oph.load_ligands(ligands_smi, form="smi")
     assert len(ligands) == 4
 
     # We proceed to add hydrogens to the ligands
