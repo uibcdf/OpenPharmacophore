@@ -21,7 +21,6 @@ from .pharmacophore.pharmacophore import Pharmacophore
 from .pl_complex.pl_complex import PLComplex
 from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
 from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
-from .load.load_from_file import load_from_file
 from .load.load import load
 from .screening import VirtualScreening
 

@@ -43,3 +43,10 @@ def load(pharmacophore_data):
             return pharmacophore
 
     raise NotImplementedError
+
+
+def load_ligands(ligands, format=None):
+    """ Load ligands from a list of SMILES, SMARTS, Inchi, Mol block
+        or PDB block.
+    """
+    raise NotImplementedError
