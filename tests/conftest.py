@@ -163,7 +163,7 @@ def five_element_pharmacophore():
             hydrophobicity, ring_1, ring_2]
 
 
-# Data for functional tests
+# Data for integration tests
 
 @pytest.fixture
 def thrombin_ligands():

@@ -1,5 +1,5 @@
-from openpharmacophore.io import MolIO, TrajIO
 from openpharmacophore import Ligand, LigandSet, Protein
+from openpharmacophore.molecular_systems import create_topology, create_ligand_set
 import openpharmacophore.config as config
 
 
@@ -7,48 +7,11 @@ class InvalidFileFormatError(ValueError):
     pass
 
 
-def _load_trajectory(traj_file, topology_file=None):
-    """ Load a trajectory from a file and return a Protein.
-
-        Parameters
-        ----------
-        traj_file : str
-            Name of the file containing the data.
-
-        topology_file : str, optional
-            File with the topology of the system for a MD trajectory.
-
-        Returns
-        -------
-        Protein
+def protein_from_file(traj_file, topology_file):
+    """ Create a protein object from a file
     """
-    if topology_file is not None and topology_file not in config.TOP_FORMATS:
-        file_format = topology_file.split(".")[-1]
-        raise InvalidFileFormatError(f"File format {file_format} is not supported")
-
-    traj_io = TrajIO(traj_file, topology_file)
-    with traj_io:
-        traj_io.load_data()
-    return traj_io.protein
-
-
-def _load_ligand_file(file_name):
-    """ Load ligands from a file
-
-        Parameters
-        ----------
-        file_name : str
-            Name of the file
-
-        Returns
-        -------
-        LigandSet
-
-    """
-    mol_io = MolIO(file_name)
-    with mol_io:
-        mol_io.load_data()
-    return mol_io.ligands
+    topology, coords = create_topology(traj_file, topology_file)
+    return Protein(topology, coords)
 
 
 def load(file_name, topology_file=None):
@@ -70,9 +33,15 @@ def load(file_name, topology_file=None):
     file_format = file_name.split(".")[-1]
 
     if file_format in config.TRAJ_FORMATS:
-        return _load_trajectory(file_name, topology_file)
+
+        if topology_file is not None and topology_file not in config.TOP_FORMATS:
+            file_format = topology_file.split(".")[-1]
+            raise InvalidFileFormatError(f"File format {file_format} is not supported")
+
+        return protein_from_file(file_name, topology_file)
+
     elif file_format in config.MOL_FORMATS:
-        return _load_ligand_file(file_name)
+        return create_ligand_set(file_name)
     else:
         raise InvalidFileFormatError(f"File format {file_format} is not supported")
 

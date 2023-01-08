@@ -1,7 +1,7 @@
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore.pharmacophore.ligand_based.rdp import find_common_pharmacophores
 from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
-from openpharmacophore.chem_feats.chem_feats import smarts_ligand, feature_indices
+from openpharmacophore.molecular_systems.chem_feats import smarts_ligand, feature_indices
 from openpharmacophore.utils.conformers import ConformerGenerator
 import openpharmacophore.io as io
 from matplotlib.colors import to_rgb

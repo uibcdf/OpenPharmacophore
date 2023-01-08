@@ -2,7 +2,7 @@ from openpharmacophore.pl_complex.pdb_to_smi import pdb_id_mapper
 from openpharmacophore.pl_complex.convert import mol_to_traj
 from openpharmacophore.pl_complex.exceptions import DifferentNumAtomsError, \
     SmilesNotFoundError, NoLigandError, MolGraphError
-from openpharmacophore.chem_feats.chem_feats import feature_indices, smarts_ligand
+from openpharmacophore.molecular_systems.chem_feats import feature_indices, smarts_ligand
 from openpharmacophore.utils import maths
 
 from matplotlib.colors import to_rgb
