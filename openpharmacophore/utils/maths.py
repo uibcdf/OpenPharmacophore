@@ -124,3 +124,10 @@ def maximum_distance(centroid, coords):
     """
     distance = np.sqrt(np.sum(np.power(coords - centroid, 2), axis=1))
     return np.amax(distance)
+
+
+def delete(quantity, indices):
+    """ Return a new array with sub-arrays along an axis deleted.
+        For a one dimensional array, this returns those entries not
+        returned by arr[indices]."""
+    pass

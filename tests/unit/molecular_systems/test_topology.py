@@ -1,4 +1,5 @@
 from openpharmacophore.molecular_systems import Topology
+from copy import deepcopy
 import pytest
 
 
@@ -127,4 +128,42 @@ def test_returns_empty_list_when_topology_has_no_ligands(
 
 def test_find_all_ligands(topology_with_ligand):
     lig_ids = topology_with_ligand.ligand_ids()
-    assert lig_ids == ["EST:B", "EST:E"]
+    assert set(lig_ids) == {"EST:B", "EST:E"}
+
+
+def test_get_residue_indices(topology_2_chains):
+    expected_ind = [3, 4, 5]
+    ind = topology_2_chains.get_residue_indices("MET", "A")
+    assert ind == expected_ind
+
+
+def test_get_residue_indices_extracts_correct_chain(topology_with_ligand):
+    expected_ind = [16, 17, 18, 19]
+    ind = topology_with_ligand.get_residue_indices("EST", "E")
+    assert ind == expected_ind
+
+
+def residue_in_topology(topology: Topology, res_name: str):
+    for atom in topology.top.atoms:
+        if atom.residue.name == res_name:
+            return True
+    return False
+
+
+def test_remove_atoms(topology_with_ligand):
+    new_topology = topology_with_ligand.remove_atoms(
+        [8, 9, 10], inplace=False
+    )
+    assert new_topology.n_atoms == 17
+    assert new_topology.n_chains == 4
+    assert not residue_in_topology(new_topology, "HOH")
+
+
+def test_remove_atoms_in_place(topology_with_ligand):
+    new_topology = deepcopy(topology_with_ligand)
+    new_topology.remove_atoms(
+        [8, 9, 10], inplace=True
+    )
+    assert new_topology.n_atoms == 17
+    assert new_topology.n_chains == 4
+    assert not residue_in_topology(new_topology, "HOH")

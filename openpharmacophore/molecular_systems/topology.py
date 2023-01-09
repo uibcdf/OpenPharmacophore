@@ -2,7 +2,6 @@ import mdtraj
 import mdtraj.core.element as mdt_element
 import pyunitwizard as puw
 
-
 SOLVENT_AND_IONS = frozenset(
     ['118', '119', '1AL', '1CU', '2FK', '2HP', '2OF',
      '3CO', '3MT', '3NI', '3OF', '4MO', '543', '6MO', 'ACT', 'AG', 'AL', 'ALF',
@@ -26,7 +25,6 @@ SOLVENT_AND_IONS = frozenset(
      'YB2', 'YH', 'YT3', 'ZN', 'ZN2', 'ZN3', 'ZNA', 'ZNO', 'ZO3']
 )
 
-
 CHAIN_NAMES = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
     "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
@@ -42,7 +40,7 @@ class Topology:
         if topology is None:
             self.top = mdtraj.Topology()
         else:
-            self.top = topology
+            self.top = topology  # type: mdtraj.Topology
 
     @property
     def n_chains(self) -> int:
@@ -188,6 +186,56 @@ class Topology:
                 ligands.add(ligand_id)
 
         return list(ligands)
+
+    def get_residue_indices(self, res_name, chain):
+        """ Get the indices of hte residue with given name and chain
+
+            Parameters
+            ----------
+            res_name : str
+                Name of the residue
+
+            chain : str
+                Name of the chain
+
+            Returns
+            -------
+            indices : list[int]
+
+        """
+        chain_index = CHAIN_NAMES.index(chain)
+        indices = [
+            a.index for a in self.top.atoms
+            if a.residue.name == res_name and a.residue.chain.index == chain_index
+        ]
+        return indices
+
+    def remove_atoms(self, indices, inplace=False):
+        """ Remove atoms from the topology.
+
+            Parameters
+            ----------
+            indices : list[int]
+                Indices of the atoms that will be removed
+
+            inplace : bool, default=False
+                Whether to perform the operation in place.
+
+            Returns
+            -------
+            Topology
+                A new topology with the specified atoms removed, if inplace
+                its false. Otherwise, it does not return anything.
+
+        """
+        # indices of atoms that will not be removed
+        atoms = [
+            ii for ii in range(0, self.n_atoms) if ii not in indices
+        ]
+        if inplace:
+            self.top = self.top.subset(atoms)
+        else:
+            return Topology(self.top.subset(atoms))
 
 
 def create_topology(traj_file, topology_file=None):

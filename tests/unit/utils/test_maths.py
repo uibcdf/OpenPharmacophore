@@ -1,6 +1,7 @@
 import openpharmacophore.utils.maths as maths
 import pyunitwizard as puw
 import numpy as np
+import pytest
 
 
 def test_points_distance():
@@ -75,3 +76,7 @@ def test_maximum_distance():
     ]), "angstroms")
     expected = puw.quantity(np.sqrt(48), "angstroms")
     assert maths.maximum_distance(centroid, coordinates) == expected
+
+
+def test_delete_from_quantity():
+    pytest.fail("Implement me!")
