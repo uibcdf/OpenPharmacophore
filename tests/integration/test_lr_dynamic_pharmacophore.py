@@ -11,7 +11,7 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     # The receptor already contains hydrogens
     assert protein.has_hydrogens()
 
-    lig_ids = protein.ligand_ids()
+    lig_ids = protein.ligand_ids
     assert len(lig_ids) == 1
 
     ligand = protein.get_ligand()

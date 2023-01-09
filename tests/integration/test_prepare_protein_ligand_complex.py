@@ -7,7 +7,9 @@ def test_pl_complex_preparation(pdb_1m7w):
     # lauric acid (id DAO, C12H24O2) as its ligand.
     protein = oph.load(pdb_1m7w)
     n_atoms_start = protein.n_atoms
-    lig_ids = protein.ligand_ids()
+    assert protein.has_ligands
+    
+    lig_ids = protein.ligand_ids
     assert lig_ids == ["DAO:B"]
     assert not protein.has_hydrogens()
 

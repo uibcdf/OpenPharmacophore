@@ -7,8 +7,8 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     # estrogen receptor with estradiol.
     protein = oph.load(pdb_er_alpha)
     # We know that the file contains a single ligand
-    assert protein.has_ligands()
-    lig_ids = protein.ligand_ids()
+    assert protein.has_ligands
+    lig_ids = protein.ligand_ids
     assert lig_ids == ["EST:B"]
 
     # We extract the ligand and fix its bond order and add hydrogens
@@ -21,7 +21,7 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
 
     # We add hydrogens to the protein
     protein.add_hydrogens()
-    assert protein.has_hydrogen()
+    assert protein.has_hydrogens
 
     # We get the binding site
     binding_site = protein.extract_binding_site(ligand=ligand)

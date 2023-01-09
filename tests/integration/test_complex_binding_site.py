@@ -4,7 +4,8 @@ import openpharmacophore as oph
 def test_pl_complex_bsite(pdb_3bbh_with_hydrogen):
     # We want to extract the binding site of a protein-ligand complex
     protein = oph.load(pdb_3bbh_with_hydrogen)
-    assert protein.has_hydrogens()
+    assert protein.has_hydrogens
+    assert protein.has_ligands
 
     lig_ids = protein.ligand_ids()
     assert len(lig_ids) == 1
