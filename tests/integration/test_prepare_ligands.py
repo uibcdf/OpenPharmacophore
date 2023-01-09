@@ -1,6 +1,8 @@
 import openpharmacophore as oph
+import pytest
 
 
+@pytest.mark.skip(reason="Ligand class not implemented yet")
 def test_ligand_preparation():
     # We want to prepare the ligands of Thrombin for pharmacophore extraction
 

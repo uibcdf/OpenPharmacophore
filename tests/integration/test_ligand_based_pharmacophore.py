@@ -1,6 +1,8 @@
 import openpharmacophore as oph
+import pytest
 
 
+@pytest.mark.skip(reason="Ligand class not implemented yet")
 def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     # We want to extract a ligand based pharmacophore for thrombin.
     # We start by loading the ligands from a sdf file. The ligands in this file

@@ -8,14 +8,14 @@ def test_pl_complex_preparation(pdb_1m7w):
     protein = oph.load(pdb_1m7w)
     n_atoms_start = protein.n_atoms
     assert protein.has_ligands
-    
+
     lig_ids = protein.ligand_ids
     assert lig_ids == ["DAO:B"]
-    assert not protein.has_hydrogens()
+    assert not protein.has_hydrogens
 
     # First we need to extract the ligand, so we can fix its bond orders
     # and add hydrogens to it.
-    ligand = protein.extract_ligand(lig_ids[0])
+    ligand = protein.get_ligand(lig_ids[0])
     assert ligand.n_atoms == 14
     # The protein should have 14 less atoms because the ligand was removed
     assert protein.n_atoms == n_atoms_start - 14

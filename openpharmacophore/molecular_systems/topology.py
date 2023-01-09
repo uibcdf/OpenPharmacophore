@@ -3,9 +3,41 @@ import mdtraj.core.element as mdt_element
 import pyunitwizard as puw
 
 
+SOLVENT_AND_IONS = frozenset(
+    ['118', '119', '1AL', '1CU', '2FK', '2HP', '2OF',
+     '3CO', '3MT', '3NI', '3OF', '4MO', '543', '6MO', 'ACT', 'AG', 'AL', 'ALF',
+     'ATH', 'AU', 'AU3', 'AUC', 'AZI', 'Ag', 'BA', 'BAR', 'BCT', 'BEF', 'BF4',
+     'BO4', 'BR', 'BS3', 'BSY', 'Be', 'CA', 'CA+2', 'Ca+2', 'CAC', 'CAD', 'CAL',
+     'CD', 'CD1', 'CD3', 'CD5', 'CE', 'CES', 'CHT', 'CL', 'CL-', 'CLA', 'Cl-', 'CO',
+     'CO3', 'CO5', 'CON', 'CR', 'CS', 'CSB', 'CU', 'CU1', 'CU3', 'CUA', 'CUZ',
+     'CYN', 'Cl-', 'Cr', 'DME', 'DMI', 'DSC', 'DTI', 'DY', 'E4N', 'EDR', 'EMC',
+     'ER3', 'EU', 'EU3', 'F', 'FE', 'FE2', 'FPO', 'GA', 'GD3', 'GEP', 'HAI', 'HG',
+     'HGC', 'HOH', 'IN', 'IOD', 'ION', 'IR', 'IR3', 'IRI', 'IUM', 'K', 'K+', 'KO4',
+     'LA', 'LCO', 'LCP', 'LI', 'LIT', 'LU', 'MAC', 'MG', 'MH2', 'MH3', 'MLI', 'MMC',
+     'MN', 'MN3', 'MN5', 'MN6', 'MO1', 'MO2', 'MO3', 'MO4', 'MO5', 'MO6', 'MOO',
+     'MOS', 'MOW', 'MW1', 'MW2', 'MW3', 'NA', 'NA+2', 'NA2', 'NA5', 'NA6', 'NAO',
+     'NAW', 'Na+2', 'NET', 'NH4', 'NI', 'NI1', 'NI2', 'NI3', 'NO2', 'NO3', 'NRU',
+     'Na+', 'O4M', 'OAA', 'OC1', 'OC2', 'OC3', 'OC4', 'OC5', 'OC6', 'OC7', 'OC8',
+     'OCL', 'OCM', 'OCN', 'OCO', 'OF1', 'OF2', 'OF3', 'OH', 'OS', 'OS4', 'OXL',
+     'PB', 'PBM', 'PD', 'PER', 'PI', 'PO3', 'PO4', 'POT', 'PR', 'PT', 'PT4', 'PTN',
+     'RB', 'RH3', 'RHD', 'RU', 'RUB', 'Ra', 'SB', 'SCN', 'SE4', 'SEK', 'SM', 'SMO',
+     'SO3', 'SO4', 'SOD', 'SR', 'Sm', 'Sn', 'T1A', 'TB', 'TBA', 'TCN', 'TEA', 'THE',
+     'TL', 'TMA', 'TRA', 'UNX', 'V', 'V2+', 'VN3', 'VO4', 'W', 'WO5', 'Y1', 'YB',
+     'YB2', 'YH', 'YT3', 'ZN', 'ZN2', 'ZN3', 'ZNA', 'ZNO', 'ZO3']
+)
+
+
+CHAIN_NAMES = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
+    "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+    "W", "X", "Y", "Z",
+]
+
+
 class Topology:
     """ Wrapper for mdtraj's topology object.
     """
+
     def __init__(self, topology=None):
         if topology is None:
             self.top = mdtraj.Topology()
@@ -111,6 +143,51 @@ class Topology:
             if atom.element.symbol == "H":
                 return True
         return False
+
+    @staticmethod
+    def _is_ligand_atom(atom):
+        """ Check if an atom belongs to a ligand.
+
+            Parameters
+            ----------
+            atom : mdtraj.Atom
+
+            Returns
+            -------
+            bool
+        """
+        return not atom.residue.is_water and not atom.residue.is_protein \
+            and atom.residue.name not in SOLVENT_AND_IONS
+
+    def has_ligands(self):
+        """ Returns true if there are any ligands in the topology.
+
+            Returns
+            -------
+            bool
+        """
+        for atom in self.top.atoms:
+            if self._is_ligand_atom(atom):
+                return True
+        return False
+
+    def ligand_ids(self):
+        """ Returns the ligand ids of the ligands in the protein if there
+            are any.
+
+            Returns
+            -------
+            ligands : list[str]
+                List with ligand ids. An empty list if there are no ligands
+        """
+        ligands = set()
+        for atom in self.top.atoms:
+            if self._is_ligand_atom(atom):
+                chain = atom.residue.chain.index
+                ligand_id = atom.residue.name + ":" + CHAIN_NAMES[chain]
+                ligands.add(ligand_id)
+
+        return list(ligands)
 
 
 def create_topology(traj_file, topology_file=None):

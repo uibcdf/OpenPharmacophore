@@ -7,12 +7,12 @@ def test_pl_complex_bsite(pdb_3bbh_with_hydrogen):
     assert protein.has_hydrogens
     assert protein.has_ligands
 
-    lig_ids = protein.ligand_ids()
+    lig_ids = protein.ligand_ids
     assert len(lig_ids) == 1
 
     # We set the ligand whose chemical features we want to obtain, and we
     # see that its bond orders are not correct
-    ligand = protein.extract(lig_ids[0])
+    ligand = protein.get_ligand(lig_ids[0])
     assert ligand.n_atoms == 27
 
     # We fix the ligand. Its bond orders are correct now and it contains
