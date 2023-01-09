@@ -33,7 +33,7 @@ CHAIN_NAMES = [
 
 
 class Topology:
-    """ Wrapper for mdtraj's topology object.
+    """ Wrapper for mdtraj's Topology object.
     """
 
     def __init__(self, topology=None):
@@ -53,6 +53,10 @@ class Topology:
     @property
     def n_atoms(self) -> int:
         return self.top.n_atoms
+
+    @property
+    def n_bonds(self) -> int:
+        return self.top.n_bonds
 
     def set_num_chains(self, num):
         """ Set the number of chains in an empty topology.
@@ -236,6 +240,34 @@ class Topology:
             self.top = self.top.subset(atoms)
         else:
             return Topology(self.top.subset(atoms))
+
+    def add_bonds_from_dict(self, bonds_dict):
+        """ Add bonds to the topology
+
+            Parameters
+            ----------
+            bonds_dict: dict [int, list[int]]
+                Each entry represents an atom index (key) to which other atoms
+                are bonded (values).
+
+        """
+        for atom_ind, neighbors_ind in bonds_dict.items():
+            atom = self.top.atom(atom_ind)
+            for nbr in neighbors_ind:
+                self.top.add_bond(atom, self.top.atom(nbr))
+
+    def subset(self, atom_indices):
+        """ Returns a subset of the topology.
+
+            Parameters
+            ----------
+            atom_indices : list[int]
+
+            Returns
+            -------
+            Topology
+        """
+        return Topology(self.top.subset(atom_indices))
 
 
 def create_topology(traj_file, topology_file=None):

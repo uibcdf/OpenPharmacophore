@@ -1,5 +1,5 @@
 import pytest
 
 
-def test_get_ligand():
+def test_remove_ligand():
     pytest.fail("Implement me!")

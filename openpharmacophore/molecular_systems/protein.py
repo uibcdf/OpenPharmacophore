@@ -58,7 +58,8 @@ class Protein:
         assert len(lig_indices) > 0, f"Ligand {ligand_id} could not be extracted"
 
         lig_coords = self._coords[:, lig_indices, :]
-        ligand = ligand_from_topology(self._topology, lig_coords)
+        ligand_top = self._topology.subset(lig_indices)
+        ligand = ligand_from_topology(ligand_top, lig_coords)
         if remove:
             self._remove_ligand_by_indices(lig_indices)
         return ligand

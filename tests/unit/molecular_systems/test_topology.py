@@ -167,3 +167,12 @@ def test_remove_atoms_in_place(topology_with_ligand):
     assert new_topology.n_atoms == 17
     assert new_topology.n_chains == 4
     assert not residue_in_topology(new_topology, "HOH")
+
+
+def test_add_bonds_from_dict(topology_2_chains):
+    topology_2_chains.add_bonds_from_dict(
+        {0: [1, 2],
+         1: [2, 3],
+        }
+    )
+    assert topology_2_chains.n_bonds == 4
