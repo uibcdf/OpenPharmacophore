@@ -10,3 +10,12 @@ class DifferentNumAtomsError(ValueError):
                        f"smiles contains {atoms_2} atoms"
         super().__init__(self.message)
 
+
+class LigandCreationError(ValueError):
+    """ Exception raised when failing to create a ligand from a string
+    """
+
+    def __init__(self, string, form):
+        self.message = f"Failed to create ligand from form {form} with the "\
+                        f"string {string}"
+        super().__init__(self.message)

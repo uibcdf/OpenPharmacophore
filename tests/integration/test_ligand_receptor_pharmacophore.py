@@ -11,9 +11,12 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     lig_ids = protein.ligand_ids
     assert lig_ids == ["EST:B"]
 
+    # We obtain the smiles of the ligand. Necessary to fix its bond order later
+    smiles = oph.smiles_from_pdb_id(lig_ids[0])
+
     # We extract the ligand and fix its bond order and add hydrogens
     ligand = protein.get_ligand(lig_ids[0])
-    ligand.fix_bond_order()
+    ligand.fix_bond_order(smiles=smiles)
     ligand.add_hydrogens()
     # Estradiol has 18 Carbons, 2 Oxygens and 24 Hydrogens.
     assert ligand.has_aromatic_bonds()

@@ -1,5 +1,5 @@
 from openpharmacophore.molecular_systems import Topology
-from openpharmacophore.molecular_systems.ligand import Ligand, ligand_from_topology
+from openpharmacophore.molecular_systems.ligand import Ligand, ligand_from_topology, smiles_from_pdb_id
 import numpy as np
 import pyunitwizard as puw
 import pytest
@@ -123,3 +123,21 @@ def test_add_hydrogens(caffeine):
     ligand.add_hydrogens()
     assert ligand.has_hydrogens()
     assert ligand.n_atoms == 24
+
+
+def test_smiles_from_pdb_id_with_chain():
+    mapper = {
+        "DAO": "CCCCCCCCCCCC(=O)O",
+        "EST": "C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
+    }
+    pdb_id = "DAO:B"
+    assert smiles_from_pdb_id(pdb_id, mapper=mapper) == "CCCCCCCCCCCC(=O)O"
+
+
+def test_smiles_from_pdb_id_without_chain():
+    mapper = {
+        "DAO": "CCCCCCCCCCCC(=O)O",
+        "EST": "C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
+    }
+    pdb_id = "DAO"
+    assert smiles_from_pdb_id(pdb_id, mapper=mapper) == "CCCCCCCCCCCC(=O)O"
