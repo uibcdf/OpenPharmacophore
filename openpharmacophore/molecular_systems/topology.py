@@ -296,5 +296,5 @@ def create_topology(traj_file, topology_file=None):
         traj = mdtraj.load(traj_file)
 
     topology = Topology(traj.topology)
-    coords = puw.quantity(traj.xyz, "angstroms")
+    coords = puw.quantity(traj.xyz, "nanometers")
     return topology, coords

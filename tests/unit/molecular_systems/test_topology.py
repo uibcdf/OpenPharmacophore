@@ -49,43 +49,6 @@ def topology_with_hydrogen():
     return top
 
 
-@pytest.fixture()
-def topology_with_ligand():
-    top = Topology()
-    top.set_num_chains(5)
-    top.add_atoms_to_chain(
-        {
-            "ALA": [("CA", "C"), ("O", "O"), ("NA", "N"), ("H", "H")],
-        },
-        0
-    )
-    top.add_atoms_to_chain(
-        {
-            "EST": [("C", "C"), ("O", "O"), ("C", "C"), ("H", "H")],
-        },
-        1
-    )
-    top.add_atoms_to_chain(
-        {
-            "HOH": [("O", "O"), ("H", "H"), ("H", "H")],
-        },
-        2
-    )
-    top.add_atoms_to_chain(
-        {
-            "SO4": [("S", "S"), ("O", "O"), ("O", "O"), ("O", "O"), ("O", "O")],
-        },
-        3
-    )
-    top.add_atoms_to_chain(
-        {
-            "EST": [("C", "C"), ("O", "O"), ("C", "C"), ("H", "H")],
-        },
-        4
-    )
-    return top
-
-
 def test_create_topology_from_scratch():
     top = Topology()
     top.set_num_chains(2)
@@ -173,6 +136,6 @@ def test_add_bonds_from_dict(topology_2_chains):
     topology_2_chains.add_bonds_from_dict(
         {0: [1, 2],
          1: [2, 3],
-        }
+         }
     )
     assert topology_2_chains.n_bonds == 4

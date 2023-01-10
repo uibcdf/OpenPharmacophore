@@ -1,7 +1,9 @@
 import pytest
 import pyunitwizard as puw
-from openpharmacophore import PharmacophoricPoint
 from pathlib import Path
+
+from openpharmacophore import PharmacophoricPoint
+from openpharmacophore.molecular_systems import Topology
 
 
 # TODO: our unit tests will run faster if we do not use files
@@ -161,6 +163,43 @@ def five_element_pharmacophore():
     )
     return [acceptor, hb_donor,
             hydrophobicity, ring_1, ring_2]
+
+
+@pytest.fixture()
+def topology_with_ligand():
+    top = Topology()
+    top.set_num_chains(5)
+    top.add_atoms_to_chain(
+        {
+            "ALA": [("CA", "C"), ("O", "O"), ("NA", "N"), ("H", "H")],
+        },
+        0
+    )
+    top.add_atoms_to_chain(
+        {
+            "EST": [("C", "C"), ("O", "O"), ("C", "C"), ("H", "H")],
+        },
+        1
+    )
+    top.add_atoms_to_chain(
+        {
+            "HOH": [("O", "O"), ("H", "H"), ("H", "H")],
+        },
+        2
+    )
+    top.add_atoms_to_chain(
+        {
+            "SO4": [("S", "S"), ("O", "O"), ("O", "O"), ("O", "O"), ("O", "O")],
+        },
+        3
+    )
+    top.add_atoms_to_chain(
+        {
+            "EST": [("C", "C"), ("O", "O"), ("C", "C"), ("H", "H")],
+        },
+        4
+    )
+    return top
 
 
 # Data for integration tests

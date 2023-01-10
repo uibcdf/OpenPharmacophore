@@ -60,6 +60,7 @@ class Protein:
         lig_coords = self._coords[:, lig_indices, :]
         ligand_top = self._topology.subset(lig_indices)
         ligand = ligand_from_topology(ligand_top, lig_coords)
+
         if remove:
             self._remove_ligand_by_indices(lig_indices)
         return ligand
@@ -69,7 +70,7 @@ class Protein:
 
             Parameters
             ----------
-            ligand_indices : list[int[]
+            ligand_indices : list[int]
 
         """
         self._topology.remove_atoms(ligand_indices, inplace=True)
