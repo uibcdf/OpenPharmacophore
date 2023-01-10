@@ -141,3 +141,14 @@ def test_smiles_from_pdb_id_without_chain():
     }
     pdb_id = "DAO"
     assert smiles_from_pdb_id(pdb_id, mapper=mapper) == "CCCCCCCCCCCC(=O)O"
+
+
+def test_add_conformers(estradiol):
+    estradiol = deepcopy(estradiol)
+    assert estradiol.n_conformers == 1
+
+    coords = puw.quantity(
+        np.ones((2, estradiol.n_atoms, 3)), "angstroms"
+    )
+    estradiol.add_conformers(coords)
+    assert estradiol.n_conformers == 3

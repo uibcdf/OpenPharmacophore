@@ -36,7 +36,7 @@ class Protein:
     def ligand_ids(self):
         return self._topology.ligand_ids()
 
-    def get_ligand(self, ligand_id, remove=True):
+    def get_ligand(self, ligand_id, remove=False):
         """ Extract a ligand assuming there is one.
 
             Parameters
@@ -45,7 +45,7 @@ class Protein:
                 ID of the ligand. ID is composed by pdb id followed by chain name,
                 i.e. "EST:B".
 
-            remove : bool, default=True
+            remove : bool, default=False
                 Whether to remove the ligand from the topology.
 
             Returns

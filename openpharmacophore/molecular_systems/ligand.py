@@ -1,6 +1,7 @@
 import mdtraj as mdt
 import pyunitwizard as puw
 from rdkit.Chem import AllChem as Chem
+from rdkit.Geometry.rdGeometry import Point3D
 from pathlib import Path
 import pickle
 import tempfile
@@ -121,6 +122,31 @@ class Ligand:
         """
         self._mol = Chem.AddHs(self._mol, addCoords=True, addResidueInfo=True)
 
+    def add_conformers(self, coords):
+        """ Add conformers to a ligand.
+
+            Parameters
+            ----------
+            coords : puw.Quantity
+                A quantity of shape (n_conformers, n_atoms, 3)
+
+        """
+        if len(coords.shape) != 3 or coords.shape[1] != self.n_atoms:
+            shape = ("x", self.n_atoms, 3)
+            raise ValueError(f"Incorrect shape {coords.shape}"
+                             f"Expected shape {shape}")
+
+        coords_arr = puw.get_value(coords, "angstroms")
+        for ii in range(coords.shape[0]):
+            conformer = Chem.Conformer(self.n_atoms)
+            for atom in range(self.n_atoms):
+                position = coords_arr[ii, atom, :]
+                position = [float(pos) for pos in position]
+                conformer.SetAtomPosition(
+                    atom, Point3D(*position)
+                )
+            self._mol.AddConformer(conformer, assignId=True)
+
 
 class LigandSet:
     pass
@@ -151,7 +177,7 @@ def ligand_from_topology(topology, coords):
     traj.save_pdb(pdb_file.name)
     pdb_file.seek(0)
 
-    mol = Chem.MolFromPDBFile(pdb_file.name)
+    mol = Chem.MolFromPDBFile(pdb_file.name, removeHs=True)
     pdb_file.close()
     assert mol is not None, "Failed to create ligand"
 
