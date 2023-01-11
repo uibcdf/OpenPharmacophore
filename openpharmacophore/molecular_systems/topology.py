@@ -58,6 +58,12 @@ class Topology:
     def n_bonds(self) -> int:
         return self.top.n_bonds
 
+    @classmethod
+    def from_openmm(cls, openmm_top):
+        """ Create a topology from an openmm.Topology.
+        """
+        return cls(topology=mdtraj.Topology.from_openmm(openmm_top))
+
     def set_num_chains(self, num):
         """ Set the number of chains in an empty topology.
 
@@ -279,6 +285,10 @@ class Topology:
         return [
             a.index for a in self.top.atoms if a.element.symbol != "H"
         ]
+
+    def to_openmm(self):
+        """ Convert to openmm topology. """
+        return self.top.to_openmm()
 
 
 def create_topology(traj_file, topology_file=None):

@@ -1,6 +1,9 @@
 from openpharmacophore.molecular_systems.topology import Topology
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 from openpharmacophore.utils.maths import delete
+from openmm.app import Modeller
+import pyunitwizard as puw
+import numpy as np
 
 
 class Protein:
@@ -91,3 +94,39 @@ class Protein:
         lig_indices = self._topology.get_residue_indices(ligand_id)
         self._topology.remove_atoms(lig_indices, inplace=True)
         self._coords = delete(self._coords, lig_indices, axis=1)
+
+    def add_hydrogens(self):
+        """ Add hydrogens to the protein.
+        """
+        modeller = Modeller(
+            topology=self._topology.to_openmm(),
+            positions=puw.convert(self._coords[0],
+                                  to_unit="nanometers",
+                                  to_form="openmm.unit")
+        )
+        modeller.addHydrogens()
+        self._topology, self._coords = modeller_to_topology(modeller)
+
+
+def modeller_to_topology(modeller):
+    """ Convert an openmm.Modeller to a mdtraj.Trajectory.
+
+        Parameters
+        ----------
+        modeller : openmm.Modeller
+
+        Returns
+        -------
+        Topology
+            The topology
+
+        coords : puw.Quantity
+            Coordinates of the protein.
+    """
+    positions = modeller.getPositions()
+    coords = puw.convert(positions, to_unit="angstroms", to_form="pint")
+    coords = np.expand_dims(coords, axis=0)
+    assert coords.shape == (1, len(positions), 3), f"Incorrect shape {coords.shape}"
+
+    topology = Topology.from_openmm(modeller.getTopology())
+    return topology, coords

@@ -33,4 +33,4 @@ def test_pl_complex_preparation(pdb_1m7w):
 
     # We add hydrogens to the receptor
     protein.add_hydrogens()
-    assert protein.has_hydrogens()
+    assert protein.has_hydrogens
