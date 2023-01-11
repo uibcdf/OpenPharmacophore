@@ -145,6 +145,21 @@ class Ligand:
         else:
             self._conformers = np.concatenate((self._conformers, coords))
 
+    def get_conformer(self, conf_ind):
+        """ Get the coordinates of the specified conformer
+
+            Parameters
+            ----------
+            conf_ind : int
+                Index of the conformer
+
+            Returns
+            -------
+            puw.Quantity
+                A quantity of shape (n_atoms, 3)
+        """
+        return self._conformers[conf_ind]
+
 
 class LigandSet:
     pass

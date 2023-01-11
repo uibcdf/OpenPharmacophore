@@ -4,29 +4,6 @@ import pytest
 
 
 @pytest.fixture
-def topology_2_chains():
-    top = Topology()
-    top.set_num_chains(2)
-    top.add_atoms_to_chain(
-        {
-            "ALA": [("CA", "C"), ("O", "O"), ("NA", "N")],
-            "MET": [("CA", "C"), ("O", "O"), ("CB", "C")],
-        },
-        0
-    )
-    top.add_atoms_to_chain(
-        {
-            "PRO": [("CA", "C"), ("O", "O"), ("NA", "N")],
-            "LEU": [("CA", "C"), ("O", "O"), ("CB", "C")],
-        },
-        1
-    )
-    assert top.n_residues == 4
-    assert top.n_atoms == 12
-    return top
-
-
-@pytest.fixture
 def topology_with_hydrogen():
     top = Topology()
     top.set_num_chains(2)

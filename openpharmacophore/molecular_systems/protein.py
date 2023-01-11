@@ -20,6 +20,7 @@ class Protein:
             A quantity of shape (n_structures, n_atoms, 3)
     """
     def __init__(self, topology, coords):
+        # TODO: validate coordinates shape and topology match
         self._topology = topology
         self._coords = coords
 
@@ -106,6 +107,35 @@ class Protein:
         )
         modeller.addHydrogens()
         self._topology, self._coords = modeller_to_topology(modeller)
+
+    def residues_at_distance(self, frame, centroid, max_dist, min_dist=0):
+        """ Get the indices of the residues that are at
+            min_dist <= centroid <= max_dist.
+
+            Parameters
+            ----------
+            frame : int
+                Frame of the trajectory
+            centroid : puw.Quantity
+                Shape (1,3)
+            max_dist : puw.Quantity
+                Scalar
+            min_dist : puw.Quantity
+                Scalar
+
+            Returns
+            -------
+            np.ndarray
+                Array if integers with the indices.
+
+        """
+        if min_dist == 0:
+            min_dist = puw.quantity(0, "nanometers")
+
+        distance = np.sqrt(np.sum(np.power(self._coords[frame] - centroid, 2), axis=1))
+        return np.where(
+            np.logical_and(distance > min_dist, distance <= max_dist)
+        )[0]
 
 
 def modeller_to_topology(modeller):

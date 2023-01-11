@@ -21,3 +21,24 @@ def test_remove_ligand(topology_with_ligand):
     expected_coords = np.ones((2, n_atoms - 4, 3))
     assert np.all(puw.get_value(protein._coords, "nanometers")
                   == expected_coords)
+
+
+def test_residues_at_distance(topology_2_chains):
+    centroid = puw.quantity(np.zeros((1, 3)), "nanometers")
+    max_dist = puw.quantity(3.0, "nanometers")
+
+    coords = puw.quantity(np.array([[
+        [4., 4., 4.],
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+    ]]), "nanometers")
+    protein = Protein(topology_2_chains, coords)
+    indices = protein.residues_at_distance(0, centroid, max_dist)
+    expected = np.array([1, 3, 8])
+    assert np.all(indices == expected)

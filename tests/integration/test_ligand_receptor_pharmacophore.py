@@ -26,11 +26,8 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     protein.add_hydrogens()
     assert protein.has_hydrogens
 
-    # We get the binding site
-    binding_site = protein.extract_binding_site(ligand=ligand)
-
     # We extract the pharmacophore
-    pharmacophore = oph.LigandReceptorPharmacophore(binding_site, ligand)
+    pharmacophore = oph.LigandReceptorPharmacophore(protein, ligand)
     pharmacophore.extract()
     assert len(pharmacophore[0]) > 0
     # We know that the pharmacophore of ERalpha should contain one aromatic point and
@@ -50,6 +47,5 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
 
     # We create a view of the binding site, so we can the residues that
     # are involved in protein ligand-interactions.
-    view.remove_protein()
-    view.add_bsite(binding_site)
+    view.set_protein_indices(pharmacophore.bsite.indices())
     assert_view_contains_pharmacophore(view, len(pharmacophore[0]))

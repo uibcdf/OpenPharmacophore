@@ -103,3 +103,11 @@ def feature_centroids(mol, conf, indices):
         coords[ii] = pos.x, pos.y, pos.z
 
     return np.mean(coords, axis=0)
+
+
+class ChemFeatContainer:
+    pass
+
+
+def residues_chem_feats():
+    pass

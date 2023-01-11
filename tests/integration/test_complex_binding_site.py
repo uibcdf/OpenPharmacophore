@@ -23,13 +23,15 @@ def test_pl_complex_bsite(pdb_3bbh_with_hydrogen):
     ligand.add_hydrogens()
     assert ligand.n_atoms == 50
 
-    # We extract the binding site using the centroid of the ligand
-    binding_site = protein.extract_binding_site(ligand=ligand)
+    # We create a binding site to obtain the receptor chemical features
+    bsite = oph.ComplexBindingSite(protein, ligand)
 
     # Extract chemical features and visualize them
+    receptor_feats = bsite.get_chem_feats(frame=0)
     ligand_feats = oph.extract_chem_feats(ligand)
-    receptor_feats = oph.extract_chem_feats(binding_site)
 
-    viewer = oph.Viewer(binding_site=binding_site, ligands=ligand)
+    viewer = oph.Viewer(protein=protein, ligands=ligand)
     viewer.add_chem_feats([ligand_feats, receptor_feats])
+    viewer.set_protein_indices(bsite_extractor.get_indices(),
+                               frame=0)
     viewer.show()

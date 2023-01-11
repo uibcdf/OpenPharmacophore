@@ -21,20 +21,15 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     ligand.add_hydrogens()
     assert ligand.n_atoms == 44
 
-    binding_site = protein.extract_binding_site(ligand=ligand)
-
     # We extract the pharmacophore
-    pharmacophore = oph.LigandReceptorPharmacophore(ligand, binding_site)
+    pharmacophore = oph.LigandReceptorPharmacophore(protein, ligand)
     pharmacophore.extract(frames=[0, 1, 2])
     assert len(pharmacophore) == 3
     assert len(pharmacophore[0]) > 0
     assert len(pharmacophore[1]) > 0
     assert len(pharmacophore[2]) > 0
 
-    # We inspect the ligand to see that it was correctly extracted. It should
-    # have hydrogens, because the receptor has too
-    assert pharmacophore.receptor.ligand.GetNumAtoms() == 44
-
-    # We create a view of the second frame
-    viewer = oph.Viewer(protein=protein, ligand=ligand)
+    # We view the second frame
+    viewer = oph.Viewer(pharmacophore=pharmacophore,
+                        protein=protein, ligand=ligand)
     view = viewer.show(frame=1)

@@ -152,3 +152,8 @@ def test_add_conformers(estradiol):
     )
     estradiol.add_conformers(coords)
     assert estradiol.n_conformers == 3
+
+
+def test_get_conformer(estradiol):
+    conformer = estradiol.get_conformer(0)
+    assert conformer.shape == (20, 3)
