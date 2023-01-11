@@ -36,7 +36,7 @@ class Protein:
     def ligand_ids(self):
         return self._topology.ligand_ids()
 
-    def get_ligand(self, ligand_id, remove=False):
+    def get_ligand(self, ligand_id, remove=False, remove_hyd=True):
         """ Extract a ligand assuming there is one.
 
             Parameters
@@ -47,6 +47,9 @@ class Protein:
 
             remove : bool, default=False
                 Whether to remove the ligand from the topology.
+
+            remove_hyd : bool
+                Whether to remove teh hydrogens from the ligand.
 
             Returns
             -------
@@ -59,7 +62,7 @@ class Protein:
 
         lig_coords = self._coords[:, lig_indices, :]
         ligand_top = self._topology.subset(lig_indices)
-        ligand = ligand_from_topology(ligand_top, lig_coords)
+        ligand = ligand_from_topology(ligand_top, lig_coords, remove_hyd)
 
         if remove:
             self._remove_ligand_by_indices(lig_indices)

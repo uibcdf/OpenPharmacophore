@@ -1,7 +1,7 @@
+import numpy as np
 import mdtraj as mdt
 import pyunitwizard as puw
 from rdkit.Chem import AllChem as Chem
-from rdkit.Geometry.rdGeometry import Point3D
 from pathlib import Path
 import pickle
 import tempfile
@@ -12,8 +12,10 @@ from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsErro
 class Ligand:
     """ Represents a ligand. Wrapper for rdkit Mol object
     """
-    def __init__(self, mol):
+    def __init__(self, mol, conformer_coords=None):
         self._mol = mol  # type: Chem.Mol
+        # quantity of shape (n_conformers, n_atoms, 3)
+        self._conformers = conformer_coords
 
     @property
     def n_atoms(self) -> int:
@@ -21,7 +23,9 @@ class Ligand:
 
     @property
     def n_conformers(self) -> int:
-        return self._mol.GetNumConformers()
+        if self._conformers is None:
+            return 0
+        return self._conformers.shape[0]
 
     @property
     def n_bonds(self) -> int:
@@ -136,23 +140,17 @@ class Ligand:
             raise ValueError(f"Incorrect shape {coords.shape}"
                              f"Expected shape {shape}")
 
-        coords_arr = puw.get_value(coords, "angstroms")
-        for ii in range(coords.shape[0]):
-            conformer = Chem.Conformer(self.n_atoms)
-            for atom in range(self.n_atoms):
-                position = coords_arr[ii, atom, :]
-                position = [float(pos) for pos in position]
-                conformer.SetAtomPosition(
-                    atom, Point3D(*position)
-                )
-            self._mol.AddConformer(conformer, assignId=True)
+        if self._conformers is None:
+            self._conformers = coords
+        else:
+            self._conformers = np.concatenate((self._conformers, coords))
 
 
 class LigandSet:
     pass
 
 
-def ligand_from_topology(topology, coords):
+def ligand_from_topology(topology, coords, remove_hyd=True):
     """ Create a ligand from a topology object and an array of coordinates
 
         Parameters
@@ -162,6 +160,9 @@ def ligand_from_topology(topology, coords):
 
         coords: Quantity
             Array of shape (n_conformers, n_atoms, 3).
+
+        remove_hyd : bool
+            Whether to remove teh hydrogens from the ligand.
 
         Returns
         -------
@@ -177,14 +178,15 @@ def ligand_from_topology(topology, coords):
     traj.save_pdb(pdb_file.name)
     pdb_file.seek(0)
 
-    mol = Chem.MolFromPDBFile(pdb_file.name, removeHs=True)
+    mol = Chem.MolFromPDBFile(pdb_file.name, removeHs=remove_hyd)
     pdb_file.close()
     assert mol is not None, "Failed to create ligand"
 
-    ligand = Ligand(mol)
-    if coords.shape[0] > 1:
-        ligand.add_conformers(coords)
-    return ligand
+    if remove_hyd:
+        non_hyd = topology.non_hyd_indices()
+        coords = coords[:, non_hyd, :]
+
+    return Ligand(mol, coords)
 
 
 def create_ligand_set(filename: str):

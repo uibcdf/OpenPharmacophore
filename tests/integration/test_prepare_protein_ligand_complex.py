@@ -15,7 +15,7 @@ def test_pl_complex_preparation(pdb_1m7w):
 
     # First we need to extract the ligand, so we can fix its bond orders
     # and add hydrogens to it.
-    ligand = protein.get_ligand(lig_ids[0])
+    ligand = protein.get_ligand(lig_ids[0], remove=True)
     assert ligand.n_atoms == 14
     # The protein should have 14 less atoms because the ligand was removed
     assert protein.n_atoms == n_atoms_start - 14

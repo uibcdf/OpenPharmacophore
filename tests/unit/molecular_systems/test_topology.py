@@ -139,3 +139,9 @@ def test_add_bonds_from_dict(topology_2_chains):
          }
     )
     assert topology_2_chains.n_bonds == 4
+
+
+def test_non_hyd_indices(topology_with_hydrogen):
+    indices = topology_with_hydrogen.non_hyd_indices()
+    expected = [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]
+    assert indices == expected

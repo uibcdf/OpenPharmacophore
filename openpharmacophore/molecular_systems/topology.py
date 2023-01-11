@@ -269,6 +269,17 @@ class Topology:
         """
         return Topology(self.top.subset(atom_indices))
 
+    def non_hyd_indices(self):
+        """ Returns the indices of the atoms that are not hydrogen.
+
+            Returns
+            -------
+            list[int]
+        """
+        return [
+            a.index for a in self.top.atoms if a.element.symbol != "H"
+        ]
+
 
 def create_topology(traj_file, topology_file=None):
     """ Create a topology object.
