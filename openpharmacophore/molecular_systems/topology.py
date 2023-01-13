@@ -275,6 +275,20 @@ class Topology:
         """
         return Topology(self.top.subset(atom_indices))
 
+    def residues_subset(self, residues):
+        """ Returns a subset of the topology.
+
+            Parameters
+            ----------
+            residues : list[int]
+
+            Returns
+            -------
+            Topology
+
+        """
+        return self.subset(self.get_residues_atoms(residues))
+
     def non_hyd_indices(self):
         """ Returns the indices of the atoms that are not hydrogen.
 
@@ -289,6 +303,40 @@ class Topology:
     def to_openmm(self):
         """ Convert to openmm topology. """
         return self.top.to_openmm()
+
+    def get_atoms_residues(self, atoms):
+        """ Get the indices of the residues to which the given atoms belong to.
+
+            Parameters
+            ----------
+            atoms : ArrayLike[int]
+                An array like object with the atoms indices
+
+            Returns
+            -------
+            set[int]
+                The residues
+        """
+        return {self.top.atom(i).residue.index for i in atoms}
+
+    def get_residues_atoms(self, residues):
+        """ Get the indices of the atoms which comprise the given resiudes.
+
+            Parameters
+            ----------
+            residues : list[int]
+                An array like object with the residues indices
+
+            Returns
+            -------
+            atoms : list[int]
+                A list with atoms indices
+        """
+        atoms = []
+        for res in residues:
+            for at in self.top.residue(res).atoms:
+                atoms.append(at.index)
+        return atoms
 
 
 def create_topology(traj_file, topology_file=None):

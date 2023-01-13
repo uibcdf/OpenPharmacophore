@@ -4,6 +4,7 @@ from openpharmacophore.utils.maths import delete
 from openmm.app import Modeller
 import pyunitwizard as puw
 import numpy as np
+from typing import List
 
 
 class Protein:
@@ -25,7 +26,7 @@ class Protein:
         self._coords = coords
 
     @property
-    def n_atoms(self):
+    def n_atoms(self) -> int:
         return self._topology.n_atoms
 
     @property
@@ -37,8 +38,16 @@ class Protein:
         return self._topology.has_ligands()
 
     @property
-    def ligand_ids(self):
+    def ligand_ids(self) -> List[str]:
         return self._topology.ligand_ids()
+
+    @property
+    def topology(self) -> Topology:
+        return self._topology
+
+    @property
+    def coords(self) -> np.ndarray:
+        return self._coords
 
     def get_ligand(self, ligand_id, remove=False, remove_hyd=True):
         """ Extract a ligand assuming there is one.
@@ -108,8 +117,8 @@ class Protein:
         modeller.addHydrogens()
         self._topology, self._coords = modeller_to_topology(modeller)
 
-    def residues_at_distance(self, frame, centroid, max_dist, min_dist=0):
-        """ Get the indices of the residues that are at
+    def atoms_at_distance(self, frame, centroid, max_dist, min_dist=0):
+        """ Get the indices of the atoms that are at
             min_dist <= centroid <= max_dist.
 
             Parameters

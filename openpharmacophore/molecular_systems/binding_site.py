@@ -1,8 +1,9 @@
 import abc
-from typing import List
 import numpy as np
 import pyunitwizard as puw
-from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, residues_chem_feats
+from typing import List
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
+from openpharmacophore.molecular_systems.topology_to_mol import topology_to_mol
 from openpharmacophore.utils import maths
 
 
@@ -44,16 +45,16 @@ class ComplexBindingSite(AbstractBindingSite):
 
             Returns
             -------
-            list[int]
+            set[int]
                 Indices of the residues that encompass the binding site
         """
         conformer = self._ligand.get_conformer(frame)
         lig_centroid = self._ligand_centroid(conformer)
         max_extent = self._ligand_max_extent(conformer, lig_centroid)
         bs_cutoff = max_extent + BS_DIST_MAX
-        return self._protein.residues_at_distance(
-            frame, lig_centroid, bs_cutoff, max_extent
-        )
+        atoms = self._protein.atoms_at_distance(
+            frame, lig_centroid, bs_cutoff, max_extent)
+        return self._protein.topology.get_atoms_residues(atoms)
 
     def get_chem_feats(self, frame):
         """ Get the chemical features of the binding site at the specified frame.
@@ -67,7 +68,14 @@ class ComplexBindingSite(AbstractBindingSite):
             ChemFeatContainer
         """
         residues = self.get_residues(frame)
-        return residues_chem_feats(residues)
+        bs_topology = self._protein.topology.residues_subset(residues)
+
+        atoms = self._protein.topology.get_residues_atoms(residues)
+        bsite = topology_to_mol(bs_topology,
+                                puw.get_value(self._protein.coords[frame, atoms, :], "nanometers"),
+                                remove_hyd=False)
+
+        return mol_chem_feats(bsite)
 
     @staticmethod
     def _ligand_centroid(coords):

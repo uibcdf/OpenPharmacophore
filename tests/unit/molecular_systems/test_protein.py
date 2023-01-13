@@ -1,3 +1,4 @@
+import pytest
 import pyunitwizard as puw
 import numpy as np
 from copy import deepcopy
@@ -23,10 +24,8 @@ def test_remove_ligand(topology_with_ligand):
                   == expected_coords)
 
 
-def test_residues_at_distance(topology_2_chains):
-    centroid = puw.quantity(np.zeros((1, 3)), "nanometers")
-    max_dist = puw.quantity(3.0, "nanometers")
-
+@pytest.fixture
+def protein_4_residues(topology_2_chains):
     coords = puw.quantity(np.array([[
         [4., 4., 4.],
         [1., 1., 1.],
@@ -38,7 +37,13 @@ def test_residues_at_distance(topology_2_chains):
         [4., 4., 4.],
         [1., 1., 1.],
     ]]), "nanometers")
-    protein = Protein(topology_2_chains, coords)
-    indices = protein.residues_at_distance(0, centroid, max_dist)
+    return Protein(topology_2_chains, coords)
+
+
+def test_atoms_at_distance(protein_4_residues):
+    centroid = puw.quantity(np.zeros((1, 3)), "nanometers")
+    max_dist = puw.quantity(3.0, "nanometers")
+
+    indices = protein_4_residues.atoms_at_distance(0, centroid, max_dist)
     expected = np.array([1, 3, 8])
     assert np.all(indices == expected)

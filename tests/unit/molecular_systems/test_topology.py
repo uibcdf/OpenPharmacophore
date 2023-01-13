@@ -1,6 +1,7 @@
 from openpharmacophore.molecular_systems import Topology
 from copy import deepcopy
 import pytest
+import numpy as np
 
 
 @pytest.fixture
@@ -122,3 +123,21 @@ def test_non_hyd_indices(topology_with_hydrogen):
     indices = topology_with_hydrogen.non_hyd_indices()
     expected = [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]
     assert indices == expected
+
+
+def test_get_atoms_residues(topology_2_chains):
+    atoms = np.array([0, 1, 6])
+    residues = topology_2_chains.get_atoms_residues(atoms)
+    assert residues == {0, 2}
+
+
+def test_get_residues_atoms(topology_2_chains):
+    residues = [1, 2]
+    atoms = topology_2_chains.get_residues_atoms(residues)
+    assert atoms == [3, 4, 5, 6, 7, 8]
+
+
+def test_residues_subset(topology_2_chains):
+    subset = topology_2_chains.residues_subset([1, 2])
+    assert subset.n_chains == 2
+    assert subset.n_atoms == 6

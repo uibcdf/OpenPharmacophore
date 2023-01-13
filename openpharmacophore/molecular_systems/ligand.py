@@ -1,12 +1,11 @@
 import numpy as np
-import mdtraj as mdt
-import pyunitwizard as puw
 from rdkit.Chem import AllChem as Chem
+import pyunitwizard as puw
 from pathlib import Path
 import pickle
-import tempfile
 
 from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsError, LigandCreationError
+from openpharmacophore.molecular_systems.topology_to_mol import topology_to_mol
 
 
 class Ligand:
@@ -184,19 +183,9 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
         Ligand
 
     """
-    traj = mdt.Trajectory(
-        xyz=puw.get_value(coords, "nanometers")[0],
-        topology=topology.top
-    )
-    # TODO: create ligand without using files
-    pdb_file = tempfile.NamedTemporaryFile()
-    traj.save_pdb(pdb_file.name)
-    pdb_file.seek(0)
-
-    mol = Chem.MolFromPDBFile(pdb_file.name, removeHs=remove_hyd)
-    pdb_file.close()
-    assert mol is not None, "Failed to create ligand"
-
+    mol = topology_to_mol(topology,
+                          puw.get_value(coords, "nanometers")[0],
+                          remove_hyd)
     if remove_hyd:
         non_hyd = topology.non_hyd_indices()
         coords = coords[:, non_hyd, :]
