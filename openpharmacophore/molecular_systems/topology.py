@@ -306,6 +306,7 @@ class Topology:
 
     def get_atoms_residues(self, atoms):
         """ Get the indices of the residues to which the given atoms belong to.
+            Only aminoacids residues are included.
 
             Parameters
             ----------
@@ -317,10 +318,16 @@ class Topology:
             set[int]
                 The residues
         """
-        return {self.top.atom(i).residue.index for i in atoms}
+        residues = set()
+        for at_ind in atoms:
+            atom = self.top.atom(at_ind)
+            if atom.residue.is_protein:
+                residues.add(atom.residue.index)
+
+        return residues
 
     def get_residues_atoms(self, residues):
-        """ Get the indices of the atoms which comprise the given resiudes.
+        """ Get the indices of the atoms which comprise the given residues.
 
             Parameters
             ----------

@@ -131,6 +131,12 @@ def test_get_atoms_residues(topology_2_chains):
     assert residues == {0, 2}
 
 
+def test_atoms_residues_only_gets_aminoacids(topology_with_ligand):
+    indices = [0, 4, 8, 11, 16]
+    residues = topology_with_ligand.get_atoms_residues(indices)
+    assert residues == {0}
+
+
 def test_get_residues_atoms(topology_2_chains):
     residues = [1, 2]
     atoms = topology_2_chains.get_residues_atoms(residues)

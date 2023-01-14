@@ -15,7 +15,7 @@ def topology_to_mol(topology, coords, remove_hyd=True):
                Array of shape (n_atoms, 3).
 
            remove_hyd : bool
-               Whether to remove teh hydrogens from the ligand.
+               Whether to remove the hydrogens from the molecule.
 
            Returns
            -------

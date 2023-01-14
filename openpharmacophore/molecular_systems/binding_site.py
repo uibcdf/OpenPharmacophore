@@ -73,7 +73,7 @@ class ComplexBindingSite(AbstractBindingSite):
         atoms = self._protein.topology.get_residues_atoms(residues)
         bsite = topology_to_mol(bs_topology,
                                 puw.get_value(self._protein.coords[frame, atoms, :], "nanometers"),
-                                remove_hyd=False)
+                                remove_hyd=True)
 
         return mol_chem_feats(bsite)
 
