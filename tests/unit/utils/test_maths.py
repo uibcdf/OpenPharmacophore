@@ -1,6 +1,7 @@
 import openpharmacophore.utils.maths as maths
 import pyunitwizard as puw
 import numpy as np
+import pytest
 
 
 def test_points_distance():
@@ -75,3 +76,33 @@ def test_maximum_distance():
     ]), "angstroms")
     expected = puw.quantity(np.sqrt(48), "angstroms")
     assert maths.maximum_distance(centroid, coordinates) == expected
+
+
+def test_delete_from_quantity_of_rank_1():
+    qty = puw.quantity(
+        np.array([1, 2, 3, 4, 5]), "angstroms"
+    )
+    expected = np.array([1, 3, 5])
+
+    qty_deleted = maths.delete(qty, [1, 3])
+    assert np.all(puw.get_value(qty_deleted) == expected)
+
+
+def test_delete_from_quantity_of_rank_3():
+    qty = puw.quantity(
+        np.array([
+            [[1, 2],
+             [3, 4], ],
+            [[5, 6],
+             [7, 8], ],
+        ]), "angstroms"
+    )
+    assert qty.shape == (2, 2, 2)
+    expected = np.array([
+            [[1, 2], ],
+            [[5, 6], ],
+        ])
+    assert expected.shape == (2, 1, 2)
+
+    qty_deleted = maths.delete(qty, [1], axis=1)
+    assert np.all(puw.get_value(qty_deleted) == expected)
