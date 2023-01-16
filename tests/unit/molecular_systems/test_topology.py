@@ -143,6 +143,12 @@ def test_get_residues_atoms(topology_2_chains):
     assert atoms == [3, 4, 5, 6, 7, 8]
 
 
+def test_get_residues_atoms_result_is_sorted(topology_2_chains):
+    residues = [2, 1]
+    atoms = topology_2_chains.get_residues_atoms(residues)
+    assert atoms == [3, 4, 5, 6, 7, 8]
+
+
 def test_residues_subset(topology_2_chains):
     subset = topology_2_chains.residues_subset([1, 2])
     assert subset.n_chains == 2

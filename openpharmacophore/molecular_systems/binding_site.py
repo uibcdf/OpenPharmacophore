@@ -36,7 +36,7 @@ class ComplexBindingSite(AbstractBindingSite):
         self._ligand = ligand
 
     def get_residues(self, frame):
-        """ Get the indices of the residues in the protein that corresponds
+        """ Get the indices of the residues in the protein that correspond
             to the binding site.
 
             The binding site is defined as the sphere with centroid at the ligand
@@ -68,13 +68,12 @@ class ComplexBindingSite(AbstractBindingSite):
             ChemFeatContainer
         """
         residues = self.get_residues(frame)
-        bs_topology = self._protein.topology.residues_subset(residues)
-
         atoms = self._protein.topology.get_residues_atoms(residues)
-        bsite = topology_to_mol(bs_topology,
-                                puw.get_value(self._protein.coords[frame, atoms, :], "nanometers"),
-                                remove_hyd=True)
 
+        bs_topology = self._protein.topology.subset(atoms)
+        bs_coords = puw.get_value(self._protein.coords[frame, atoms, :], "nanometers")
+
+        bsite = topology_to_mol(bs_topology, bs_coords, remove_hyd=True)
         return mol_chem_feats(bsite)
 
     @staticmethod

@@ -343,7 +343,7 @@ class Topology:
         for res in residues:
             for at in self.top.residue(res).atoms:
                 atoms.append(at.index)
-        return atoms
+        return sorted(atoms)
 
 
 def create_topology(traj_file, topology_file=None):
