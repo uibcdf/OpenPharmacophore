@@ -17,10 +17,10 @@ def test_remove_ligand(topology_with_ligand):
 
     protein._remove_ligand_by_indices([4, 5, 6, 7])
     assert protein.n_atoms == n_atoms - 4
-    assert protein._coords.shape == (2, n_atoms - 4, 3)
+    assert protein.coords.shape == (2, n_atoms - 4, 3)
 
     expected_coords = np.ones((2, n_atoms - 4, 3))
-    assert np.all(puw.get_value(protein._coords, "nanometers")
+    assert np.all(puw.get_value(protein.coords, "nanometers")
                   == expected_coords)
 
 
@@ -36,6 +36,9 @@ def protein_4_residues(topology_2_chains):
         [4., 4., 4.],
         [4., 4., 4.],
         [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
     ]]), "nanometers")
     return Protein(topology_2_chains, coords)
 
@@ -47,3 +50,43 @@ def test_atoms_at_distance(protein_4_residues):
     indices = protein_4_residues.atoms_at_distance(0, centroid, max_dist)
     expected = np.array([1, 3, 8])
     assert np.all(indices == expected)
+
+
+def test_slice_protein_all_frames(protein_4_residues):
+    atoms = [3, 4, 5, 6, 7, 8]
+    sliced_protein = protein_4_residues.slice(atoms)
+
+    assert sliced_protein.n_atoms == 6
+    assert sliced_protein.n_residues == 2
+    assert sliced_protein.coords.shape == (1, 6, 3)
+
+    expected = puw.quantity(np.array([[
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+    ]]), "nanometers")
+
+    assert np.all(expected == sliced_protein.coords)
+
+
+def test_slice_protein_single_frame(protein_4_residues):
+    atoms = [3, 4, 5, 6, 7, 8]
+    sliced_protein = protein_4_residues.slice(atoms, frame=0)
+
+    assert sliced_protein.n_atoms == 6
+    assert sliced_protein.n_residues == 2
+    assert sliced_protein.coords.shape == (1, 6, 3)
+
+    expected = puw.quantity(np.array([[
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+    ]]), "nanometers")
+
+    assert np.all(expected == sliced_protein.coords)

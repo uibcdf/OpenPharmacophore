@@ -22,12 +22,17 @@ class Protein:
     """
     def __init__(self, topology, coords):
         # TODO: validate coordinates shape and topology match
+        self._validate_coords(topology, coords)
         self._topology = topology
         self._coords = coords
 
     @property
     def n_atoms(self) -> int:
         return self._topology.n_atoms
+
+    @property
+    def n_residues(self) -> int:
+        return self._topology.n_residues
 
     @property
     def has_hydrogens(self) -> bool:
@@ -145,6 +150,43 @@ class Protein:
         return np.where(
             np.logical_and(distance > min_dist, distance <= max_dist)
         )[0]
+
+    def slice(self, atoms, frame=None):
+        """ Obtain a subset of the protein with the specified atoms.
+
+            Parameters
+            ----------
+            atoms : list[int]
+                Indices of the atoms in the sliced protein.
+
+            frame : int, optional
+                Frame to extract. If None all frames are extracted.
+
+            Returns
+            -------
+            Protein
+                The sliced protein.
+        """
+        topology = self._topology.subset(atoms)
+        if frame is None:
+            coords = self._coords[:, atoms, :]
+        else:
+            coords = self._coords[frame, atoms, :]
+            coords = np.expand_dims(coords, axis=0)
+
+        return Protein(topology, coords)
+
+    @staticmethod
+    def _validate_coords(topology, coords):
+        """ Verifies that the coordinates array has correct shape
+            and that number of atoms match with the topology
+        """
+        if len(coords.shape) != 3:
+            raise ValueError(f"Incorrect shape {coords.shape}")
+
+        if coords.shape[1] != topology.n_atoms:
+            raise ValueError(f"Incorrect number of atoms {coords.shape[1]}. "
+                             f"Topology has {topology.n_atoms} atoms")
 
 
 def modeller_to_topology(modeller):
