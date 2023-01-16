@@ -15,7 +15,7 @@ def test_remove_ligand(topology_with_ligand):
     protein = Protein(topology, coords)
     n_atoms = protein.n_atoms
 
-    protein._remove_ligand_by_indices([4, 5, 6, 7])
+    protein.remove_ligand("EST:B")
     assert protein.n_atoms == n_atoms - 4
     assert protein.coords.shape == (2, n_atoms - 4, 3)
 

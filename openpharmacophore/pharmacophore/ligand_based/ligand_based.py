@@ -472,7 +472,7 @@ class LigandBasedPharmacophore:
         self._feats.clear()
         for ii, lig in enumerate(self._ligands):
             self._feats.append({})
-            for feat_type, smarts in smarts_ligand.items():
+            for feat_type, smarts in SMARTS_LIGAND.items():
                 indices = feature_indices(smarts, lig)
                 short_name = PharmacophoricPoint.feature_to_char[feat_type]
                 self._feats[ii][short_name] = indices

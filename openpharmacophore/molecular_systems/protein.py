@@ -54,7 +54,7 @@ class Protein:
     def coords(self) -> np.ndarray:
         return self._coords
 
-    def get_ligand(self, ligand_id, remove=False, remove_hyd=True):
+    def get_ligand(self, ligand_id, remove_hyd=True):
         """ Extract a ligand assuming there is one.
 
             Parameters
@@ -62,9 +62,6 @@ class Protein:
             ligand_id : str
                 ID of the ligand. ID is composed by pdb id followed by chain name,
                 i.e. "EST:B".
-
-            remove : bool, default=False
-                Whether to remove the ligand from the topology.
 
             remove_hyd : bool
                 Whether to remove teh hydrogens from the ligand.
@@ -82,22 +79,9 @@ class Protein:
         ligand_top = self._topology.subset(lig_indices)
         ligand = ligand_from_topology(ligand_top, lig_coords, remove_hyd)
 
-        if remove:
-            self._remove_ligand_by_indices(lig_indices)
         return ligand
 
-    def _remove_ligand_by_indices(self, ligand_indices):
-        """ Remove a ligand from this protein.
-
-            Parameters
-            ----------
-            ligand_indices : list[int]
-
-        """
-        self._topology.remove_atoms(ligand_indices, inplace=True)
-        self._coords = delete(self._coords, ligand_indices, axis=1)
-
-    def _remove_ligand_by_id(self, ligand_id):
+    def remove_ligand(self, ligand_id):
         """ Remove a ligand from this protein.
 
             Parameters
@@ -106,7 +90,8 @@ class Protein:
                 ID of the ligand
 
         """
-        lig_indices = self._topology.get_residue_indices(ligand_id)
+        lig_name, chain = ligand_id.split(":")
+        lig_indices = self._topology.get_residue_indices(lig_name, chain)
         self._topology.remove_atoms(lig_indices, inplace=True)
         self._coords = delete(self._coords, lig_indices, axis=1)
 

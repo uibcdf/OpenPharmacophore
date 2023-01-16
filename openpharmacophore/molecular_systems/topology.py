@@ -306,7 +306,7 @@ class Topology:
 
     def get_atoms_residues(self, atoms):
         """ Get the indices of the residues to which the given atoms belong to.
-            Only aminoacids residues are included.
+            Only aminoacids and ligand residues are included.
 
             Parameters
             ----------
@@ -321,7 +321,7 @@ class Topology:
         residues = set()
         for at_ind in atoms:
             atom = self.top.atom(at_ind)
-            if atom.residue.is_protein:
+            if atom.residue.is_protein or self._is_ligand_atom(atom):
                 residues.add(atom.residue.index)
 
         return sorted(residues)

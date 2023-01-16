@@ -70,12 +70,13 @@ class ComplexBindingSite(AbstractBindingSite):
         residues = self.get_residues(frame)
         atoms = self._protein.topology.get_residues_atoms(residues)
 
+        # This protein contains the ligand and the binding site aminoacids
         bsite = self._protein.slice(atoms, frame)
 
         bsite_mol = topology_to_mol(bsite.topology, bsite.coords, remove_hyd=True)
         feats = mol_chem_feats(bsite_mol, bsite.coords[0], feat_def="protein")
 
-        h_bonds = get_protein_hbonds(bsite)
+        h_bonds = get_protein_ligand_hbonds(bsite)
         feats.add_feats(h_bonds)
         return feats
 

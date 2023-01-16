@@ -2,7 +2,7 @@ import mdtraj as mdt
 import numpy as np
 import openpharmacophore.pl_complex.exceptions as exc
 from openpharmacophore import PLComplex
-from openpharmacophore.molecular_systems.chem_feats import smarts_ligand
+from openpharmacophore.molecular_systems.chem_feats import SMARTS_LIGAND
 import pyunitwizard as puw
 import pytest
 from copy import deepcopy
@@ -394,7 +394,7 @@ def test_ligand_feature_centroids_indices_not_computed(
     mock_feat_indices.assert_called_once()
     _, args, _ = mock_feat_indices.mock_calls[0]
     assert len(args) == 2
-    assert args[0] == smarts_ligand["hydrophobicity"]
+    assert args[0] == SMARTS_LIGAND["hydrophobicity"]
 
 
 def test_ligand_feature_centroids_indices_precomputed(
