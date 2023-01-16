@@ -2,7 +2,7 @@ import abc
 import numpy as np
 import pyunitwizard as puw
 from typing import List
-from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, mol_chem_feats
 from openpharmacophore.molecular_systems.topology_to_mol import topology_to_mol
 from openpharmacophore.utils import maths
 
@@ -70,11 +70,14 @@ class ComplexBindingSite(AbstractBindingSite):
         residues = self.get_residues(frame)
         atoms = self._protein.topology.get_residues_atoms(residues)
 
-        bs_topology = self._protein.topology.subset(atoms)
-        bs_coords = puw.get_value(self._protein.coords[frame, atoms, :], "nanometers")
+        bsite = self._protein.slice(atoms, frame)
 
-        bsite = topology_to_mol(bs_topology, bs_coords, remove_hyd=True)
-        return mol_chem_feats(bsite)
+        bsite_mol = topology_to_mol(bsite.topology, bsite.coords, remove_hyd=True)
+        feats = mol_chem_feats(bsite_mol, bsite.coords[0], feat_def="protein")
+
+        h_bonds = get_protein_hbonds(bsite)
+        feats.add_feats(h_bonds)
+        return feats
 
     @staticmethod
     def _ligand_centroid(coords):

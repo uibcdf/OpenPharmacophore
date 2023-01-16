@@ -2,7 +2,7 @@ from openpharmacophore.pl_complex.pdb_to_smi import pdb_id_mapper
 from openpharmacophore.pl_complex.convert import mol_to_traj
 from openpharmacophore.pl_complex.exceptions import DifferentNumAtomsError, \
     SmilesNotFoundError, NoLigandError, MolGraphError
-from openpharmacophore.molecular_systems.chem_feats import feature_indices, smarts_ligand
+from openpharmacophore.molecular_systems.chem_feats import feature_indices, SMARTS_LIGAND
 from openpharmacophore.utils import maths
 
 from matplotlib.colors import to_rgb
@@ -480,7 +480,7 @@ class PLComplex:
         # Chemical feature indices are not dependent on the frame
         if self._lig_feats[feat_name] is None:
             self._lig_feats[feat_name] = feature_indices(
-                smarts_ligand[feat_name], self._ligand)
+                SMARTS_LIGAND[feat_name], self._ligand)
 
         centers = []
         indices_list = []

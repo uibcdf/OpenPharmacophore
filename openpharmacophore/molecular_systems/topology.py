@@ -315,8 +315,8 @@ class Topology:
 
             Returns
             -------
-            set[int]
-                The residues
+            list[int]
+                The residues indices in ascending order
         """
         residues = set()
         for at_ind in atoms:
@@ -324,7 +324,7 @@ class Topology:
             if atom.residue.is_protein:
                 residues.add(atom.residue.index)
 
-        return residues
+        return sorted(residues)
 
     def get_residues_atoms(self, residues):
         """ Get the indices of the atoms which comprise the given residues.
@@ -332,7 +332,7 @@ class Topology:
             Parameters
             ----------
             residues : list[int]
-                An array like object with the residues indices
+                An array like object with the residues indices. It must be sorted
 
             Returns
             -------
@@ -343,7 +343,7 @@ class Topology:
         for res in residues:
             for at in self.top.residue(res).atoms:
                 atoms.append(at.index)
-        return sorted(atoms)
+        return atoms
 
 
 def create_topology(traj_file, topology_file=None):

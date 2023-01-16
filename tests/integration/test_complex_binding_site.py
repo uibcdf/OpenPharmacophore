@@ -28,7 +28,7 @@ def test_pl_complex_bsite(pdb_3bbh_with_hydrogen):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
-    ligand_feats = oph.extract_chem_feats(ligand)
+    ligand_feats = ligand.get_chem_feats(ligand)
 
     viewer = oph.Viewer(protein=protein, ligands=ligand)
     viewer.add_chem_feats([ligand_feats, receptor_feats])

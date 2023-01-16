@@ -76,7 +76,7 @@ class Ligand:
                 Smiles of the ligand
         """
         template = Chem.MolFromSmiles(smiles)
-        if self._mol.GetNumAtoms() != template.GetNumAtoms():
+        if self.n_atoms != template.GetNumAtoms():
             # Removing Hs involved in double bonds can help with the
             # matching
             template = Chem.RemoveAllHs(template)

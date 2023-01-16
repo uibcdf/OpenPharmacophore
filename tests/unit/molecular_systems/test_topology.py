@@ -128,23 +128,23 @@ def test_non_hyd_indices(topology_with_hydrogen):
 def test_get_atoms_residues(topology_2_chains):
     atoms = np.array([0, 1, 6])
     residues = topology_2_chains.get_atoms_residues(atoms)
-    assert residues == {0, 2}
+    assert residues == [0, 2]
+
+
+def test_get_atoms_residues_result_is_sorted(topology_2_chains):
+    atoms = np.array([6, 1, 0])
+    residues = topology_2_chains.get_atoms_residues(atoms)
+    assert residues == [0, 2]
 
 
 def test_atoms_residues_only_gets_aminoacids(topology_with_ligand):
     indices = [0, 4, 8, 11, 16]
     residues = topology_with_ligand.get_atoms_residues(indices)
-    assert residues == {0}
+    assert residues == [0]
 
 
 def test_get_residues_atoms(topology_2_chains):
     residues = [1, 2]
-    atoms = topology_2_chains.get_residues_atoms(residues)
-    assert atoms == [3, 4, 5, 6, 7, 8]
-
-
-def test_get_residues_atoms_result_is_sorted(topology_2_chains):
-    residues = [2, 1]
     atoms = topology_2_chains.get_residues_atoms(residues)
     assert atoms == [3, 4, 5, 6, 7, 8]
 

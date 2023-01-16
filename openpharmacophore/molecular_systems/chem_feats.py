@@ -1,8 +1,11 @@
-import numpy as np
 from rdkit import Chem
+from dataclasses import dataclass
+import numpy as np
+
+from openpharmacophore.config import QuantityLike
 
 
-smarts_ligand = {
+SMARTS_LIGAND = {
         "aromatic ring": [
             "a1aaaa1",
             "a1aaaaa1"
@@ -49,6 +52,90 @@ smarts_ligand = {
     }
 
 
+SMARTS_PROTEIN = {
+        "aromatic ring": [
+            "a1aaaa1",
+            "a1aaaaa1"
+        ],
+        "hydrophobicity": [
+            '[$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])&!$(*([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+            'I])([CH3X4,CH2X3,CH1X2,F,Cl,Br,I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I])]([CH3X4,CH2X3,CH1X2,F,Cl,Br,'
+            'I])[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+            '[$([S]~[#6])&!$(S~[!#6])]',
+            '[CH2X4,CH1X3,CH0X2]~[CH3X4,CH2X3,CH1X2,F,Cl,Br,I]',
+        ],
+        "negative charge": [
+            'C(=O)[O-,OH,OX1]',
+            '[-,-2,-3,-4]',
+        ],
+        "positive charge": [
+            '[$(C(N)(N)=N)]',
+            '[$(n1cc[nH]c1)]',
+            '[+,+2,+3,+4]',
+        ]
+    }
+
+
+@dataclass
+class ChemFeat:
+    type: str
+    coords: QuantityLike
+
+
+class ChemFeatContainer:
+
+    def __init__(self):
+        self.aromatic = []
+        self.acceptor = []
+        self.donor = []
+        self.hydrophobic = []
+        self.positive = []
+        self.negative = []
+
+    def add_feats(self, feats):
+        """ Add chemical features to the container.
+
+            Parameters
+            ----------
+            feats : list[ChemFeat]
+
+        """
+        for chem_feat in feats:
+            feat_list = self._get_feat_list(chem_feat.type)
+            feat_list.append(chem_feat)
+
+    def has_feat(self, feat_type):
+        """ Check if the container has any chemical features of the
+            specified type
+
+            Parameters
+            ----------
+            feat_type : str
+                Type of chemical feature.
+
+            Returns
+            -------
+            bool
+
+        """
+        return len(self._get_feat_list(feat_type)) > 0
+
+    def _get_feat_list(self, feat_type):
+        if feat_type == "aromatic ring":
+            return self.aromatic
+        if feat_type == "hb acceptor":
+            return self.acceptor
+        if feat_type == "hb donor":
+            return self.donor
+        if feat_type == "hydrophobicity":
+            return self.hydrophobic
+        if feat_type == "positive charge":
+            return self.positive
+        if feat_type == "negative charge":
+            return self.negative
+        raise ValueError(feat_type)
+
+
 def feature_indices(feat_def, mol):
     """ Get the indices of the atoms that encompass a chemical
         feature.
@@ -79,18 +166,14 @@ def feature_indices(feat_def, mol):
 
 def feature_centroids(mol, conf, indices):
     """ Get the centroid of a chemical feature.
-
         Parameters
         ----------
         mol : rdkit.Chem.Mol
             A molecule
-
         conf : int
             Index of conformer
-
         indices : tuple[int]
             Atom indices of the chemical feature.
-
         Returns
         -------
         np.ndarray
@@ -105,9 +188,67 @@ def feature_centroids(mol, conf, indices):
     return np.mean(coords, axis=0)
 
 
-def mol_chem_feats(mol, coords):
-    pass
+def create_chem_feats(feat_type, indices, coords):
+    """ Returns a list of chemical features of the same type
+
+        Parameters
+        ----------
+        feat_type : str
+            Type of the feature
+
+        indices : list[tuple[int]]
+            List where each entry is a tuple with the indices
+            of a chemical feature.
+
+        coords : QuantityLike
+            A quantity of shape (n_atoms, 3)
+
+        Returns
+        -------
+        list[ChemFeat]
+
+    """
+    feats = []
+    for ind_tuple in indices:
+        feat_coords = np.mean(coords[ind_tuple, :], axis=0)
+        feats.append(
+            ChemFeat(feat_type, feat_coords)
+        )
+    return feats
 
 
-class ChemFeatContainer:
-    pass
+def mol_chem_feats(mol, coords, feat_def):
+    """ Get the chemical features of a molecule.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.Mol
+            Molecule which chemical features will be extracted.
+
+        coords : QuantityLike
+            The coordinates of a conformer of the molecule. Has shape
+            (n_atoms, 3)
+
+        feat_def : {"protein", "ligand"}
+            Feature definition that is used to get chemical features.
+
+        Returns
+        -------
+        ChemFeatContainer
+            A container with chemical features.
+
+    """
+    if feat_def == "protein":
+        smarts_def = SMARTS_PROTEIN
+    elif feat_def == "ligand":
+        smarts_def = SMARTS_LIGAND
+    else:
+        raise ValueError(feat_def)
+
+    container = ChemFeatContainer()
+    for feat, smarts in smarts_def.items():
+        indices = feature_indices(smarts, mol)
+        feats = create_chem_feats(feat, indices, coords)
+        container.add_feats(feats)
+
+    return container

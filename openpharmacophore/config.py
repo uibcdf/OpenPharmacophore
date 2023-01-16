@@ -1,3 +1,4 @@
+from pyunitwizard._private_tools.quantity_or_unit import QuantityLike
 
 
 TRAJ_FORMATS = [
@@ -27,5 +28,5 @@ MOL_STR_FORMATS = [
     "smarts",
     "inchi",
     "mol2",
-    "pdb"
+    "pdb",
 ]
