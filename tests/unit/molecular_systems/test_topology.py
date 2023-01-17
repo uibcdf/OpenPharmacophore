@@ -137,10 +137,10 @@ def test_get_atoms_residues_result_is_sorted(topology_2_chains):
     assert residues == [0, 2]
 
 
-def test_atoms_residues_only_gets_aminoacids_and_ligands(topology_with_ligand):
+def test_atoms_residues_only_gets_aminoacids(topology_with_ligand):
     indices = [0, 4, 8, 11, 16]
     residues = topology_with_ligand.get_atoms_residues(indices)
-    assert residues == [0, 1, 4]
+    assert residues == [0]
 
 
 def test_get_residues_atoms(topology_2_chains):

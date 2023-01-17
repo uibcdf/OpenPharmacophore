@@ -64,6 +64,11 @@ class Topology:
         """
         return cls(topology=mdtraj.Topology.from_openmm(openmm_top))
 
+    def iter_atoms(self):
+        """ Iterator of the atoms of the topology
+        """
+        return self.top.atoms
+
     def set_num_chains(self, num):
         """ Set the number of chains in an empty topology.
 
@@ -74,9 +79,20 @@ class Topology:
         """
         if self.n_chains == 0:
             for ii in range(num):
-                self.top.add_chain()
+                self.add_chain()
         else:
             raise ValueError(f"Topology already has {self.n_chains} chains")
+
+    def add_chain(self):
+        """ Adda new chain.
+
+            Returns
+            -------
+            int
+                Index of the new chain
+        """
+        self.top.add_chain()
+        return self.n_chains - 1
 
     def add_residue(self, res_name, chain):
         """ Add a new residue to a chain.
@@ -121,6 +137,29 @@ class Topology:
         element = mdt_element.get_by_symbol(symbol)
         self.top.add_atom(name, element, residue)
         return self.n_atoms - 1
+
+    def add_bond(self, at_ind_1, at_ind_2):
+        """ Add a new atom to the topology
+
+            Parameters
+            ----------
+            at_ind_1 : int
+                Index of the first atom.
+
+            at_ind_2
+                Index of the second atom.
+        """
+        self.top.add_bond(at_ind_1, at_ind_2)
+
+    def get_atom(self, index):
+        """ Get the atom with the given index.
+        """
+        return self.top.atom(index)
+
+    def get_residue(self, index):
+        """ Get the residue with given index.
+        """
+        return self.top.residue(index)
 
     def add_atoms_to_chain(self, res_atoms, chain):
         """ Add multiple atoms to a chain.
@@ -321,7 +360,7 @@ class Topology:
         residues = set()
         for at_ind in atoms:
             atom = self.top.atom(at_ind)
-            if atom.residue.is_protein or self._is_ligand_atom(atom):
+            if atom.residue.is_protein:
                 residues.add(atom.residue.index)
 
         return sorted(residues)

@@ -5,7 +5,7 @@ from pathlib import Path
 import pickle
 
 from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsError, LigandCreationError
-from openpharmacophore.molecular_systems.topology_to_mol import topology_to_mol
+from openpharmacophore.molecular_systems.convert import topology_to_mol
 
 
 class Ligand:

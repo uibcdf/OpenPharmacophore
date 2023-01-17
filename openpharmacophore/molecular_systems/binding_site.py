@@ -3,7 +3,7 @@ import numpy as np
 import pyunitwizard as puw
 from typing import List
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, mol_chem_feats
-from openpharmacophore.molecular_systems.topology_to_mol import topology_to_mol
+from openpharmacophore.molecular_systems.convert import topology_to_mol, ligand_to_topology
 from openpharmacophore.utils import maths
 
 
@@ -70,8 +70,10 @@ class ComplexBindingSite(AbstractBindingSite):
         residues = self.get_residues(frame)
         atoms = self._protein.topology.get_residues_atoms(residues)
 
-        # This protein contains the ligand and the binding site aminoacids
         bsite = self._protein.slice(atoms, frame)
+        # Add the ligand to the bsite, so we can get hydrogen bonds
+        ligand_top = ligand_to_topology(self._ligand.to_rdkit())
+        bsite.concatenate(ligand_top, self._ligand.get_conformer(frame))
 
         bsite_mol = topology_to_mol(bsite.topology, bsite.coords, remove_hyd=True)
         feats = mol_chem_feats(bsite_mol, bsite.coords[0], feat_def="protein")
