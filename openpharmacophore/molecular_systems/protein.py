@@ -77,9 +77,7 @@ class Protein:
 
         lig_coords = self._coords[:, lig_indices, :]
         ligand_top = self._topology.subset(lig_indices)
-        ligand = ligand_from_topology(ligand_top, lig_coords, remove_hyd)
-
-        return ligand
+        return ligand_from_topology(ligand_top, lig_coords, remove_hyd)
 
     def remove_ligand(self, ligand_id):
         """ Remove a ligand from this protein.
@@ -160,6 +158,13 @@ class Protein:
             coords = np.expand_dims(coords, axis=0)
 
         return Protein(topology, coords)
+
+    def concatenate(self, topology, coords):
+        """ Concatenate new residues to this protein.
+        """
+        self._topology = self._topology.join(topology)
+        self._coords = np.concatenate((self._coords, coords), axis=1)
+        self._validate_coords(self._topology, self._coords)
 
     @staticmethod
     def _validate_coords(topology, coords):

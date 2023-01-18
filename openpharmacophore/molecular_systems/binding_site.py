@@ -71,12 +71,15 @@ class ComplexBindingSite(AbstractBindingSite):
         atoms = self._protein.topology.get_residues_atoms(residues)
 
         bsite = self._protein.slice(atoms, frame)
-        # Add the ligand to the bsite, so we can get hydrogen bonds
-        ligand_top = ligand_to_topology(self._ligand.to_rdkit())
-        bsite.concatenate(ligand_top, self._ligand.get_conformer(frame))
 
         bsite_mol = topology_to_mol(bsite.topology, bsite.coords, remove_hyd=True)
         feats = mol_chem_feats(bsite_mol, bsite.coords[0], feat_def="protein")
+
+        # Add the ligand to the bsite, so we can get hydrogen bonds
+        ligand_top = ligand_to_topology(self._ligand.to_rdkit())
+        ligand_coords = np.expand_dims(self._ligand.get_conformer(frame), axis=0)
+        # TODO: Ligand coordinates does not contain hydrogens
+        bsite.concatenate(ligand_top, ligand_coords)
 
         h_bonds = get_protein_ligand_hbonds(bsite)
         feats.add_feats(h_bonds)

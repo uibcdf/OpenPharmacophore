@@ -90,3 +90,13 @@ def test_slice_protein_single_frame(protein_4_residues):
     ]]), "nanometers")
 
     assert np.all(expected == sliced_protein.coords)
+
+
+def test_concatenate_to_protein(protein_4_residues, estradiol_topology, estradiol_coords):
+    protein = deepcopy(protein_4_residues)
+    start_atoms = protein.n_atoms
+    estradiol_atoms = estradiol_topology.n_atoms
+
+    protein.concatenate(estradiol_topology, estradiol_coords)
+    assert protein.n_atoms == start_atoms + estradiol_atoms
+    assert protein.coords.shape == (1, start_atoms + estradiol_atoms, 3)

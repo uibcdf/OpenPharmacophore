@@ -21,6 +21,10 @@ class Ligand:
         return self._mol.GetNumAtoms()
 
     @property
+    def n_heavy_atoms(self) -> int:
+        return self._mol.GetNumHeavyAtoms()
+
+    @property
     def n_conformers(self) -> int:
         if self._conformers is None:
             return 0
@@ -122,7 +126,11 @@ class Ligand:
 
     def add_hydrogens(self):
         """ Add hydrogens to this ligand. Modifies the ligand in place.
+
+            Can only add hydrogens to a ligand that only has one conformer.
         """
+        if self.n_conformers > 1:
+            raise ValueError("Cannot add hydrogens to this ligand")
         self._mol = Chem.AddHs(self._mol, addCoords=True, addResidueInfo=True)
 
     def add_conformers(self, coords):
@@ -159,6 +167,15 @@ class Ligand:
         """
         return self._conformers[conf_ind]
 
+    def to_rdkit(self):
+        """ Returns the ligand as an rdkit molecule.
+
+            Returns
+            -------
+            rdkit.Chem.Mol
+        """
+        return self._mol
+
 
 class LigandSet:
     pass
@@ -176,7 +193,7 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
             Array of shape (n_conformers, n_atoms, 3).
 
         remove_hyd : bool
-            Whether to remove teh hydrogens from the ligand.
+            Whether to remove the hydrogens from the ligand.
 
         Returns
         -------

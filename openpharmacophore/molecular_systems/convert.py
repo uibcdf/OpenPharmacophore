@@ -37,7 +37,6 @@ def topology_to_mol(topology, coords, remove_hyd=True):
     pdb_file.close()
 
     assert mol is not None, "Failed to create molecule"
-    mol.RemoveAllConformers()
     return mol
 
 

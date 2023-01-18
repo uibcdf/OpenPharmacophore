@@ -384,6 +384,10 @@ class Topology:
                 atoms.append(at.index)
         return atoms
 
+    def join(self, other):
+        """ Join two topologies. """
+        return Topology(self.top.join(other.top))
+
 
 def create_topology(traj_file, topology_file=None):
     """ Create a topology object.

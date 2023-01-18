@@ -14,11 +14,12 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     lig_ids = protein.ligand_ids
     assert len(lig_ids) == 1
 
-    ligand = protein.get_ligand(lig_ids[0])
+    ligand = protein.get_ligand(lig_ids[0], remove_hyd=False)
     ligand.fix_bond_order(
         smiles="C[C@]12CC[C@@H]3c4ccc(cc4CC[C@H]3[C@@H]1CC[C@@H]2O)O"
     )
-    ligand.add_hydrogens()
+    # Ligand already contains hydrogens
+    assert ligand.has_hydrogens()
     assert ligand.n_atoms == 44
 
     # We extract the pharmacophore
