@@ -125,22 +125,18 @@ def test_non_hyd_indices(topology_with_hydrogen):
     assert indices == expected
 
 
-def test_get_atoms_residues(topology_2_chains):
-    atoms = np.array([0, 1, 6])
-    residues = topology_2_chains.get_atoms_residues(atoms)
-    assert residues == [0, 2]
-
-
-def test_get_atoms_residues_result_is_sorted(topology_2_chains):
+def test_get_bs_residues_result_is_sorted(topology_2_chains):
     atoms = np.array([6, 1, 0])
-    residues = topology_2_chains.get_atoms_residues(atoms)
+    residues, ligand = topology_2_chains.get_bs_residues(atoms)
     assert residues == [0, 2]
+    assert ligand is None
 
 
-def test_atoms_residues_only_gets_aminoacids(topology_with_ligand):
-    indices = [0, 4, 8, 11, 16]
-    residues = topology_with_ligand.get_atoms_residues(indices)
+def test_get_bs_residues_and_ligand(topology_with_ligand):
+    indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11]
+    residues, ligand = topology_with_ligand.get_bs_residues(indices)
     assert residues == [0]
+    assert ligand == 1
 
 
 def test_get_residues_atoms(topology_2_chains):
@@ -153,3 +149,9 @@ def test_residues_subset(topology_2_chains):
     subset = topology_2_chains.residues_subset([1, 2])
     assert subset.n_chains == 2
     assert subset.n_atoms == 6
+
+
+def test_residue_has_hyd(topology_2_chains,
+                         topology_with_hydrogen):
+    assert not topology_2_chains.residue_has_hyd(0)
+    assert topology_with_hydrogen.residue_has_hyd(0)

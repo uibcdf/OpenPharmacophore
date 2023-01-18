@@ -343,9 +343,8 @@ class Topology:
         """ Convert to openmm topology. """
         return self.top.to_openmm()
 
-    def get_atoms_residues(self, atoms):
-        """ Get the indices of the residues to which the given atoms belong to.
-            Only aminoacids and ligand residues are included.
+    def get_bs_residues(self, atoms):
+        """ Get the indices of the residues in the binding site.
 
             Parameters
             ----------
@@ -356,14 +355,20 @@ class Topology:
             -------
             list[int]
                 The residues indices in ascending order
+
+            int
+                Index of the ligand. None if there is no ligand
         """
         residues = set()
+        ligand = None
         for at_ind in atoms:
             atom = self.top.atom(at_ind)
             if atom.residue.is_protein:
                 residues.add(atom.residue.index)
+            elif self._is_ligand_atom(atom):
+                ligand = atom.residue.index
 
-        return sorted(residues)
+        return sorted(residues), ligand
 
     def get_residues_atoms(self, residues):
         """ Get the indices of the atoms which comprise the given residues.
@@ -385,8 +390,34 @@ class Topology:
         return atoms
 
     def join(self, other):
-        """ Join two topologies. """
+        """ Join two topologies.
+
+            Parameters
+            ----------
+            other : Topology
+
+            Returns
+            -------
+            Topology
+        """
         return Topology(self.top.join(other.top))
+
+    def residue_has_hyd(self, residue_ind):
+        """ Check if a residue has hydrogens
+
+        Parameters
+        ----------
+        residue_ind : int
+
+        Returns
+        -------
+        bool
+
+        """
+        for atom in self.get_residue(residue_ind).atoms:
+            if atom.element.symbol == "H":
+                return True
+        return False
 
 
 def create_topology(traj_file, topology_file=None):

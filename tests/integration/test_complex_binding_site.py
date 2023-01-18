@@ -30,8 +30,10 @@ def test_binding_site_complex_structure_has_hydrogens(pdb_3bbh_with_hydrogen):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
+    hyd_bonds = bsite.get_hydrogen_bonds(frame=0)
     ligand_feats = ligand.get_chem_feats(conformer=0)
     assert len(receptor_feats) > 0
+    assert len(hyd_bonds) > 0
     assert len(ligand_feats) > 0
 
     # viewer = oph.Viewer(protein=protein, ligands=ligand)
@@ -47,7 +49,6 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
     # lauric acid (id DAO, C12H24O2) as its ligand. This structure does not contain
     # hydrogen, so we need to add them to the ligand and to the receptor.
     protein = oph.load(pdb_1m7w)
-    n_atoms_start = protein.n_atoms
     assert protein.has_ligands
 
     lig_ids = protein.ligand_ids
@@ -58,10 +59,6 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
     # and add hydrogens to it.
     ligand = protein.get_ligand(lig_ids[0])
     assert ligand.n_atoms == 14
-    # We need to remove the ligand from the protein because it does not contain hydrogen
-    protein.remove_ligand(lig_ids[0])
-    # The protein should have 14 less atoms because the ligand was removed
-    assert protein.n_atoms == n_atoms_start - 14
     # The ligand does not have hydrogens yet and all its bonds are single
     assert not ligand.has_hydrogens
     assert not ligand.has_double_bonds()
@@ -85,6 +82,7 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
+    hyd_bonds = bsite.get_hydrogen_bonds(frame=0)
     ligand_feats = ligand.get_chem_feats(conformer=0)
     assert len(receptor_feats) > 0
     assert len(ligand_feats) > 0
