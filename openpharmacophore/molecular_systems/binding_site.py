@@ -27,9 +27,9 @@ class ComplexBindingSite(AbstractBindingSite):
 
         Parameters
         ----------
-        protein : Protein
+        protein : openpharmacophore.Protein
 
-        ligand : Ligand
+        ligand : openpharmacophore.Ligand
     """
     def __init__(self, protein, ligand):
         self._protein = protein

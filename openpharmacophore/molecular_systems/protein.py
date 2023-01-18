@@ -54,7 +54,7 @@ class Protein:
     def coords(self) -> np.ndarray:
         return self._coords
 
-    def get_ligand(self, ligand_id, remove_hyd=True):
+    def get_ligand(self, ligand_id, remove_hyd=False):
         """ Extract a ligand assuming there is one.
 
             Parameters
@@ -68,7 +68,7 @@ class Protein:
 
             Returns
             -------
-            Ligand
+            openpharmacophore.Ligand
                 A ligand. Its bond orders may be incorrect.
         """
         lig_name, chain = ligand_id.split(":")

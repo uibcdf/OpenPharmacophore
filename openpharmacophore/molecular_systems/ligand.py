@@ -8,6 +8,13 @@ from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsErro
 from openpharmacophore.molecular_systems.convert import topology_to_mol
 
 
+class LigandWithHsError(ValueError):
+    """ Exception raised when trying to add Hs to a ligand that
+        already contains hydrogen.
+    """
+    pass
+
+
 class Ligand:
     """ Represents a ligand. Wrapper for rdkit Mol object
     """
@@ -15,6 +22,8 @@ class Ligand:
         self._mol = mol  # type: Chem.Mol
         # quantity of shape (n_conformers, n_atoms, 3)
         self._conformers = conformer_coords
+        self._has_hyd = None
+        self._lig_id = None
 
     @property
     def n_atoms(self) -> int:
@@ -26,13 +35,41 @@ class Ligand:
 
     @property
     def n_conformers(self) -> int:
-        if self._conformers is None:
+        if not self.has_conformers:
             return 0
         return self._conformers.shape[0]
 
     @property
     def n_bonds(self) -> int:
         return self._mol.GetNumBonds()
+
+    @property
+    def has_hydrogens(self):
+        """ Returns true if the ligand has any hydrogen atoms
+
+            Returns
+            -------
+            bool
+        """
+        if self._has_hyd is None:
+            self._has_hyd = any([
+                a.GetSymbol() == "H" for a in self._mol.GetAtoms()
+            ])
+        return self._has_hyd
+
+    @property
+    def has_conformers(self):
+        return self._conformers is not None
+
+    @property
+    def lig_id(self) -> str:
+        """ ID of the ligand if it was extracted from a protein.
+        """
+        return self._lig_id
+
+    @lig_id.setter
+    def lig_id(self, ligand_id: str):
+        self._lig_id = ligand_id
 
     @classmethod
     def from_string(cls, string, form):
@@ -80,7 +117,7 @@ class Ligand:
                 Smiles of the ligand
         """
         template = Chem.MolFromSmiles(smiles)
-        if self.n_atoms != template.GetNumAtoms():
+        if not self._has_hyd and self.n_atoms != template.GetNumAtoms():
             # Removing Hs involved in double bonds can help with the
             # matching
             template = Chem.RemoveAllHs(template)
@@ -88,6 +125,9 @@ class Ligand:
                 raise DifferentNumAtomsError(
                     self.n_atoms, template.GetNumAtoms()
                 )
+        elif self._has_hyd:
+            # TODO: can we do the matching without adding Hydrogens to speed the process?
+            template = Chem.AddHs(template)
 
         self._mol = Chem.AssignBondOrdersFromTemplate(template, self._mol)
 
@@ -113,25 +153,54 @@ class Ligand:
             [b.GetBondTypeAsDouble() == 2.0 for b in self._mol.GetBonds()]
         )
 
-    def has_hydrogens(self):
-        """ Returns true if the ligand has any hydrogen atoms
-
-            Returns
-            -------
-            bool
-        """
-        return any([
-            a.GetSymbol() == "H" for a in self._mol.GetAtoms()
-        ])
-
     def add_hydrogens(self):
         """ Add hydrogens to this ligand. Modifies the ligand in place.
 
             Can only add hydrogens to a ligand that only has one conformer.
         """
-        if self.n_conformers > 1:
-            raise ValueError("Cannot add hydrogens to this ligand")
+        if self.has_hydrogens:
+            raise LigandWithHsError("This ligand already contains hydrogens")
+
         self._mol = Chem.AddHs(self._mol, addCoords=True, addResidueInfo=True)
+        self._has_hyd = True
+
+        if self.has_conformers and self.n_conformers == self._mol.GetNumConformers():
+            self._conformers = puw.quantity(
+                self._get_molecule_coordinates(self._mol), "angstroms"
+            )
+
+        if self.n_conformers != self._mol.GetNumConformers():
+            # When the rdkit mol has no conformers and the conformers array is not null
+            # the hydrogens will not have coordinates.
+            raise ValueError("Failed to add Hs")
+
+        # We do not need to store the conformers in the rdkit molecule anymore
+        self._mol.RemoveAllConformers()
+
+    @staticmethod
+    def _get_molecule_coordinates(molecule):
+        """ Returns an array with the positions of the atoms in each
+            conformer of the molecule.
+
+            Parameters
+            ----------
+            molecule : rdkit.Chem.Mol
+
+            Returns
+            -------
+            np.ndarray
+                Array of shape (n_conformers, n_atoms, 3)
+        """
+        conformer: Chem.Conformer
+
+        n_conformers = molecule.GetNumConformers()
+        n_atoms = molecule.GetNumAtoms()
+        new_coords = np.zeros((n_conformers, n_atoms, 3))
+        for ii in range(n_conformers):
+            conformer = molecule.GetConformer(ii)
+            new_coords[ii] = conformer.GetPositions()
+
+        return new_coords
 
     def add_conformers(self, coords):
         """ Add conformers to a ligand.
@@ -200,6 +269,7 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
         Ligand
 
     """
+    assert topology.n_residues == 1, f"Topology has {topology.n_residues}"
     mol = topology_to_mol(topology,
                           puw.get_value(coords, "nanometers")[0],
                           remove_hyd)
@@ -207,7 +277,9 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
         non_hyd = topology.non_hyd_indices()
         coords = coords[:, non_hyd, :]
 
-    return Ligand(mol, coords)
+    ligand = Ligand(mol, coords)
+    ligand.lig_id = topology.get_residue(0).name
+    return ligand
 
 
 def create_ligand_set(filename: str):
