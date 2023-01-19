@@ -245,6 +245,10 @@ class Ligand:
         """
         return self._mol
 
+    def get_chem_feats(self, conformer):
+        """ FInd chemical features in this ligand.
+        """
+
 
 class LigandSet:
     pass

@@ -108,6 +108,7 @@ class ChemFeatContainer:
         self.hydrophobic = []
         self.positive = []
         self.negative = []
+        self._n_feats = 0
 
     def add_feats(self, feats):
         """ Add chemical features to the container.
@@ -120,6 +121,7 @@ class ChemFeatContainer:
         for chem_feat in feats:
             feat_list = self._get_feat_list(chem_feat.type)
             feat_list.append(chem_feat)
+            self._n_feats += 1
 
     def has_feat(self, feat_type):
         """ Check if the container has any chemical features of the
@@ -151,6 +153,9 @@ class ChemFeatContainer:
         if feat_type == "negative charge":
             return self.negative
         raise ValueError(feat_type)
+
+    def __len__(self):
+        return self._n_feats
 
 
 def feature_indices(feat_def, mol):
@@ -234,23 +239,17 @@ def create_chem_feats(feat_type, indices, coords):
     return feats
 
 
-def mol_chem_feats(mol, coords, feat_def, types=None):
+def mol_chem_feats(indices, coords):
     """ Get the chemical features of a molecule.
 
         Parameters
         ----------
-        mol : rdkit.Chem.Mol
-            Molecule which chemical features will be extracted.
+        indices : dict[str, list[tuple[int]]]
+            Indices of the atomst that encompass the chemical features.
 
         coords : QuantityLike
             The coordinates of a conformer of the molecule. Has shape
             (n_atoms, 3)
-
-        feat_def : {"protein", "ligand"}
-            Feature definition that is used to get chemical features.
-
-        types : set[str]
-            Types of features to search for in the molecule.
 
         Returns
         -------
@@ -258,21 +257,9 @@ def mol_chem_feats(mol, coords, feat_def, types=None):
             A container with chemical features.
 
     """
-    if feat_def == "protein":
-        smarts_def = SMARTS_PROTEIN
-    elif feat_def == "ligand":
-        smarts_def = SMARTS_LIGAND
-    else:
-        raise ValueError(feat_def)
-
-    if types is None:
-        types = FEAT_TYPES
-
     container = ChemFeatContainer()
-    for feat, smarts in smarts_def.items():
-        if feat in types:
-            indices = feature_indices(smarts, mol)
-            feats = create_chem_feats(feat, indices, coords)
-            container.add_feats(feats)
+    for feat, ind_list in indices.items():
+        feats = create_chem_feats(feat, ind_list, coords)
+        container.add_feats(feats)
 
     return container
