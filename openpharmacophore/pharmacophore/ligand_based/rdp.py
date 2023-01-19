@@ -1,4 +1,3 @@
-from openpharmacophore.molecular_systems.chem_feats import feature_centroids
 from openpharmacophore.utils.maths import points_distance
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
 import numpy as np

@@ -186,28 +186,33 @@ def feature_indices(feat_def, mol):
     return feat_indices
 
 
-def feature_centroids(mol, conf, indices):
-    """ Get the centroid of a chemical feature.
+def get_indices(mol, feat_def, types=None):
+    """ Get indices of different chemical features.
+
         Parameters
         ----------
         mol : rdkit.Chem.Mol
-            A molecule
-        conf : int
-            Index of conformer
-        indices : tuple[int]
-            Atom indices of the chemical feature.
-        Returns
-        -------
-        np.ndarray
-            Array of shape (3,)
-    """
-    coords = np.zeros((len(indices), 3))
-    conformer = mol.GetConformer(conf)
-    for ii, atom in enumerate(indices):
-        pos = conformer.GetAtomPosition(atom)
-        coords[ii] = pos.x, pos.y, pos.z
 
-    return np.mean(coords, axis=0)
+        feat_def : dict[str, list[str]]
+            A list of smarts patterns for each feature
+
+        types : set[str], optional
+            The chemical features that will be searched for.
+
+        Returns
+        --------
+        indices : dict[str, list[tuple[int]]
+            Indices of each chemical feature type.
+    """
+    if types is None:
+        types = FEAT_TYPES
+
+    indices = {}
+    for feat_type, smarts_list in feat_def.items():
+        if feat_type in types:
+            indices[feat_type] = feature_indices(smarts_list, mol)
+
+    return indices
 
 
 def create_chem_feats(feat_type, indices, coords):

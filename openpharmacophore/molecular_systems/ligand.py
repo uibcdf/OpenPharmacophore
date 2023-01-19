@@ -6,6 +6,8 @@ import pickle
 
 from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsError, LigandCreationError
 from openpharmacophore.molecular_systems.convert import topology_to_mol
+from openpharmacophore.molecular_systems.chem_feats import get_indices, mol_chem_feats
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, SMARTS_LIGAND
 
 
 class LigandWithHsError(ValueError):
@@ -22,6 +24,8 @@ class Ligand:
         self._mol = mol  # type: Chem.Mol
         # quantity of shape (n_conformers, n_atoms, 3)
         self._conformers = conformer_coords
+
+        self._feat_ind = None
         self._has_hyd = None
         self._lig_id = None
 
@@ -245,9 +249,24 @@ class Ligand:
         """
         return self._mol
 
-    def get_chem_feats(self, conformer):
-        """ FInd chemical features in this ligand.
+    def get_chem_feats(self, conf_ind, types=None):
+        """ Find chemical features in this ligand.
+
+            Parameters
+            ----------
+            conf_ind : int
+                Index of the conformer.
+
+            types : set[str], optional
+                The chemical features that will be searched for.
+
+            Returns
+            -------
+            ChemFeatContainer
         """
+        if self._feat_ind is None:
+            self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
+        return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind))
 
 
 class LigandSet:

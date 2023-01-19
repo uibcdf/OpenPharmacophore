@@ -3,6 +3,7 @@ import numpy as np
 import pyunitwizard as puw
 from typing import List
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, mol_chem_feats
+from openpharmacophore.molecular_systems.chem_feats import SMARTS_PROTEIN, get_indices
 from openpharmacophore.molecular_systems.convert import topology_to_mol, ligand_to_topology
 from openpharmacophore.molecular_systems.hbonds import protein_ligand_hbonds
 from openpharmacophore.utils import maths
@@ -132,10 +133,8 @@ class ComplexBindingSite(AbstractBindingSite):
             self._bsite.topology,
             self._bsite.coords,
             remove_hyd=True)
-        return mol_chem_feats(
-            self._bsite_mol, self._bsite.coords[0], feat_def="protein",
-            types=types
-        )
+        indices = get_indices(self._bsite_mol, feat_def=SMARTS_PROTEIN, types=types)
+        return mol_chem_feats(indices, self._bsite.coords[0])
 
     def _hydrogen_bonds_indices(self, frame):
         """ Get the indices of the atoms involved in hydrogen

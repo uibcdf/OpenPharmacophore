@@ -30,7 +30,7 @@ def test_binding_site_complex_structure_has_hydrogens(pdb_3bbh_with_hydrogen):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
-    ligand_feats = ligand.get_chem_feats(conformer=0)
+    ligand_feats = ligand.get_chem_feats(conf_ind=0)
     assert len(receptor_feats) > 0
     assert len(ligand_feats) > 0
 
@@ -80,7 +80,7 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
-    ligand_feats = ligand.get_chem_feats(conformer=0)
+    ligand_feats = ligand.get_chem_feats(conf_ind=0)
     assert len(receptor_feats) > 0
     assert len(ligand_feats) > 0
 
