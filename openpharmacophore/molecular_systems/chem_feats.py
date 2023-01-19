@@ -72,8 +72,25 @@ SMARTS_PROTEIN = {
             '[$(C(N)(N)=N)]',
             '[$(n1cc[nH]c1)]',
             '[+,+2,+3,+4]',
+        ],
+        "hb acceptor": [
+            '[#7&!$([nX3])&!$([NX3]-*=[!#6])&!$([NX3]-[a])&!$([NX4])&!$(N=C([C,N])N)]',
+            '[$([O])&!$([OX2](C)C=O)&!$(*(~a)~a)]',
+        ],
+        "hb donor": [
+            '[#16!H0]',
+            '[#7!H0&!$(N-[SX4](=O)(=O)[CX4](F)(F)F)]',
+            '[#8!H0&!$([OH][C,S,P]=O)]',
         ]
-    }
+
+}
+
+
+FEAT_TYPES = frozenset([
+    "aromatic ring", "hydrophobicity",
+    "negative charge", "positive charge",
+    "hb acceptor", "hb donor",
+])
 
 
 @dataclass
@@ -217,7 +234,7 @@ def create_chem_feats(feat_type, indices, coords):
     return feats
 
 
-def mol_chem_feats(mol, coords, feat_def):
+def mol_chem_feats(mol, coords, feat_def, types=None):
     """ Get the chemical features of a molecule.
 
         Parameters
@@ -232,6 +249,9 @@ def mol_chem_feats(mol, coords, feat_def):
         feat_def : {"protein", "ligand"}
             Feature definition that is used to get chemical features.
 
+        types : set[str]
+            Types of features to search for in the molecule.
+
         Returns
         -------
         ChemFeatContainer
@@ -245,10 +265,14 @@ def mol_chem_feats(mol, coords, feat_def):
     else:
         raise ValueError(feat_def)
 
+    if types is None:
+        types = FEAT_TYPES
+
     container = ChemFeatContainer()
     for feat, smarts in smarts_def.items():
-        indices = feature_indices(smarts, mol)
-        feats = create_chem_feats(feat, indices, coords)
-        container.add_feats(feats)
+        if feat in types:
+            indices = feature_indices(smarts, mol)
+            feats = create_chem_feats(feat, indices, coords)
+            container.add_feats(feats)
 
     return container

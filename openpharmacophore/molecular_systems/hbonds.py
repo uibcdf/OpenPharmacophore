@@ -1,3 +1,5 @@
+import mdtraj as mdt
+import pyunitwizard as puw
 
 
 def protein_ligand_hbonds(bsite):
@@ -5,11 +7,16 @@ def protein_ligand_hbonds(bsite):
 
     Parameters
     ----------
-    bsite : openPharmacophore.Topology
+    bsite : openPharmacophore.Protein
 
     Returns
     -------
-    list[openPharmacophore.ChemFeat]
+    openPharmacophore.ChemFeatContainer
 
     """
-    raise NotImplementedError
+    traj = mdt.Trajectory(
+        xyz=puw.get_value(bsite.coords),
+        topology=bsite.topology.top
+    )
+
+    return mdt.baker_hubbard(traj)

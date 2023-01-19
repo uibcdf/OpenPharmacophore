@@ -112,12 +112,16 @@ class ComplexBindingSite(AbstractBindingSite):
 
         self._bsite = self._protein.slice(atoms, frame)
 
-    def get_chem_feats(self, frame):
+    def get_chem_feats(self, frame, types=None):
         """ Get the chemical features of the binding site at the specified frame.
 
             Parameters
             ----------
             frame : int
+
+            types : set[str], optional
+                Types of features to search for. If none all feat types
+                will be used.
 
             Returns
             -------
@@ -129,11 +133,13 @@ class ComplexBindingSite(AbstractBindingSite):
             self._bsite.coords,
             remove_hyd=True)
         return mol_chem_feats(
-            self._bsite_mol, self._bsite.coords[0], feat_def="protein"
+            self._bsite_mol, self._bsite.coords[0], feat_def="protein",
+            types=types
         )
 
-    def get_hydrogen_bonds(self, frame):
-        """ Get the hydrogen bonds between the protein and the ligand.
+    def _hydrogen_bonds_indices(self, frame):
+        """ Get the indices of the atoms involved in hydrogen
+            bonds between the protein and the ligand.
 
             Parameters
             ----------
@@ -144,7 +150,6 @@ class ComplexBindingSite(AbstractBindingSite):
             ChemFeatContainer
         """
         have_hyd = self._ligand.has_hydrogens and self._protein.has_hydrogens
-        h_bonds = ChemFeatContainer()
         if have_hyd:
             if not self._has_ligand:
                 # Add the ligand to the bsite, so we can get hydrogen bonds
@@ -152,8 +157,8 @@ class ComplexBindingSite(AbstractBindingSite):
                 ligand_coords = np.expand_dims(self._ligand.get_conformer(frame), axis=0)
                 self._bsite.concatenate(ligand_top, ligand_coords)
 
-            h_bonds.add_feats(protein_ligand_hbonds(self._bsite))
-        return h_bonds
+            protein_ligand_hbonds(self._bsite)
+        return None
 
     @staticmethod
     def _ligand_centroid(coords):

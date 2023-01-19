@@ -30,17 +30,15 @@ def test_binding_site_complex_structure_has_hydrogens(pdb_3bbh_with_hydrogen):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
-    hyd_bonds = bsite.get_hydrogen_bonds(frame=0)
     ligand_feats = ligand.get_chem_feats(conformer=0)
     assert len(receptor_feats) > 0
-    assert len(hyd_bonds) > 0
     assert len(ligand_feats) > 0
 
-    # viewer = oph.Viewer(protein=protein, ligands=ligand)
-    # viewer.add_chem_feats([ligand_feats, receptor_feats])
-    # viewer.set_protein_indices(bsite_extractor.get_indices(),
-    #                            frame=0)
-    # viewer.show()
+    # Finally we visualize the binding site with the chemical
+    # features highlighted
+    viewer = oph.Viewer(bsite=bsite, ligands=ligand)
+    viewer.add_chem_feats([ligand_feats, receptor_feats])
+    viewer.show()
 
 
 def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
@@ -82,7 +80,12 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
 
     # Extract chemical features and visualize them
     receptor_feats = bsite.get_chem_feats(frame=0)
-    hyd_bonds = bsite.get_hydrogen_bonds(frame=0)
     ligand_feats = ligand.get_chem_feats(conformer=0)
     assert len(receptor_feats) > 0
     assert len(ligand_feats) > 0
+
+    # Finally we visualize the binding site with the chemical
+    # features highlighted
+    viewer = oph.Viewer(bsite=bsite, ligands=ligand)
+    viewer.add_chem_feats([ligand_feats, receptor_feats])
+    viewer.show()
