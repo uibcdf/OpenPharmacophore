@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 
 from openpharmacophore import PharmacophoricPoint
-from openpharmacophore.molecular_systems import Topology
+from openpharmacophore.molecular_systems import Topology, Protein
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 
 
@@ -311,6 +311,25 @@ def estradiol_coords():
 @pytest.fixture
 def estradiol(estradiol_topology, estradiol_coords):
     return ligand_from_topology(estradiol_topology, estradiol_coords)
+
+
+@pytest.fixture
+def protein_4_residues(topology_2_chains):
+    coords = puw.quantity(np.array([[
+        [4., 4., 4.],
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [1., 1., 1.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+        [4., 4., 4.],
+    ]]), "nanometers")
+    return Protein(topology_2_chains, coords)
 
 
 # Data for integration tests

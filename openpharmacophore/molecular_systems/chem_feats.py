@@ -101,7 +101,7 @@ class ChemFeat:
 
 class ChemFeatContainer:
 
-    def __init__(self):
+    def __init__(self, feats=None):
         self.aromatic = []
         self.acceptor = []
         self.donor = []
@@ -109,6 +109,9 @@ class ChemFeatContainer:
         self.positive = []
         self.negative = []
         self._n_feats = 0
+
+        if feats is not None:
+            self.add_feats(feats)
 
     def add_feats(self, feats):
         """ Add chemical features to the container.
@@ -156,6 +159,15 @@ class ChemFeatContainer:
 
     def __len__(self):
         return self._n_feats
+
+    def __iter__(self):
+        # Iterate all features
+        yield from self.aromatic
+        yield from self.acceptor
+        yield from self.donor
+        yield from self.hydrophobic
+        yield from self.positive
+        yield from self.negative
 
 
 def feature_indices(feat_def, mol):

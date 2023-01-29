@@ -1,8 +1,10 @@
 import mdtraj as mdt
 from rdkit import Chem
 import tempfile
+import pyunitwizard as puw
 
 from openpharmacophore.molecular_systems import Topology
+from openpharmacophore.config import QuantityLike
 
 
 def topology_to_mol(topology, coords, remove_hyd=True):
@@ -92,3 +94,23 @@ def ligand_to_topology(mol):
         topology.add_bond(at_1, at_2)
 
     return topology
+
+
+def create_traj(coords, topology):
+    """ Create a mdtraj Trajectory from an array of coordinates and
+        a topology.
+
+        Parameters
+        ----------
+        coords : QuantityLike
+
+        topology : Topology
+
+        Returns
+        -------
+        mdtraj.Trajectory
+    """
+    return mdt.Trajectory(
+        xyz=puw.get_value(coords, "nanometers"),
+        topology=topology.top
+    )

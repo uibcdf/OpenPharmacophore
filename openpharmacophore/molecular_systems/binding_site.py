@@ -23,6 +23,10 @@ class AbstractBindingSite(abc.ABC):
     def get_chem_feats(self, frame: int) -> ChemFeatContainer:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def to_rdkit(self):
+        raise NotImplementedError
+
 
 BS_DIST_MAX = puw.quantity(0.85, "nanometers")
 
@@ -200,6 +204,15 @@ class ComplexBindingSite(AbstractBindingSite):
         """
         return lig_res_ind is not None and \
             self._protein.topology.residue_has_hyd(lig_res_ind)
+
+    def to_rdkit(self):
+        """ Returns the binding site as an rdkit molecule.
+
+            Returns
+            -------
+            rdkit.Chem.Mol
+        """
+        return self._bsite_mol
 
 
 class BindingSite(AbstractBindingSite):
