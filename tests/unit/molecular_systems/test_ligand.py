@@ -98,3 +98,4 @@ def test_add_conformers(estradiol):
 def test_get_conformer(estradiol):
     conformer = estradiol.get_conformer(0)
     assert conformer.shape == (20, 3)
+    assert str(puw.get_unit(conformer)) == "angstrom"

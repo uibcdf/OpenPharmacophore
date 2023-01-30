@@ -1,5 +1,6 @@
 import numpy as np
 from rdkit.Chem import AllChem as Chem
+from rdkit.Geometry.rdGeometry import Point3D
 import pyunitwizard as puw
 
 from copy import deepcopy
@@ -24,8 +25,6 @@ class Ligand:
     """
     def __init__(self, mol, conformer_coords=None):
         self._mol = mol  # type: Chem.Mol
-        # quantity of shape (n_conformers, n_atoms, 3)
-        self._conformers = conformer_coords
 
         self._feat_ind = None
         self._lig_id = None
@@ -43,9 +42,7 @@ class Ligand:
 
     @property
     def n_conformers(self) -> int:
-        if not self.has_conformers:
-            return 0
-        return self._conformers.shape[0]
+        return self._mol.GetNumConformers()
 
     @property
     def n_bonds(self) -> int:
@@ -63,7 +60,7 @@ class Ligand:
 
     @property
     def has_conformers(self):
-        return self._conformers is not None
+        return self._mol.GetNumConformers() > 0
 
     @property
     def lig_id(self) -> str:
@@ -168,19 +165,6 @@ class Ligand:
         self._mol = Chem.AddHs(self._mol, addCoords=True, addResidueInfo=True)
         self._has_hyd = True
 
-        if self.has_conformers and self.n_conformers == self._mol.GetNumConformers():
-            self._conformers = puw.quantity(
-                self._get_molecule_coordinates(self._mol), "angstroms"
-            )
-
-        if self.n_conformers != self._mol.GetNumConformers():
-            # When the rdkit mol has no conformers and the conformers array is not null
-            # the hydrogens will not have coordinates.
-            raise ValueError("Failed to add Hs")
-
-        # We do not need to store the conformers in the rdkit molecule anymore
-        self._mol.RemoveAllConformers()
-
     @staticmethod
     def _get_molecule_coordinates(molecule):
         """ Returns an array with the positions of the atoms in each
@@ -220,10 +204,15 @@ class Ligand:
             raise ValueError(f"Incorrect shape {coords.shape}"
                              f"Expected shape {shape}")
 
-        if self._conformers is None:
-            self._conformers = coords
-        else:
-            self._conformers = np.concatenate((self._conformers, coords))
+        coords = puw.get_value(coords, "angstroms")
+        n_conformers = coords.shape[0]
+        n_atoms = coords.shape[1]
+        for ii in range(n_conformers):
+            conformer = Chem.Conformer(n_atoms)
+            for jj in range(n_atoms):
+                pos = [float(co) for co in coords[ii, jj, :]]
+                conformer.SetAtomPosition(jj, Point3D(*pos))
+            self._mol.AddConformer(conformer, assignId=True)
 
     def get_conformer(self, conf_ind):
         """ Get the coordinates of the specified conformer
@@ -238,7 +227,10 @@ class Ligand:
             puw.Quantity
                 A quantity of shape (n_atoms, 3)
         """
-        return self._conformers[conf_ind]
+        return puw.quantity(
+            self._mol.GetConformer(conf_ind).GetPositions(),
+            "angstroms",
+        )
 
     def to_rdkit(self):
         """ Returns the ligand as an rdkit molecule.
