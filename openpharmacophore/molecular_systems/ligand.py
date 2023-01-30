@@ -1,6 +1,8 @@
 import numpy as np
 from rdkit.Chem import AllChem as Chem
 import pyunitwizard as puw
+
+from copy import deepcopy
 from pathlib import Path
 import pickle
 
@@ -26,8 +28,10 @@ class Ligand:
         self._conformers = conformer_coords
 
         self._feat_ind = None
-        self._has_hyd = None
         self._lig_id = None
+        self._has_hyd = any([
+                a.GetSymbol() == "H" for a in self._mol.GetAtoms()
+            ])
 
     @property
     def n_atoms(self) -> int:
@@ -55,10 +59,6 @@ class Ligand:
             -------
             bool
         """
-        if self._has_hyd is None:
-            self._has_hyd = any([
-                a.GetSymbol() == "H" for a in self._mol.GetAtoms()
-            ])
         return self._has_hyd
 
     @property
@@ -267,6 +267,14 @@ class Ligand:
         if self._feat_ind is None:
             self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
         return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind))
+
+    def draw(self):
+        """ Draw the ligand.
+        """
+        mol_copy = deepcopy(self._mol)
+        # Remove conformers for pretty drawing
+        mol_copy.RemoveAllConformers()
+        return mol_copy
 
 
 class LigandSet:

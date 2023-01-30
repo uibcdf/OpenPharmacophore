@@ -113,3 +113,21 @@ class Viewer:
             nv.NGLWidget
         """
         return self._widget
+
+    def set_protein_style(self, style):
+        """ Set the style of the protein.
+
+            Parameters
+            ----------
+            style : str
+                Name of the style
+        """
+        styles = [
+            "cartoon",
+            "licorice",
+            "ball+stick",
+        ]
+        if style not in styles:
+            raise ValueError
+        self._widget.clear_representations()
+        self._widget.add_representation(style, selection="protein")

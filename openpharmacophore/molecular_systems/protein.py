@@ -195,7 +195,7 @@ def modeller_to_topology(modeller):
             Coordinates of the protein.
     """
     positions = modeller.getPositions()
-    coords = puw.convert(positions, to_unit="angstroms", to_form="pint")
+    coords = puw.convert(positions, to_unit="nanometer", to_form="pint")
     coords = np.expand_dims(coords, axis=0)
     assert coords.shape == (1, len(positions), 3), f"Incorrect shape {coords.shape}"
 
