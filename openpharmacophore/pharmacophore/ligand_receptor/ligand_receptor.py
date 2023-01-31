@@ -3,10 +3,6 @@ from openpharmacophore.utils import maths
 import networkx as nx
 import numpy as np
 import pyunitwizard as puw
-import json
-import re
-import requests
-import tempfile
 
 
 class LigandReceptorPharmacophore:
@@ -28,7 +24,6 @@ class LigandReceptorPharmacophore:
 
     def __init__(self):
         self._pharmacophores = []  # type: list[Pharmacophore]
-        self._pl_complex = None
 
     @property
     def num_frames(self):
@@ -93,92 +88,73 @@ class LigandReceptorPharmacophore:
                 )
                 self._pharmacophores[frame].add(pharma_point)
 
-    def _aromatic_pharmacophoric_points(self, lig_centers, lig_indices,
-                                        rec_centers, rec_indices, frame):
+    @staticmethod
+    def aromatic_angle_exceeds_deviation(angle):
+        ang_dev = LigandReceptorPharmacophore.PISTACK_ANG_DEV
+        return not (0 <= angle <= ang_dev or 90 - ang_dev <= angle <= 90 + ang_dev)
+
+    @staticmethod
+    def _aromatic_pharmacophoric_points(ligand_feats, receptor_feats):
         """ Compute aromatic pharmacophoric points from
             protein-ligand interactions.
 
             Parameters
             -----------
-            lig_centers : list[puw.Quantity]
-                Centroids of the aromatic rings in the ligand.
+            ligand_feats : list[ChemFeat]
+                Aromatic chemical features of the ligand
 
-            lig_indices : list[list[int]]
-                Indices of the rings atoms in the ligand.
+            receptor_feats : list[ChemFeat]
+                Aromatic chemical features of the receptor
 
-            rec_centers : list[puw.Quantity]
-                Centroids of aromatic rings in the receptor.
-
-            rec_indices : list[list[int]]
-                Indices of the rings atoms in the receptor.
-
-            frame : int
-                The frame of the trajectory.
+            Returns
+            -------
+            points : list[PharmacophoricPoint]
+                List of aromatic pharmacophoric points
 
         """
         # Calculate pistack interactions and create pharmacophoric points
         radius = puw.quantity(1.0, "angstroms")
-        for ii in range(len(lig_centers)):
-            for jj in range(len(rec_centers)):
-                if maths.points_distance(rec_centers[jj], lig_centers[ii]) <= self.PISTACK_DIST_MAX:
+        points = []
+        for ii in range(len(ligand_feats)):
+            for jj in range(len(receptor_feats)):
+                lig_center = ligand_feats[ii].coords
+                rec_center = receptor_feats[jj].coords
+                dist = maths.points_distance(rec_center, lig_center)
+                if dist <= LigandReceptorPharmacophore.PISTACK_DIST_MAX:
                     # Calculate deviation from ideal angle by taking the angle between the normals
                     # defined by the planes of each ring
-                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords[frame], lig_centers[ii])
-                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords[frame], rec_centers[jj])
+                    lig_normal = ligand_feats[ii].normal
+                    rec_normal = receptor_feats[jj].normal
+
                     angle = maths.angle_between_normals(lig_normal, rec_normal)
                     assert 0 <= angle <= 360, f"Angle is {angle}"
 
-                    if 0 <= angle <= self.PISTACK_ANG_DEV or \
-                            90 - self.PISTACK_ANG_DEV <= angle <= 90 + self.PISTACK_ANG_DEV:
+                    if not LigandReceptorPharmacophore.aromatic_angle_exceeds_deviation(angle):
 
                         # Project ring centers into the other plane and calculate offset
-                        rec_proj = maths.point_projection(lig_normal, lig_centers[ii], rec_centers[jj])
-                        lig_proj = maths.point_projection(rec_normal, rec_centers[jj], lig_centers[ii])
-                        offset = min(maths.points_distance(lig_proj, rec_centers[jj]),
-                                     maths.points_distance(rec_proj, lig_centers[ii]))
-                        if offset <= self.PISTACK_OFFSET_MAX:
-                            direction = puw.get_value(rec_centers[jj] - lig_centers[ii])
-                            pharma_point = PharmacophoricPoint(
-                                "aromatic ring", lig_centers[ii], radius, direction)
-                            self._pharmacophores[frame].add(pharma_point)
+                        rec_proj = maths.point_projection(
+                            lig_normal, lig_center, rec_center
+                        )
+                        lig_proj = maths.point_projection(
+                            rec_normal, rec_center, lig_center
+                        )
+                        offset = min(maths.points_distance(lig_proj, rec_center),
+                                     maths.points_distance(rec_proj, lig_center))
 
-    def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
-        """ Compute hydrophobic pharmacophoric points from protein-ligand interactions.
-
-            Typically, there will be a lot of hydrophobic points so, they are passed
-            to a merging procedure.
-
-            Parameters
-            -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the hydrophobic areas in the ligand.
-
-            receptor_centers : list[puw.Quantity]
-                Centroids of hydrophobic areas in the receptor.
-
-            frame : int
-                The frame of the trajectory.
-
-        """
-        centers = []
-        radius = puw.quantity(1.0, "angstroms")
-        for lig_center in ligand_centers:
-            for prot_center in receptor_centers:
-                dist = maths.points_distance(lig_center, prot_center)
-                if dist < self.HYD_DIST_MAX:
-                    centers.append(lig_center)
-
-        points_clustered = self._merge_hydrophobic_points(centers, radius)
-        for p in points_clustered:
-            self._pharmacophores[frame].add(p)
+                        if offset <= LigandReceptorPharmacophore.PISTACK_OFFSET_MAX:
+                            direction = puw.get_value(rec_center - lig_center)
+                            points.append(PharmacophoricPoint(
+                                "aromatic ring", lig_center, radius, direction
+                            ))
+        return points
 
     @staticmethod
-    def _merge_hydrophobic_points(centers, radius):
+    def _merge_hydrophobic_points(points, radius):
         """ Merge group of hydrophobic points close to each other.
 
             Parameters
             ----------
-            centers : list[puw.Quantity]
+            points : list[PharmacophoricPoint]
             radius : puw.Quantity
 
             Returns
@@ -189,48 +165,63 @@ class LigandReceptorPharmacophore:
         # a feature and an edge is added between two nodes only if their distance
         # is < HYD_MERGE_DIST.
         hyd_graph = nx.Graph()
-        for ii in range(len(centers)):
+        for ii in range(len(points)):
             hyd_graph.add_node(ii)
 
-        for ii in range(len(centers)):
-            for jj in range(ii + 1, len(centers)):
-                dist = maths.points_distance(centers[ii], centers[jj])
+        for ii in range(len(points)):
+            for jj in range(ii + 1, len(points)):
+                dist = maths.points_distance(points[ii].center, points[jj].center)
                 if dist <= LigandReceptorPharmacophore.HYD_MERGE_DIST:
                     hyd_graph.add_edge(ii, jj)
 
         # Find each maximum clique and group all nodes within a clique
         cliques_iter = nx.find_cliques(hyd_graph)
-        points = []
+        merged = []
         for clique in cliques_iter:
-            clique_centers = [centers[ii] for ii in clique]
+            clique_centers = [points[ii].center for ii in clique]
             center = np.mean(np.stack(clique_centers), axis=0)
             pharma_point = PharmacophoricPoint("hydrophobicity", center, radius)
-            points.append(pharma_point)
-        return points
+            merged.append(pharma_point)
+        return merged
 
-    def _charge_pharmacophoric_points(self, ligand_centers, receptor_centers,
-                                      charge_type, frame):
-        """ Compute positive or negative charge pharmacophoric points from
-            protein-ligand interactions.
+    @staticmethod
+    def _points_from_distance_rule(
+            ligand_feats, receptor_feats, feat_type, max_dist
+    ):
+        """ Given a set of ligand and receptor chem feats, creates pharmacophoric
+            points if the ligand and receptor feats are below the maximum distance.
 
-            Parameters
-            -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the positive or negative areas in the ligand.
+            This method can be used to obtain hydrophobic, positive charge and
+            negative charge pharmacophoric points.
 
-            receptor_centers : list[puw.Quantity]
-                Centroids of areas with opposite sign in the receptor.
+        Parameters
+        ----------
+        ligand_feats : list[ChemFeat]
+            Chemical features of the ligand
 
-            frame : int
-                The frame of the trajectory.
+        receptor_feats : list[ChemFeat]
+            Chemical features of the receptor
+
+        feat_type : str
+            Name of the feature type of the pharmacophoric points.
+
+        max_dist : QuantityLike
+            Maximum distance between a receptor and a ligand feature.
+
+        Returns
+        -------
+        points : list[PharmacophoricPoint]
 
         """
         radius = puw.quantity(1.0, "angstroms")
-        for lig_center in ligand_centers:
-            for prot_center in receptor_centers:
-                if maths.points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
-                    pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
-                    self._pharmacophores[frame].add(pharma_point)
+        points = []
+        for lig_feat in ligand_feats:
+            for rec_feat in receptor_feats:
+                dist = maths.points_distance(lig_feat.coords, rec_feat.coords)
+                if dist < max_dist:
+                    pharma_point = PharmacophoricPoint(feat_type, lig_feat.coords, radius)
+                    points.append(pharma_point)
+        return points
 
     def __len__(self):
         return len(self._pharmacophores)

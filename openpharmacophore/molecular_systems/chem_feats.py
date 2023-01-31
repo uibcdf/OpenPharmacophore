@@ -1,6 +1,7 @@
 from rdkit import Chem
-from dataclasses import dataclass
 import numpy as np
+from dataclasses import dataclass
+from typing import Optional
 
 from openpharmacophore.config import QuantityLike
 
@@ -97,6 +98,7 @@ FEAT_TYPES = frozenset([
 class ChemFeat:
     type: str
     coords: QuantityLike
+    normal: Optional[np.ndarray] = None
 
 
 class ChemFeatContainer:
