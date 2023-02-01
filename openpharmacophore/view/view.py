@@ -53,6 +53,8 @@ class Viewer:
             component : Any
         """
         if isinstance(component, Protein):
+            # TODO: add Protein component without converting it to
+            #   mdtraj.Trajectory
             self._widget.add_component(create_traj(
                 component.coords, component.topology
             ))

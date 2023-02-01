@@ -46,7 +46,6 @@ class ComplexBindingSite(AbstractBindingSite):
         self._protein = protein
         self._ligand = ligand
 
-        self._bsite = None  # type: openpharmacophore.Protein
         self._bsite_mol = None  # type: rdkit.Chem.Mol
         self._has_ligand = None
 
@@ -115,7 +114,7 @@ class ComplexBindingSite(AbstractBindingSite):
         else:
             assert False, "This should not happen."
 
-        self._bsite = self._protein.slice(atoms, frame)
+        return self._protein.slice(atoms, frame)
 
     def get_chem_feats(self, frame, types=None):
         """ Get the chemical features of the binding site at the specified frame.
@@ -132,36 +131,11 @@ class ComplexBindingSite(AbstractBindingSite):
             -------
             ChemFeatContainer
         """
-        self._get_binding_site(frame)
+        b_site = self._get_binding_site(frame)
         self._bsite_mol = topology_to_mol(
-            self._bsite.topology,
-            self._bsite.coords,
-            remove_hyd=True)
+            b_site.topology, b_site.coords, remove_hyd=True)
         indices = get_indices(self._bsite_mol, feat_def=SMARTS_PROTEIN, types=types)
-        return mol_chem_feats(indices, self._bsite.coords[0])
-
-    def _hydrogen_bonds_indices(self, frame):
-        """ Get the indices of the atoms involved in hydrogen
-            bonds between the protein and the ligand.
-
-            Parameters
-            ----------
-            frame : int
-
-            Returns
-            --------
-            ChemFeatContainer
-        """
-        have_hyd = self._ligand.has_hydrogens and self._protein.has_hydrogens
-        if have_hyd:
-            if not self._has_ligand:
-                # Add the ligand to the bsite, so we can get hydrogen bonds
-                ligand_top = ligand_to_topology(self._ligand.to_rdkit())
-                ligand_coords = np.expand_dims(self._ligand.get_conformer(frame), axis=0)
-                self._bsite.concatenate(ligand_top, ligand_coords)
-
-            protein_ligand_hbonds(self._bsite)
-        return None
+        return mol_chem_feats(indices, b_site.coords[0])
 
     @staticmethod
     def _ligand_centroid(coords):

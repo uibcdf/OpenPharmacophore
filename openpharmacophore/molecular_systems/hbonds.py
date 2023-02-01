@@ -14,6 +14,7 @@ def protein_ligand_hbonds(bsite):
     openPharmacophore.ChemFeatContainer
 
     """
+    # TODO: obtain hydrogen bonds without using mdtraj
     traj = mdt.Trajectory(
         xyz=puw.get_value(bsite.coords),
         topology=bsite.topology.top

@@ -21,7 +21,6 @@ class Protein:
             A quantity of shape (n_structures, n_atoms, 3)
     """
     def __init__(self, topology, coords):
-        # TODO: validate coordinates shape and topology match
         self._validate_coords(topology, coords)
         self._topology = topology
         self._coords = coords
