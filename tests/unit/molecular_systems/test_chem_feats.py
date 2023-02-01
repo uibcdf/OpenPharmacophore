@@ -26,8 +26,8 @@ def test_create_chem_feats():
 
 def test_add_features_to_container():
     feats = [
-        cf.ChemFeat("aromatic ring", puw.quantity(np.array([1.5, 1.5, 1.5]), "nanometers")),
-        cf.ChemFeat("hb acceptor", puw.quantity(np.array([2.5, 2.5, 2.5]), "nanometers")),
+        cf.ChemFeat(type="aromatic ring", coords=puw.quantity(np.array([1.5, 1.5, 1.5]), "nanometers")),
+        cf.ChemFeat(type="hb acceptor", coords=puw.quantity(np.array([2.5, 2.5, 2.5]), "nanometers")),
     ]
     container = cf.ChemFeatContainer()
     container.add_feats(feats)

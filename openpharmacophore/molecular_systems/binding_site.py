@@ -4,8 +4,7 @@ import pyunitwizard as puw
 from typing import List
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, mol_chem_feats
 from openpharmacophore.molecular_systems.chem_feats import SMARTS_PROTEIN, get_indices
-from openpharmacophore.molecular_systems.convert import topology_to_mol, ligand_to_topology
-from openpharmacophore.molecular_systems.hbonds import protein_ligand_hbonds
+from openpharmacophore.molecular_systems.convert import topology_to_mol
 from openpharmacophore.utils import maths
 
 

@@ -44,8 +44,8 @@ def test_add_components_to_viewer(
 def test_add_chem_feats_to_viewer():
     viewer = get_viewer()
     chem_feats = ChemFeatContainer(
-        [ChemFeat("aromatic ring", puw.quantity(np.array([1.5, 1.5, 1.5]), "nanometers")),
-         ChemFeat("hb acceptor", puw.quantity(np.array([2.5, 2.5, 2.5]), "nanometers"))]
+        [ChemFeat(type="aromatic ring", coords=puw.quantity(np.array([1.5, 1.5, 1.5]), "nanometers")),
+         ChemFeat(type="hb acceptor", coords=puw.quantity(np.array([2.5, 2.5, 2.5]), "nanometers"))]
     )
     viewer.add_chem_feats(chem_feats)
 

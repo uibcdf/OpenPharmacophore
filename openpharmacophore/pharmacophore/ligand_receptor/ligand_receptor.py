@@ -22,6 +22,9 @@ class LigandReceptorPharmacophore:
     PISTACK_OFFSET_MAX = puw.quantity(0.20, "nanometers")
     PISTACK_ANG_DEV = 30  # degrees
 
+    HBOND_DIST_MAX = puw.quantity(0.25, "nanometers")
+    HBOND_ANG_MIN = puw.quantity(120, "degree")  # degrees
+
     def __init__(self):
         self._pharmacophores = []  # type: list[Pharmacophore]
 
@@ -32,64 +35,79 @@ class LigandReceptorPharmacophore:
     def extract(self):
         raise NotImplementedError
 
-    def _hbond_donor_pharmacophoric_points(self, h_bonds, frame):
-        """ Compute hydrogen bond donor pharmacophoric points from
-            protein-ligand interactions.
+    @staticmethod
+    def _hbond_angle(don_acc_dist, don_hyd_dist, acc_hyd_dist):
+        """  Compute hydrogen bonding angle.
 
             Parameters
-            -----------
-            h_bonds : np.ndarray
-                Array with the indices of the atoms involved in hydrogen bond.
-                Each row contains three integer indices, (d_i, h_i, a_i), such
-                that d_i is the index of the donor atom, h_i the index of the
-                hydrogen atom, and a_i the index of the acceptor atom.
-                Shape = (n_h_bonds, 3)
+            ----------
+            don_acc_dist : QuantityLike
+                Distance from donor to acceptor
 
-            frame : int
-                The frame of the trajectory.
+            don_hyd_dist : QuantityLike
+                Distance from donor to hydrogen
+
+            acc_hyd_dist : QuantityLike
+               Distance from acceptor to hydrogen
+
+            Returns
+            -------
+            QuantityLike
         """
-        radius = puw.quantity(1.0, "angstroms")
-        for bond in h_bonds:
-            # There is an acceptor in the receptor
-            if bond[0] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[2], :] -
-                                          self._pl_complex.coords[frame, bond[0], :])
-                pharma_point = PharmacophoricPoint(
-                    "hb donor", self._pl_complex.coords[frame, bond[0], :],
-                    radius, direction
-                )
-                self._pharmacophores[frame].add(pharma_point)
-
-    def _hbond_acceptor_pharmacophoric_points(self, h_bonds, frame):
-        """ Compute hydrogen bond acceptor pharmacophoric points from
-            protein-ligand interactions.
-
-            Parameters
-            -----------
-            h_bonds : np.ndarray
-                Array with the indices of the atoms involved in hydrogen bond.
-                Each row contains three integer indices, (d_i, h_i, a_i), such
-                that d_i is the index of the donor atom, h_i the index of the
-                hydrogen atom, and a_i the index of the acceptor atom.
-                Shape = (n_h_bonds, 3)
-
-            frame : int
-                The frame of the trajectory.
-        """
-        radius = puw.quantity(1.0, "angstroms")
-        for bond in h_bonds:
-            if bond[2] in self._pl_complex.lig_indices:
-                # There is a donor in the ligand
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[0], :] -
-                                          self._pl_complex.coords[frame, bond[2], :])
-                pharma_point = PharmacophoricPoint(
-                    "hb acceptor", self._pl_complex.coords[frame, bond[2], :],
-                    radius, direction
-                )
-                self._pharmacophores[frame].add(pharma_point)
+        # Calculate angle using law of cosines
+        cos = (don_hyd_dist**2 + acc_hyd_dist**2 - don_acc_dist**2) / (2 * don_hyd_dist * acc_hyd_dist)
+        return np.degrees(np.arccos(cos))
 
     @staticmethod
-    def aromatic_angle_exceeds_deviation(angle):
+    def _hbond_pharmacophoric_points(donors, acceptors, donors_in_ligand):
+        """ Compute hydrogen bonds pharmacophoric points centroids and
+            directions vectors.
+
+            Parameters
+            ----------
+            donors : list[HBDonor]
+                List with hydrogen bond donors.
+
+            acceptors : list[ChemFeat]
+                List with hydrogen bond acceptors.
+
+            donors_in_ligand : bool
+                Whether the donors are part of the ligand or of the receptor
+
+            Returns
+            -------
+            points : list[PharmacophoricPoint]
+
+        """
+        radius = puw.quantity(1.0, "angstroms")
+
+        points = []
+        for don in donors:
+            for acc in acceptors:
+                # Distance between H-Acceptor
+                acc_hyd_dist = maths.points_distance(don.hyd, acc.coords)
+                if acc_hyd_dist < LigandReceptorPharmacophore.HBOND_DIST_MAX:
+                    don_acc_dist = maths.points_distance(don.coords, acc.coords)
+                    don_hyd_dist = maths.points_distance(don.coords, don.hyd)
+                    angle = LigandReceptorPharmacophore._hbond_angle(
+                        don_acc_dist, don_hyd_dist, acc_hyd_dist
+                    )
+                    if angle > LigandReceptorPharmacophore.HBOND_ANG_MIN:
+                        direction = puw.get_value(acc.coords - don.hyd)
+                        if donors_in_ligand:
+                            points.append(
+                                PharmacophoricPoint(
+                                    "hb donor", don.coords, radius, direction=direction)
+                            )
+                        else:
+                            points.append(
+                                PharmacophoricPoint(
+                                    "hb acceptor", acc.coords, radius, direction=direction)
+                            )
+        return points
+
+    @staticmethod
+    def _aromatic_angle_exceeds_deviation(angle):
         ang_dev = LigandReceptorPharmacophore.PISTACK_ANG_DEV
         return not (0 <= angle <= ang_dev or 90 - ang_dev <= angle <= 90 + ang_dev)
 
@@ -129,7 +147,7 @@ class LigandReceptorPharmacophore:
                     angle = maths.angle_between_normals(lig_normal, rec_normal)
                     assert 0 <= angle <= 360, f"Angle is {angle}"
 
-                    if not LigandReceptorPharmacophore.aromatic_angle_exceeds_deviation(angle):
+                    if not LigandReceptorPharmacophore._aromatic_angle_exceeds_deviation(angle):
 
                         # Project ring centers into the other plane and calculate offset
                         rec_proj = maths.point_projection(

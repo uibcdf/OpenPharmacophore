@@ -96,9 +96,20 @@ FEAT_TYPES = frozenset([
 
 @dataclass
 class ChemFeat:
-    type: str
     coords: QuantityLike
+    type: str
+
+
+@dataclass
+class AromaticRing(ChemFeat):
+    type: str = "aromatic ring"
     normal: Optional[np.ndarray] = None
+
+
+@dataclass
+class HBDonor(ChemFeat):
+    type: str = "hb donor"
+    hyd: Optional[np.ndarray] = None
 
 
 class ChemFeatContainer:
@@ -253,7 +264,7 @@ def create_chem_feats(feat_type, indices, coords):
     for ind_tuple in indices:
         feat_coords = np.mean(coords[ind_tuple, :], axis=0)
         feats.append(
-            ChemFeat(feat_type, feat_coords)
+            ChemFeat(coords=feat_coords, type=feat_type)
         )
     return feats
 
