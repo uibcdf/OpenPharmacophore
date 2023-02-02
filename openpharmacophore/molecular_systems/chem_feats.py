@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from openpharmacophore.config import QuantityLike
-
+from openpharmacophore.utils.maths import ring_normal
 
 SMARTS_LIGAND = {
         "aromatic ring": [
@@ -226,7 +226,7 @@ def get_indices(mol, feat_def, types=None):
 
         Returns
         --------
-        indices : dict[str, list[tuple[int]]
+        indices : dict[str, list[tuple[int]]]
             Indices of each chemical feature type.
     """
     if types is None:
@@ -275,7 +275,7 @@ def mol_chem_feats(indices, coords):
         Parameters
         ----------
         indices : dict[str, list[tuple[int]]]
-            Indices of the atomst that encompass the chemical features.
+            Indices of the atoms that encompass the chemical features.
 
         coords : QuantityLike
             The coordinates of a conformer of the molecule. Has shape
@@ -293,3 +293,57 @@ def mol_chem_feats(indices, coords):
         container.add_feats(feats)
 
     return container
+
+
+def donor_chem_feats(donor_indices, coords, mol):
+    """ Compute hydrogen bond donor chemical features.
+
+    Parameters
+    ----------
+    donor_indices : list[tuple[int]]
+
+    coords : QuantityLike
+
+    mol : rdkit.Chem.Mol
+
+    Returns
+    -------
+    list[HBDonor]
+
+    """
+    feats = []
+    for ind_tuple in donor_indices:
+        centroid = np.mean(coords[ind_tuple, :], axis=0)
+        assert len(ind_tuple) == 1  # Donors should be just one atom
+
+        atom = mol.GetAtomWithIdx(ind_tuple[0])
+        for nbr in atom.GetNeighbors():
+            hyd = coords[nbr.GetIdx()]
+            feats.append(
+                HBDonor(coords=centroid, hyd=hyd)
+            )
+    return feats
+
+
+def aromatic_chem_feats(aromatic_indices, coords):
+    """ Compute aromatic chemical features.
+
+    Parameters
+    ----------
+    aromatic_indices : list[tuple[int]]
+
+    coords : QuantityLike
+
+    Returns
+    -------
+    feats : list[AromaticRing]
+
+    """
+    feats = []
+    for ind_tuple in aromatic_indices:
+        centroid = np.mean(coords[ind_tuple, :], axis=0)
+        normal = ring_normal(ind_tuple, coords, centroid)
+        feats.append(
+            AromaticRing(coords=centroid, normal=normal)
+        )
+    return feats

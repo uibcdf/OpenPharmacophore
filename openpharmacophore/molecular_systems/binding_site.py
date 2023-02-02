@@ -2,8 +2,7 @@ import abc
 import numpy as np
 import pyunitwizard as puw
 from typing import List
-from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, mol_chem_feats
-from openpharmacophore.molecular_systems.chem_feats import SMARTS_PROTEIN, get_indices
+import openpharmacophore.molecular_systems.chem_feats as cf
 from openpharmacophore.molecular_systems.convert import topology_to_mol
 from openpharmacophore.utils import maths
 
@@ -19,7 +18,7 @@ class AbstractBindingSite(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_chem_feats(self, frame: int) -> ChemFeatContainer:
+    def get_chem_feats(self, frame: int) -> cf.ChemFeatContainer:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -133,8 +132,17 @@ class ComplexBindingSite(AbstractBindingSite):
         b_site = self._get_binding_site(frame)
         self._bsite_mol = topology_to_mol(
             b_site.topology, b_site.coords, remove_hyd=True)
-        indices = get_indices(self._bsite_mol, feat_def=SMARTS_PROTEIN, types=types)
-        return mol_chem_feats(indices, b_site.coords[0])
+
+        indices = cf.get_indices(self._bsite_mol, feat_def=cf.SMARTS_PROTEIN, types=types)
+        # Donors and aromatics need to be processed differently because they require extra data
+        donors = indices.pop("hb donor")
+        aromatics = indices.pop("aromatic ring")
+
+        container = cf.mol_chem_feats(indices, b_site.coords[0])
+        container.add_feats(cf.donor_chem_feats(donors, b_site.coords[0], self._bsite_mol))
+        container.add_feats(cf.aromatic_chem_feats(aromatics, b_site.coords[0]))
+
+        return container
 
     @staticmethod
     def _ligand_centroid(coords):

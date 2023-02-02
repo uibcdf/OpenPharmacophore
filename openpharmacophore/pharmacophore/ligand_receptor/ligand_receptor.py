@@ -74,7 +74,7 @@ class LigandReceptorPharmacophore:
         points = self._hbond_pharmacophoric_points(
             ligand_feats.donor, receptor_feats.acceptor, donors_in_ligand=True)
         points += self._hbond_pharmacophoric_points(
-            ligand_feats.acceptor, receptor_feats.donor, donors_in_ligand=False)
+            receptor_feats.donor, ligand_feats.acceptor, donors_in_ligand=False)
         return points
 
     def _hydrophobic_pharmacophoric_points(self, ligand_feats, receptor_feats):
@@ -120,7 +120,7 @@ class LigandReceptorPharmacophore:
                 extracted.
 
         """
-        ligand_feats = self._ligand.get_chem_feats(frame)
+        ligand_feats = self._ligand.get_chem_feats_with_directionality(frame)
         receptor_feats = self._bsite.get_chem_feats(frame)
 
         points = self._charge_pharmacophoric_points(ligand_feats, receptor_feats)

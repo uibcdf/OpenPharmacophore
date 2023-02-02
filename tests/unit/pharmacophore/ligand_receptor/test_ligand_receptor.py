@@ -155,7 +155,7 @@ def test_pharmacophoric_points_from_distance_rule():
 
 class FakeLigand:
 
-    def get_chem_feats(self, conf_ind):
+    def get_chem_feats_with_directionality(self, conf_ind):
         donor = HBDonor(coords=puw.quantity(np.array([0., 0., 0.]), "angstroms"),
                         hyd=puw.quantity(np.array([0.25, 0.5, 0.]), "angstroms"))
         ring = AromaticRing(coords=puw.quantity(np.array([0., 0., 0.]), "angstroms"),

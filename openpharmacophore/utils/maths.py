@@ -37,7 +37,7 @@ def ring_normal(indices, coords, centroid):
 
         Parameters
         ----------
-        indices : list[int]
+        indices : Iterable[int]
             Atom indices of the ring in the trajectory.
 
         coords : puw.Quantity

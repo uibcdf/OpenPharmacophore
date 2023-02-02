@@ -9,7 +9,8 @@ import pickle
 
 from openpharmacophore.molecular_systems.exceptions import DifferentNumAtomsError, LigandCreationError
 from openpharmacophore.molecular_systems.convert import topology_to_mol
-from openpharmacophore.molecular_systems.chem_feats import get_indices, mol_chem_feats
+from openpharmacophore.molecular_systems.chem_feats import get_indices, mol_chem_feats, \
+    aromatic_chem_feats, donor_chem_feats
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, SMARTS_LIGAND
 
 
@@ -259,6 +260,40 @@ class Ligand:
         if self._feat_ind is None:
             self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
         return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind))
+
+    def get_chem_feats_with_directionality(self, conf_ind, types=None):
+        """ Find chemical features in this ligand. Hydrogen bond donors obtained
+            with this method will include information about hydrogen atoms, and
+            aromatic ring will contain their normal vector.
+
+            Parameters
+            ----------
+            conf_ind : int
+                Index of the conformer.
+
+            types : set[str], optional
+                The chemical features that will be searched for.
+
+            Returns
+            -------
+            ChemFeatContainer
+        """
+        if self._feat_ind is None:
+            self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
+
+        # Exclude donor and aromatics and process them separately
+        donors = self._feat_ind.pop("hb donor")
+        aromatics = self._feat_ind.pop("aromatic ring")
+
+        conformer = self.get_conformer(conf_ind)
+        container = mol_chem_feats(self._feat_ind, conformer)
+        container.add_feats(donor_chem_feats(donors, conformer, self._mol))
+        container.add_feats(aromatic_chem_feats(aromatics, conformer))
+
+        self._feat_ind["hb donor"] = donors
+        self._feat_ind["aromatic ring"] = aromatics
+
+        return container
 
     def draw(self):
         """ Draw the ligand.

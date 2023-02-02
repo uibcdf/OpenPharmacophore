@@ -1,5 +1,4 @@
 import openpharmacophore as oph
-from assert_view import assert_view_contains_pharmacophore
 
 
 def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
