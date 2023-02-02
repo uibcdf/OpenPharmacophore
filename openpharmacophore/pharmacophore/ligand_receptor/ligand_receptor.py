@@ -1,4 +1,5 @@
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
+from openpharmacophore.molecular_systems import ComplexBindingSite, Ligand
 from openpharmacophore.utils import maths
 import networkx as nx
 import numpy as np
@@ -10,6 +11,14 @@ class LigandReceptorPharmacophore:
 
         The pharmacophores can be extracted from a PDB structure or from a molecular
         dynamics trajectory.
+
+        Parameters
+        ----------
+        binding_site : ComplexBindingSite
+            Binding site from which the pharmacophore will be extracted
+
+        ligand : Ligand
+            The ligand in the binding site.
 
     """
     # Values from ligandscout and plip
@@ -25,15 +34,102 @@ class LigandReceptorPharmacophore:
     HBOND_DIST_MAX = puw.quantity(0.25, "nanometers")
     HBOND_ANG_MIN = puw.quantity(120, "degree")  # degrees
 
-    def __init__(self):
+    def __init__(self, binding_site, ligand):
         self._pharmacophores = []  # type: list[Pharmacophore]
+        self._bsite = binding_site
+        self._ligand = ligand
 
-    @property
-    def num_frames(self):
-        return len(self._pharmacophores)
+    def _charge_pharmacophoric_points(self, ligand_feats, receptor_feats):
+        """ Get positive and negative charge pharmacophoric points.
 
-    def extract(self):
-        raise NotImplementedError
+            Parameters
+            ----------
+            ligand_feats : ChemFeatContainer
+            receptor_feats : ChemFeatContainer
+
+            Returns
+            -------
+            list [PharmacophoricPoint]
+
+        """
+        points = self._points_from_distance_rule(
+            ligand_feats.positive, receptor_feats.negative, "positive charge", self.CHARGE_DIST_MAX)
+        points += self._points_from_distance_rule(
+            ligand_feats.negative, receptor_feats.positive, "positive charge", self.CHARGE_DIST_MAX)
+        return points
+
+    def _donors_and_acceptors(self, ligand_feats, receptor_feats):
+        """ Get hydrogen bond donor and acceptor pharmacophoric points.
+
+            Parameters
+            ----------
+            ligand_feats : ChemFeatContainer
+            receptor_feats : ChemFeatContainer
+
+            Returns
+            -------
+            list [PharmacophoricPoint]
+
+        """
+        points = self._hbond_pharmacophoric_points(
+            ligand_feats.donor, receptor_feats.acceptor, donors_in_ligand=True)
+        points += self._hbond_pharmacophoric_points(
+            ligand_feats.acceptor, receptor_feats.donor, donors_in_ligand=False)
+        return points
+
+    def _hydrophobic_pharmacophoric_points(self, ligand_feats, receptor_feats):
+        """ Get hydrophobic pharmacophoric points.
+
+            Parameters
+            ----------
+            ligand_feats : ChemFeatContainer
+            receptor_feats : ChemFeatContainer
+
+            Returns
+            -------
+            list [PharmacophoricPoint]
+
+        """
+        hyd_points = self._points_from_distance_rule(
+            ligand_feats.hydrophobic, receptor_feats.hydrophobic, "hydrophobicity", self.HYD_DIST_MAX
+        )
+        return self._merge_hydrophobic_points(hyd_points, radius=puw.quantity(1.0, "angstroms"))
+
+    def extract(self, frames=None):
+        """ Extract one or multiple pharmaophores at different frames
+
+            Parameters
+            ----------
+            frames : Iterable[int], optional
+                Iterable with the frames for which pharmacophores will be extracted.
+
+        """
+        if frames is None:
+            frames = range(1)
+
+        for fr in frames:
+            self._extract_single_frame(fr)
+
+    def _extract_single_frame(self, frame):
+        """ Extract a pharmacophore at a given frame.
+
+            Parameters
+            ----------
+            frame : int
+                The frame of the trajectory for which the pharmacophore will be
+                extracted.
+
+        """
+        ligand_feats = self._ligand.get_chem_feats(frame)
+        receptor_feats = self._bsite.get_chem_feats(frame)
+
+        points = self._charge_pharmacophoric_points(ligand_feats, receptor_feats)
+        points += self._aromatic_pharmacophoric_points(ligand_feats.aromatic, receptor_feats.aromatic)
+        points += self._donors_and_acceptors(ligand_feats, receptor_feats)
+        points += self._hydrophobic_pharmacophoric_points(ligand_feats, receptor_feats)
+
+        pharma = Pharmacophore(points, ref_struct=frame, ref_mol=0)
+        self._pharmacophores.append(pharma)
 
     @staticmethod
     def _hbond_angle(don_acc_dist, don_hyd_dist, acc_hyd_dist):

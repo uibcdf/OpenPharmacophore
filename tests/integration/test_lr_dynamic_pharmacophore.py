@@ -1,5 +1,4 @@
 import openpharmacophore as oph
-from assert_view import assert_view_contains_pharmacophore
 
 
 def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
@@ -21,15 +20,19 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     )
     assert ligand.has_aromatic_bonds()
 
+    # We need to extract the binding site from the protein, so we can get
+    # pharmacophoric features
+    bsite = oph.ComplexBindingSite(protein, ligand)
+
     # We extract the pharmacophore
-    pharmacophore = oph.LigandReceptorPharmacophore(protein, ligand)
-    pharmacophore.extract(frames=[0, 1, 2])
+    pharmacophore = oph.LigandReceptorPharmacophore(bsite, ligand)
+    pharmacophore.extract(frames=range(3))
     assert len(pharmacophore) == 3
     assert len(pharmacophore[0]) > 0
     assert len(pharmacophore[1]) > 0
     assert len(pharmacophore[2]) > 0
 
-    # We view the second frame
-    viewer = oph.Viewer(pharmacophore=pharmacophore,
-                        protein=protein, ligand=ligand)
-    view = viewer.show(frame=1)
+    # Finally we visualize the pharmacophore.
+    viewer = oph.Viewer()
+    viewer.add_components([protein, ligand])
+    viewer.show()

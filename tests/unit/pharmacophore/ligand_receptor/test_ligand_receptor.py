@@ -1,7 +1,7 @@
 import numpy as np
 import pyunitwizard as puw
 
-from openpharmacophore.molecular_systems.chem_feats import ChemFeat, HBDonor, AromaticRing
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, ChemFeat, HBDonor, AromaticRing
 from openpharmacophore import LigandReceptorPharmacophore as LRP
 from openpharmacophore import PharmacophoricPoint
 
@@ -151,3 +151,46 @@ def test_pharmacophoric_points_from_distance_rule():
 
     assert len(points) == 1
     assert np.all(puw.get_value(points[0].center) == np.array([0.] * 3))
+
+
+class FakeLigand:
+
+    def get_chem_feats(self, conf_ind):
+        donor = HBDonor(coords=puw.quantity(np.array([0., 0., 0.]), "angstroms"),
+                        hyd=puw.quantity(np.array([0.25, 0.5, 0.]), "angstroms"))
+        ring = AromaticRing(coords=puw.quantity(np.array([0., 0., 0.]), "angstroms"),
+                            normal=np.array([0., 0., 1.]))
+        pos = ChemFeat(type="positive charge", coords=puw.quantity(np.array([0.] * 3), "angstroms"))
+        neg = ChemFeat(type="negative charge", coords=puw.quantity(np.array([0.] * 3), "angstroms"))
+        hyd = ChemFeat(type="hydrophobicity", coords=puw.quantity(np.array([0.] * 3), "angstroms"))
+
+        container = ChemFeatContainer()
+        container.add_feats([donor, ring, pos, neg, hyd])
+        return container
+
+
+class FakeBindingSite:
+
+    def get_chem_feats(self, frame):
+        acceptor = ChemFeat(type="hb acceptor", coords=puw.quantity(np.array([0.75, 0.75, 0.]), "angstroms"))
+        ring = AromaticRing(
+            coords=puw.quantity(np.array([1., 0., 3.]), "angstroms"),
+            normal=np.array([0., 0., 1.]))
+        pos = ChemFeat(type="positive charge", coords=puw.quantity(np.array([2.] * 3), "angstroms"))
+        neg = ChemFeat(type="negative charge", coords=puw.quantity(np.array([2.] * 3), "angstroms"))
+        hyd = ChemFeat(type="hydrophobicity", coords=puw.quantity(np.array([2.] * 3), "angstroms"))
+
+        container = ChemFeatContainer()
+        container.add_feats([acceptor, ring, pos, neg, hyd])
+        return container
+
+
+def test_extract():
+    pharmacophore = LRP(FakeBindingSite(), FakeLigand())
+    pharmacophore.extract()
+
+    assert len(pharmacophore) == 1
+    assert len(pharmacophore[0]) == 5
+
+    assert pharmacophore[0].ref_struct == 0
+    assert pharmacophore[0].ref_mol == 0
