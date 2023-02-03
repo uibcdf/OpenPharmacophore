@@ -45,7 +45,6 @@ class ComplexBindingSite(AbstractBindingSite):
         self._ligand = ligand
 
         self._bsite_mol = None  # type: rdkit.Chem.Mol
-        self._has_ligand = None
 
     def get_atoms(self, frame):
         """ Get the indices of the atoms in the binding site. This will include the ligand
@@ -99,19 +98,8 @@ class ComplexBindingSite(AbstractBindingSite):
             openPharmacophore.Protein
                 The binding site
         """
-        aminoacids, lig_res_ind = self.get_residues(frame)
-        if self._ligand_has_hyd(lig_res_ind):
-            # In this case we do not need to concatenate the ligand
-            aminoacids.append(lig_res_ind)
-            atoms = self._protein.topology.get_residues_atoms(aminoacids)
-            self._has_ligand = True
-        elif not self._ligand_has_hyd(lig_res_ind) or lig_res_ind is None:
-            # We extract the binding site topology and concatenate the ligand topology
-            atoms = self._protein.topology.get_residues_atoms(aminoacids)
-            self._has_ligand = False
-        else:
-            assert False, "This should not happen."
-
+        aminoacids, _ = self.get_residues(frame)
+        atoms = self._protein.topology.get_residues_atoms(aminoacids)
         return self._protein.slice(atoms, frame)
 
     def get_chem_feats(self, frame, types=None):
