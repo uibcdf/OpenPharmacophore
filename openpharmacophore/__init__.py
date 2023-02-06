@@ -24,7 +24,6 @@ from .pharmacophore.pharmacophore import Pharmacophore
 from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
 from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
 from .load.load import load, load_ligands
-from .screening import VirtualScreening
 
 
 versions = get_versions()
