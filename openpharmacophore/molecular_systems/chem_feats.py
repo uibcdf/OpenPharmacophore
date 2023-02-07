@@ -3,7 +3,7 @@ import numpy as np
 from dataclasses import dataclass
 from typing import Optional
 
-from openpharmacophore.config import QuantityLike
+from openpharmacophore.constants import QuantityLike, FEAT_TYPES
 from openpharmacophore.utils.maths import ring_normal
 
 SMARTS_LIGAND = {
@@ -85,13 +85,6 @@ SMARTS_PROTEIN = {
         ]
 
 }
-
-
-FEAT_TYPES = frozenset([
-    "aromatic ring", "hydrophobicity",
-    "negative charge", "positive charge",
-    "hb acceptor", "hb donor",
-])
 
 
 @dataclass

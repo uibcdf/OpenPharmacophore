@@ -3,7 +3,7 @@ import pyunitwizard as puw
 from openpharmacophore import Protein, ComplexBindingSite, Ligand
 from openpharmacophore.molecular_systems.convert import create_traj
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
-from openpharmacophore import config
+from openpharmacophore import constants
 
 
 class Viewer:
@@ -80,7 +80,7 @@ class Viewer:
         """
         radius = 1.0  # in angstroms
         for feat in chem_feats:
-            color = config.PALETTE[feat.type]
+            color = constants.PALETTE[feat.type]
             coords = puw.get_value(feat.coords, "angstroms").tolist()
             self._add_sphere(coords, radius, color, feat.type)
         self._has_chem_feats = True

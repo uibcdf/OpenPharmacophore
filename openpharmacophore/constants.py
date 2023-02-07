@@ -1,3 +1,4 @@
+# Use this file to define constants used in different modules
 from pyunitwizard._private_tools.quantity_or_unit import QuantityLike
 from matplotlib.colors import to_rgb
 
@@ -43,3 +44,13 @@ PALETTE = {
     'hydrophobicity': to_rgb('#F5B041'),  # Orange
     'aromatic ring': to_rgb('#F1C40F'),  # Yellow
 }
+
+
+FEAT_TYPES = frozenset([
+    "aromatic ring",
+    "hydrophobicity",
+    "negative charge",
+    "positive charge",
+    "hb acceptor",
+    "hb donor",
+])

@@ -42,5 +42,5 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
 
     # Finally we visualize the pharmacophore.
     viewer = oph.Viewer()
-    viewer.add_components([protein, ligand])
+    viewer.add_components([protein, ligand, pharmacophore])
     viewer.show()

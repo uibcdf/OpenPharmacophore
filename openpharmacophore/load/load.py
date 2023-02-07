@@ -1,6 +1,6 @@
 from openpharmacophore import Ligand, LigandSet, Protein
 from openpharmacophore.molecular_systems import create_topology, create_ligand_set
-import openpharmacophore.config as config
+import openpharmacophore.constants as config
 
 
 class InvalidFileFormatError(ValueError):

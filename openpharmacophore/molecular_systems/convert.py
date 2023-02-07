@@ -4,7 +4,7 @@ import tempfile
 import pyunitwizard as puw
 
 from openpharmacophore.molecular_systems import Topology
-from openpharmacophore.config import QuantityLike
+from openpharmacophore.constants import QuantityLike
 
 
 def topology_to_mol(topology, coords, remove_hyd=True):
