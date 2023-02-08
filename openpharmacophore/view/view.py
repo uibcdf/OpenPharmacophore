@@ -1,6 +1,6 @@
 import nglview as nv
 import pyunitwizard as puw
-from openpharmacophore import Protein, ComplexBindingSite, Ligand
+from openpharmacophore import Protein, ComplexBindingSite, Ligand, Pharmacophore
 from openpharmacophore.molecular_systems.convert import create_traj
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 from openpharmacophore import constants
@@ -13,6 +13,7 @@ class Viewer:
         self._has_protein = False
         self._has_ligand = False
         self._has_chem_feats = False
+        self._has_pharmacophore = False
 
     @property
     def n_components(self) -> int:
@@ -32,6 +33,11 @@ class Viewer:
     def has_chem_feats(self) -> bool:
         """ Returns true if the view contains chemical features. """
         return self._has_chem_feats
+
+    @property
+    def has_pharmacophore(self) -> bool:
+        """ Returns true if the view contains a pharmacophore. """
+        return self._has_pharmacophore
 
     def add_components(self, components):
         """ Add multiple components to the viewer, such as Proteins, Ligands and
@@ -67,6 +73,8 @@ class Viewer:
             self._has_ligand = True
         elif isinstance(component, ChemFeatContainer):
             self.add_chem_feats(component)
+        elif isinstance(component, Pharmacophore):
+            self.add_pharmacophore(component)
         else:
             raise NotImplementedError
 
@@ -84,6 +92,23 @@ class Viewer:
             coords = puw.get_value(feat.coords, "angstroms").tolist()
             self._add_sphere(coords, radius, color, feat.type)
         self._has_chem_feats = True
+
+    def add_pharmacophore(self, pharmacophore):
+        """ Add a pharmacophore to the viewer
+
+            Parameters
+            ----------
+            pharmacophore : Pharmacophore
+
+        """
+        for point in pharmacophore:
+            coords = puw.get_value(point.center, "angstroms")
+            color = constants.PALETTE[point.feature_name]
+            radius = puw.get_value(point.radius, "angstroms")
+            self._add_sphere(coords.tolist(), radius, color, point.feature_name)
+            if point.has_direction:
+                self._add_arrow(coords, radius, point.direction, color)
+        self._has_pharmacophore = True
 
     def _add_sphere(self, centroid, radius, color, label):
         """ Add a sphere to the viewer.
@@ -106,6 +131,30 @@ class Viewer:
         self._widget.update_representation(
             component=self.n_components+1, repr_index=0, opacity=0.9
         )
+
+    def _add_arrow(self, centroid, length, direction, color):
+        """ Add an arrow to the view
+
+            Parameters
+            ----------
+            centroid : np.ndarray
+                Aan array of length 3 with the coordinates of the centroid.
+
+            length : float
+                Length of the arrow.
+
+            direction : np.ndarray
+                Directionality of the arrow
+
+            color : tuple[float]
+                Color in rgb format.
+
+        """
+        arrow_radius = 0.2
+        end_arrow = (centroid + length * direction * 2.0).tolist()
+
+        self._widget.shape.add_arrow(centroid, end_arrow, color, arrow_radius)
+        self._widget.update_representation(component=self.n_components+1, repr_index=0, opacity=0.9)
 
     def show(self):
         """ Shows the view.
