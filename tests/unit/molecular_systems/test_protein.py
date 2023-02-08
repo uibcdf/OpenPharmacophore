@@ -1,4 +1,3 @@
-import pytest
 import pyunitwizard as puw
 import numpy as np
 from copy import deepcopy

@@ -1,10 +1,36 @@
 import mdtraj as mdt
+from mdtraj.utils.unit import in_units_of
+from mdtraj.formats.pdb import PDBTrajectoryFile
 from rdkit import Chem
-import tempfile
 import pyunitwizard as puw
+
+import io
 
 from openpharmacophore.molecular_systems import Topology
 from openpharmacophore.constants import QuantityLike
+
+
+class PDBStringIO(PDBTrajectoryFile):
+    """ Class to write pdb files to a text stream or StringIO
+    """
+    def __init__(self):
+        self._open = False
+        self._file = None
+        self._topology = None
+        self._positions = None
+        self._mode = "w"
+        self._last_topology = None
+        self._standard_names = True
+
+        self._header_written = False
+        self._footer_written = False
+        self._file = io.StringIO()
+
+        self._open = True
+
+    @property
+    def sio(self) -> io.StringIO:
+        return self._file
 
 
 def topology_to_mol(topology, coords, remove_hyd=True):
@@ -16,7 +42,7 @@ def topology_to_mol(topology, coords, remove_hyd=True):
                Topology of the ligand.
 
            coords: np.ndarray
-               Array of shape (n_atoms, 3).
+               Array of shape (n_atoms, 3) in nanometers.
 
            remove_hyd : bool
                Whether to remove the hydrogens from the molecule.
@@ -26,18 +52,15 @@ def topology_to_mol(topology, coords, remove_hyd=True):
            mol: rdkit.Chem.Mol
 
    """
-    traj = mdt.Trajectory(
-        xyz=coords,
-        topology=topology.top
-    )
-    # TODO: create molecule without using files
-    pdb_file = tempfile.NamedTemporaryFile()
-    traj.save_pdb(pdb_file.name)
-    pdb_file.seek(0)
+    with PDBStringIO() as pdb:
+        pdb.write(
+            in_units_of(coords, mdt.Trajectory._distance_unit, pdb.distance_unit),
+            topology.top,
+            modelIndex=0,
+            bfactors=None
+        )
 
-    mol = Chem.MolFromPDBFile(pdb_file.name, removeHs=remove_hyd)
-    pdb_file.close()
-
+        mol = Chem.MolFromPDBBlock(pdb.sio.getvalue(), removeHs=remove_hyd)
     assert mol is not None, "Failed to create molecule"
     return mol
 

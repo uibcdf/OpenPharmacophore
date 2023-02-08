@@ -119,7 +119,7 @@ class ComplexBindingSite(AbstractBindingSite):
         """
         b_site = self._get_binding_site(frame)
         self._bsite_mol = topology_to_mol(
-            b_site.topology, b_site.coords, remove_hyd=True)
+            b_site.topology, puw.get_value(b_site.coords[0], "nanometers"), remove_hyd=False)
 
         indices = cf.get_indices(self._bsite_mol, feat_def=cf.SMARTS_PROTEIN, types=types)
         # Donors and aromatics need to be processed differently because they require extra data

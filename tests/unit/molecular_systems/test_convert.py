@@ -137,6 +137,6 @@ def dipeptide_coords():
 
 def test_topology_to_mol(dipeptide_topology, dipeptide_coords):
     mol = topology_to_mol(
-        dipeptide_topology, dipeptide_coords, remove_hyd=True
+        dipeptide_topology, dipeptide_coords[0], remove_hyd=True
     )
     assert mol.GetNumAtoms() == 19
