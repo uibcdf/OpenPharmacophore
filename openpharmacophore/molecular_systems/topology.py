@@ -237,7 +237,7 @@ class Topology:
         return list(ligands)
 
     def get_residue_indices(self, res_name, chain):
-        """ Get the indices of hte residue with given name and chain
+        """ Get the indices of the atoms of the residue with given name and chain
 
             Parameters
             ----------
@@ -250,6 +250,7 @@ class Topology:
             Returns
             -------
             indices : list[int]
+                List of atm indices
 
         """
         chain_index = CHAIN_NAMES.index(chain)
@@ -326,7 +327,7 @@ class Topology:
             Topology
 
         """
-        return self.subset(self.get_residues_atoms(residues))
+        return self.subset(self.residues_atoms(residues))
 
     def non_hyd_indices(self):
         """ Returns the indices of the atoms that are not hydrogen.
@@ -343,8 +344,8 @@ class Topology:
         """ Convert to openmm topology. """
         return self.top.to_openmm()
 
-    def get_bs_residues(self, atoms):
-        """ Get the indices of the residues in the binding site.
+    def atoms_residue_index(self, atoms):
+        """ Get the indices of the residues that the given atoms belong to.
 
             Parameters
             ----------
@@ -360,17 +361,14 @@ class Topology:
                 Index of the ligand. None if there is no ligand
         """
         residues = set()
-        ligand = None
         for at_ind in atoms:
             atom = self.top.atom(at_ind)
             if atom.residue.is_protein:
                 residues.add(atom.residue.index)
-            elif self._is_ligand_atom(atom):
-                ligand = atom.residue.index
 
-        return sorted(residues), ligand
+        return sorted(residues)
 
-    def get_residues_atoms(self, residues):
+    def residues_atoms(self, residues):
         """ Get the indices of the atoms which comprise the given residues.
 
             Parameters

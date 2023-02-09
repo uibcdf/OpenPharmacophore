@@ -1,5 +1,5 @@
 from openpharmacophore.molecular_systems import Topology
-from openpharmacophore.molecular_systems.convert import topology_to_mol, ligand_to_topology
+from openpharmacophore.molecular_systems.convert import topology_to_mol, mol_to_topology
 from rdkit.Chem import AllChem as Chem
 import pytest
 import numpy as np
@@ -35,10 +35,10 @@ def assert_mol_and_topology_equal(mol, topology):
 def test_mol_with_no_residue_info_raises_error():
     mol = Chem.MolFromSmiles("CC(C(C(=O)O)N)O")
     with pytest.raises(ValueError):
-        ligand_to_topology(mol)
+        mol_to_topology(mol)
 
 
-def test_ligand_to_topology():
+def test_mol_to_topology():
     estradiol = Chem.MolFromPDBBlock("""
 MODEL        0
 ATOM   5944  C1  EST A 600     104.106  17.203  24.775  1.00  0.00           C  
@@ -86,7 +86,7 @@ CONECT   20   14
 END
 """)
     assert estradiol.GetNumAtoms() == 20
-    est_topology = ligand_to_topology(estradiol)
+    est_topology = mol_to_topology(estradiol)
 
     assert_mol_and_topology_equal(estradiol, est_topology)
     assert est_topology.get_residue(0).name == "EST"

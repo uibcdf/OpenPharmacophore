@@ -1,10 +1,13 @@
+import numpy as np
+import pyunitwizard as puw
+from rdkit import Chem
+
+from typing import List
+
 from openpharmacophore.molecular_systems.topology import Topology
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 from openpharmacophore.utils.maths import delete
-from openmm.app import Modeller
-import pyunitwizard as puw
-import numpy as np
-from typing import List
+from openpharmacophore.molecular_systems import convert
 
 
 class Protein:
@@ -94,15 +97,19 @@ class Protein:
 
     def add_hydrogens(self):
         """ Add hydrogens to the protein.
+
+            Assumes that the protein has a single frame.
         """
-        modeller = Modeller(
-            topology=self._topology.to_openmm(),
-            positions=puw.convert(self._coords[0],
-                                  to_unit="nanometers",
-                                  to_form="openmm.unit")
-        )
-        modeller.addHydrogens()
-        self._topology, self._coords = modeller_to_topology(modeller)
+        mol = convert.topology_to_mol(self.topology, puw.get_value(self.coords[0], "nanometers"))
+        mol = Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
+        # Note: Hs added with rdkit residue number does not correspond to the original residue number
+
+        self._topology = convert.mol_to_topology(mol)
+
+        coords = puw.quantity(mol.GetConformer(0).GetPositions(), "angstroms")
+        self._coords = np.expand_dims(coords, axis=0)
+
+        self._validate_coords(self.topology, self._coords)
 
     def atoms_at_distance(self, frame, centroid, max_dist, min_dist=0):
         """ Get the indices of the atoms that are at
@@ -138,6 +145,7 @@ class Protein:
 
             Parameters
             ----------
+            atoms : list[int]
             atoms : list[int]
                 Indices of the atoms in the sliced protein.
 

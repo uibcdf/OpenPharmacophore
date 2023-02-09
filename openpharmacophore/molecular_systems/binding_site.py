@@ -84,7 +84,7 @@ class ComplexBindingSite(AbstractBindingSite):
                 Indices of the residues that encompass the binding site
         """
         atoms = self.get_atoms(frame)
-        return self._protein.topology.get_bs_residues(atoms)
+        return self._protein.topology.atoms_residue_index(atoms)
 
     def _get_binding_site(self, frame):
         """ Create a Protein object representing the binding site
@@ -98,8 +98,8 @@ class ComplexBindingSite(AbstractBindingSite):
             openPharmacophore.Protein
                 The binding site
         """
-        aminoacids, _ = self.get_residues(frame)
-        atoms = self._protein.topology.get_residues_atoms(aminoacids)
+        residues = self.get_residues(frame)
+        atoms = self._protein.topology.residues_atoms(residues)
         return self._protein.slice(atoms, frame)
 
     def get_chem_feats(self, frame, types=None):

@@ -65,7 +65,7 @@ def topology_to_mol(topology, coords, remove_hyd=True):
     return mol
 
 
-def ligand_to_topology(mol):
+def mol_to_topology(mol):
     """ Convert an rdkit molecule to a topology.
 
         Parameters
