@@ -6,7 +6,7 @@ import pyunitwizard as puw
 
 import io
 
-from openpharmacophore.molecular_systems import Topology
+from openpharmacophore.molecular_systems.topology import Topology, CHAIN_NAMES
 from openpharmacophore.constants import QuantityLike
 
 
@@ -65,6 +65,86 @@ def topology_to_mol(topology, coords, remove_hyd=True):
     return mol
 
 
+def _get_number_of_chains(mol):
+    """ Count the number of chains in a rdkit molecule.
+
+        Parameters
+        ----------
+        mol : rdkit.Chem.Mol
+
+        Returns
+        -------
+        int
+    """
+    # Assumes that the chains are in order
+    n_atoms = mol.GetNumAtoms()
+    return CHAIN_NAMES.index(
+        mol.GetAtomWithIdx(n_atoms - 1).GetPDBResidueInfo().GetChainId()
+    ) + 1
+
+
+def _add_residues(topology, mol, residue_map):
+    """ Add residues to the topology.
+
+        Parameters
+        ----------
+        topology : Topology
+
+        mol : rdkit.Chem.Mol
+
+        residue_map : dict[int, int]
+
+    """
+    res_ind = 0
+
+    for atom in mol.GetAtoms():
+        info = atom.GetPDBResidueInfo()
+        res_num = info.GetResidueNumber()
+
+        if res_num not in residue_map:
+            topology.add_residue(info.GetResidueName(),
+                                 CHAIN_NAMES.index(info.GetChainId()))
+            residue_map[res_num] = res_ind
+            res_ind += 1
+
+
+def _add_atoms(topology, mol, residue_map):
+    """ Add atoms to the topology.
+
+        Parameters
+        ----------
+        topology : Topology
+
+        mol : rdkit.Chem.Mol
+
+        residue_map : dict[int, int]
+
+    """
+    for atom in mol.GetAtoms():
+        info = atom.GetPDBResidueInfo()
+        topology.add_atom(
+            name=info.GetName(),
+            symbol=atom.GetSymbol(),
+            residue=residue_map[info.GetResidueNumber()]
+        )
+
+
+def _add_bonds(topology, mol):
+    """ Add bonds to the topology.
+
+        Parameters
+        ----------
+        topology : Topology
+
+        mol : rdkit.Chem.Mol
+
+    """
+    for bond in mol.GetBonds():
+        at_1 = topology.get_atom(bond.GetBeginAtomIdx())
+        at_2 = topology.get_atom(bond.GetEndAtomIdx())
+        topology.add_bond(at_1, at_2)
+
+
 def mol_to_topology(mol):
     """ Convert an rdkit molecule to a topology.
 
@@ -85,37 +165,15 @@ def mol_to_topology(mol):
     if mol.GetNumAtoms() == 0:
         return topology
 
-    # Add first chain and residue
-    atom = mol.GetAtomWithIdx(0)
-    info = atom.GetPDBResidueInfo()
-    if info is None:
-        # Assume that if the first atom has residue info all of them have
-        raise ValueError("Molecule does not contain PDB residue info")
-    prev_chain = info.GetChainId()
-    prev_res = info.GetResidueName()
+    assert mol.GetAtomWithIdx(0).GetPDBResidueInfo() is not None, "Molecule does not contain PDB residue info"
 
-    chain = topology.add_chain()
-    residue = topology.add_residue(info.GetResidueName(), chain)
+    # residue numbers may not start from 1, so we must create a map
+    residue_map = {}
 
-    # Add the rest of chains and residues as well as atoms
-    for atom in mol.GetAtoms():
-        info = atom.GetPDBResidueInfo()
-        chain_id = info.GetChainId()
-        res = info.GetResidueName()
-        if chain_id != prev_chain:
-            chain = topology.add_chain()
-            prev_chain = chain_id
-        if prev_res != res:
-            residue = topology.add_residue(res, chain)
-            prev_res = res
-
-        topology.add_atom(info.GetName(), atom.GetSymbol(), residue)
-
-    for bond in mol.GetBonds():
-        at_1 = topology.get_atom(bond.GetBeginAtomIdx())
-        at_2 = topology.get_atom(bond.GetEndAtomIdx())
-        topology.add_bond(at_1, at_2)
-
+    topology.set_num_chains(_get_number_of_chains(mol))
+    _add_residues(topology, mol, residue_map)
+    _add_atoms(topology, mol, residue_map)
+    _add_bonds(topology, mol)
     return topology
 
 

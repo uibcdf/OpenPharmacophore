@@ -1,5 +1,5 @@
 from openpharmacophore.molecular_systems import Topology
-from openpharmacophore.molecular_systems.convert import topology_to_mol, mol_to_topology
+import openpharmacophore.molecular_systems.convert as convert
 from rdkit.Chem import AllChem as Chem
 import pytest
 import numpy as np
@@ -34,8 +34,8 @@ def assert_mol_and_topology_equal(mol, topology):
 
 def test_mol_with_no_residue_info_raises_error():
     mol = Chem.MolFromSmiles("CC(C(C(=O)O)N)O")
-    with pytest.raises(ValueError):
-        mol_to_topology(mol)
+    with pytest.raises(AssertionError):
+        convert.mol_to_topology(mol)
 
 
 def test_mol_to_topology():
@@ -86,10 +86,59 @@ CONECT   20   14
 END
 """)
     assert estradiol.GetNumAtoms() == 20
-    est_topology = mol_to_topology(estradiol)
+    est_topology = convert.mol_to_topology(estradiol)
 
     assert_mol_and_topology_equal(estradiol, est_topology)
     assert est_topology.get_residue(0).name == "EST"
+
+
+@pytest.fixture
+def molecule_two_residues():
+    mol = Chem.MolFromPDBBlock(
+        """MODEL    0
+ATOM      1  N   ALA A 145      46.411  13.580  27.508  1.00  0.00           N  
+ATOM      2  CA  ALA A 145      46.204  13.395  26.090  1.00  0.00           C  
+ATOM      3  C   ALA A 145      47.270  14.190  25.332  1.00  0.00           C  
+ATOM      4  O   ALA A 145      47.947  13.654  24.448  1.00  0.00           O  
+ATOM      5  CB  ALA A 145      44.817  13.873  25.699  1.00  0.00           C  
+ATOM      6  N   ALA A 149      50.424  13.298  22.736  1.00  0.00           N  
+ATOM      7  CA  ALA A 149      50.417  13.697  21.333  1.00  0.00           C  
+ATOM      8  C   ALA A 149      51.805  14.263  21.035  1.00  0.00           C  
+ATOM      9  O   ALA A 149      52.408  13.939  20.017  1.00  0.00           O  
+ATOM     10  CB  ALA A 149      49.360  14.751  21.095  1.00  0.00           C  
+ATOM     76  H1  ALA A 145      45.645  13.926  28.103  1.00  0.00           H  
+ATOM     77  H2  ALA A 145      46.286  12.328  25.836  1.00  0.00           H  
+ATOM     78  H3  ALA A 145      44.230  14.075  26.607  1.00  0.00           H  
+ATOM     79  H4  ALA A 145      44.901  14.794  25.104  1.00  0.00           H  
+ATOM     80  H5  ALA A 145      44.316  13.096  25.104  1.00  0.00           H  
+ATOM     81  H1  ALA A 149      49.766  13.741  23.394  1.00  0.00           H  
+ATOM     82  H2  ALA A 149      50.187  12.844  20.678  1.00  0.00           H  
+ATOM     83  H3  ALA A 149      48.988  15.122  22.061  1.00  0.00           H  
+ATOM     84  H4  ALA A 149      49.796  15.585  20.525  1.00  0.00           H  
+ATOM     85  H5  ALA A 149      48.527  14.313  20.525  1.00  0.00           H  
+END
+""", removeHs=False)
+    assert mol.GetNumAtoms() == 20
+    return mol
+
+
+def test_get_number_of_chains(molecule_two_residues):
+    assert convert._get_number_of_chains(molecule_two_residues) == 1
+
+
+def test_add_residues_when_converting_mol_to_topology(molecule_two_residues):
+    topology = Topology()
+    topology.set_num_chains(1)
+    convert._add_residues(topology, molecule_two_residues, dict())
+
+    assert topology.n_residues == 2
+
+
+def test_mol_to_topology_does_not_create_additional_residues(molecule_two_residues):
+    topology = convert.mol_to_topology(molecule_two_residues)
+
+    assert_mol_and_topology_equal(molecule_two_residues, topology)
+    assert topology.n_residues == 2
 
 
 @pytest.fixture
@@ -113,30 +162,30 @@ def dipeptide_topology():
 @pytest.fixture
 def dipeptide_coords():
     return np.array([[
-        [4.4235,  8.0308,  1.8419],
-        [4.3549,  7.9243,  1.7706],
-        [4.4528,  7.8252,  1.7077],
-        [4.5699,  7.8559,  1.6853],
-        [4.2608,  7.9792,  1.6611],
-        [4.3375,  8.0468,  1.5608],
-        [4.1586,  8.0762,  1.7208],
-        [4.4030,  7.7052,  1.6814],
-        [4.4799,  7.6021,  1.6156],
-        [4.4189,  7.5782,  1.4791],
-        [4.3007,  7.6033,  1.4583],
-        [4.4721,  7.4725,  1.6954],
-        [4.5253,  7.4836,  1.8355],
-        [4.6598,  7.4629,  1.8621],
-        [4.4412,  7.5147,  1.9416],
-        [4.7098,  7.4729,  1.9906],
-        [4.4895,  7.5245,  2.0707],
-        [4.6246,  7.5036,  2.0946],
-        [4.6748,  7.5126,  2.2224],
+        [4.4235, 8.0308, 1.8419],
+        [4.3549, 7.9243, 1.7706],
+        [4.4528, 7.8252, 1.7077],
+        [4.5699, 7.8559, 1.6853],
+        [4.2608, 7.9792, 1.6611],
+        [4.3375, 8.0468, 1.5608],
+        [4.1586, 8.0762, 1.7208],
+        [4.4030, 7.7052, 1.6814],
+        [4.4799, 7.6021, 1.6156],
+        [4.4189, 7.5782, 1.4791],
+        [4.3007, 7.6033, 1.4583],
+        [4.4721, 7.4725, 1.6954],
+        [4.5253, 7.4836, 1.8355],
+        [4.6598, 7.4629, 1.8621],
+        [4.4412, 7.5147, 1.9416],
+        [4.7098, 7.4729, 1.9906],
+        [4.4895, 7.5245, 2.0707],
+        [4.6246, 7.5036, 2.0946],
+        [4.6748, 7.5126, 2.2224],
     ]])
 
 
 def test_topology_to_mol(dipeptide_topology, dipeptide_coords):
-    mol = topology_to_mol(
+    mol = convert.topology_to_mol(
         dipeptide_topology, dipeptide_coords[0], remove_hyd=True
     )
     assert mol.GetNumAtoms() == 19
