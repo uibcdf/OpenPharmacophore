@@ -61,8 +61,6 @@ class Viewer:
             component : Any
         """
         if isinstance(component, Protein):
-            # TODO: add Protein component without converting it to
-            #   mdtraj.Trajectory
             text_struct = nv.TextStructure(write_pdb_block(component.topology, component.coords), ext="pdb")
             self._widget.add_component(text_struct)
             self._has_protein = True
@@ -155,6 +153,7 @@ class Viewer:
         end_arrow = (centroid + length * direction * 2.0).tolist()
 
         self._widget.shape.add_arrow(centroid, end_arrow, color, arrow_radius)
+        # TODO: opacity is not working
         self._widget.update_representation(component=self.n_components+1, repr_index=0, opacity=0.9)
 
     def show(self):
