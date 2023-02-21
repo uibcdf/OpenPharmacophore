@@ -15,7 +15,6 @@ class PDBStringIO(PDBTrajectoryFile):
     """
     def __init__(self):
         self._open = False
-        self._file = None
         self._topology = None
         self._positions = None
         self._mode = "w"
@@ -54,7 +53,7 @@ def topology_to_mol(topology, coords, remove_hyd=True):
    """
     with PDBStringIO() as pdb:
         pdb.write(
-            in_units_of(coords, mdt.Trajectory._distance_unit, pdb.distance_unit),
+            in_units_of(coords, "nanometers", pdb.distance_unit),
             topology.top,
             modelIndex=0,
             bfactors=None
@@ -123,7 +122,7 @@ def _add_atoms(topology, mol, residue_map):
     for atom in mol.GetAtoms():
         info = atom.GetPDBResidueInfo()
         topology.add_atom(
-            name=info.GetName(),
+            name=info.GetName().strip(),
             symbol=atom.GetSymbol(),
             residue=residue_map[info.GetResidueNumber()]
         )
@@ -154,7 +153,11 @@ def mol_to_topology(mol):
 
         Returns
         -------
-        Topology
+        topology : Topology
+            The topology of the molecule
+
+        atom_map : np.ndarray
+            A map of the atom indices
 
         Raises
         ------

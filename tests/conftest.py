@@ -1,3 +1,4 @@
+from rdkit import Chem
 import pytest
 import pyunitwizard as puw
 import numpy as np
@@ -330,6 +331,41 @@ def protein_4_residues(topology_2_chains):
         [4., 4., 4.],
     ]]), "nanometers")
     return Protein(topology_2_chains, coords)
+
+
+@pytest.fixture
+def dialanine():
+    # Returns two alanine residues in a single molecule
+    mol = Chem.MolFromPDBBlock(
+        """MODEL    0
+ATOM      1  N   ALA A   1      46.411  13.580  27.508  1.00  0.00           N  
+ATOM      2  CA  ALA A   1      46.204  13.395  26.090  1.00  0.00           C  
+ATOM      3  C   ALA A   1      47.270  14.190  25.332  1.00  0.00           C  
+ATOM      4  O   ALA A   1      47.947  13.654  24.448  1.00  0.00           O  
+ATOM      5  CB  ALA A   1      44.817  13.873  25.699  1.00  0.00           C  
+ATOM      6  N   ALA A   2      50.424  13.298  22.736  1.00  0.00           N  
+ATOM      7  CA  ALA A   2      50.417  13.697  21.333  1.00  0.00           C  
+ATOM      8  C   ALA A   2      51.805  14.263  21.035  1.00  0.00           C  
+ATOM      9  O   ALA A   2      52.408  13.939  20.017  1.00  0.00           O  
+ATOM     10  CB  ALA A   2      49.360  14.751  21.095  1.00  0.00           C  
+ATOM     11  H1  ALA A   1      45.750  12.989  28.032  1.00  0.00           H  
+ATOM     12  H2  ALA A   1      47.376  13.314  27.752  1.00  0.00           H  
+ATOM     13  H3  ALA A   1      46.286  12.328  25.836  1.00  0.00           H  
+ATOM     14  H4  ALA A   1      47.435  15.250  25.577  1.00  0.00           H  
+ATOM     15  H5  ALA A   1      44.230  14.075  26.607  1.00  0.00           H  
+ATOM     16  H6  ALA A   1      44.901  14.794  25.104  1.00  0.00           H  
+ATOM     17  H7  ALA A   1      44.316  13.096  25.104  1.00  0.00           H  
+ATOM     18  H1  ALA A   2      50.409  14.138  23.332  1.00  0.00           H  
+ATOM     19  H2  ALA A   2      49.593  12.722  22.933  1.00  0.00           H  
+ATOM     20  H3  ALA A   2      50.187  12.844  20.678  1.00  0.00           H  
+ATOM     21  H4  ALA A   2      52.268  14.968  21.741  1.00  0.00           H  
+ATOM     22  H5  ALA A   2      48.988  15.122  22.061  1.00  0.00           H  
+ATOM     23  H6  ALA A   2      49.796  15.585  20.525  1.00  0.00           H  
+ATOM     24  H7  ALA A   2      48.527  14.313  20.525  1.00  0.00           H  
+END
+""", removeHs=False)
+    assert mol.GetNumAtoms() == 24
+    return mol
 
 
 # Data for integration tests
