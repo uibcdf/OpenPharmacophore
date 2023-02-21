@@ -1,12 +1,14 @@
 import nglview as nv
 import pyunitwizard as puw
 from openpharmacophore import Protein, ComplexBindingSite, Ligand, Pharmacophore
-from openpharmacophore.molecular_systems.convert import create_traj
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
+from openpharmacophore.io.pdb import write_pdb_block
 from openpharmacophore import constants
 
 
 class Viewer:
+    """ Class to visualize molecular systems and pharmacophores.
+    """
 
     def __init__(self):
         self._widget = nv.NGLWidget()
@@ -61,9 +63,8 @@ class Viewer:
         if isinstance(component, Protein):
             # TODO: add Protein component without converting it to
             #   mdtraj.Trajectory
-            self._widget.add_component(create_traj(
-                component.coords, component.topology
-            ))
+            text_struct = nv.TextStructure(write_pdb_block(component.topology, component.coords), ext="pdb")
+            self._widget.add_component(text_struct)
             self._has_protein = True
         elif isinstance(component, ComplexBindingSite):
             self._widget.add_component(component.to_rdkit())

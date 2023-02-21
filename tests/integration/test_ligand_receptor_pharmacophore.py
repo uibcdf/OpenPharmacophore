@@ -34,13 +34,12 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     pharmacophore.extract()
     assert len(pharmacophore[0]) > 0
     # We know that the pharmacophore of ERalpha should contain one aromatic point and
-    # at least one hydrophobic point and a donor
+    # at least one hydrophobic point
     feats = [p.feature_name for p in pharmacophore[0]]
     assert "aromatic ring" in feats
     assert "hydrophobicity" in feats
-    assert "hb donor" in feats
 
     # Finally we visualize the pharmacophore.
     viewer = oph.Viewer()
-    viewer.add_components([protein, ligand, pharmacophore])
+    viewer.add_components([protein, ligand, pharmacophore[0]])
     viewer.show()

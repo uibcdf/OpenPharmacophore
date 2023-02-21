@@ -184,27 +184,3 @@ class Protein:
         if coords.shape[1] != topology.n_atoms:
             raise ValueError(f"Incorrect number of atoms {coords.shape[1]}. "
                              f"Topology has {topology.n_atoms} atoms")
-
-
-def modeller_to_topology(modeller):
-    """ Convert an openmm.Modeller to a mdtraj.Trajectory.
-
-        Parameters
-        ----------
-        modeller : openmm.Modeller
-
-        Returns
-        -------
-        Topology
-            The topology
-
-        coords : puw.Quantity
-            Coordinates of the protein.
-    """
-    positions = modeller.getPositions()
-    coords = puw.convert(positions, to_unit="nanometer", to_form="pint")
-    coords = np.expand_dims(coords, axis=0)
-    assert coords.shape == (1, len(positions), 3), f"Incorrect shape {coords.shape}"
-
-    topology = Topology.from_openmm(modeller.getTopology())
-    return topology, coords

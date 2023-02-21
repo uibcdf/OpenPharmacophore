@@ -178,23 +178,3 @@ def mol_to_topology(mol):
     _add_atoms(topology, mol, residue_map)
     _add_bonds(topology, mol)
     return topology
-
-
-def create_traj(coords, topology):
-    """ Create a mdtraj Trajectory from an array of coordinates and
-        a topology.
-
-        Parameters
-        ----------
-        coords : QuantityLike
-
-        topology : Topology
-
-        Returns
-        -------
-        mdtraj.Trajectory
-    """
-    return mdt.Trajectory(
-        xyz=puw.get_value(coords, "nanometers"),
-        topology=topology.top
-    )
