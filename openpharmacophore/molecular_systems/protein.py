@@ -66,7 +66,7 @@ class Protein:
                 i.e. "EST:B".
 
             remove_hyd : bool
-                Whether to remove teh hydrogens from the ligand.
+                Whether to remove hydrogens from the ligand.
 
             Returns
             -------

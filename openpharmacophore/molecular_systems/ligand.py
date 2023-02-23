@@ -24,7 +24,7 @@ class LigandWithHsError(ValueError):
 class Ligand:
     """ Represents a ligand. Wrapper for rdkit Mol object
     """
-    def __init__(self, mol, conformer_coords=None):
+    def __init__(self, mol):
         self._mol = mol  # type: Chem.Mol
 
         self._feat_ind = None
@@ -328,15 +328,15 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
 
     """
     assert topology.n_residues == 1, f"Topology has {topology.n_residues}"
-    mol = topology_to_mol(topology,
-                          puw.get_value(coords, "nanometers")[0],
-                          remove_hyd)
-    if remove_hyd:
-        non_hyd = topology.non_hyd_indices()
-        coords = coords[:, non_hyd, :]
-
-    ligand = Ligand(mol, coords)
+    assert len(coords.shape) == 3, f"Coordinates array has incorrect shape {coords.shape}"
+    mol = topology_to_mol(
+        topology, puw.get_value(coords, "nanometers")[0], remove_hyd)
+    ligand = Ligand(mol)
     ligand.lig_id = topology.get_residue(0).name
+
+    if coords.shape[0] > 1:
+        ligand.add_conformers(coords[1:, :, :])
+
     return ligand
 
 

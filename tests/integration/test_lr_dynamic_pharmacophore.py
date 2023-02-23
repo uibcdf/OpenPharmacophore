@@ -32,7 +32,8 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     assert len(pharmacophore[1]) > 0
     assert len(pharmacophore[2]) > 0
 
-    # Finally we visualize the pharmacophore.
-    viewer = oph.Viewer()
-    viewer.add_components([protein, ligand, pharmacophore])
-    viewer.show(frame=1)
+    # Finally we visualize the pharmacophores.
+    for ii in range(len(pharmacophore)):
+        viewer = oph.Viewer()
+        viewer.add_components([protein, ligand, pharmacophore[ii]])
+        viewer.show()

@@ -1,4 +1,5 @@
-from openpharmacophore.molecular_systems.ligand import Ligand, LigandWithHsError, smiles_from_pdb_id
+from openpharmacophore.molecular_systems.ligand import Ligand, LigandWithHsError, \
+    smiles_from_pdb_id, ligand_from_topology
 import numpy as np
 import pyunitwizard as puw
 import pytest
@@ -10,6 +11,19 @@ def test_ligand_from_topology(estradiol):
     assert estradiol.n_conformers == 1
     assert estradiol.n_bonds == 23
     assert estradiol.lig_id == "EST"
+
+
+def test_convert_ligand_with_multiple_conformers(estradiol_topology, estradiol_coords):
+    constant = puw.quantity(0.4, "angstroms")
+    coords = puw.quantity(np.array([estradiol_coords, estradiol_coords + constant]), "angstroms")
+    coords = np.squeeze(coords)
+
+    ligand = ligand_from_topology(estradiol_topology, coords)
+
+    assert ligand.n_atoms == 20
+    assert ligand.n_conformers == 2
+
+    assert ligand.get_conformer(1).shape == (20, 3)
 
 
 @pytest.fixture

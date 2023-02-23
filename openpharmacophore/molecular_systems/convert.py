@@ -1,8 +1,6 @@
-import mdtraj as mdt
 from mdtraj.utils.unit import in_units_of
 from mdtraj.formats.pdb import PDBTrajectoryFile
 from rdkit import Chem
-import pyunitwizard as puw
 
 import io
 
