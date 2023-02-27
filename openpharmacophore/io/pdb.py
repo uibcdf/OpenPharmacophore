@@ -126,7 +126,7 @@ class PDBFileWriter(PDBTrajectoryFile):
         return self._file
 
 
-def write_pdb_block(topology, coords):
+def write_pdb_block(topology, coords, conformer=0):
     """ Write a pdb block for a molecule.
 
         Parameters
@@ -136,9 +136,12 @@ def write_pdb_block(topology, coords):
 
         coords : QuantityLike
             The positions of the atoms.
+
+        conformer : int, optional
+            Index of the conformer
     """
     with PDBFileWriter(file=io.StringIO()) as pdb:
-        pdb.write(puw.get_value(coords[0], "angstroms"),
+        pdb.write(puw.get_value(coords[conformer], "angstroms"),
                   topology.top,
                   modelIndex=0,
                   bfactors=None
