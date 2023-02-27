@@ -25,6 +25,10 @@ def test_binding_site_complex_structure_has_hydrogens(pdb_3bbh_with_hydrogen):
     assert ligand.has_aromatic_bonds()
     assert ligand.get_conformer(0).shape == (50, 3)
 
+    # Now we can remove the ligand from the protein
+    protein.remove_ligand(lig_ids[0])
+    assert not protein.has_ligands
+
     # We create a binding site to obtain the receptor chemical features
     bsite = oph.ComplexBindingSite(protein, ligand)
 

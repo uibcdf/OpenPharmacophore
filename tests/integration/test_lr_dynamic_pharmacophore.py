@@ -20,6 +20,10 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     )
     assert ligand.has_aromatic_bonds()
 
+    # Now we can remove the ligand from the protein
+    protein.remove_ligand(lig_ids[0])
+    assert not protein.has_ligands
+
     # We need to extract the binding site from the protein, so we can get
     # pharmacophoric features
     bsite = oph.ComplexBindingSite(protein, ligand)
@@ -33,7 +37,7 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     assert len(pharmacophore[2]) > 0
 
     # Finally we visualize the pharmacophores.
-    for ii in range(len(pharmacophore)):
-        viewer = oph.Viewer()
-        viewer.add_components([protein, ligand, pharmacophore[ii]])
-        viewer.show()
+    viewer = oph.Viewer()
+    viewer.add_components([protein, ligand, pharmacophore])
+    viewer.show(frame=0)
+    viewer.show(frame=1)

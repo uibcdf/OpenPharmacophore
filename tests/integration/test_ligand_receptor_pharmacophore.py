@@ -21,6 +21,10 @@ def test_ligand_receptor_pharmacophore_from_pdb(pdb_er_alpha):
     assert ligand.has_aromatic_bonds()
     assert ligand.n_atoms == 44  # This ligand should contain 50 atoms
 
+    # Now we can remove the ligand from the protein
+    protein.remove_ligand(lig_ids[0])
+    assert not protein.has_ligands
+
     # We add hydrogens to the protein
     protein.add_hydrogens()
     assert protein.has_hydrogens
