@@ -1,7 +1,10 @@
+import numpy as np
+import pyunitwizard as puw
+
 from openpharmacophore import Pharmacophore, PharmacophoricPoint, Viewer
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, ChemFeat
-import pyunitwizard as puw
-import numpy as np
+from openpharmacophore.molecular_systems.ligand import ligand_from_topology
+from openpharmacophore.molecular_systems import Protein
 
 
 class FakeShape:
@@ -26,10 +29,18 @@ class FakeWidget:
         self._ngl_component_names.append(component)
 
 
+class FakeViewer(Viewer):
+
+    def __init__(self):
+        super().__init__()
+        self._widget = FakeWidget()
+
+    def _restore_widget(self):
+        self._widget = FakeWidget()
+
+
 def get_viewer():
-    viewer = Viewer()
-    viewer._widget = FakeWidget()
-    return viewer
+    return FakeViewer()
 
 
 def test_add_components_to_viewer(protein_4_residues, estradiol):
@@ -37,6 +48,7 @@ def test_add_components_to_viewer(protein_4_residues, estradiol):
     viewer.add_components(
         [protein_4_residues, estradiol]
     )
+    viewer.show()  # load the components
     assert viewer.n_components == 2
     assert viewer.has_protein
     assert viewer.has_ligand
@@ -49,6 +61,7 @@ def test_add_chem_feats_to_viewer():
          ChemFeat(type="hb acceptor", coords=puw.quantity(np.array([2.5, 2.5, 2.5]), "nanometers"))]
     )
     viewer.add_components([chem_feats])
+    viewer.show()  # load the components
 
     assert viewer.n_components == 2
     assert viewer.has_chem_feats
@@ -64,6 +77,27 @@ def test_add_pharmacophore_to_viewer():
         PharmacophoricPoint("aromatic ring", puw.quantity(np.array([1.] * 3), "angstroms"), radius)
     ])
     viewer.add_components([pharmacophore])
+    viewer.show()  # load the components
 
     assert viewer.n_components == 3  # Each sphere and each arrow are a component
     assert viewer.has_pharmacophore
+
+
+def test_viewer_components_have_multiple_conformers(
+        topology_2_chains, estradiol_topology, estradiol_coords
+):
+    protein_coords = puw.quantity(np.ones((2, topology_2_chains.n_atoms, 3)), "angstroms")
+    protein = Protein(topology_2_chains, protein_coords)
+
+    constant = puw.quantity(0.4, "angstroms")
+    coords = puw.quantity(np.array([estradiol_coords, estradiol_coords + constant]), "angstroms")
+    coords = np.squeeze(coords)
+    ligand = ligand_from_topology(estradiol_topology, coords)
+
+    viewer = get_viewer()
+    viewer.add_components([protein, ligand])
+    viewer.show(frame=0)
+    assert viewer.n_components == 2
+
+    viewer.show(frame=1)
+    assert viewer.n_components == 2

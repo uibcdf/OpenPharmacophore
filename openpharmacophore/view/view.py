@@ -3,6 +3,7 @@ import pyunitwizard as puw
 from openpharmacophore import Protein, ComplexBindingSite, Ligand, Pharmacophore
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 from openpharmacophore.io.pdb import write_pdb_block
+from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
 from openpharmacophore import constants
 
 
@@ -12,6 +13,8 @@ class Viewer:
 
     def __init__(self):
         self._widget = nv.NGLWidget()
+        self._components = []
+
         self._has_protein = False
         self._has_ligand = False
         self._has_chem_feats = False
@@ -50,30 +53,36 @@ class Viewer:
             components : list[Any]
         """
         for comp in components:
-            self.add_component(comp)
+            self._components.append(comp)
 
-    def add_component(self, component):
-        """ Add a single component to the viewer, such as a Protein, Ligand or
-            BindingSite.
+    def load_component(self, component, frame):
+        """ Load a component to the viewer, such as a Protein, Ligand or
+            BindingSite so, it can be visualized.
 
             Parameters
             ----------
             component : Any
+
+            frame : int, optional
         """
         if isinstance(component, Protein):
-            text_struct = nv.TextStructure(write_pdb_block(component.topology, component.coords), ext="pdb")
+            text_struct = nv.TextStructure(
+                write_pdb_block(component.topology, component.coords, conformer=0),
+                ext="pdb")
             self._widget.add_component(text_struct)
             self._has_protein = True
         elif isinstance(component, ComplexBindingSite):
-            self._widget.add_component(component.to_rdkit())
+            self._add_molecule(component.to_rdkit(), frame)
             self._has_protein = True
         elif isinstance(component, Ligand):
-            self._widget.add_component(component.to_rdkit())
+            self._add_molecule(component.to_rdkit(), frame)
             self._has_ligand = True
         elif isinstance(component, ChemFeatContainer):
             self.add_chem_feats(component)
         elif isinstance(component, Pharmacophore):
             self.add_pharmacophore(component)
+        elif isinstance(component, (LigandReceptorPharmacophore, LigandBasedPharmacophore)):
+            self.add_pharmacophore(component[frame])
         else:
             raise NotImplementedError
 
@@ -156,13 +165,40 @@ class Viewer:
         # TODO: opacity is not working
         self._widget.update_representation(component=self.n_components+1, repr_index=0, opacity=0.9)
 
-    def show(self):
+    def _add_molecule(self, mol, conformer):
+        """ Add an rdkit molecule to the viewer.
+
+            Parameters
+            ----------
+            mol : rdkit.Chem.Mol
+
+            conformer : int
+        """
+        self._widget.add_component(
+            nv.RdkitStructure(mol, conf_id=conformer)
+        )
+
+    def _restore_widget(self):
+        """ Restore the widget to have a clean view."""
+        if self.n_components > 0:
+            self._widget = nv.NGLWidget()
+
+    def show(self, frame=0):
         """ Shows the view.
+
+            Parameters
+            ----------
+            frame : int, optional
+                Frame or conformer number to show if there are any proteins,
+                ligands or pharmacophores with multiple frames.
 
             Returns
             -------
             nv.NGLWidget
         """
+        self._restore_widget()
+        for comp in self._components:
+            self.load_component(comp, frame)
         return self._widget
 
     def set_protein_style(self, style):
