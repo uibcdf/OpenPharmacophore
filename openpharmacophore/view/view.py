@@ -136,9 +136,6 @@ class Viewer:
                 The label of the sphere
         """
         self._widget.shape.add_sphere(centroid, color, radius, label)
-        self._widget.update_representation(
-            component=self.n_components+1, repr_index=0, opacity=0.9
-        )
 
     def _add_arrow(self, centroid, length, direction, color):
         """ Add an arrow to the view
@@ -163,7 +160,6 @@ class Viewer:
 
         self._widget.shape.add_arrow(centroid, end_arrow, color, arrow_radius)
         # TODO: opacity is not working
-        self._widget.update_representation(component=self.n_components+1, repr_index=0, opacity=0.9)
 
     def _add_molecule(self, mol, conformer):
         """ Add an rdkit molecule to the viewer.
@@ -199,7 +195,14 @@ class Viewer:
         self._restore_widget()
         for comp in self._components:
             self.load_component(comp, frame)
+        self._update_opacity()
         return self._widget
+
+    def _update_opacity(self):
+        """ Add opacity to chemical features and pharmacophoric points. """
+        for ii, comp in enumerate(self._widget._ngl_component_names):
+            if comp == "nglview.shape.Shape":
+                self._widget.update_representation(component=ii, repr_index=0, opacity=0.6)
 
     def set_protein_style(self, style):
         """ Set the style of the protein.
