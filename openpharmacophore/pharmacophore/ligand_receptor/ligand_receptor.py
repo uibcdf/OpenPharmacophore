@@ -179,8 +179,8 @@ class LigandReceptorPharmacophore:
                                 PharmacophoricPoint(
                                     "hb donor", don.coords, radius, direction=direction)
                             )
-                        # TODO: hb acceptor points in the opposite direction
                         else:
+                            direction *= -1
                             points.append(
                                 PharmacophoricPoint(
                                     "hb acceptor", acc.coords, radius, direction=direction)

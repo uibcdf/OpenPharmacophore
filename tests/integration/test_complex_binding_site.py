@@ -97,8 +97,4 @@ def test_binding_site_complex_structure_does_not_contain_hydrogen(pdb_1m7w):
     viewer.add_components([bsite, ligand])
     viewer.set_protein_style("ball+stick")
 
-    # TODO: adding chemical features makes the test too slow. We should just
-    #  have some sort of way of temporarily skipping slow parts.
-    # viewer.add_chem_feats(ligand_feats)
-    # viewer.add_chem_feats(receptor_feats)
     viewer.show()

@@ -159,7 +159,6 @@ class Viewer:
         end_arrow = (centroid + length * direction * 2.0).tolist()
 
         self._widget.shape.add_arrow(centroid, end_arrow, color, arrow_radius)
-        # TODO: opacity is not working
 
     def _add_molecule(self, mol, conformer):
         """ Add an rdkit molecule to the viewer.
