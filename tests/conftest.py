@@ -58,41 +58,6 @@ def ligands_sdf():
 
 
 @pytest.fixture
-def pdb_1ncr_path():
-    return str(pdb_path / "1ncr.pdb")
-
-
-@pytest.fixture
-def small_pdb_with_ligand():
-    return str(pdb_path / "test_with_lig.pdb")
-
-
-@pytest.fixture
-def small_pdb_with_no_ligand_1():
-    return str(pdb_path / "test_no_lig.pdb")
-
-
-@pytest.fixture
-def small_pdb_with_no_ligand_2():
-    return str(pdb_path / "test_no_lig_2.pdb")
-
-
-@pytest.fixture
-def estradiol_pdb():
-    return str(pdb_path / "estradiol.pdb")
-
-
-@pytest.fixture
-def small_trajectory_path():
-    return str(traj_path / "pentalanine_small.gro")
-
-
-@pytest.fixture
-def ligand_trajectory():
-    return str(traj_path / "ligand_traj.gro")
-
-
-@pytest.fixture
 def two_element_pharmacophore():
     """Returns a pharmacophore with an aromatic ring and a hb acceptor"""
     radius = puw.quantity(1.0, "angstroms")
