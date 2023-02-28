@@ -26,7 +26,7 @@ def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
 
     # We visualize the best scoring pharmacophore
     viewer = oph.Viewer(pharmacophore=pharmacophore, ligands=ligands)
-    view = viewer.show(pharma_index=0)
+    view = viewer.show()
     # The view should contain a component for the ligand + 3 the pharmacophoric
     # points
     assert len(view._ngl_component_names) == 4

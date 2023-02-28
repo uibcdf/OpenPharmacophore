@@ -3,6 +3,7 @@ from rdkit.Chem import AllChem as Chem
 from rdkit.Geometry.rdGeometry import Point3D
 import pyunitwizard as puw
 
+import abc
 from copy import deepcopy
 from pathlib import Path
 import pickle
@@ -12,6 +13,7 @@ from openpharmacophore.molecular_systems.convert import topology_to_mol
 from openpharmacophore.molecular_systems.chem_feats import get_indices, mol_chem_feats, \
     aromatic_chem_feats, donor_chem_feats
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer, SMARTS_LIGAND
+from openpharmacophore.utils.conformers import ConformerGenerator
 
 
 class LigandWithHsError(ValueError):
@@ -21,7 +23,28 @@ class LigandWithHsError(ValueError):
     pass
 
 
-class Ligand:
+class AbstractLigand(abc.ABC):
+
+    @property
+    @abc.abstractmethod
+    def has_hydrogens(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def n_conformers(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def add_hydrogens(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def generate_conformers(self, n_confs):
+        raise NotImplementedError
+
+
+class Ligand(AbstractLigand):
     """ Represents a ligand. Wrapper for rdkit Mol object
     """
     def __init__(self, mol):
@@ -50,7 +73,7 @@ class Ligand:
         return self._mol.GetNumBonds()
 
     @property
-    def has_hydrogens(self):
+    def has_hydrogens(self) -> bool:
         """ Returns true if the ligand has any hydrogen atoms
 
             Returns
@@ -60,7 +83,7 @@ class Ligand:
         return self._has_hyd
 
     @property
-    def has_conformers(self):
+    def has_conformers(self) -> bool:
         return self._mol.GetNumConformers() > 0
 
     @property
@@ -303,9 +326,72 @@ class Ligand:
         mol_copy.RemoveAllConformers()
         return mol_copy
 
+    def generate_conformers(self, n_confs):
+        """ Generate conformers for this ligand. Removes current
+            conformers if any
+        """
+        self._mol.RemoveAllConformers()
+        conf_gen = ConformerGenerator(n_confs)
+        return conf_gen(self._mol)
+
 
 class LigandSet:
-    pass
+    """ Class to store and prepare ligands.
+    """
+    def __init__(self):
+        self._ligands = []  # type: list[AbstractLigand]
+
+    def add(self, ligand):
+        """ Add a new ligand to the set
+
+            Parameters
+            ----------
+            ligand : AbstractLigand
+
+        """
+        if not isinstance(ligand, AbstractLigand):
+            raise TypeError("Expected Ligand type object")
+        self._ligands.append(ligand)
+
+    def add_hydrogens(self, indices="all"):
+        """ Add hydrogens to the ligands.
+
+            Parameters
+            ----------
+            indices : str or Iterable[int]
+                Indices of the ligands to which hydrogens will be added
+        """
+        if indices == "all":
+            indices = range(len(self))
+
+        for ind in indices:
+            self._ligands[ind].add_hydrogens()
+
+    def generate_conformers(self, indices, n_confs):
+        """ Generate conformers for the ligands.
+
+            Parameters
+            ----------
+            molecule : rdkit.Chem.Mol
+            n_confs : int
+
+            Returns
+            -------
+            rdkit.Chem.Mol
+                Molecule with conformers.
+
+        """
+        if indices == "all":
+            indices = range(len(self))
+
+        for ind in indices:
+            self._ligands[ind].generate_conformers(n_confs)
+
+    def __getitem__(self, item):
+        return self._ligands[item]
+
+    def __len__(self):
+        return len(self._ligands)
 
 
 def ligand_from_topology(topology, coords, remove_hyd=True):

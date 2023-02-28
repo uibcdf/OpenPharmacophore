@@ -2,7 +2,6 @@ import openpharmacophore as oph
 import pytest
 
 
-@pytest.mark.skip(reason="Ligand class not implemented yet")
 def test_ligand_preparation():
     # We want to prepare the ligands of Thrombin for pharmacophore extraction
 
@@ -19,11 +18,11 @@ def test_ligand_preparation():
 
     # We proceed to add hydrogens to the ligands
     ligands.add_hydrogens(indices="all")
-    assert all([lig.has_hydrogen() for lig in ligands])
+    assert all([lig.has_hydrogens for lig in ligands])
 
     # We generate conformers for each
     ligands.generate_conformers(indices="all", n_confs=1)
-    assert all([lig.n_confs == 1 for lig in ligands])
+    assert all([lig.n_conformers == 1 for lig in ligands])
 
     # We draw the ligands
     ligands.draw(n_per_row=4)
