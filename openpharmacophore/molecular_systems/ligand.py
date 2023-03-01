@@ -3,7 +3,6 @@ from rdkit.Chem import AllChem as Chem
 from rdkit.Geometry.rdGeometry import Point3D
 import pyunitwizard as puw
 
-import abc
 from copy import deepcopy
 from pathlib import Path
 import pickle
@@ -23,28 +22,7 @@ class LigandWithHsError(ValueError):
     pass
 
 
-class AbstractLigand(abc.ABC):
-
-    @property
-    @abc.abstractmethod
-    def has_hydrogens(self) -> bool:
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def n_conformers(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def add_hydrogens(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def generate_conformers(self, n_confs):
-        raise NotImplementedError
-
-
-class Ligand(AbstractLigand):
+class Ligand:
     """ Represents a ligand. Wrapper for rdkit Mol object
     """
     def __init__(self, mol):
@@ -52,9 +30,7 @@ class Ligand(AbstractLigand):
 
         self._feat_ind = None
         self._lig_id = None
-        self._has_hyd = any([
-                a.GetSymbol() == "H" for a in self._mol.GetAtoms()
-            ])
+        self._has_hyd = Ligand._mol_has_hyd(self._mol)
 
     @property
     def n_atoms(self) -> int:
@@ -332,66 +308,17 @@ class Ligand(AbstractLigand):
         """
         self._mol.RemoveAllConformers()
         conf_gen = ConformerGenerator(n_confs)
-        return conf_gen(self._mol)
+        self._mol = conf_gen(self._mol)
 
-
-class LigandSet:
-    """ Class to store and prepare ligands.
-    """
-    def __init__(self):
-        self._ligands = []  # type: list[AbstractLigand]
-
-    def add(self, ligand):
-        """ Add a new ligand to the set
-
-            Parameters
-            ----------
-            ligand : AbstractLigand
-
+    @staticmethod
+    def _mol_has_hyd(mol):
+        """ Returns true if the molecule contains hydrogens.
         """
-        if not isinstance(ligand, AbstractLigand):
-            raise TypeError("Expected Ligand type object")
-        self._ligands.append(ligand)
-
-    def add_hydrogens(self, indices="all"):
-        """ Add hydrogens to the ligands.
-
-            Parameters
-            ----------
-            indices : str or Iterable[int]
-                Indices of the ligands to which hydrogens will be added
-        """
-        if indices == "all":
-            indices = range(len(self))
-
-        for ind in indices:
-            self._ligands[ind].add_hydrogens()
-
-    def generate_conformers(self, indices, n_confs):
-        """ Generate conformers for the ligands.
-
-            Parameters
-            ----------
-            molecule : rdkit.Chem.Mol
-            n_confs : int
-
-            Returns
-            -------
-            rdkit.Chem.Mol
-                Molecule with conformers.
-
-        """
-        if indices == "all":
-            indices = range(len(self))
-
-        for ind in indices:
-            self._ligands[ind].generate_conformers(n_confs)
-
-    def __getitem__(self, item):
-        return self._ligands[item]
-
-    def __len__(self):
-        return len(self._ligands)
+        if any(atom.GetSymbol() == "H" for atom in mol.GetAtoms()):
+            n_implicit_hs = sum(a.GetNumImplicitHs() for a in mol.GetAtoms())
+            n_actual_hs = sum(a.GetSymbol() == "H" for a in mol.GetAtoms())
+            return not (n_actual_hs < n_implicit_hs)
+        return False
 
 
 def ligand_from_topology(topology, coords, remove_hyd=True):
@@ -424,10 +351,6 @@ def ligand_from_topology(topology, coords, remove_hyd=True):
         ligand.add_conformers(coords[1:, :, :])
 
     return ligand
-
-
-def create_ligand_set(filename: str):
-    raise NotImplementedError
 
 
 def _load_pdb_id_mapper():

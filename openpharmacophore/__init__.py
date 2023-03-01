@@ -16,7 +16,7 @@ puw.configure.set_standard_units(['angstroms', 'ps', 'K', 'mole', 'amu', 'e',
 
 
 # Add imports here
-from .molecular_systems import Ligand, LigandSet, Protein, smiles_from_pdb_id
+from .molecular_systems import Ligand, Protein, smiles_from_pdb_id
 from .molecular_systems import ComplexBindingSite, BindingSite
 from .point.pharmacophoric_point import PharmacophoricPoint, distance_between_pharmacophoric_points
 from .pharmacophore.pharmacophore import Pharmacophore

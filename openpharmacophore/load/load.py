@@ -1,5 +1,5 @@
-from openpharmacophore import Ligand, LigandSet, Protein
-from openpharmacophore.molecular_systems import create_topology, create_ligand_set
+from openpharmacophore import Ligand, Protein
+from openpharmacophore.molecular_systems import create_topology
 import openpharmacophore.constants as config
 
 
@@ -41,7 +41,7 @@ def load(file_name, topology_file=None):
         return protein_from_file(file_name, topology_file)
 
     elif file_format in config.MOL_FORMATS:
-        return create_ligand_set(file_name)
+        raise NotImplementedError(f"File format {file_format} is not yet implemented")
     else:
         raise InvalidFileFormatError(f"File format {file_format} is not supported")
 
@@ -65,13 +65,12 @@ def load_ligands(ligands, form):
 
         Returns
         -------
-        LigandSet
+        list[Ligand]
             The set with all the ligands.
     """
     if form not in config.MOL_STR_FORMATS:
         raise InvalidFormError(f"Form {form} is not a supported form")
 
-    lig_set = LigandSet()
-    for lig in ligands:
-        lig_set.add(Ligand.from_string(lig, form))
-    return lig_set
+    return [
+        Ligand.from_string(lig, form=form) for lig in ligands
+    ]

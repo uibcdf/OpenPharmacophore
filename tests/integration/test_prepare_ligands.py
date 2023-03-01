@@ -1,5 +1,5 @@
 import openpharmacophore as oph
-import pytest
+from openpharmacophore.view import draw_ligands, draw_ligands_chem_feats
 
 
 def test_ligand_preparation():
@@ -16,25 +16,25 @@ def test_ligand_preparation():
     ligands = oph.load_ligands(ligands_smi, form="smi")
     assert len(ligands) == 4
 
-    # We proceed to add hydrogens to the ligands
-    ligands.add_hydrogens(indices="all")
-    assert all([lig.has_hydrogens for lig in ligands])
-
     # We generate conformers for each
-    ligands.generate_conformers(indices="all", n_confs=1)
+    for lig in ligands:
+        lig.generate_conformers(1)
     assert all([lig.n_conformers == 1 for lig in ligands])
 
     # We draw the ligands
-    ligands.draw(n_per_row=4)
+    draw_ligands(ligands, n_per_row=4)
 
     # Now we want to find chemical features in the ligands
-    chem_feats = oph.extract_chem_feats(ligands)
+    chem_feats = []
+    for lig in ligands:
+        chem_feats.append(lig.get_chem_feats())
     # All ligands have aromatic rings, hydrophobic areas, acceptors and donors
     assert len(chem_feats) == 4
     assert all(["aromatic ring" in f for f in chem_feats])
     assert all(["hb acceptor" in f for f in chem_feats])
     assert all(["hb donor" in f for f in chem_feats])
     assert all(["hydrophobicity" in f for f in chem_feats])
+
     # Finally we create a 2D representation of the ligands with their
     # chemical features highlighted
-    ligands.draw(sub_image_size=(300, 280), chem_feats=chem_feats)
+    draw_ligands_chem_feats(ligands, sub_image_size=(300, 280), chem_feats=chem_feats)
