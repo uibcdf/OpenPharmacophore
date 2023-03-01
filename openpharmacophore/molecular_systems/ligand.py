@@ -28,7 +28,7 @@ class Ligand:
     def __init__(self, mol):
         self._mol = mol  # type: Chem.Mol
 
-        self._feat_ind = None
+        self._feat_ind = {}  # type: dict[str, list[tuple]]
         self._lig_id = None
         self._has_hyd = Ligand._mol_has_hyd(self._mol)
 
@@ -71,6 +71,10 @@ class Ligand:
     @lig_id.setter
     def lig_id(self, ligand_id: str):
         self._lig_id = ligand_id
+
+    @property
+    def feat_ind(self):
+        return self._feat_ind
 
     @classmethod
     def from_string(cls, string, form):
@@ -256,7 +260,7 @@ class Ligand:
             -------
             ChemFeatContainer
         """
-        if self._feat_ind is None:
+        if len(self._feat_ind) == 0:
             self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
         return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind))
 
@@ -277,7 +281,7 @@ class Ligand:
             -------
             ChemFeatContainer
         """
-        if self._feat_ind is None:
+        if len(self._feat_ind) == 0:
             self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
 
         # Exclude donor and aromatics and process them separately

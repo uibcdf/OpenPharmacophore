@@ -27,14 +27,14 @@ def test_ligand_preparation():
     # Now we want to find chemical features in the ligands
     chem_feats = []
     for lig in ligands:
-        chem_feats.append(lig.get_chem_feats())
+        chem_feats.append(lig.get_chem_feats(conf_ind=0))
     # All ligands have aromatic rings, hydrophobic areas, acceptors and donors
     assert len(chem_feats) == 4
-    assert all(["aromatic ring" in f for f in chem_feats])
-    assert all(["hb acceptor" in f for f in chem_feats])
-    assert all(["hb donor" in f for f in chem_feats])
-    assert all(["hydrophobicity" in f for f in chem_feats])
+    assert all(cfc.has_feat("aromatic ring") for cfc in chem_feats)
+    assert all(cfc.has_feat("hb acceptor") for cfc in chem_feats)
+    assert all(cfc.has_feat("hb donor") for cfc in chem_feats)
+    assert all(cfc.has_feat("hydrophobicity") for cfc in chem_feats)
 
     # Finally we create a 2D representation of the ligands with their
     # chemical features highlighted
-    draw_ligands_chem_feats(ligands, sub_image_size=(300, 280), chem_feats=chem_feats)
+    draw_ligands_chem_feats(ligands, lig_size=(300, 280))
