@@ -5,7 +5,7 @@ from openpharmacophore.visualization import draw_ligands, draw_ligands_chem_feat
 def test_ligand_preparation():
     # We want to prepare the ligands of Thrombin for pharmacophore extraction
 
-    # We start by creating a LigandSetObject object from a list of smiles representing
+    # We start by creating a loading ligands from a list of smiles representing
     # Thrombin ligands
     ligands_smi = [
         r"[H]/N=C(\C1CCC(CC1)CNC(=O)[C@@H]2C=C(CN3N2C(=O)N(C3=O)CC(c4ccccc4)c5ccccc5)C)/N",
