@@ -1,5 +1,5 @@
 from openpharmacophore.constants import PALETTE
-from openpharmacophore.view.draw import _atom_highlights, _drawing_size
+from openpharmacophore.visualization.draw import _atom_highlights, _drawing_size
 
 
 def test_atom_highlights():

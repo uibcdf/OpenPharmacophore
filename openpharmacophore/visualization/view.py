@@ -26,22 +26,22 @@ class Viewer:
 
     @property
     def has_protein(self) -> bool:
-        """ Returns true if the view contains a protein."""
+        """ Returns true if the visualization contains a protein."""
         return self._has_protein
 
     @property
     def has_ligand(self) -> bool:
-        """ Returns true if the view contains a ligand. """
+        """ Returns true if the visualization contains a ligand. """
         return self._has_ligand
 
     @property
     def has_chem_feats(self) -> bool:
-        """ Returns true if the view contains chemical features. """
+        """ Returns true if the visualization contains chemical features. """
         return self._has_chem_feats
 
     @property
     def has_pharmacophore(self) -> bool:
-        """ Returns true if the view contains a pharmacophore. """
+        """ Returns true if the visualization contains a pharmacophore. """
         return self._has_pharmacophore
 
     def add_components(self, components):
@@ -138,7 +138,7 @@ class Viewer:
         self._widget.shape.add_sphere(centroid, color, radius, label)
 
     def _add_arrow(self, centroid, length, direction, color):
-        """ Add an arrow to the view
+        """ Add an arrow to the visualization
 
             Parameters
             ----------
@@ -174,12 +174,12 @@ class Viewer:
         )
 
     def _restore_widget(self):
-        """ Restore the widget to have a clean view."""
+        """ Restore the widget to have a clean visualization."""
         if self.n_components > 0:
             self._widget = nv.NGLWidget()
 
     def show(self, frame=0):
-        """ Shows the view.
+        """ Shows the visualization.
 
             Parameters
             ----------

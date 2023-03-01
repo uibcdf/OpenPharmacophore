@@ -171,12 +171,12 @@ def test_add_to_ngl_view_components_are_loaded(hydrogen_bond_donor, aromatic_rin
     view = nv.NGLWidget()
     assert len(view._ngl_component_ids) == 0
 
-    # HB donor with no direction should just add a sphere to the view
+    # HB donor with no direction should just add a sphere to the visualization
     hydrogen_bond_donor.add_to_ngl_view(view)
     assert len(view._ngl_component_ids) == 1
     assert view._ngl_component_names[0] == "nglview.shape.Shape"
 
-    # Aromatic ring should add a sphere and an arrow to the view
+    # Aromatic ring should add a sphere and an arrow to the visualization
     aromatic_ring.add_to_ngl_view(view)
     assert len(view._ngl_component_ids) == 3
     assert view._ngl_component_names[1] == "nglview.shape.Shape"

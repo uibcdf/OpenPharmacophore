@@ -161,7 +161,7 @@ html_css_files = [
 #
 # html_sidebars = {}
 
-# Removing "view page source" from the top-right corner
+# Removing "visualization page source" from the top-right corner
 html_show_sourcelink = False
 
 # -- Options for HTMLHelp output ---------------------------------------------

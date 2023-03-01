@@ -22,7 +22,7 @@ from .point.pharmacophoric_point import PharmacophoricPoint, distance_between_ph
 from .pharmacophore.pharmacophore import Pharmacophore
 from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
 from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
-from .view import Viewer
+from .visualization import Viewer
 from .load.load import load, load_ligands
 
 

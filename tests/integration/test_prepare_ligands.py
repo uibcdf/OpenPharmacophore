@@ -1,5 +1,5 @@
 import openpharmacophore as oph
-from openpharmacophore.view import draw_ligands, draw_ligands_chem_feats
+from openpharmacophore.visualization import draw_ligands, draw_ligands_chem_feats
 
 
 def test_ligand_preparation():

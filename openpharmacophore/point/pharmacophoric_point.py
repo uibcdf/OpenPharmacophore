@@ -168,7 +168,7 @@ class PharmacophoricPoint:
 
         Notes
         -----
-        This method does not return a new view but modifies the input object.
+        This method does not return a new visualization but modifies the input object.
 
         """
         if color_palette:
