@@ -305,6 +305,63 @@ class FLQueue:
         return self._items[item]
 
 
+class ScoringFunction:
+    """ A customizable scoring function to score the common pharmacophores.
+    """
+    def __init__(
+            self,
+            point_weight=1.0,
+            vector_weight=1.0,
+            rmsd_cutoff=puw.quantity(1.2, "angstroms"),
+            cos_cutoff=0.5
+    ):
+        self.point_weight = point_weight
+        self.vector_weight = vector_weight
+        self.rmsd_cutoff = rmsd_cutoff
+        self.cos_cutoff = cos_cutoff
+
+
+class CommonPharmacophoreFinder:
+    """ Class to search for common pharmacophores in a set of ligands.
+
+        Parameters
+        ----------
+        n_points : int
+           Extracted pharmacophores will have this number of pharmacophoric
+           points.
+
+       min_actives : int, optional
+           Number of ligands that must match a common pharmacophore.
+
+       max_pharmacophores : int, optional
+           Maximum number of pharmacophores to return. If set to null
+           all found pharmacophores will be returned.
+
+        scoring_fn_params : dict[str, float], optional
+            The parameters of the scoring function.
+    """
+
+    def __init__(
+        self, n_points, min_actives=None, max_pharmacophores=None,
+        scoring_fn_params=None, **kwargs
+    ):
+        self.n_points = n_points
+        self.min_actives = min_actives
+
+        self.min_dist = kwargs.get("min_dist", puw.quantity(2.0, "angstroms"))
+        self.max_dist = kwargs.get("max_dist", puw.quantity(15.0, "angstroms"))
+        self.bin_size = kwargs.get("bin_size", puw.quantity(1.0, "angstroms"))
+        self.bins = np.arange(
+            0, puw.get_value(self.max_dist + self.bin_size), step=puw.get_value(self.bin_size)
+        )
+
+        self.queue = FLQueue(max_pharmacophores)
+        if scoring_fn_params is None:
+            self.scoring_fn = ScoringFunction()
+        else:
+            self.scoring_fn = ScoringFunction(**scoring_fn_params)
+
+
 def nearest_bins(num, bin_size):
     """ Return the index of the nearest bins of the given number
         in the bins array.
