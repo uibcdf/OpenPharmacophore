@@ -1,7 +1,7 @@
 from rdkit import Chem
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 from openpharmacophore.constants import QuantityLike, FEAT_TYPES
 from openpharmacophore.utils.maths import ring_normal
@@ -87,19 +87,20 @@ SMARTS_PROTEIN = {
 }
 
 
-@dataclass
+@dataclass(frozen=True)
 class ChemFeat:
     coords: QuantityLike
     type: str
+    atom_indices: Optional[Tuple[int]] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class AromaticRing(ChemFeat):
     type: str = "aromatic ring"
     normal: Optional[np.ndarray] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class HBDonor(ChemFeat):
     type: str = "hb donor"
     hyd: Optional[np.ndarray] = None
@@ -233,7 +234,7 @@ def get_indices(mol, feat_def, types=None):
     return indices
 
 
-def create_chem_feats(feat_type, indices, coords):
+def create_chem_feats(feat_type, indices, coords, store_indices=False):
     """ Returns a list of chemical features of the same type
 
         Parameters
@@ -248,6 +249,9 @@ def create_chem_feats(feat_type, indices, coords):
         coords : QuantityLike
             A quantity of shape (n_atoms, 3)
 
+         store_indices : bool, default=False
+            Whether to store the indices of the atoms in the chemical features.
+
         Returns
         -------
         list[ChemFeat]
@@ -256,13 +260,15 @@ def create_chem_feats(feat_type, indices, coords):
     feats = []
     for ind_tuple in indices:
         feat_coords = np.mean(coords[ind_tuple, :], axis=0)
-        feats.append(
-            ChemFeat(coords=feat_coords, type=feat_type)
-        )
+        if store_indices:
+            chem_feat = ChemFeat(coords=feat_coords, type=feat_type, atom_indices=ind_tuple)
+        else:
+            chem_feat = ChemFeat(coords=feat_coords, type=feat_type)
+        feats.append(chem_feat)
     return feats
 
 
-def mol_chem_feats(indices, coords):
+def mol_chem_feats(indices, coords, store_indices=False):
     """ Get the chemical features of a molecule.
 
         Parameters
@@ -274,6 +280,9 @@ def mol_chem_feats(indices, coords):
             The coordinates of a conformer of the molecule. Has shape
             (n_atoms, 3)
 
+        store_indices : bool, default=False
+            Whether to store the indices of the atoms in the chemical features.
+
         Returns
         -------
         ChemFeatContainer
@@ -282,7 +291,7 @@ def mol_chem_feats(indices, coords):
     """
     container = ChemFeatContainer()
     for feat, ind_list in indices.items():
-        feats = create_chem_feats(feat, ind_list, coords)
+        feats = create_chem_feats(feat, ind_list, coords, store_indices=store_indices)
         container.add_feats(feats)
 
     return container

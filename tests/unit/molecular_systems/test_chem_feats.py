@@ -59,6 +59,24 @@ def test_mol_chem_feats():
     assert len(container.positive) == 1
 
 
+def test_mol_chem_feats_store_indices():
+    indices = {
+        "hydrophobicity": [(0, 1)],
+        "positive charge": [(3,)]
+    }
+    coords = puw.quantity(np.array([
+        [1., 1., 1.],
+        [2., 2., 2.],
+        [3., 3., 3.],
+        [4., 4., 4.],
+    ]), "nanometers")
+
+    container = cf.mol_chem_feats(indices, coords, store_indices=True)
+
+    assert container.hydrophobic[0].atom_indices == (0, 1)
+    assert container.positive[0].atom_indices == (3, )
+
+
 def test_aromatic_chem_feats_have_normal_vector():
     indices = [(0, 1, 2, 3, 4, 5)]
     coords = puw.quantity(np.array([

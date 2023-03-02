@@ -245,7 +245,7 @@ class Ligand:
         """
         return self._mol
 
-    def get_chem_feats(self, conf_ind, types=None):
+    def get_chem_feats(self, conf_ind, types=None, indices=False):
         """ Find chemical features in this ligand.
 
             Parameters
@@ -256,13 +256,16 @@ class Ligand:
             types : set[str], optional
                 The chemical features that will be searched for.
 
+            indices : bool, default=False
+                Whether to store the indices of the atoms in the chemical features.
+
             Returns
             -------
             ChemFeatContainer
         """
         if len(self._feat_ind) == 0:
             self._feat_ind = get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
-        return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind))
+        return mol_chem_feats(self._feat_ind, self.get_conformer(conf_ind), store_indices=indices)
 
     def get_chem_feats_with_directionality(self, conf_ind, types=None):
         """ Find chemical features in this ligand. Hydrogen bond donors obtained
