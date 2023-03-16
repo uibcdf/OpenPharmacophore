@@ -10,8 +10,8 @@ dependencies:
 - openmm=7.7.0
 - pyunitwizard=0.5.0b0
 - sabueso=0.1.0b0
-- mdtraj=2.1.0
-- mdanalysis=1.9.7
+- mdtraj=1.9.7
+- mdanalysis=2.1.0
 - nglview=3.0.3
 - networkx=2.5.1
 - rdkit=2022.03.3
