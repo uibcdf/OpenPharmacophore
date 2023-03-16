@@ -1,5 +1,5 @@
 # Use this file to define constants used in different modules
-from pyunitwizard._private_tools.quantity_or_unit import QuantityLike
+from pyunitwizard._private.quantity_or_unit import QuantityLike
 from matplotlib.colors import to_rgb
 
 

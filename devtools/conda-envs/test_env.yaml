@@ -8,8 +8,8 @@ dependencies:
 - setuptools
 - numpy=1.21.6
 - openmm=7.7.0
-- "pyunitwizard=0.5.0b0"
-- "sabueso=0.1.0b0"
+- pyunitwizard=0.7.2
+- sabueso=0.1.0b0
 - mdtraj=1.9.7
 - mdanalysis=2.1.0
 - nglview=3.0.3
