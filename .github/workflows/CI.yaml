@@ -39,7 +39,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         environment-file: devtools/conda-envs/test_env.yaml
         mamba-version: "*"
-        use-mamba: true
+        use-mamba: false
         channels: conda-forge,defaults
 
         activate-environment: test
