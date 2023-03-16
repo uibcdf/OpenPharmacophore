@@ -88,7 +88,7 @@ def test_viewer_components_have_multiple_conformers(
     protein = Protein(topology_2_chains, protein_coords)
 
     constant = puw.quantity(0.4, "angstroms")
-    coords = puw.quantity(np.array([estradiol_coords, estradiol_coords + constant]), "angstroms")
+    coords = np.stack((estradiol_coords, estradiol_coords + constant))
     coords = np.squeeze(coords)
     ligand = ligand_from_topology(estradiol_topology, coords)
 

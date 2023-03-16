@@ -15,7 +15,7 @@ def test_ligand_from_topology(estradiol):
 
 def test_convert_ligand_with_multiple_conformers(estradiol_topology, estradiol_coords):
     constant = puw.quantity(0.4, "angstroms")
-    coords = puw.quantity(np.array([estradiol_coords, estradiol_coords + constant]), "angstroms")
+    coords = np.stack((estradiol_coords, estradiol_coords + constant))
     coords = np.squeeze(coords)
 
     ligand = ligand_from_topology(estradiol_topology, coords)
