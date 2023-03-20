@@ -322,21 +322,3 @@ class ConformerGenerator(object):
             if atom.GetSymbol() == "H":
                 return True
             return False
-
-
-def generate_conformers(molecule, n_confs):
-    """ Generate conformers for a molecule.
-
-        Parameters
-        ----------
-        molecule : rdkit.Chem.Mol
-        n_confs : int
-
-        Returns
-        -------
-        rdkit.Chem.Mol
-            Molecule with conformers.
-
-    """
-    conf_gen = ConformerGenerator(n_confs)
-    return conf_gen(molecule)

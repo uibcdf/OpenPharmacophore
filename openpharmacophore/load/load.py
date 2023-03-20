@@ -1,45 +1,98 @@
-from openpharmacophore import LigandBasedPharmacophore, LigandReceptorPharmacophore
-import os
+from rdkit import Chem
+
+from openpharmacophore import Ligand, Protein
+from openpharmacophore.io import load_mol2_ligands, load_sdf
+from openpharmacophore.molecular_systems import create_topology
+import openpharmacophore.constants as config
 
 
-traj_file_formats = [
-    "pdb",
-    "h5",
-    # TODO: add trajectory formats
-]
-
-molecular_file_formats = [
-    "smi",
-    "mol2",
-    "sdf",
-    # TODO: add other molecular formats
-]
+class InvalidFileFormatError(ValueError):
+    pass
 
 
-def load(pharmacophore_data):
-    """ Instantiate a pharmacophore.
+def protein_from_file(traj_file, topology_file):
+    """ Create a protein object from a file
+    """
+    topology, coords = create_topology(traj_file, topology_file)
+    return Protein(topology, coords)
 
-        Parameters
-        ----------
-        pharmacophore_data : Any
-            Can be a file path or list of files, PDB id, or a list of molecules or smiles.
+
+def load_ligands_from_file(file_path, file_format):
+    """ Load ligands from a file.
 
         Returns
         -------
-        Pharmacophore
-            Can be ligand, receptor-ligand or receptor based, depending on the type
-            of input.
+        list[Ligand]
     """
-    if isinstance(pharmacophore_data, str) and os.path.isfile(pharmacophore_data):
-        file_extension = pharmacophore_data.split(".")[-1]
-        if file_extension in traj_file_formats:
-            pharmacophore = LigandReceptorPharmacophore()
-            pharmacophore.load_receptor(pharmacophore_data)
-            return pharmacophore
+    if file_format == "smi":
+        return [Ligand(mol) for mol in Chem.SmilesMolSupplier(file_path)]
+    if file_format == "sdf":
+        return [Ligand(mol) for mol in load_sdf(file_path)]
+    if file_format == "mol2":
+        return [Ligand(mol) for mol in load_mol2_ligands(file_path)]
+    if file_format == "xyz":
+        return [Ligand(Chem.MolFromXYZFile(file_path))]
+    if file_format == "mol":
+        return [Ligand(Chem.MolFromMolFile(file_path))]
 
-        elif file_extension in molecular_file_formats:
-            pharmacophore = LigandBasedPharmacophore()
-            pharmacophore.load_ligands(pharmacophore_data)
-            return pharmacophore
 
-    raise NotImplementedError
+def load(file_name, topology_file=None):
+    """ Load ligands, protein, protein-ligand complexes, or MD trajectories
+        from a file.
+
+        Parameters
+        ----------
+        file_name : str
+            Name of the file containing the data.
+
+        topology_file : str, optional
+            File with the topology of the system for a MD trajectory.
+
+        Returns
+        -------
+        LigandSet or Protein
+    """
+    file_format = file_name.split(".")[-1]
+
+    if file_format in config.TRAJ_FORMATS:
+
+        if topology_file is not None and topology_file not in config.TOP_FORMATS:
+            file_format = topology_file.split(".")[-1]
+            raise InvalidFileFormatError(f"File format {file_format} is not supported")
+
+        return protein_from_file(file_name, topology_file)
+
+    elif file_format in config.MOL_FORMATS:
+        return load_ligands_from_file(file_name, file_format)
+    else:
+        raise InvalidFileFormatError(f"File format {file_format} is not supported")
+
+
+class InvalidFormError(ValueError):
+    pass
+
+
+def load_ligands(ligands, form):
+    """ Load ligands from a list of SMILES, SMARTS, Inchi, Mol2 block
+        or PDB block.
+
+        Parameters
+        ----------
+        ligands : list[str]
+            List with the ligands
+
+        form : str
+            The form of the ligands. Can be "smi", "smarts", "inchi",
+            "mol2", "pdb".
+
+        Returns
+        -------
+        list[Ligand]
+            The set with all the ligands.
+    """
+    if form not in config.MOL_STR_FORMATS:
+        raise InvalidFormError(f"Form {form} is not a supported form")
+
+    return [
+        Ligand.from_string(lig, form=form) for lig in ligands
+    ]

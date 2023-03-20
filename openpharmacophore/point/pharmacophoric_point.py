@@ -1,6 +1,7 @@
 # OpenPharmacophore
 from openpharmacophore.point.input_arguments import validate_input_array_like, validate_input_quantity
 from openpharmacophore.point.exceptions import InvalidFeatureError
+from openpharmacophore.constants import PALETTE
 # Third Party
 from matplotlib.colors import to_rgb
 import numpy as np
@@ -167,7 +168,7 @@ class PharmacophoricPoint:
 
         Notes
         -----
-        This method does not return a new view but modifies the input object.
+        This method does not return a new visualization but modifies the input object.
 
         """
         if color_palette:
@@ -195,16 +196,7 @@ class PharmacophoricPoint:
     @staticmethod
     def get_valid_features():
         """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
-        return [
-            "hb acceptor",
-            "hb donor",
-            "aromatic ring",
-            "hydrophobicity",
-            "positive charge",
-            "negative charge",
-            "excluded volume",
-            "included volume",
-        ]
+        return list(PALETTE.keys())
 
     def is_equal(self, other):
         """ Compare equality of two pharmacophoric points based on atoms indices.

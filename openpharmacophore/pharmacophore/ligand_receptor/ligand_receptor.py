@@ -1,27 +1,10 @@
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
-from openpharmacophore.pharmacophore.rdkit_pharmacophore import rdkit_pharmacophore
-from openpharmacophore import PLComplex
-import openpharmacophore.io as io
+from openpharmacophore.molecular_systems import ComplexBindingSite, Ligand
 from openpharmacophore.utils import maths
+from openpharmacophore.constants import FEAT_TYPES
 import networkx as nx
 import numpy as np
-import nglview as nv
 import pyunitwizard as puw
-import json
-import re
-import requests
-import tempfile
-
-
-class PDBFetchError(IOError):
-    """ Exception raised when a file format is not supported or
-        is incorrect.
-    """
-
-    def __init__(self, pdb_id, url):
-
-        self.message = f"Error obtaining pdb with id {pdb_id} from {url}"
-        super().__init__(self.message)
 
 
 class LigandReceptorPharmacophore:
@@ -29,6 +12,14 @@ class LigandReceptorPharmacophore:
 
         The pharmacophores can be extracted from a PDB structure or from a molecular
         dynamics trajectory.
+
+        Parameters
+        ----------
+        binding_site : ComplexBindingSite
+            Binding site from which the pharmacophore will be extracted
+
+        ligand : Ligand
+            The ligand in the binding site.
 
     """
     # Values from ligandscout and plip
@@ -41,437 +32,228 @@ class LigandReceptorPharmacophore:
     PISTACK_OFFSET_MAX = puw.quantity(0.20, "nanometers")
     PISTACK_ANG_DEV = 30  # degrees
 
-    def __init__(self):
+    HBOND_DIST_MAX = puw.quantity(0.25, "nanometers")
+    HBOND_ANG_MIN = puw.quantity(120, "degree")  # degrees
+
+    def __init__(self, binding_site, ligand):
         self._pharmacophores = []  # type: list[Pharmacophore]
-        self._pl_complex = None
+        self._bsite = binding_site
+        self._ligand = ligand
 
-    @property
-    def num_frames(self):
-        return len(self._pharmacophores)
+    def _hydrophobic_pharmacophoric_points(self, ligand_feats, receptor_feats):
+        """ Get hydrophobic pharmacophoric points.
 
-    @property
-    def receptor(self):
-        """ Return the receptor.
+            Parameters
+            ----------
+            ligand_feats : ChemFeatContainer
+            receptor_feats : ChemFeatContainer
 
             Returns
             -------
-            PLComplex
-        """
-        return self._pl_complex
+            list [PharmacophoricPoint]
 
-    @staticmethod
-    def _is_pdb_id(receptor):
-        """ Check if the receptor is a PDB id.
+        """
+        hyd_points = self._points_from_distance_rule(
+            ligand_feats.hydrophobic, receptor_feats.hydrophobic, "hydrophobicity", self.HYD_DIST_MAX
+        )
+        return self._merge_hydrophobic_points(hyd_points, radius=puw.quantity(1.0, "angstroms"))
+
+    def extract(self, frames=None, feat_types=FEAT_TYPES):
+        """ Extract one or multiple pharmaophores at different frames
 
             Parameters
             ----------
-            receptor: str
-                The receptor should be a string
+            frames : Iterable[int], optional
+                Iterable with the frames for which pharmacophores will be extracted.
 
-            Returns
-            -------
-            bool
-                Whether the receptor is a pdb id.
+            feat_types : set[str], optional
+                Only pharmacophoric points with this feature types will be extracted.
         """
-        if len(receptor) == 4:
-            pattern = re.compile('[0-9][a-zA-Z_0-9]{3}')
-            if pattern.match(receptor):
-                return True
-        return False
+        if frames is None:
+            frames = range(1)
 
-    @staticmethod
-    def _fetch_pdb(pdb_id):
-        """ Fetch a PDB with the given id.
-        """
-        url = f'http://files.rcsb.org/download/{pdb_id}.pdb'
-        res = requests.get(url, allow_redirects=True)
+        for fr in frames:
+            self._extract_single_frame(fr, feat_types)
 
-        if res.status_code != 200:
-            raise PDBFetchError(pdb_id, url)
-
-        return res.content
-
-    def load_receptor(self, file_path):
-        """ Loads the receptor (or protein-ligand complex) file.
-
-            Can be a pdb or a trajectory file format.
+    def _extract_single_frame(self, frame, feat_types=FEAT_TYPES):
+        """ Extract a pharmacophore at a given frame.
 
             Parameters
             ----------
-            file_path : str
+            frame : int
+                The frame of the trajectory for which the pharmacophore will be
+                extracted.
 
+            feat_types : set[str], optional
+                Only pharmacophoric points with this feature types will be extracted.
         """
-        self._pl_complex = PLComplex(file_path)
+        ligand_feats = self._ligand.get_chem_feats_with_directionality(frame)
+        receptor_feats = self._bsite.get_chem_feats(frame)
 
-    def load_pdb_id(self, pdb_id):
-        """ Download the pdb with given id and save it to a temporary file.
-        """
-        pdb_str = self._fetch_pdb(pdb_id)
-        with tempfile.TemporaryFile() as fp:
-            fp.seek(0)
-            fp.write(pdb_str)
-            self._pl_complex = PLComplex(fp)
+        points = []
+        if "positive charge" in feat_types:
+            points += self._points_from_distance_rule(
+                ligand_feats.positive, receptor_feats.negative, "positive charge", self.CHARGE_DIST_MAX
+            )
+        if "negative charge" in feat_types:
+            points += self._points_from_distance_rule(
+                ligand_feats.negative, receptor_feats.positive, "negative charge", self.CHARGE_DIST_MAX
+            )
+        if "aromatic ring" in feat_types:
+            points += self._aromatic_pharmacophoric_points(ligand_feats.aromatic, receptor_feats.aromatic)
+        if "hb donor" in feat_types:
+            points += self._hbond_pharmacophoric_points(
+                ligand_feats.donor, receptor_feats.acceptor, donors_in_ligand=True
+            )
+        if "hb acceptor" in feat_types:
+            points += self._hbond_pharmacophoric_points(
+                receptor_feats.donor, ligand_feats.acceptor, donors_in_ligand=False
+            )
+        if "hydrophobicity" in feat_types:
+            points += self._hydrophobic_pharmacophoric_points(ligand_feats, receptor_feats)
 
-    def add_pharmacophore(self, pharma):
-        """ Add a new pharmacophore.
-
-            Parameters
-            ----------
-            pharma : Pharmacophore
-        """
+        pharma = Pharmacophore(points, ref_struct=frame, ref_mol=0)
         self._pharmacophores.append(pharma)
 
-    def add_frame(self):
-        """ Add a new frame to the pharmacophore. """
-        self._pharmacophores.append(Pharmacophore())
-
-    def add_points_to_frame(self, point_list, frame):
-        """ Add pharmacophoric points from a list to a frame. """
-        for point in point_list:
-            self._pharmacophores[frame].add(point)
-
-    def add_point(self, point, frame):
-        """ Add a pharmacophoric point to a pharmacophore in a specific frame."""
-        self._pharmacophores[frame].add(point)
-
-    def remove_point(self, index, frame):
-        """ Removes a pharmacophoric point from the pharmacophore at the given frame."""
-        self._pharmacophores[frame].remove(index)
-
-    def remove_picked_point(self, view):
-        raise NotImplementedError
-
-    def edit_picked_point(self, view):
-        raise NotImplementedError
-
-    def add_point_in_picked_location(self, view):
-        raise NotImplementedError
-
-    def add_to_view(self, view, frame=0):
-        """ Add pharmacophoric points to a ngl view.
+    @staticmethod
+    def _hbond_angle(don_acc_dist, don_hyd_dist, acc_hyd_dist):
+        """  Compute hydrogen bonding angle.
 
             Parameters
             ----------
-            view : nglview.NGLWidget
-                A view object where the pharmacophoric points will be added.
-            frame : int
-                Adds the points of this frame.
-        """
-        for point in self[frame]:
-            point.add_to_ngl_view(view)
+            don_acc_dist : QuantityLike
+                Distance from donor to acceptor
 
-    def show(self, frame=0, ligand=True, receptor=True,
-             points=True, indices=None):
-        """ Shows a 3D representation of the pharmacophore model.
+            don_hyd_dist : QuantityLike
+                Distance from donor to hydrogen
+
+            acc_hyd_dist : QuantityLike
+               Distance from acceptor to hydrogen
+
+            Returns
+            -------
+            QuantityLike
+        """
+        # Calculate angle using law of cosines
+        cos = (don_hyd_dist**2 + acc_hyd_dist**2 - don_acc_dist**2) / (2 * don_hyd_dist * acc_hyd_dist)
+        return np.degrees(np.arccos(cos))
+
+    @staticmethod
+    def _hbond_pharmacophoric_points(donors, acceptors, donors_in_ligand):
+        """ Compute hydrogen bonds pharmacophoric points centroids and
+            directions vectors.
 
             Parameters
             ----------
-            frame : int
-                Which frame to show
-            ligand : bool, optional
-                Whether to show the ligand.
-            receptor : bool, optional
-                Whether to show the receptor.
-            points : bool, optional
-                Whether to show pharmacophoric points.
-            indices : np.ndarray or list[int]
-                A list of the indices of the atoms that will be shown.
-        """
-        view = nv.NGLWidget()
-        if not any([ligand, receptor, points]):
-            return view
+            donors : list[HBDonor]
+                List with hydrogen bond donors.
 
-        if ligand and frame != 0:
-            conformer = self.receptor.get_lig_conformer(frame)
-        else:
-            conformer = self.receptor.ligand
+            acceptors : list[ChemFeat]
+                List with hydrogen bond acceptors.
 
-        if indices is None:
+            donors_in_ligand : bool
+                Whether the donors are part of the ligand or of the receptor
 
-            if receptor and ligand:
-                view = nv.show_mdtraj(self.receptor.traj.atom_slice(
-                    self.receptor.receptor_indices)[frame])
-                view.add_component(conformer)
-            elif receptor:
-                view = nv.show_mdtraj(self.receptor.traj.atom_slice(
-                    self.receptor.receptor_indices))
-            elif ligand:
-                view = nv.show_rdkit(conformer)
-        else:
-            traj = self.receptor.slice_traj(indices, frame)
-            view = nv.show_mdtraj(traj)
-            view.representations = [{
-                "type": "ball+stick",
-                "params": {
-                    "sele": "all",
-                }
-            }]
-            if ligand:
-                view.add_component(conformer)
+            Returns
+            -------
+            points : list[PharmacophoricPoint]
 
-        if points:
-            self.add_to_view(view, frame)
-        return view
-
-    def to_json(self, file_name, frame):
-        """ Save pharmacophore(s) to a json file.
-        """
-        data = io.json_pharmacophoric_elements(self[frame])
-        with open(file_name, "w") as fp:
-            json.dump(data, fp)
-
-    def to_ligand_scout(self, file_name, frame):
-        """ Save a pharmacophore at a given frame to ligand scout format (pml).
-        """
-        xml_tree = io.ligandscout_xml_tree(self[frame])
-        xml_tree.write(file_name, encoding="UTF-8", xml_declaration=True)
-
-    def to_moe(self, file_name, frame):
-        """ Save a pharmacophore at a given frame to moe format (ph4).
-        """
-        pharmacophore_str = io.ph4_string(self[frame])
-        with open(file_name, "w") as fp:
-            fp.write(pharmacophore_str)
-
-    def to_mol2(self, file_name, frame=None):
-        """ Save pharmacophore(s) to mol2 file.
-        """
-        # TODO: save multiple pharmacophores
-        if frame is None or isinstance(frame, list):
-            raise NotImplementedError
-        pharmacophore_data = io.mol2_file_info([self[frame]])
-        with open(file_name, "w") as fp:
-            fp.writelines(pharmacophore_data[0])
-
-    def to_rdkit(self, frame):
-        """ Transform a pharmacophore at a given frame to a rdkit pharmacophore.
-        """
-        return rdkit_pharmacophore(self[frame])
-
-    def extract(self, ligand_id, frames=0, smiles="", features=None,
-                add_hydrogens=True):
-        """ Extract pharmacophore(s) from the receptor. A protein-ligand complex
-            can contain multiple ligands or small molecules, pharmacophore(s) is
-            extracted only for the selected one.
-
-            Parameters
-            ----------
-            ligand_id : str
-                The id of the ligand whose pharmacophore will be extracted.
-
-            frames : int or list[int] or 'all', optional
-                Extract pharmacophores from the given frame(s) of the trajectory.
-
-            smiles : str, optional
-                The smiles of the ligand.
-
-            features : list[str], optional
-                A list of the chemical features that will be used in the extraction.
-
-            add_hydrogens : bool
-                Whether to add hydrogens to the ligand and the receptor. Necessary
-                to extrac hydrogen bond pharmacophoric points.
-        """
-        if isinstance(frames, int):
-            frames = [frames]
-
-        if features is None:
-            features = PharmacophoricPoint.get_valid_features()
-
-        pl: PLComplex
-        pl = self._pl_complex
-        pl.prepare(lig_id=ligand_id, smiles=smiles, add_hydrogens=add_hydrogens)
-
-        for frame in frames:
-            self.add_frame()
-
-            if "hydrophobicity" in features:
-                lig_hyd_centers, _ = pl.ligand_features("hydrophobicity", frame)
-                if len(lig_hyd_centers) > 0:
-                    rec_hyd_centers, _ = pl.receptor_features("hydrophobicity", frame)
-                    self._hydrophobic_pharmacophoric_points(
-                        lig_hyd_centers, rec_hyd_centers, frame
-                    )
-
-            if "positive charge" in features:
-                lig_pos_charge_cent, _ = pl.ligand_features("positive charge", frame)
-                if len(lig_pos_charge_cent) > 0:
-                    rec_neg_charge_cent, _ = pl.receptor_features("negative charge", frame)
-                    self._charge_pharmacophoric_points(
-                        lig_pos_charge_cent, rec_neg_charge_cent,
-                        "positive charge", frame
-                    )
-
-            if "negative charge" in features:
-                lig_neg_charge_cent, _ = pl.ligand_features("negative charge", frame)
-                if len(lig_neg_charge_cent) > 0:
-                    rec_pos_charge_cent, _ = pl.receptor_features("positive charge", frame)
-                    self._charge_pharmacophoric_points(
-                        lig_neg_charge_cent, rec_pos_charge_cent,
-                        "negative charge", frame
-                    )
-
-            if "aromatic ring" in features:
-                lig_aro_cent, lig_aro_ind = pl.ligand_features("aromatic ring", frame)
-                if len(lig_aro_cent) > 0:
-                    rec_aro_cent, rec_aro_ind = pl.receptor_features("aromatic ring", frame)
-                    self._aromatic_pharmacophoric_points(
-                        lig_aro_cent, lig_aro_ind,
-                        rec_aro_cent, rec_aro_ind, frame
-                    )
-
-            h_bonds = None
-            if "hb donor" in features:
-                h_bonds = pl.hbond_indices(frame)
-                self._hbond_donor_pharmacophoric_points(h_bonds, frame)
-
-            if "hb acceptor" in features:
-                if h_bonds is None:
-                    h_bonds = pl.hbond_indices(frame)
-                self._hbond_acceptor_pharmacophoric_points(h_bonds, frame)
-
-    def _hbond_donor_pharmacophoric_points(self, h_bonds, frame):
-        """ Compute hydrogen bond donor pharmacophoric points from
-            protein-ligand interactions.
-
-            Parameters
-            -----------
-            h_bonds : np.ndarray
-                Array with the indices of the atoms involved in hydrogen bond.
-                Each row contains three integer indices, (d_i, h_i, a_i), such
-                that d_i is the index of the donor atom, h_i the index of the
-                hydrogen atom, and a_i the index of the acceptor atom.
-                Shape = (n_h_bonds, 3)
-
-            frame : int
-                The frame of the trajectory.
         """
         radius = puw.quantity(1.0, "angstroms")
-        for bond in h_bonds:
-            # There is an acceptor in the receptor
-            if bond[0] in self._pl_complex.lig_indices:
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[2], :] -
-                                          self._pl_complex.coords[frame, bond[0], :])
-                pharma_point = PharmacophoricPoint(
-                    "hb donor", self._pl_complex.coords[frame, bond[0], :],
-                    radius, direction
-                )
-                self._pharmacophores[frame].add(pharma_point)
 
-    def _hbond_acceptor_pharmacophoric_points(self, h_bonds, frame):
-        """ Compute hydrogen bond acceptor pharmacophoric points from
-            protein-ligand interactions.
+        points = []
+        for don in donors:
+            for acc in acceptors:
+                # Distance between H-Acceptor
+                acc_hyd_dist = maths.points_distance(don.hyd, acc.coords)
+                if acc_hyd_dist < LigandReceptorPharmacophore.HBOND_DIST_MAX:
+                    don_acc_dist = maths.points_distance(don.coords, acc.coords)
+                    don_hyd_dist = maths.points_distance(don.coords, don.hyd)
+                    angle = LigandReceptorPharmacophore._hbond_angle(
+                        don_acc_dist, don_hyd_dist, acc_hyd_dist
+                    )
+                    if angle > LigandReceptorPharmacophore.HBOND_ANG_MIN:
+                        direction = puw.get_value(acc.coords - don.hyd)
+                        if donors_in_ligand:
+                            points.append(
+                                PharmacophoricPoint(
+                                    "hb donor", don.coords, radius, direction=direction)
+                            )
+                        else:
+                            direction *= -1
+                            points.append(
+                                PharmacophoricPoint(
+                                    "hb acceptor", acc.coords, radius, direction=direction)
+                            )
+        return points
 
-            Parameters
-            -----------
-            h_bonds : np.ndarray
-                Array with the indices of the atoms involved in hydrogen bond.
-                Each row contains three integer indices, (d_i, h_i, a_i), such
-                that d_i is the index of the donor atom, h_i the index of the
-                hydrogen atom, and a_i the index of the acceptor atom.
-                Shape = (n_h_bonds, 3)
+    @staticmethod
+    def _aromatic_angle_exceeds_deviation(angle):
+        ang_dev = LigandReceptorPharmacophore.PISTACK_ANG_DEV
+        return not (0 <= angle <= ang_dev or 90 - ang_dev <= angle <= 90 + ang_dev)
 
-            frame : int
-                The frame of the trajectory.
-        """
-        radius = puw.quantity(1.0, "angstroms")
-        for bond in h_bonds:
-            if bond[2] in self._pl_complex.lig_indices:
-                # There is a donor in the ligand
-                direction = puw.get_value(self._pl_complex.coords[frame, bond[0], :] -
-                                          self._pl_complex.coords[frame, bond[2], :])
-                pharma_point = PharmacophoricPoint(
-                    "hb acceptor", self._pl_complex.coords[frame, bond[2], :],
-                    radius, direction
-                )
-                self._pharmacophores[frame].add(pharma_point)
-
-    def _aromatic_pharmacophoric_points(self, lig_centers, lig_indices,
-                                        rec_centers, rec_indices, frame):
+    @staticmethod
+    def _aromatic_pharmacophoric_points(ligand_feats, receptor_feats):
         """ Compute aromatic pharmacophoric points from
             protein-ligand interactions.
 
             Parameters
             -----------
-            lig_centers : list[puw.Quantity]
-                Centroids of the aromatic rings in the ligand.
+            ligand_feats : list[ChemFeat]
+                Aromatic chemical features of the ligand
 
-            lig_indices : list[list[int]]
-                Indices of the rings atoms in the ligand.
+            receptor_feats : list[ChemFeat]
+                Aromatic chemical features of the receptor
 
-            rec_centers : list[puw.Quantity]
-                Centroids of aromatic rings in the receptor.
-
-            rec_indices : list[list[int]]
-                Indices of the rings atoms in the receptor.
-
-            frame : int
-                The frame of the trajectory.
+            Returns
+            -------
+            points : list[PharmacophoricPoint]
+                List of aromatic pharmacophoric points
 
         """
         # Calculate pistack interactions and create pharmacophoric points
         radius = puw.quantity(1.0, "angstroms")
-        for ii in range(len(lig_centers)):
-            for jj in range(len(rec_centers)):
-                if maths.points_distance(rec_centers[jj], lig_centers[ii]) <= self.PISTACK_DIST_MAX:
+        points = []
+        for ii in range(len(ligand_feats)):
+            for jj in range(len(receptor_feats)):
+                lig_center = ligand_feats[ii].coords
+                rec_center = receptor_feats[jj].coords
+                dist = maths.points_distance(rec_center, lig_center)
+                if dist <= LigandReceptorPharmacophore.PISTACK_DIST_MAX:
                     # Calculate deviation from ideal angle by taking the angle between the normals
                     # defined by the planes of each ring
-                    lig_normal = maths.ring_normal(lig_indices[ii], self._pl_complex.coords[frame], lig_centers[ii])
-                    rec_normal = maths.ring_normal(rec_indices[jj], self._pl_complex.coords[frame], rec_centers[jj])
+                    lig_normal = ligand_feats[ii].normal
+                    rec_normal = receptor_feats[jj].normal
+
                     angle = maths.angle_between_normals(lig_normal, rec_normal)
                     assert 0 <= angle <= 360, f"Angle is {angle}"
 
-                    if 0 <= angle <= self.PISTACK_ANG_DEV or \
-                            90 - self.PISTACK_ANG_DEV <= angle <= 90 + self.PISTACK_ANG_DEV:
+                    if not LigandReceptorPharmacophore._aromatic_angle_exceeds_deviation(angle):
 
                         # Project ring centers into the other plane and calculate offset
-                        rec_proj = maths.point_projection(lig_normal, lig_centers[ii], rec_centers[jj])
-                        lig_proj = maths.point_projection(rec_normal, rec_centers[jj], lig_centers[ii])
-                        offset = min(maths.points_distance(lig_proj, rec_centers[jj]),
-                                     maths.points_distance(rec_proj, lig_centers[ii]))
-                        if offset <= self.PISTACK_OFFSET_MAX:
-                            direction = puw.get_value(rec_centers[jj] - lig_centers[ii])
-                            pharma_point = PharmacophoricPoint(
-                                "aromatic ring", lig_centers[ii], radius, direction)
-                            self._pharmacophores[frame].add(pharma_point)
+                        rec_proj = maths.point_projection(
+                            lig_normal, lig_center, rec_center
+                        )
+                        lig_proj = maths.point_projection(
+                            rec_normal, rec_center, lig_center
+                        )
+                        offset = min(maths.points_distance(lig_proj, rec_center),
+                                     maths.points_distance(rec_proj, lig_center))
 
-    def _hydrophobic_pharmacophoric_points(self, ligand_centers, receptor_centers, frame):
-        """ Compute hydrophobic pharmacophoric points from protein-ligand interactions.
-
-            Typically, there will be a lot of hydrophobic points so, they are passed
-            to a merging procedure.
-
-            Parameters
-            -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the hydrophobic areas in the ligand.
-
-            receptor_centers : list[puw.Quantity]
-                Centroids of hydrophobic areas in the receptor.
-
-            frame : int
-                The frame of the trajectory.
-
-        """
-        centers = []
-        radius = puw.quantity(1.0, "angstroms")
-        for lig_center in ligand_centers:
-            for prot_center in receptor_centers:
-                dist = maths.points_distance(lig_center, prot_center)
-                if dist < self.HYD_DIST_MAX:
-                    centers.append(lig_center)
-
-        points_clustered = self._merge_hydrophobic_points(centers, radius)
-        for p in points_clustered:
-            self._pharmacophores[frame].add(p)
+                        if offset <= LigandReceptorPharmacophore.PISTACK_OFFSET_MAX:
+                            direction = puw.get_value(rec_center - lig_center)
+                            points.append(PharmacophoricPoint(
+                                "aromatic ring", lig_center, radius, direction
+                            ))
+        return points
 
     @staticmethod
-    def _merge_hydrophobic_points(centers, radius):
+    def _merge_hydrophobic_points(points, radius):
         """ Merge group of hydrophobic points close to each other.
 
             Parameters
             ----------
-            centers : list[puw.Quantity]
+            points : list[PharmacophoricPoint]
             radius : puw.Quantity
 
             Returns
@@ -482,48 +264,63 @@ class LigandReceptorPharmacophore:
         # a feature and an edge is added between two nodes only if their distance
         # is < HYD_MERGE_DIST.
         hyd_graph = nx.Graph()
-        for ii in range(len(centers)):
+        for ii in range(len(points)):
             hyd_graph.add_node(ii)
 
-        for ii in range(len(centers)):
-            for jj in range(ii + 1, len(centers)):
-                dist = maths.points_distance(centers[ii], centers[jj])
+        for ii in range(len(points)):
+            for jj in range(ii + 1, len(points)):
+                dist = maths.points_distance(points[ii].center, points[jj].center)
                 if dist <= LigandReceptorPharmacophore.HYD_MERGE_DIST:
                     hyd_graph.add_edge(ii, jj)
 
         # Find each maximum clique and group all nodes within a clique
         cliques_iter = nx.find_cliques(hyd_graph)
-        points = []
+        merged = []
         for clique in cliques_iter:
-            clique_centers = [centers[ii] for ii in clique]
+            clique_centers = [points[ii].center for ii in clique]
             center = np.mean(np.stack(clique_centers), axis=0)
             pharma_point = PharmacophoricPoint("hydrophobicity", center, radius)
-            points.append(pharma_point)
-        return points
+            merged.append(pharma_point)
+        return merged
 
-    def _charge_pharmacophoric_points(self, ligand_centers, receptor_centers,
-                                      charge_type, frame):
-        """ Compute positive or negative charge pharmacophoric points from
-            protein-ligand interactions.
+    @staticmethod
+    def _points_from_distance_rule(
+            ligand_feats, receptor_feats, feat_type, max_dist
+    ):
+        """ Given a set of ligand and receptor chem feats, creates pharmacophoric
+            points if the ligand and receptor feats are below the maximum distance.
 
-            Parameters
-            -----------
-            ligand_centers : list[puw.Quantity]
-                Centroids of the positive or negative areas in the ligand.
+            This method can be used to obtain hydrophobic, positive charge and
+            negative charge pharmacophoric points.
 
-            receptor_centers : list[puw.Quantity]
-                Centroids of areas with opposite sign in the receptor.
+        Parameters
+        ----------
+        ligand_feats : list[ChemFeat]
+            Chemical features of the ligand
 
-            frame : int
-                The frame of the trajectory.
+        receptor_feats : list[ChemFeat]
+            Chemical features of the receptor
+
+        feat_type : str
+            Name of the feature type of the pharmacophoric points.
+
+        max_dist : QuantityLike
+            Maximum distance between a receptor and a ligand feature.
+
+        Returns
+        -------
+        points : list[PharmacophoricPoint]
 
         """
         radius = puw.quantity(1.0, "angstroms")
-        for lig_center in ligand_centers:
-            for prot_center in receptor_centers:
-                if maths.points_distance(lig_center, prot_center) < self.CHARGE_DIST_MAX:
-                    pharma_point = PharmacophoricPoint(charge_type, lig_center, radius)
-                    self._pharmacophores[frame].add(pharma_point)
+        points = []
+        for lig_feat in ligand_feats:
+            for rec_feat in receptor_feats:
+                dist = maths.points_distance(lig_feat.coords, rec_feat.coords)
+                if dist < max_dist:
+                    pharma_point = PharmacophoricPoint(feat_type, lig_feat.coords, radius)
+                    points.append(pharma_point)
+        return points
 
     def __len__(self):
         return len(self._pharmacophores)
