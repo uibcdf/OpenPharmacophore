@@ -22,10 +22,10 @@ conda -c uibcdf openpharmacophore
   - [Preparing ligand for pharmacophore extraction](contents/examples/ligand-based/ligand_preparation.ipynb)
 
 ### Ligand-receptor based pharmacophores
-  - [examples of the protein-ligand complex of estrogen receptor with estradiol](contents/examples/ligand-receptor/ligand_receptor_pharmacophore.ipynb)
+  - [Protein-ligand complex of estrogen receptor with estradiol](contents/examples/ligand-receptor/er-alpha.ipynb)
 
 ### Dynamic pharmacophores
-  - [Obtaining a ligand-receptor pharmacophore model from a MD trajectory](contents/examples/ligand-receptor/lr_dynamic_pharmacophore.ipynb)
+  - [Obtaining a ligand-receptor pharmacophore model from a MD trajectory](contents/examples/dynamic-pharmacophore/lr_dynamic_pharmacophore.ipynb)
 
 ### Receptor based pharmacophores
 
@@ -39,14 +39,14 @@ conda -c uibcdf openpharmacophore
 
 #### Protein-ligand interactions
 
-- [Aromatic Interactions](contents/examples/pl-interactions/aromatic_interactions.ipynb)
-- [Hydrogen Bonding](contents/examples/pl-interactions/hydrogen_bonding.ipynb)
-- [Hydrophobic Interactions](contents/examples/pl-interactions/hydrophobic_interactions.ipynb)
+- [Aromatic Interactions](contents/examples/other/pl-interactions/aromatic_interactions.ipynb)
+- [Hydrogen Bonding](contents/examples/other/pl-interactions/hydrogen_bonding.ipynb)
+- [Hydrophobic Interactions](contents/examples/other/pl-interactions/hydrophobic_interactions.ipynb)
 
 
 #### Binding site
 
-- [Protein-ligand complex binding site](contents/examples/binding-site/complex_binding_site.ipynb)
+- [Protein-ligand complex binding site](contents/examples/other/binding-site/complex_binding_site.ipynb)
 
 
 ```{eval-rst}

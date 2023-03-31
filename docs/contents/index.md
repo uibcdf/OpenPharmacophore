@@ -1,5 +1,6 @@
 # Examples
 
+Here you can find examples of pharmacophore modelling with different systems.
 
 ```{eval-rst}
 .. toctree::
