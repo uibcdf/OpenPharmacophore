@@ -116,7 +116,7 @@ record.txt
 # In This Library
 devtools/playground/*
 !devtools/playground/README.md
-docs/contents/Pharmacophore/data/*
+
 docs/_autosummary/
 
 # Other

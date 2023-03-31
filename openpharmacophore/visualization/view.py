@@ -220,3 +220,12 @@ class Viewer:
             raise ValueError
         self._widget.clear_representations()
         self._widget.add_representation(style, selection="protein")
+
+    def to_nglview(self):
+        """ Get an NGLView widget representing the view.
+
+            Returns
+            -------
+            nv.NGLWidget
+        """
+        return self._widget
