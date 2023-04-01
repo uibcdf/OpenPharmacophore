@@ -55,16 +55,14 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.githubpages',
     'sphinxcontrib.bibtex',
-    'nbsphinx',
-    'recommonmark',
-    'sphinx_markdown_tables',
-    'sphinx.ext.extlinks'
+    'sphinx.ext.extlinks',
+    'myst_nb'
 ]
 
 autosummary_generate = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
-napoleon_use_param = True
+napoleon_use_param = False
 napoleon_use_ivar = True
 numpydoc_show_class_members= True
 numpydoc_show_inherited_class_members= True
@@ -95,7 +93,7 @@ master_doc = 'index'
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 # language was edited to use sphinx-intl
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
