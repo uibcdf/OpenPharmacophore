@@ -34,6 +34,8 @@ Visualization
    :recursive:
 
     openpharmacophore.Viewer
+    openpharmacophore.draw_ligands
+    openpharmacophore.draw_ligands_chem_feats
 
 
 Others

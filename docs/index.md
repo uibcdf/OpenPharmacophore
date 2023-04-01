@@ -1,7 +1,7 @@
 # OpenPharmacophore
 
 
-OpenPharmacophore is a library to work with pharmacophore models and perform virtual screening. It 
+OpenPharmacophore is a library designed to work with pharmacophore models and perform virtual screening. It 
 can derive pharmacophores from ligand-based as well as structured-based methods. It also offers
 the possibility to derive pharmacophores from molecular dynamics trajectories.
 
@@ -25,7 +25,7 @@ conda -c uibcdf openpharmacophore
   - [Protein-ligand complex of estrogen receptor with estradiol](contents/examples/ligand-receptor/er-alpha.ipynb)
 
 ### Dynamic pharmacophores
-  - [Obtaining a ligand-receptor pharmacophore model from a MD trajectory](contents/examples/dynamic-pharmacophore/lr_dynamic_pharmacophore.ipynb)
+  - [Obtaining a ligand-receptor pharmacophore model from a MD trajectory](contents/examples/dynamic-pharmacophore/er_alpha_md.ipynb)
 
 ### Receptor based pharmacophores
 
