@@ -1,10 +1,13 @@
-from openpharmacophore.utils.maths import points_distance, nearest_bins
-from openpharmacophore import PharmacophoricPoint, Pharmacophore
-from openpharmacophore.molecular_systems.chem_feats import ChemFeat, ChemFeatContainer
+from collections import Counter, defaultdict
+from dataclasses import dataclass
+import itertools
+from typing import List, Optional, Tuple
 import numpy as np
 import pyunitwizard as puw
-import itertools
-from collections import defaultdict, Counter, namedtuple
+
+from openpharmacophore.utils.maths import points_distance, nearest_bins
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 
 
 class PriorityQueue:
@@ -42,12 +45,13 @@ class FeatureList:
            a conformer with two hydrogen bond acceptors (A) and an aromatic
            ring (R) would have variant 'AAR'.
 
-       distances : listnp.ndarray
-           An array of shape (n_pairs,) where n_pairs is the number of interpoint
+       distances : np.ndarray
+           An array of shape (n_conformers, n_pairs) where n_pairs is the number of interpoint
            distances given by n_points x (n_points - 1) / 2
 
         coords : QuantityLike
             A quantity with the coordinates of the chemical features.
+            Shape (n_conformers, n_feats, 3)
    """
     def __init__(self, variant, distances, coords):
         self.variant = variant
@@ -87,6 +91,16 @@ class FeatureList:
 
         return cls(variant, distances, coords)
 
+    def has_variant(self, variant):
+        """ Returns true if the feature list contains the given variant. """
+        counter_self = Counter(self.variant)
+        counter_other = Counter(variant)
+        for ftype, cnt in counter_other.items():
+            cnt_self = counter_self.get(ftype, 0)
+            if cnt > cnt_self:
+                return False
+        return True
+
     @staticmethod
     def distance_vector(coords):
         """ Compute the vector of inter-site distances.
@@ -118,8 +132,34 @@ class FeatureList:
 
         return distances
 
+    def k_sublists(self, variant, mol):
+        """ Get all sublists of the given variant.
+
+            Parameters
+            ----------
+            variant : str
+            mol: int
+
+            Returns
+            -------
+            list[KSubList]
+        """
+        pass
+
     def __len__(self):
         return self.coords.shape[0]
+
+
+@dataclass(frozen=True)
+class KSubList:
+    """ Class to store sub sets of a feature lists with k points.
+
+        Does not store chem feats coordinates.
+    """
+    distances: np.ndarray
+    mol_id: Tuple[int, int]
+    feat_ind: List[int]
+    score: Optional[float] = None
 
 
 class CommonPharmacophoreFinder:
@@ -179,12 +219,12 @@ class CommonPharmacophoreFinder:
         feature_lists = self._get_feat_lists(chemical_features)
         all_variants = [fl.variant for fl in feature_lists]
         common_variants = self._common_k_point_variants(all_variants, n_points, min_actives)
-        sub_lists = self._feat_sub_lists(feature_lists, common_variants)
+        sub_lists = self._variant_sublists(feature_lists, common_variants)
 
         scores = {}
         queue = PriorityQueue(size=max_pharmacophores)
-        for variant in sub_lists:
-            surviving_boxes = self._recursive_partitioning(variant, min_actives, n_ligands)
+        for variant in sub_lists.keys():
+            surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives, n_ligands)
             for box in surviving_boxes:
                 if box:
                     top_representative = self._box_top_representative(box, scores, n_ligands)
@@ -234,6 +274,32 @@ class CommonPharmacophoreFinder:
             "".join(var) for var in variant_count.keys()
             if variant_count[var] >= min_actives
         ]
+
+    @staticmethod
+    def _variant_sublists(feat_lists, common_variants):
+        """ Group the feature lists by variant type.
+
+            Returns a dictionary of feature lists grouped by variant
+
+            Parameters
+            ----------
+            feat_lists : list[FeatureList]
+                Feature lists of all ligands
+
+            common_variants : list[str]
+                The common variants
+
+            Returns
+            -------
+            variants : dict[Str, list[KSubList]]
+        """
+        variants = defaultdict(list)
+        for var in common_variants:
+            for ii, flist in enumerate(feat_lists):
+                if flist.has_variant(var):
+                    variants[var].extend(flist.k_sub_lists(var, ii))
+
+        return variants
 
     def __call__(self, chemical_features, n_points, min_actives=None, max_pharmacophores=None):
         """ Find common pharmacophores.

@@ -143,8 +143,31 @@ class TestCommonPharmacophoreFinder:
         variants = ["ADHP", "ADHR", "ADHN"]
         assert cp.CommonPharmacophoreFinder._common_k_point_variants(variants, 3, 2) == ["ADH"]
             
-    def test_feature_sublists(self):
-        pass
+    def test_variant_containers(self):
+        common_variants = ["ADP"]
+        coords = np.ones((2, 4, 3))
+        distances = np.array([
+            [1, 2, 3, 4, 5, 6],
+            [7, 8, 9, 10, 11, 12],
+        ])
+        feat_lists = [
+            cp.FeatureList("ADPR", distances, coords),
+            cp.FeatureList("ADHP", distances * 2, coords),
+        ]
+        all_sublists = cp.CommonPharmacophoreFinder._variant_sublists(feat_lists, common_variants)
+        assert len(all_sublists) == 1
+
+        sublists = all_sublists["ADH"]
+        assert len(sublists) == 4
+
+        expected_sublists = [
+            cp.KSubList(np.array([1, 2, 4]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([7, 9, 11]), mol_id=(0, 1), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([2, 4, 8]), mol_id=(1, 0), feat_ind=[0, 1, 3]),
+            cp.KSubList(np.array([14, 18, 22]), mol_id=(1, 1), feat_ind=[0, 1, 3]),
+        ]
+
+        assert expected_sublists == sublists
 
 
 class TestFeatList:
@@ -166,3 +189,31 @@ class TestFeatList:
             [4., 5., 4.],
         ])
         assert np.allclose(distance_vector, expected)
+
+    def test_has_variant(self):
+        feat_list = cp.FeatureList(variant="AADPR", distances=None, coords=None)
+        assert feat_list.has_variant("AAR")
+        assert not feat_list.has_variant("AHR")
+
+    def test_k_sublists(self):
+        coords = puw.quantity(np.ones((2, 5, 3)), "angstroms")
+        distances = np.array([
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        ])
+        feat_list = cp.FeatureList(variant="AADPR", distances=distances, coords=coords)
+        k_sublists = feat_list.k_sublists(variant="AAP", mol=1)
+        assert k_sublists == [
+            cp.KSubList(np.array([1, 3, 6]), (1, 0), [0, 1, 3]),
+            cp.KSubList(np.array([11, 12, 16]), (1, 1), [0, 1, 3]),
+        ]
+
+    def test_k_sublists_repeated_feat(self):
+        coords = puw.quantity(np.ones((1, 4, 3)), "angstroms")
+        distances = np.array([[1, 2, 3, 4, 5, 6]])
+        feat_list = cp.FeatureList(variant="AADR", distances=distances, coords=coords)
+        k_sublists = feat_list.k_sublists(variant="ADR", mol=1)
+        assert k_sublists == [
+            cp.KSubList(np.array([2, 3, 6]), (1, 0), [0, 1, 3]),
+            cp.KSubList(np.array([4, 5, 6]), (1, 1), [0, 1, 3]),
+        ]
