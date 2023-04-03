@@ -32,69 +32,60 @@ class ScoringFunction:
 class FeatureList:
     """ Class to store feature lists.
 
-       A feature lists represents the pharmacophoric points of a conformer
+       A feature lists represents the pharmacophoric points of a ligand
        including its chemical features and the interpoint distances of its points.
 
        Attributes
        ----------
        variant : str
-           A string with the chemical features of a conformer. For example,
+           A string with the chemical features of the ligand. For example,
            a conformer with two hydrogen bond acceptors (A) and an aromatic
            ring (R) would have variant 'AAR'.
 
-       mol_id : tuple[int, int]
-           The id of this list. The first number is the molecule index and the second
-           the conformer index
-
-       distances : np.ndarray
+       distances : listnp.ndarray
            An array of shape (n_pairs,) where n_pairs is the number of interpoint
            distances given by n_points x (n_points - 1) / 2
 
         coords : QuantityLike
             A quantity with the coordinates of the chemical features.
    """
-    def __init__(self, variant, mol_id, distances, coords):
+    def __init__(self, variant, distances, coords):
         self.variant = variant
-        self.mol_id = mol_id
         self.distances = distances
         self.coords = coords
 
     @classmethod
-    def from_chem_feats(cls, chem_feats, mol, conf):
+    def from_chem_feats(cls, chem_feats):
         """ Create a feature list form a molecule chemical features.
 
             Parameters
             ----------
-            chem_feats : ChemFeatContainer
+            chem_feats : list[ChemFeatContainer]
                List of chemical features.
-
-            mol : int
-                Index of the molecule the chemical features were extracted from.
-
-            conf : int
-                Index of the conformer the chemical features were extracted from.
 
             Returns
             -------
             FeatureList
         """
         variant = ""
-        variant += "A" * len(chem_feats.acceptor)
-        variant += "D" * len(chem_feats.donor)
-        variant += "H" * len(chem_feats.hydrophobic)
-        variant += "N" * len(chem_feats.negative)
-        variant += "P" * len(chem_feats.positive)
-        variant += "R" * len(chem_feats.aromatic)
+        variant += "A" * len(chem_feats[0].acceptor)
+        variant += "D" * len(chem_feats[0].donor)
+        variant += "H" * len(chem_feats[0].hydrophobic)
+        variant += "N" * len(chem_feats[0].negative)
+        variant += "P" * len(chem_feats[0].positive)
+        variant += "R" * len(chem_feats[0].aromatic)
 
-        n_feats = len(chem_feats)
-        coords = puw.quantity(np.zeros((n_feats, 3)), "angstroms")
-        for ii, feat in enumerate(chem_feats):
-            coords[ii] = feat.coords
+        n_conformers = len(chem_feats)
+        n_feats = len(chem_feats[0])
+
+        coords = puw.quantity(np.zeros((n_conformers, n_feats, 3)), "angstroms")
+        for ii in range(len(chem_feats)):
+            for jj, feats in enumerate(chem_feats[ii]):
+                coords[ii][jj] = feats.coords
 
         distances = FeatureList.distance_vector(puw.get_value(coords, "angstroms"))
 
-        mol_id = (mol, conf)
-        return cls(variant, mol_id, distances, coords)
+        return cls(variant, distances, coords)
 
     @staticmethod
     def distance_vector(coords):
@@ -104,23 +95,31 @@ class FeatureList:
             ----------
             coords : np.ndarray
                An array with the chemical features positions. Shape
-               (n_feats, 3)
+               (n_conformers, n_feats, 3)
 
             Returns
             -------
             np.array
                 An array of shape (n_feats * (n_feats - 1) / 2)
         """
-        n_sites = coords.shape[0]
-        distances = np.zeros(int((n_sites * (n_sites - 1)) / 2))
+        n_confs = coords.shape[0]
+        n_sites = coords.shape[1]
+        vec_len = int((n_sites * (n_sites - 1)) / 2)
+        distances = np.zeros((n_confs, vec_len))
 
-        ii = 0
-        for site_i in range(n_sites):
-            for site_j in range(site_i + 1, n_sites):
-                distances[ii] = points_distance(coords[site_i], coords[site_j])
-                ii += 1
+        for conf in range(n_confs):
+            ii = 0
+            for site_i in range(n_sites):
+                for site_j in range(site_i + 1, n_sites):
+                    distances[conf][ii] = points_distance(
+                        coords[conf][site_i], coords[conf][site_j]
+                    )
+                    ii += 1
 
         return distances
+
+    def __len__(self):
+        return self.coords.shape[0]
 
 
 class CommonPharmacophoreFinder:
@@ -128,29 +127,11 @@ class CommonPharmacophoreFinder:
 
         Parameters
         ----------
-        n_points : int
-           Extracted pharmacophores will have this number of pharmacophoric
-           points.
-
-       min_actives : int, optional
-           Number of ligands that must match a common pharmacophore.
-
-       max_pharmacophores : int, optional
-           Maximum number of pharmacophores to return. If set to null
-           all found pharmacophores will be returned.
-
         scoring_fn_params : dict[str, float], optional
             The parameters of the scoring function.
     """
 
-    def __init__(
-        self, n_points, min_actives=None, max_pharmacophores=None,
-        scoring_fn_params=None, **kwargs
-    ):
-        self.n_points = n_points
-        self.min_actives = min_actives
-        self.max_pharmacophores = max_pharmacophores
-
+    def __init__(self, scoring_fn_params=None, **kwargs):
         self.min_dist = kwargs.get("min_dist", puw.quantity(2.0, "angstroms"))
         self.max_dist = kwargs.get("max_dist", puw.quantity(15.0, "angstroms"))
         self.bin_size = kwargs.get("bin_size", puw.quantity(1.0, "angstroms"))
@@ -163,7 +144,8 @@ class CommonPharmacophoreFinder:
         else:
             self.scoring_fn = ScoringFunction(**scoring_fn_params)
 
-    def find_common_pharmacophores(self, chemical_features):
+    def find_common_pharmacophores(self, chemical_features, n_points,
+                                   min_actives=None, max_pharmacophores=None):
         """ Find common pharmacophores.
 
             Parameters
@@ -172,6 +154,18 @@ class CommonPharmacophoreFinder:
                 A nested list where each entry represents the chemical features
                 of a ligand and its conformers (as sublist)
 
+            n_points : int
+               Extracted pharmacophores will have this number of pharmacophoric
+               points.
+
+            min_actives : int, optional
+               Number of ligands that must match a common pharmacophore.
+
+            max_pharmacophores : int, optional
+               Maximum number of pharmacophores to return. If set to null
+               all found pharmacophores will be returned.
+
+
             Returns
             -------
             list[Pharmacophore]
@@ -179,15 +173,18 @@ class CommonPharmacophoreFinder:
 
         """
         n_ligands = len(chemical_features)
+        if min_actives is None:
+            min_actives = n_ligands
 
         feature_lists = self._get_feat_lists(chemical_features)
-        common_variants = self._common_k_point_variants(feature_lists)
+        all_variants = [fl.variant for fl in feature_lists]
+        common_variants = self._common_k_point_variants(all_variants, n_points, min_actives)
         sub_lists = self._feat_sub_lists(feature_lists, common_variants)
 
         scores = {}
-        queue = PriorityQueue(size=self.max_pharmacophores)
+        queue = PriorityQueue(size=max_pharmacophores)
         for variant in sub_lists:
-            surviving_boxes = self._recursive_partitioning(variant, self.min_actives, n_ligands)
+            surviving_boxes = self._recursive_partitioning(variant, min_actives, n_ligands)
             for box in surviving_boxes:
                 if box:
                     top_representative = self._box_top_representative(box, scores, n_ligands)
@@ -195,17 +192,50 @@ class CommonPharmacophoreFinder:
 
         return self._get_pharmacophores(queue, chemical_features)
 
-    def _get_feat_lists(self, chem_feats):
-        """ Get the feat lists of all conformers
+    @staticmethod
+    def _get_feat_lists(chem_feats):
+        """ Get the feat lists of all ligands
+
+            Returns
+            -------
+            feat_lists : list[FeatureList]
+                List where each entry represents the feature lists of
+                a ligand
         """
         feat_lists = []
-        for ii in range(len(chem_feats)):
-            for jj in range(len(chem_feats[ii])):
-                feat_lists.append(FeatureList.from_chem_feats(chem_feats[ii][jj], ii, jj))
+        for cfts in chem_feats:
+            feat_lists.append(FeatureList.from_chem_feats(cfts))
 
         return feat_lists
 
-    def __call__(self, chemical_features):
+    @staticmethod
+    def _common_k_point_variants(variants, n_points, min_actives):
+        """ Find the common k-point feature lists, that is, the lists with variants
+            consisting of k pharmacophoric points that are common to at least the
+            specified number of actives.
+
+            Parameters
+            ----------
+
+            variants : list[str]
+                A feature list for each of the ligands
+
+        """
+        variant_count = {}
+        for lig in range(len(variants)):
+            # Keep track of the variants in this ligand
+            lig_variants = set()
+            for k_var in itertools.combinations(variants[lig], n_points):
+                if k_var not in lig_variants:
+                    lig_variants.add(k_var)
+                    variant_count[k_var] = variant_count.get(k_var, 0) + 1
+
+        return [
+            "".join(var) for var in variant_count.keys()
+            if variant_count[var] >= min_actives
+        ]
+
+    def __call__(self, chemical_features, n_points, min_actives=None, max_pharmacophores=None):
         """ Find common pharmacophores.
 
             Shortcut for calling CommonPharmacophoreFinder.find_common_pharmacophores
@@ -214,4 +244,4 @@ class CommonPharmacophoreFinder:
             ----------
             chemical_features : list[list[ChemFeatContainer]]
         """
-        return self.find_common_pharmacophores(chemical_features)
+        return self.find_common_pharmacophores(chemical_features, n_points, min_actives, max_pharmacophores)

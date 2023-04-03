@@ -86,8 +86,8 @@ class TestCommonPharmacophoreFinder:
         ])
 
         molecules = [[conf_1], [conf_2, conf_3]]
-        cp_finder = cp.CommonPharmacophoreFinder(n_points=3)
-        common_pharmacophores = cp_finder(molecules)
+        cp_finder = cp.CommonPharmacophoreFinder()
+        common_pharmacophores = cp_finder(molecules, n_points=3)
 
         radius = puw.quantity(1.0, "angstroms")
         assert common_pharmacophores == [
@@ -108,7 +108,7 @@ class TestCommonPharmacophoreFinder:
         ]), "angstroms")
 
         conformer_1 = ChemFeatContainer([
-            ChemFeat(coords_1[0], "hb acceptor"),
+            ChemFeat(coords_1[0], "aromatic ring"),
             ChemFeat(coords_1[1], "hb donor"),
         ])
 
@@ -122,38 +122,47 @@ class TestCommonPharmacophoreFinder:
             ChemFeat(coords_2[1], "hb donor"),
         ])
 
-        cp_finder = cp.CommonPharmacophoreFinder(n_points=3)
-        feat_lists = cp_finder._get_feat_lists([
-            [conformer_1], [conformer_2]
+        feat_lists = cp.CommonPharmacophoreFinder._get_feat_lists([
+            [conformer_1, conformer_2]
         ])
-        assert len(feat_lists) == 2
-        assert feat_lists[0].variant == "AD"
-        assert feat_lists[0].mol_id == (0, 0)
-        assert np.all(feat_lists[0].distances == np.array([4.]))
-        assert np.all(feat_lists[0].coords == coords_1)
+        assert len(feat_lists) == 1
+        assert len(feat_lists[0]) == 2
 
-        assert feat_lists[1].variant == "DR"
-        assert feat_lists[1].mol_id == (1, 0)
-        assert np.all(feat_lists[1].distances == np.array([6.]))
-        assert np.all(feat_lists[1].coords == coords_2)
+        expected_distances = np.array([
+            [4., ],
+            [6., ],
+        ])
+        expected_coords = puw.quantity([coords_1, coords_2], "angstroms")
+
+        f_list = feat_lists[0]
+        assert f_list.variant == "DR"
+        assert np.all(f_list.distances == expected_distances)
+        assert np.all(f_list.coords == expected_coords)
 
     def test_common_k_point_variants(self):
-        coords = puw.quantity([1., 2., 3.], "angstroms")
-        distances = np.array([1., 2, .3])
-        all_lists = [
-            cp.FeatureList("ADHP", (0, 0), distances, coords),
-            cp.FeatureList("ADHR", (1, 0), distances, coords),
-            cp.FeatureList("ADHN", (1, 1), distances, coords),
-        ]
+        variants = ["ADHP", "ADHR", "ADHN"]
+        assert cp.CommonPharmacophoreFinder._common_k_point_variants(variants, 3, 2) == ["ADH"]
+            
+    def test_feature_sublists(self):
+        pass
 
 
 class TestFeatList:
 
     def test_distance_vector(self):
         coords = np.array([
-            [4., 3., 0.],
-            [4., 0., 0.],
-            [0., 0., 0.],
+            [[4., 3., 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ],
+            [[3.125, 3.903123749, 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ],
         ])
         distance_vector = cp.FeatureList.distance_vector(coords)
-        assert np.all(distance_vector == np.array([3., 5., 4.]))
+        expected = np.array([
+            [3., 5., 4.],
+            [4., 5., 4.],
+        ])
+        assert np.allclose(distance_vector, expected)
