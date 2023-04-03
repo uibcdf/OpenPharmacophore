@@ -1,7 +1,6 @@
 import openpharmacophore.utils.maths as maths
 import pyunitwizard as puw
 import numpy as np
-import pytest
 
 
 def test_points_distance():
@@ -106,3 +105,9 @@ def test_delete_from_quantity_of_rank_3():
 
     qty_deleted = maths.delete(qty, [1], axis=1)
     assert np.all(puw.get_value(qty_deleted) == expected)
+
+
+def test_nearest_bins():
+    assert maths.nearest_bins(4, 1.0) == (3, 4)
+    assert maths.nearest_bins(2.3, 1.0) == (1, 2)
+    assert maths.nearest_bins(5.7, 1.0) == (5, 6)

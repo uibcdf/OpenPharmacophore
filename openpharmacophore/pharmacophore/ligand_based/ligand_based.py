@@ -1,5 +1,5 @@
 from openpharmacophore import Ligand, Pharmacophore
-from openpharmacophore.pharmacophore.ligand_based.common_pharmacophore import CommonPharmacophoreFinder
+import openpharmacophore.pharmacophore.ligand_based.common_pharmacophore as cp
 
 
 class LigandBasedPharmacophore:
@@ -34,14 +34,15 @@ class LigandBasedPharmacophore:
             min_actives = len(self._ligands)
 
         chem_feats = []
-        for lig in self._ligands:
+        for ii, lig in enumerate(self._ligands):
             ligand_feats = []
             for conf in range(lig.n_conformers):
-                ligand_feats.append(lig.get_chem_feats(conf, indices=True))
+                chem_f = lig.get_chem_feats(conf, indices=False)
+                ligand_feats.append(chem_f)
             chem_feats.append(ligand_feats)
 
-        extractor = CommonPharmacophoreFinder(n_points, min_actives, max_pharmacophores, *args, **kwargs)
-        return extractor(chem_feats)
+        extractor = cp.CommonPharmacophoreFinder(n_points, min_actives, max_pharmacophores, *args, **kwargs)
+        self._pharmacophores = extractor(chem_feats)
 
     def __len__(self):
         return len(self._pharmacophores)

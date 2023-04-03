@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pyunitwizard as puw
 
@@ -147,3 +148,23 @@ def delete(quantity, indices, axis=None):
     unit = str(puw.get_unit(quantity))
     sub_array = np.delete(puw.get_value(quantity), indices, axis=axis)
     return puw.quantity(sub_array, unit)
+
+
+def nearest_bins(num, bin_size):
+    """ Return the index of the nearest bins of the given number
+        in the bins array.
+
+        Parameters
+        ----------
+        num : float
+        bin_size : float
+
+        Returns
+        -------
+        tuple[int, int]
+    """
+    if num % 1 <= 0.5:
+        low_bin = math.floor(num - bin_size)
+    else:
+        low_bin = math.ceil(num - bin_size)
+    return low_bin, low_bin + 1

@@ -89,6 +89,21 @@ SMARTS_PROTEIN = {
 
 @dataclass(frozen=True)
 class ChemFeat:
+    """ Class to store chemical features.
+
+        Attributes
+        ----------
+        coords: QuantityLike
+            3D position of the chemical feature.
+
+        type: str
+            Feature type
+
+        atom_indices: tuple[int], optional
+            The indices of the atoms that comprise the chemical feature
+             in the molecule.
+
+    """
     coords: QuantityLike
     type: str
     atom_indices: Optional[Tuple[int]] = None
@@ -107,6 +122,8 @@ class HBDonor(ChemFeat):
 
 
 class ChemFeatContainer:
+    """ A container that stores chemical features by type.
+    """
 
     def __init__(self, feats=None):
         self.aromatic = []
