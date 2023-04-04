@@ -194,6 +194,44 @@ class TestCommonPharmacophoreFinder:
              ],
         ]
 
+    def test_box_top_representative(self):
+        cp.KSubList.ID = 1
+        cp_finder = cp.CommonPharmacophoreFinder()
+        surviving_box = [
+            cp.KSubList(np.array([3, 5, 4]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([4, 5, 4]), mol_id=(1, 0), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([6, 5, 4]), mol_id=(1, 1), feat_ind=[0, 1, 2]),
+        ]
+        scores = {}
+        coords_1 = puw.quantity(np.array([
+            [[4., 3., 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ]]), "angstroms")
+        coords_2 = puw.quantity(np.array([
+            [[3.125, 3.903123749, 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ],
+            [[6.3333333333, 2.98142397, 0.],
+             [6., 0., 0.],
+             [0., 0., 0.],
+             ],
+        ]), "angstroms")
+
+        feature_lists = [
+            cp.FeatureList("AAR", distances=np.array([3, 5, 4]), coords=coords_1),
+            cp.FeatureList("AAR", distances=np.array([3, 5, 4]), coords=coords_2),
+        ]
+
+        top = cp_finder._box_top_representative(surviving_box, scores, feature_lists)
+        assert top == surviving_box[0]
+        assert top.score == 0.7970227095188576
+        assert scores == {
+            (1, 2): 0.6506998281828833,
+            (1, 3): 0.14632288133597426,
+        }
+
 
 class TestFeatList:
 
@@ -264,3 +302,29 @@ class TestSurvivingBox:
         box_3 = cp.SurvivingBox()
         box_3.id = [1, 2, 3]
         assert box_1 == box_3
+
+
+class TestScoringFunction:
+
+    def test_point_score(self):
+        coords = puw.quantity(np.array([
+            [[4., 3., 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ]]), "angstroms")
+        coords_2 = puw.quantity(np.array([
+            [[3.125, 3.903123749, 0.],
+             [4., 0., 0.],
+             [0., 0., 0.],
+             ],
+            [[6.3333333333, 2.98142397, 0.],
+             [6., 0., 0.],
+             [0., 0., 0.],
+             ],
+        ]), "angstroms")
+
+        feature_list_1 = cp.FeatureList("AAR", distances=np.array([1, 2, 3]), coords=coords)
+        feature_list_2 = cp.FeatureList("AAR", distances=np.array([1, 2, 3]), coords=coords_2)
+        scoring_fn = cp.ScoringFunction()
+        score = scoring_fn.point_score(feature_list_1, feature_list_2, ref_conf=0, other_conf=1)
+        assert score == 0.14632288133597426

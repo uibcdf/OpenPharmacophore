@@ -32,6 +32,37 @@ class ScoringFunction:
         self.rmsd_cutoff = rmsd_cutoff
         self.cos_cutoff = cos_cutoff
 
+    def point_score(self, reference, other, ref_conf, other_conf):
+        """ Compute the point score function that is defined by
+            1 - RMSD / RMSD_cutoff
+
+            Parameters
+            ----------
+            reference : FeatureList
+                Reference feature list for alignment.
+            other : FeatureList
+                Another feature list.
+            ref_conf : int
+                The conformer in reference list for which score is calculated.
+            other_conf: int
+                The conformer in the other list.
+
+            Returns
+            -------
+            float
+        """
+        rmsd = np.sqrt(
+            np.power(reference.coords[ref_conf] - other.coords[other_conf], 2).mean()
+        )
+        return 1 - rmsd / self.rmsd_cutoff
+
+    def vector_score(self):
+        # TODO: Implement me!
+        return 0
+
+    def __call__(self, reference, other, ref_conf, other_conf):
+        return self.point_score(reference, other, ref_conf, other_conf) + self.vector_score()
+
 
 class FeatureList:
     """ Class to store feature lists.
@@ -249,6 +280,8 @@ class CommonPharmacophoreFinder:
                 List with the common pharmacophores.
 
         """
+        KSubList.ID = 1
+
         n_ligands = len(chemical_features)
         if min_actives is None:
             min_actives = n_ligands
@@ -263,8 +296,9 @@ class CommonPharmacophoreFinder:
             surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives)
             for box in surviving_boxes:
                 if len(box) > 0:
-                    top_representative = self._box_top_representative(box, scores, n_ligands)
-                    queue.push(top_representative)
+                    top_representative = self._box_top_representative(box, scores, feature_lists)
+                    if top_representative is not None:
+                        queue.push(top_representative)
 
         return self._get_pharmacophores(queue, chemical_features)
 
@@ -332,6 +366,65 @@ class CommonPharmacophoreFinder:
             n_dims = sublists[0].distances.shape[0]
             self._recursive_partitioning_util(sublists, min_actives, 0, n_dims, boxes)
         return [b.sublists for b in boxes]
+
+    def _box_top_representative(self, box, scores, feature_lists):
+        """ Obtain the top ranked representative feature sublist from a surviving box.
+
+            Parameters
+            ----------
+            box : list[KSublist]
+                A surviving box
+
+            scores : dict[tuple, float]
+                Values of point scores between feature lists.
+
+            Returns
+            -------
+            KSubList
+                The best ranked feature sublist in the box with its score. Can be null if the
+                alignments of the feature list are above the rmsd threshold.
+        """
+        best_score = float("-inf")
+        best_ref = None
+
+        for ref in box:
+            total_score = 0
+            exclude = False
+            for other in box:
+                # Score reference only with respect to feature lists of other molecules
+                if ref.mol_id[0] == other.mol_id[0]:
+                    continue
+
+                idx_1 = ref.id
+                idx_2 = other.id
+                if idx_2 < idx_1:
+                    idx_1, idx_2 = idx_2, idx_1
+
+                try:
+                    align_score = scores[(idx_1, idx_2)]
+                except KeyError:
+                    ref_flist = feature_lists[ref.mol_id[0]]
+                    other_flist = feature_lists[other.mol_id[0]]
+                    conf_ref = ref.mol_id[1]
+                    conf_other = other.mol_id[1]
+                    align_score = self.scoring_fn(ref_flist, other_flist, conf_ref, conf_other)
+                    scores[(idx_1, idx_2)] = align_score
+
+                if align_score < 0:
+                    # Exclude this reference as a potential hypothesis
+                    exclude = True
+                    break
+
+                total_score += align_score
+
+            if not exclude and total_score > best_score:
+                best_score = total_score
+                best_ref = ref
+
+        if best_ref is None:
+            return
+        best_ref.score = best_score
+        return best_ref
 
     @staticmethod
     def _get_feat_lists(chem_feats):
