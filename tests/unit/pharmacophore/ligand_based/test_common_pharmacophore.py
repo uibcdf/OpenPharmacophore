@@ -29,11 +29,9 @@ class TestCommonPharmacophoreFinder:
             bin_size=bin_size,
         )
 
-        expected_bins = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        assert finder.min_dist == min_dist
-        assert finder.max_dist == max_dist
-        assert finder.bin_size == bin_size
-        assert np.all(finder.bins == expected_bins)
+        assert finder.min_dist == 1
+        assert finder.max_dist == 10
+        assert finder.bin_size == 1
 
         assert finder.scoring_fn.point_weight == 1.0
         assert finder.scoring_fn.vector_weight == 1.0
@@ -156,7 +154,7 @@ class TestCommonPharmacophoreFinder:
             ]
         }
         assert expected == common
-            
+
     def test_variant_sublists(self):
         common_variants = {
             "ADP": [cp.KVariant((0, 1, 2), 0), cp.KVariant((0, 1, 3), 1)]
@@ -181,6 +179,20 @@ class TestCommonPharmacophoreFinder:
         ]
 
         assert expected == sublists
+
+    def test_recursive_partitioning(self):
+        sublists = [
+            cp.KSubList(np.array([3, 5, 4]), mol_id=(0, 0), feat_ind=[]),
+            cp.KSubList(np.array([4, 5, 4]), mol_id=(1, 0), feat_ind=[]),
+            cp.KSubList(np.array([3, 7, 6]), mol_id=(1, 1), feat_ind=[]),
+        ]
+        cp_finder = cp.CommonPharmacophoreFinder()
+        surviving_boxes = cp_finder._recursive_partitioning(sublists, min_actives=2)
+        assert surviving_boxes == [
+            [cp.KSubList(np.array([3, 5, 4]), mol_id=(0, 0), feat_ind=[]),
+             cp.KSubList(np.array([4, 5, 4]), mol_id=(1, 0), feat_ind=[]),
+             ],
+        ]
 
 
 class TestFeatList:
@@ -221,3 +233,34 @@ class TestFeatList:
             cp.KSubList(np.array([1, 3, 4]), (1, 0), [0, 2, 3]),
             cp.KSubList(np.array([11, 13, 14]), (1, 1), [0, 2, 3]),
         ]
+
+
+class TestKSubList:
+
+    def test_id_is_incremented(self):
+        cp.KSubList.ID = 1
+
+        distance = np.array([1, 2, 30])
+        sublist_1 = cp.KSubList(distance, (0, 0), [1, 2, 3, 4])
+        sublist_2 = cp.KSubList(distance, (0, 0), [1, 2, 3, 4])
+        sublist_3 = cp.KSubList(distance, (0, 0), [1, 2, 3, 4])
+
+        assert sublist_1.id == 1
+        assert sublist_2.id == 2
+        assert sublist_3.id == 3
+
+
+class TestSurvivingBox:
+
+    def test_equality(self):
+        box_1 = cp.SurvivingBox()
+        box_1.id = [1, 2, 3]
+
+        box_2 = cp.SurvivingBox()
+        box_2.id = [2, 3]
+
+        assert not box_1 == box_2
+
+        box_3 = cp.SurvivingBox()
+        box_3.id = [1, 2, 3]
+        assert box_1 == box_3

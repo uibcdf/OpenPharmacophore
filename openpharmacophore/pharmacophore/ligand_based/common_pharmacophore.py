@@ -159,16 +159,22 @@ class FeatureList:
         return self.coords.shape[0]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class KSubList:
     """ Class to store sub sets of a feature lists with k points.
 
         Does not store chem feats coordinates.
     """
+    ID = 1
+
     distances: np.ndarray
     mol_id: Tuple[int, int]
     feat_ind: List[int]
     score: Optional[float] = None
+
+    def __post_init__(self):
+        self.id = KSubList.ID
+        KSubList.ID += 1
 
     def __eq__(self, other):
         if other.mol_id != self.mol_id:
@@ -179,6 +185,17 @@ class KSubList:
 
 
 KVariant = namedtuple("KVariant", ["feat_ind", "mol"])
+
+
+class SurvivingBox:
+
+    def __init__(self):
+        self.sublists = []  # type: list[KSubList]
+        self.ligands = set()  # type: set[int]
+        self.id = []  # type: list[int]
+
+    def __eq__(self, other):
+        return self.id == other.id
 
 
 class CommonPharmacophoreFinder:
@@ -194,9 +211,10 @@ class CommonPharmacophoreFinder:
         self.min_dist = kwargs.get("min_dist", puw.quantity(2.0, "angstroms"))
         self.max_dist = kwargs.get("max_dist", puw.quantity(15.0, "angstroms"))
         self.bin_size = kwargs.get("bin_size", puw.quantity(1.0, "angstroms"))
-        self.bins = np.arange(
-            0, puw.get_value(self.max_dist + self.bin_size), step=puw.get_value(self.bin_size)
-        )
+
+        self.min_dist = puw.get_value(self.min_dist)
+        self.max_dist = puw.get_value(self.max_dist)
+        self.bin_size = puw.get_value(self.bin_size)
 
         if scoring_fn_params is None:
             self.scoring_fn = ScoringFunction()
@@ -242,13 +260,78 @@ class CommonPharmacophoreFinder:
         scores = {}
         queue = PriorityQueue(size=max_pharmacophores)
         for variant in sub_lists.keys():
-            surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives, n_ligands)
+            surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives)
             for box in surviving_boxes:
-                if box:
+                if len(box) > 0:
                     top_representative = self._box_top_representative(box, scores, n_ligands)
                     queue.push(top_representative)
 
         return self._get_pharmacophores(queue, chemical_features)
+
+    def _recursive_partitioning_util(self, sublists, min_actives, dim, n_dims, boxes):
+        """ Helper function for _recursive_partitioning:
+
+            Parameters
+            ----------
+            sublists : list[KSubList]
+                Sublists of the same variant
+
+            min_actives : int
+                Minimum number of actives that a surviving box must contain
+
+            dim : int
+                The dimension of the distances array which will be used for
+                partitioning.
+
+            n_dims : int
+                Total number of dimensions in the distances array.
+
+            boxes : list[SurvivingBox]
+                Stores the surviving sublists
+        """
+        bins = defaultdict(SurvivingBox)
+
+        for sublist_ in sublists:
+            low_bin, upp_bin = nearest_bins(sublist_.distances[dim], self.bin_size)
+            if low_bin >= self.max_dist or upp_bin >= self.max_dist:
+                continue
+
+            bins[low_bin].sublists.append(sublist_)
+            bins[upp_bin].sublists.append(sublist_)
+
+            bins[low_bin].ligands.add(sublist_.mol_id[0])
+            bins[upp_bin].ligands.add(sublist_.mol_id[0])
+
+        for box in bins.values():
+            if len(box.ligands) >= min_actives:
+                if dim < n_dims - 1:
+                    self._recursive_partitioning_util(box.sublists, min_actives, dim + 1, n_dims, boxes)
+                else:
+                    if box not in boxes:
+                        boxes.append(box)
+
+    def _recursive_partitioning(self, sublists, min_actives):
+        """ Partition feature lists by their inter-site distances and group
+            them into "surviving boxes", which are lists of feature lists that
+            have similar inter-site distances.
+
+           Parameters
+           ----------
+           sublists : list[KSubList]
+                Sublists of the same variant
+
+           min_actives : int
+                Minimum number of actives that a surviving box must contain
+
+           Returns
+           -------
+           boxes : list[list[KSubList]]
+        """
+        boxes = []  # type: list[SurvivingBox]
+        if sublists:
+            n_dims = sublists[0].distances.shape[0]
+            self._recursive_partitioning_util(sublists, min_actives, 0, n_dims, boxes)
+        return [b.sublists for b in boxes]
 
     @staticmethod
     def _get_feat_lists(chem_feats):

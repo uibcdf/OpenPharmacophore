@@ -164,7 +164,7 @@ def nearest_bins(num, bin_size):
         tuple[int, int]
     """
     if num % 1 <= 0.5:
-        low_bin = math.floor(num - bin_size)
+        low_bin = np.floor(num - bin_size)
     else:
-        low_bin = math.ceil(num - bin_size)
+        low_bin = np.ceil(num - bin_size)
     return low_bin, low_bin + 1
