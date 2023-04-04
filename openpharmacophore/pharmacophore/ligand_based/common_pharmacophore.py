@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, namedtuple
 from dataclasses import dataclass
 import itertools
 from typing import List, Optional, Tuple
@@ -19,6 +19,7 @@ class PriorityQueue:
 class ScoringFunction:
     """ A customizable scoring function to score the common pharmacophores.
     """
+
     def __init__(
             self,
             point_weight=1.0,
@@ -53,6 +54,7 @@ class FeatureList:
             A quantity with the coordinates of the chemical features.
             Shape (n_conformers, n_feats, 3)
    """
+
     def __init__(self, variant, distances, coords):
         self.variant = variant
         self.distances = distances
@@ -132,19 +134,26 @@ class FeatureList:
 
         return distances
 
-    def k_sublists(self, variant, mol):
-        """ Get all sublists of the given variant.
+    def k_sublists(self, k_variant):
+        """ Get a sublists of the given variant.
 
             Parameters
             ----------
-            variant : str
+            k_variant : KVariant
             mol: int
 
             Returns
             -------
-            list[KSubList]
+            sublists: list[KSubList]
         """
-        pass
+        n_confs = self.distances.shape[0]
+        sublists = [None] * n_confs
+        for ii in range(n_confs):
+            feat_ind = list(k_variant.feat_ind)
+            sublists[ii] = KSubList(
+                self.distances[ii][feat_ind], (k_variant.mol, ii), feat_ind
+            )
+        return sublists
 
     def __len__(self):
         return self.coords.shape[0]
@@ -160,6 +169,16 @@ class KSubList:
     mol_id: Tuple[int, int]
     feat_ind: List[int]
     score: Optional[float] = None
+
+    def __eq__(self, other):
+        if other.mol_id != self.mol_id:
+            return False
+        if other.feat_ind != self.feat_ind:
+            return False
+        return np.all(self.distances == other.distances)
+
+
+KVariant = namedtuple("KVariant", ["feat_ind", "mol"])
 
 
 class CommonPharmacophoreFinder:
@@ -217,8 +236,7 @@ class CommonPharmacophoreFinder:
             min_actives = n_ligands
 
         feature_lists = self._get_feat_lists(chemical_features)
-        all_variants = [fl.variant for fl in feature_lists]
-        common_variants = self._common_k_point_variants(all_variants, n_points, min_actives)
+        common_variants = self._common_k_point_variants(feature_lists, n_points, min_actives)
         sub_lists = self._variant_sublists(feature_lists, common_variants)
 
         scores = {}
@@ -249,31 +267,48 @@ class CommonPharmacophoreFinder:
         return feat_lists
 
     @staticmethod
-    def _common_k_point_variants(variants, n_points, min_actives):
-        """ Find the common k-point feature lists, that is, the lists with variants
-            consisting of k pharmacophoric points that are common to at least the
+    def _common_k_point_variants(feat_lists, n_points, min_actives):
+        """ Find the common k-point variants, that is, the variants
+            consisting of k features that are common to at least the
             specified number of actives.
 
             Parameters
             ----------
-
-            variants : list[str]
+            feat_lists : list[FeatureList]
                 A feature list for each of the ligands
+
+            n_points : int
+
+            min_actives: int
+
+            Returns
+            -------
+            k_variants : dict[str, list[KVariant]]
 
         """
         variant_count = {}
-        for lig in range(len(variants)):
+        k_variants = defaultdict(list)
+
+        for ii, flist in enumerate(feat_lists):
             # Keep track of the variants in this ligand
             lig_variants = set()
-            for k_var in itertools.combinations(variants[lig], n_points):
+            for k_var_ind in itertools.combinations(
+                    range(len(flist.variant)), n_points):
+                k_var = ""
+                for jj in k_var_ind:
+                    k_var += flist.variant[jj]
+
                 if k_var not in lig_variants:
                     lig_variants.add(k_var)
                     variant_count[k_var] = variant_count.get(k_var, 0) + 1
 
-        return [
-            "".join(var) for var in variant_count.keys()
-            if variant_count[var] >= min_actives
-        ]
+                k_variants[k_var].append(KVariant(k_var_ind, ii))
+
+        for k_var, count in variant_count.items():
+            if count < min_actives:
+                k_variants.pop(k_var)
+
+        return k_variants
 
     @staticmethod
     def _variant_sublists(feat_lists, common_variants):
@@ -286,20 +321,20 @@ class CommonPharmacophoreFinder:
             feat_lists : list[FeatureList]
                 Feature lists of all ligands
 
-            common_variants : list[str]
+            common_variants : dict[str, list[KVariant]]
                 The common variants
 
             Returns
             -------
-            variants : dict[Str, list[KSubList]]
+            variants : dict[str, list[KSubList]]
         """
-        variants = defaultdict(list)
-        for var in common_variants:
-            for ii, flist in enumerate(feat_lists):
-                if flist.has_variant(var):
-                    variants[var].extend(flist.k_sub_lists(var, ii))
+        var_sublists = defaultdict(list)
+        for var, var_list in common_variants.items():
+            for k_var in var_list:
+                flist = feat_lists[k_var.mol]
+                var_sublists[var].extend(flist.k_sublists(k_var))
 
-        return variants
+        return var_sublists
 
     def __call__(self, chemical_features, n_points, min_actives=None, max_pharmacophores=None):
         """ Find common pharmacophores.

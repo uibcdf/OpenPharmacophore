@@ -1,3 +1,4 @@
+from collections import defaultdict
 import pyunitwizard as puw
 import numpy as np
 from openpharmacophore import Pharmacophore, PharmacophoricPoint
@@ -140,11 +141,26 @@ class TestCommonPharmacophoreFinder:
         assert np.all(f_list.coords == expected_coords)
 
     def test_common_k_point_variants(self):
-        variants = ["ADHP", "ADHR", "ADHN"]
-        assert cp.CommonPharmacophoreFinder._common_k_point_variants(variants, 3, 2) == ["ADH"]
+        feat_lists = [
+            cp.FeatureList("AADH", None, None),
+            cp.FeatureList("ADHP", None, None),
+            cp.FeatureList("ADHN", None, None),
+        ]
+        common = cp.CommonPharmacophoreFinder._common_k_point_variants(feat_lists, 3, 3)
+        expected = {
+            "ADH": [
+                cp.KVariant(feat_ind=(0, 2, 3), mol=0),
+                cp.KVariant(feat_ind=(1, 2, 3), mol=0),
+                cp.KVariant(feat_ind=(0, 1, 2), mol=1),
+                cp.KVariant(feat_ind=(0, 1, 2), mol=2),
+            ]
+        }
+        assert expected == common
             
-    def test_variant_containers(self):
-        common_variants = ["ADP"]
+    def test_variant_sublists(self):
+        common_variants = {
+            "ADP": [cp.KVariant((0, 1, 2), 0), cp.KVariant((0, 1, 3), 1)]
+        }
         coords = np.ones((2, 4, 3))
         distances = np.array([
             [1, 2, 3, 4, 5, 6],
@@ -154,20 +170,17 @@ class TestCommonPharmacophoreFinder:
             cp.FeatureList("ADPR", distances, coords),
             cp.FeatureList("ADHP", distances * 2, coords),
         ]
-        all_sublists = cp.CommonPharmacophoreFinder._variant_sublists(feat_lists, common_variants)
-        assert len(all_sublists) == 1
+        sublists = cp.CommonPharmacophoreFinder._variant_sublists(feat_lists, common_variants)
 
-        sublists = all_sublists["ADH"]
-        assert len(sublists) == 4
-
-        expected_sublists = [
-            cp.KSubList(np.array([1, 2, 4]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
-            cp.KSubList(np.array([7, 9, 11]), mol_id=(0, 1), feat_ind=[0, 1, 2]),
+        expected = defaultdict(list)
+        expected["ADP"] = [
+            cp.KSubList(np.array([1, 2, 3]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([7, 8, 9]), mol_id=(0, 1), feat_ind=[0, 1, 2]),
             cp.KSubList(np.array([2, 4, 8]), mol_id=(1, 0), feat_ind=[0, 1, 3]),
-            cp.KSubList(np.array([14, 18, 22]), mol_id=(1, 1), feat_ind=[0, 1, 3]),
+            cp.KSubList(np.array([14, 16, 20]), mol_id=(1, 1), feat_ind=[0, 1, 3]),
         ]
 
-        assert expected_sublists == sublists
+        assert expected == sublists
 
 
 class TestFeatList:
@@ -202,18 +215,9 @@ class TestFeatList:
             [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         ])
         feat_list = cp.FeatureList(variant="AADPR", distances=distances, coords=coords)
-        k_sublists = feat_list.k_sublists(variant="AAP", mol=1)
+        k_variant = cp.KVariant((0, 2, 3), 1)
+        k_sublists = feat_list.k_sublists(k_variant)
         assert k_sublists == [
-            cp.KSubList(np.array([1, 3, 6]), (1, 0), [0, 1, 3]),
-            cp.KSubList(np.array([11, 12, 16]), (1, 1), [0, 1, 3]),
-        ]
-
-    def test_k_sublists_repeated_feat(self):
-        coords = puw.quantity(np.ones((1, 4, 3)), "angstroms")
-        distances = np.array([[1, 2, 3, 4, 5, 6]])
-        feat_list = cp.FeatureList(variant="AADR", distances=distances, coords=coords)
-        k_sublists = feat_list.k_sublists(variant="ADR", mol=1)
-        assert k_sublists == [
-            cp.KSubList(np.array([2, 3, 6]), (1, 0), [0, 1, 3]),
-            cp.KSubList(np.array([4, 5, 6]), (1, 1), [0, 1, 3]),
+            cp.KSubList(np.array([1, 3, 4]), (1, 0), [0, 2, 3]),
+            cp.KSubList(np.array([11, 13, 14]), (1, 1), [0, 2, 3]),
         ]
