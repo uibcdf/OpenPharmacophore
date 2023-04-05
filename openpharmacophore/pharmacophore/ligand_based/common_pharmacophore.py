@@ -78,27 +78,23 @@ class ScoringFunction:
         self.rmsd_cutoff = rmsd_cutoff
         self.cos_cutoff = cos_cutoff
 
-    def point_score(self, reference, other, ref_conf, other_conf):
+    def point_score(self, reference, other):
         """ Compute the point score function that is defined by
             1 - RMSD / RMSD_cutoff
 
             Parameters
             ----------
-            reference : FeatureList
-                Reference feature list for alignment.
-            other : FeatureList
-                Another feature list.
-            ref_conf : int
-                The conformer in reference list for which score is calculated.
-            other_conf: int
-                The conformer in the other list.
+            reference : QuantityLike
+                Coordinates of reference feature list for alignment.
+            other : QuantityLike
+                Coordinates of another feature list.
 
             Returns
             -------
             float
         """
         rmsd = np.sqrt(
-            np.power(reference.coords[ref_conf] - other.coords[other_conf], 2).mean()
+            np.power(reference - other, 2).mean()
         )
         return puw.get_value(1 - rmsd / self.rmsd_cutoff)
 
@@ -106,8 +102,8 @@ class ScoringFunction:
         # TODO: Implement me!
         return 0
 
-    def __call__(self, reference, other, ref_conf, other_conf):
-        return self.point_weight * self.point_score(reference, other, ref_conf, other_conf)\
+    def __call__(self, reference, other):
+        return self.point_weight * self.point_score(reference, other)\
             + self.vector_weight * self.vector_score()
 
 
@@ -478,11 +474,10 @@ class CommonPharmacophoreFinder:
                 try:
                     align_score = scores[(idx_1, idx_2)]
                 except KeyError:
-                    ref_flist = feature_lists[ref.mol_id[0]]
-                    other_flist = feature_lists[other.mol_id[0]]
-                    conf_ref = ref.mol_id[1]
-                    conf_other = other.mol_id[1]
-                    align_score = self.scoring_fn(ref_flist, other_flist, conf_ref, conf_other)
+                    ref_flist, other_flist = feature_lists[ref.mol_id[0]], feature_lists[other.mol_id[0]]
+                    conf_ref, conf_other = ref.mol_id[1], other.mol_id[1]
+                    align_score = self.scoring_fn(ref_flist.coords[conf_ref][ref.feat_ind],
+                                                  other_flist.coords[conf_other][other.feat_ind])
                     scores[(idx_1, idx_2)] = align_score
 
                 if align_score < 0:

@@ -97,7 +97,7 @@ class TestCommonPharmacophoreFinder:
             ],
                 ref_struct=0,
                 ref_mol=0,
-                score=0.6974971776601078
+                score=0.6506998281828833
             ),
         ]
 
@@ -367,26 +367,19 @@ class TestSurvivingBox:
 class TestScoringFunction:
 
     def test_point_score(self):
+        ref_coords = puw.quantity(np.array([
+            [4., 3., 0.],
+            [4., 0., 0.],
+            [0., 0., 0.]
+        ]), "angstroms")
         coords = puw.quantity(np.array([
-            [[4., 3., 0.],
-             [4., 0., 0.],
-             [0., 0., 0.],
-             ]]), "angstroms")
-        coords_2 = puw.quantity(np.array([
-            [[3.125, 3.903123749, 0.],
-             [4., 0., 0.],
-             [0., 0., 0.],
-             ],
-            [[6.3333333333, 2.98142397, 0.],
-             [6., 0., 0.],
-             [0., 0., 0.],
-             ],
+            [6.3333333333, 2.98142397, 0.],
+            [6., 0., 0.],
+            [0., 0., 0.],
         ]), "angstroms")
 
-        feature_list_1 = cp.FeatureList("AAR", distances=np.array([1, 2, 3]), coords=coords)
-        feature_list_2 = cp.FeatureList("AAR", distances=np.array([1, 2, 3]), coords=coords_2)
         scoring_fn = cp.ScoringFunction()
-        score = scoring_fn.point_score(feature_list_1, feature_list_2, ref_conf=0, other_conf=1)
+        score = scoring_fn.point_score(ref_coords, coords)
         assert score == 0.14632288133597426
 
 

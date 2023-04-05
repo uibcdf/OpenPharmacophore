@@ -41,8 +41,8 @@ class LigandBasedPharmacophore:
                 ligand_feats.append(chem_f)
             chem_feats.append(ligand_feats)
 
-        extractor = cp.CommonPharmacophoreFinder(n_points, min_actives, max_pharmacophores, *args, **kwargs)
-        self._pharmacophores = extractor(chem_feats)
+        extractor = cp.CommonPharmacophoreFinder(*args, **kwargs)
+        self._pharmacophores = extractor(chem_feats, n_points, min_actives, max_pharmacophores)
 
     def __len__(self):
         return len(self._pharmacophores)
