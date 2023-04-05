@@ -40,6 +40,8 @@ class FeatListQueue:
             sublist with the smallest score is removed and the new sublist inserted.
         """
         if self.size is not None and len(self._heap) >= self.size:
+            if sublist.score < self.peek_left().score:
+                return
             self.pop()
         heapq.heappush(self._heap, FeatQueueWrapper(sublist))
 
@@ -47,6 +49,14 @@ class FeatListQueue:
         """ Get the sublists with the smallest score.
         """
         return heapq.heappop(self._heap).sublist
+
+    def peek_left(self):
+        """ Returns the smallest element. """
+        return self._heap[0].sublist
+
+    def peek_right(self):
+        """ Returns the greatest element. """
+        return self._heap[-1].sublist
 
     def empty(self):
         return len(self._heap) == 0
