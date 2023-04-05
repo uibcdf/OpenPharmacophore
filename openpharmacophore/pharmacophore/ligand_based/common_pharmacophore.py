@@ -97,7 +97,8 @@ class ScoringFunction:
         return 0
 
     def __call__(self, reference, other, ref_conf, other_conf):
-        return self.point_score(reference, other, ref_conf, other_conf) + self.vector_score()
+        return self.point_weight * self.point_score(reference, other, ref_conf, other_conf)\
+            + self.vector_weight * self.vector_score()
 
 
 class FeatureList:
@@ -201,6 +202,34 @@ class FeatureList:
 
         return distances
 
+    def subvariant_distances(self, variant, conf):
+        """ Get the distance vector of a subvariant.
+
+            Parameters
+            ----------
+            variant : list[int]
+            conf : int
+
+            Returns
+            -------
+            distances : np.ndarray
+        """
+        distances = np.zeros(int(len(variant) * (len(variant) - 1) / 2))
+        cnt = 0
+
+        n_pairs = self.distances.shape[-1]
+        n_feats = len(self.variant)
+
+        for ii in range(len(variant)):
+            var_left = variant[ii]
+            start = int(n_pairs - (n_feats - var_left)*(n_feats - var_left - 1) / 2)
+            for jj in range(ii + 1, len(variant)):
+                shift = variant[jj] - var_left - 1
+                distances[cnt] = self.distances[conf][start + shift]
+                cnt += 1
+
+        return distances
+
     def k_sublists(self, k_variant):
         """ Get a sublists of the given variant.
 
@@ -216,9 +245,9 @@ class FeatureList:
         n_confs = self.distances.shape[0]
         sublists = [None] * n_confs
         for ii in range(n_confs):
-            feat_ind = list(k_variant.var_ind)
+            variant_ind = list(k_variant.var_ind)
             sublists[ii] = KSubList(
-                self.distances[ii][feat_ind], (k_variant.mol, ii), feat_ind
+                self.subvariant_distances(variant_ind, ii), (k_variant.mol, ii), variant_ind
             )
         return sublists
 

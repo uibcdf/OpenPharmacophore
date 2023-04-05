@@ -97,7 +97,7 @@ class TestCommonPharmacophoreFinder:
             ],
                 ref_struct=0,
                 ref_mol=0,
-                score=0.7970227095188576
+                score=0.6974971776601078
             ),
         ]
 
@@ -108,8 +108,8 @@ class TestCommonPharmacophoreFinder:
         ]), "angstroms")
 
         conformer_1 = ChemFeatContainer([
-            ChemFeat(coords_1[0], "aromatic ring"),
-            ChemFeat(coords_1[1], "hb donor"),
+            ChemFeat(coords_1[0], "hb donor"),
+            ChemFeat(coords_1[1], "aromatic ring"),
         ])
 
         coords_2 = puw.quantity(np.array([
@@ -118,8 +118,8 @@ class TestCommonPharmacophoreFinder:
         ]), "angstroms")
 
         conformer_2 = ChemFeatContainer([
-            ChemFeat(coords_2[0], "aromatic ring"),
-            ChemFeat(coords_2[1], "hb donor"),
+            ChemFeat(coords_2[0], "hb donor"),
+            ChemFeat(coords_2[1], "aromatic ring"),
         ])
 
         feat_lists = cp.CommonPharmacophoreFinder._get_feat_lists([
@@ -173,10 +173,10 @@ class TestCommonPharmacophoreFinder:
 
         expected = defaultdict(list)
         expected["ADP"] = [
-            cp.KSubList(np.array([1, 2, 3]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
-            cp.KSubList(np.array([7, 8, 9]), mol_id=(0, 1), feat_ind=[0, 1, 2]),
-            cp.KSubList(np.array([2, 4, 8]), mol_id=(1, 0), feat_ind=[0, 1, 3]),
-            cp.KSubList(np.array([14, 16, 20]), mol_id=(1, 1), feat_ind=[0, 1, 3]),
+            cp.KSubList(np.array([1, 2, 4]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([7, 8, 10]), mol_id=(0, 1), feat_ind=[0, 1, 2]),
+            cp.KSubList(np.array([2, 6, 10]), mol_id=(1, 0), feat_ind=[0, 1, 3]),
+            cp.KSubList(np.array([14, 18, 22]), mol_id=(1, 1), feat_ind=[0, 1, 3]),
         ]
 
         assert expected == sublists
@@ -302,17 +302,35 @@ class TestFeatList:
     def test_k_sublists(self):
         coords = puw.quantity(np.ones((2, 5, 3)), "angstroms")
         distances = np.array([
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
         ])
         feat_list = cp.FeatureList(variant="AADPR", distances=distances, coords=coords)
         k_variant = cp.KVariant((0, 2, 3), 1)
         k_sublists = feat_list.k_sublists(k_variant)
         assert k_sublists == [
-            cp.KSubList(np.array([1, 3, 4]), (1, 0), [0, 2, 3]),
-            cp.KSubList(np.array([11, 13, 14]), (1, 1), [0, 2, 3]),
+            cp.KSubList(np.array([1, 2, 7]), (1, 0), [0, 2, 3]),
+            cp.KSubList(np.array([11, 12, 17]), (1, 1), [0, 2, 3]),
         ]
 
+    def test_sub_variant_distances(self):
+        distances = np.array([
+            [0, 1, 2, 3, 4,
+             5, 6, 7, 8,
+             9, 10, 11,
+             12, 13,
+             14
+             ],
+        ])
+        feat_list = cp.FeatureList(variant="ABCDEF", distances=distances, coords=None)
+        sub_variant = [1, 3, 4, 5]  # Subvariant BDEF
+        distances = feat_list.subvariant_distances(sub_variant, conf=0)
+        expected = np.array([
+            6, 7, 8,
+            12, 13,
+            14,
+        ])
+        assert np.all(distances == expected)
 
 
 class TestKSubList:
@@ -374,7 +392,7 @@ class TestScoringFunction:
 
 class TestFeatListQueue:
 
-    def test_priority_queue(self):
+    def test_gives_priority_to_higher_scores(self):
         queue = cp.FeatListQueue(size=2)
         sublist1 = cp.KSubList(np.array([1, 1, 1]), (0, 0), [0, 2, 3], score=0.5)
         sublist2 = cp.KSubList(np.array([2, 2, 2]), (1, 0), [0, 2, 3], score=0.7)
@@ -387,3 +405,30 @@ class TestFeatListQueue:
         assert queue.pop() == sublist2
         assert queue.pop() == sublist3
         assert queue.empty()
+
+    def test_cannot_add_items_with_lower_score_to_full_queue(self):
+        queue = cp.FeatListQueue(size=2)
+        sublist1 = cp.KSubList(np.array([1, 1, 1]), (0, 0), [0, 2, 3], score=0.5)
+        sublist2 = cp.KSubList(np.array([2, 2, 2]), (1, 0), [0, 2, 3], score=0.7)
+        sublist3 = cp.KSubList(np.array([3, 3, 3]), (2, 0), [0, 2, 3], score=0.3)
+
+        queue.push(sublist1)
+        queue.push(sublist2)
+        queue.push(sublist3)  # Should not be pushed
+
+        assert queue.pop() == sublist1
+        assert queue.pop() == sublist2
+        assert queue.empty()
+
+    def test_peek(self):
+        queue = cp.FeatListQueue(size=7)
+        sublist2 = cp.KSubList(np.array([2, 2, 2]), (1, 0), [0, 2, 3], score=0.8)
+        sublist1 = cp.KSubList(np.array([1, 1, 1]), (0, 0), [0, 2, 3], score=0.5)
+        sublist3 = cp.KSubList(np.array([3, 3, 3]), (2, 0), [0, 2, 3], score=0.9)
+
+        queue.push(sublist1)
+        queue.push(sublist2)
+        queue.push(sublist3)
+
+        assert queue.peek_left().score == 0.5
+        assert queue.peek_right().score == 0.9

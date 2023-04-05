@@ -167,8 +167,6 @@ class ChemFeatContainer:
         return len(self._get_feat_list(feat_type)) > 0
 
     def _get_feat_list(self, feat_type):
-        if feat_type == "aromatic ring":
-            return self.aromatic
         if feat_type == "hb acceptor":
             return self.acceptor
         if feat_type == "hb donor":
@@ -179,6 +177,8 @@ class ChemFeatContainer:
             return self.positive
         if feat_type == "negative charge":
             return self.negative
+        if feat_type == "aromatic ring":
+            return self.aromatic
         raise ValueError(feat_type)
 
     def __len__(self):
@@ -186,12 +186,12 @@ class ChemFeatContainer:
 
     def __iter__(self):
         # Iterate all features
-        yield from self.aromatic
         yield from self.acceptor
         yield from self.donor
         yield from self.hydrophobic
         yield from self.positive
         yield from self.negative
+        yield from self.aromatic
 
 
 def feature_indices(feat_def, mol):
