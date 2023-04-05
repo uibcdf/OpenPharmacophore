@@ -54,3 +54,18 @@ FEAT_TYPES = frozenset([
     "hb acceptor",
     "hb donor",
 ])
+
+FEAT_TO_CHAR = {
+    "hb acceptor": "A",
+    "hb donor": "D",
+    "aromatic ring": "R",
+    "hydrophobicity": "H",
+    "positive charge": "P",
+    "negative charge": "N",
+    "excluded volume": "E",
+    "included volume": "I",
+}
+
+CHAR_TO_FEAT = {
+    char: name for name, char in FEAT_TO_CHAR.items()
+}

@@ -50,8 +50,33 @@ class Pharmacophore:
         """
         self._points.pop(index)
 
+    def __eq__(self, other):
+        if not self._check_eq(self.score, other.score):
+            return False
+        if not self._check_eq(self.ref_mol, other.ref_mol):
+            return False
+        if not self._check_eq(self.ref_struct, other.ref_struct):
+            return False
+
+        if len(self) == len(other):
+            for ii in range(len(self)):
+                if self[ii] != other[ii]:
+                    return False
+        else:
+            return False
+
+        return True
+
+    @staticmethod
+    def _check_eq(item1, item2):
+        return (item1 is not None and item2 is not None) and item1 == item2
+
     def __len__(self):
         return len(self._points)
 
     def __getitem__(self, item):
         return self._points[item]
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(points={self._points}, " \
+               f"score={self.score}, ref_mol={self.ref_mol}, ref_struct={self.ref_struct})"

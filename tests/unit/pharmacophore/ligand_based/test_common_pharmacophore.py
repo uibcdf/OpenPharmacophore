@@ -92,11 +92,12 @@ class TestCommonPharmacophoreFinder:
         assert common_pharmacophores == [
             Pharmacophore([
                 PharmacophoricPoint("hb acceptor", coords_1[0], radius),
-                PharmacophoricPoint("hb donor", coords_1[0], radius),
-                PharmacophoricPoint("hydrophobicity", coords_1[0], radius),
+                PharmacophoricPoint("hb donor", coords_1[1], radius),
+                PharmacophoricPoint("hydrophobicity", coords_1[2], radius),
             ],
                 ref_struct=0,
-                ref_mol=0
+                ref_mol=0,
+                score=0.7970227095188576
             ),
         ]
 
@@ -147,10 +148,10 @@ class TestCommonPharmacophoreFinder:
         common = cp.CommonPharmacophoreFinder._common_k_point_variants(feat_lists, 3, 3)
         expected = {
             "ADH": [
-                cp.KVariant(feat_ind=(0, 2, 3), mol=0),
-                cp.KVariant(feat_ind=(1, 2, 3), mol=0),
-                cp.KVariant(feat_ind=(0, 1, 2), mol=1),
-                cp.KVariant(feat_ind=(0, 1, 2), mol=2),
+                cp.KVariant(var_ind=(0, 2, 3), mol=0),
+                cp.KVariant(var_ind=(1, 2, 3), mol=0),
+                cp.KVariant(var_ind=(0, 1, 2), mol=1),
+                cp.KVariant(var_ind=(0, 1, 2), mol=2),
             ]
         }
         assert expected == common
@@ -232,6 +233,46 @@ class TestCommonPharmacophoreFinder:
             (1, 3): 0.14632288133597426,
         }
 
+    def test_get_pharmacophores(self):
+        queue = cp.FeatListQueue(size=2)
+        sublist1 = cp.KSubList(np.ones(2), (0, 0), [0, 1], score=0.5)
+        sublist2 = cp.KSubList(np.ones(2), (1, 1), [0, 2], score=0.7)
+
+        queue.push(sublist1)
+        queue.push(sublist2)
+
+        coords_1 = puw.quantity(np.array([
+            [[1., 1., 1.],
+             [2., 2., 2.],
+             ]]), "angstroms")
+        coords_2 = puw.quantity(np.array([
+            [[5., 5., 5.],
+             [6., 6., 6.],
+             [7., 7., 7.],
+             ],
+            [[9., 9., 9.],
+             [10., 10., 10.],
+             [11., 11., 11.],
+             ],
+        ]), "angstroms")
+
+        feature_lists = [
+            cp.FeatureList("AD", distances=np.ones(2), coords=coords_1),
+            cp.FeatureList("AAR", distances=np.ones(4), coords=coords_2),
+        ]
+
+        pharmacophores = cp.CommonPharmacophoreFinder._get_pharmacophores(queue, feature_lists)
+        radius = puw.quantity(1.0, "angstroms")
+        expected_1 = Pharmacophore([
+            PharmacophoricPoint("hb acceptor", coords_2[1][0], radius),
+            PharmacophoricPoint("aromatic ring", coords_2[1][2], radius),
+        ], ref_mol=1, ref_struct=1, score=0.7)
+        expected_2 = Pharmacophore([
+            PharmacophoricPoint("hb acceptor", coords_1[0][0], radius),
+            PharmacophoricPoint("hb donor", coords_1[0][1], radius),
+        ], ref_mol=0, ref_struct=0, score=0.5)
+        assert pharmacophores == [expected_1, expected_2]
+
 
 class TestFeatList:
 
@@ -271,6 +312,7 @@ class TestFeatList:
             cp.KSubList(np.array([1, 3, 4]), (1, 0), [0, 2, 3]),
             cp.KSubList(np.array([11, 13, 14]), (1, 1), [0, 2, 3]),
         ]
+
 
 
 class TestKSubList:
@@ -328,3 +370,20 @@ class TestScoringFunction:
         scoring_fn = cp.ScoringFunction()
         score = scoring_fn.point_score(feature_list_1, feature_list_2, ref_conf=0, other_conf=1)
         assert score == 0.14632288133597426
+
+
+class TestFeatListQueue:
+
+    def test_priority_queue(self):
+        queue = cp.FeatListQueue(size=2)
+        sublist1 = cp.KSubList(np.array([1, 1, 1]), (0, 0), [0, 2, 3], score=0.5)
+        sublist2 = cp.KSubList(np.array([2, 2, 2]), (1, 0), [0, 2, 3], score=0.7)
+        sublist3 = cp.KSubList(np.array([3, 3, 3]), (2, 0), [0, 2, 3], score=0.8)
+
+        queue.push(sublist1)
+        queue.push(sublist2)
+        queue.push(sublist3)
+
+        assert queue.pop() == sublist2
+        assert queue.pop() == sublist3
+        assert queue.empty()

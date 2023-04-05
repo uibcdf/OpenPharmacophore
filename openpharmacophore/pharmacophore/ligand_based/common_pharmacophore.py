@@ -1,19 +1,55 @@
 from collections import Counter, defaultdict, namedtuple
 from dataclasses import dataclass
+import heapq
 import itertools
 from typing import List, Optional, Tuple
 import numpy as np
 import pyunitwizard as puw
 
-from openpharmacophore.utils.maths import points_distance, nearest_bins
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
+from openpharmacophore import constants
+from openpharmacophore.utils.maths import points_distance, nearest_bins
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 
 
-class PriorityQueue:
+class FeatQueueWrapper:
+
+    def __init__(self, sublist):
+        self.sublist = sublist
+
+    def __lt__(self, other):
+        return self.sublist.score < other.sublist.score
+
+    def __eq__(self, other):
+        return self.sublist.score == other.score
+
+
+class FeatListQueue:
+    """ Class that functions as a min heap for k sublists.
+    """
 
     def __init__(self, size):
-        pass
+        self.size = size
+        self._heap = []
+
+    def reverse_items(self):
+        return reversed([it.sublist for it in self._heap])
+
+    def push(self, sublist):
+        """ Push a sublist to the queue. If the capacity is exceeded the
+            sublist with the smallest score is removed and the new sublist inserted.
+        """
+        if self.size is not None and len(self._heap) >= self.size:
+            self.pop()
+        heapq.heappush(self._heap, FeatQueueWrapper(sublist))
+
+    def pop(self):
+        """ Get the sublists with the smallest score.
+        """
+        return heapq.heappop(self._heap).sublist
+
+    def empty(self):
+        return len(self._heap) == 0
 
 
 class ScoringFunction:
@@ -54,7 +90,7 @@ class ScoringFunction:
         rmsd = np.sqrt(
             np.power(reference.coords[ref_conf] - other.coords[other_conf], 2).mean()
         )
-        return 1 - rmsd / self.rmsd_cutoff
+        return puw.get_value(1 - rmsd / self.rmsd_cutoff)
 
     def vector_score(self):
         # TODO: Implement me!
@@ -180,7 +216,7 @@ class FeatureList:
         n_confs = self.distances.shape[0]
         sublists = [None] * n_confs
         for ii in range(n_confs):
-            feat_ind = list(k_variant.feat_ind)
+            feat_ind = list(k_variant.var_ind)
             sublists[ii] = KSubList(
                 self.distances[ii][feat_ind], (k_variant.mol, ii), feat_ind
             )
@@ -215,7 +251,7 @@ class KSubList:
         return np.all(self.distances == other.distances)
 
 
-KVariant = namedtuple("KVariant", ["feat_ind", "mol"])
+KVariant = namedtuple("KVariant", ["var_ind", "mol"])
 
 
 class SurvivingBox:
@@ -291,7 +327,7 @@ class CommonPharmacophoreFinder:
         sub_lists = self._variant_sublists(feature_lists, common_variants)
 
         scores = {}
-        queue = PriorityQueue(size=max_pharmacophores)
+        queue = FeatListQueue(size=max_pharmacophores)
         for variant in sub_lists.keys():
             surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives)
             for box in surviving_boxes:
@@ -300,10 +336,10 @@ class CommonPharmacophoreFinder:
                     if top_representative is not None:
                         queue.push(top_representative)
 
-        return self._get_pharmacophores(queue, chemical_features)
+        return self._get_pharmacophores(queue, feature_lists)
 
     def _recursive_partitioning_util(self, sublists, min_actives, dim, n_dims, boxes):
-        """ Helper function for _recursive_partitioning:
+        """ Helper function for _recursive_partitioning
 
             Parameters
             ----------
@@ -425,6 +461,38 @@ class CommonPharmacophoreFinder:
             return
         best_ref.score = best_score
         return best_ref
+
+    @staticmethod
+    def _get_pharmacophores(queue, feature_lists):
+        """ Extract sublists from the queue and transform them to
+            pharmacophores.
+
+            Parameters
+            ----------
+            queue : FeatListQueue
+            feature_lists : list[FeatureList]
+
+            Returns
+            -------
+            list[Pharmacophore]
+        """
+        pharmas = []
+        radius = puw.quantity(1.0, "angstroms")
+        for sublist in queue.reverse_items():
+            ref_mol = sublist.mol_id[0]
+            ref_conf = sublist.mol_id[1]
+
+            flist = feature_lists[ref_mol]
+            coords = flist.coords[ref_conf]
+
+            points = []
+            for ii in sublist.feat_ind:
+                feat_name = constants.CHAR_TO_FEAT[flist.variant[ii]]
+                points.append(PharmacophoricPoint(feat_name, coords[ii], radius))
+
+            pharmas.append(Pharmacophore(points, score=sublist.score, ref_mol=ref_mol, ref_struct=ref_conf))
+
+        return pharmas
 
     @staticmethod
     def _get_feat_lists(chem_feats):
