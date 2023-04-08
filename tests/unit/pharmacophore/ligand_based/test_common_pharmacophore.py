@@ -1,7 +1,9 @@
 from collections import defaultdict
 import pyunitwizard as puw
 import numpy as np
+
 from openpharmacophore import Pharmacophore, PharmacophoricPoint
+from openpharmacophore.pharmacophore.align import align_pharmacophores
 import openpharmacophore.pharmacophore.ligand_based.common_pharmacophore as cp
 from openpharmacophore.molecular_systems.chem_feats import ChemFeat, ChemFeatContainer
 
@@ -85,7 +87,7 @@ class TestCommonPharmacophoreFinder:
         ])
 
         molecules = [[conf_1], [conf_2, conf_3]]
-        cp_finder = cp.CommonPharmacophoreFinder()
+        cp_finder = cp.CommonPharmacophoreFinder(align="coords")
         common_pharmacophores = cp_finder(molecules, n_points=3)
 
         radius = puw.quantity(1.0, "angstroms")
@@ -197,7 +199,7 @@ class TestCommonPharmacophoreFinder:
 
     def test_box_top_representative(self):
         cp.KSubList.ID = 1
-        cp_finder = cp.CommonPharmacophoreFinder()
+        cp_finder = cp.CommonPharmacophoreFinder(align="coords")
         surviving_box = [
             cp.KSubList(np.array([3, 5, 4]), mol_id=(0, 0), feat_ind=[0, 1, 2]),
             cp.KSubList(np.array([4, 5, 4]), mol_id=(1, 0), feat_ind=[0, 1, 2]),
@@ -226,8 +228,8 @@ class TestCommonPharmacophoreFinder:
         ]
 
         top = cp_finder._box_top_representative(surviving_box, scores, feature_lists)
-        assert top == surviving_box[0]
-        assert top.score == 0.7970227095188576
+        assert top == surviving_box[1]
+        assert top.score == 0.6506998281828833
         assert scores == {
             (1, 2): 0.6506998281828833,
             (1, 3): 0.14632288133597426,
@@ -379,7 +381,7 @@ class TestScoringFunction:
         ]), "angstroms")
 
         scoring_fn = cp.ScoringFunction()
-        score = scoring_fn.point_score(ref_coords, coords)
+        score = scoring_fn.point_score(align_pharmacophores(ref_coords, coords))
         assert score == 0.14632288133597426
 
 

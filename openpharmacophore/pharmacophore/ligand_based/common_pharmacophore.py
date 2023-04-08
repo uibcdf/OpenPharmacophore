@@ -8,6 +8,7 @@ import pyunitwizard as puw
 
 from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore import constants
+from openpharmacophore.pharmacophore.align import align_pharmacophores
 from openpharmacophore.utils.maths import points_distance, nearest_bins
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 
@@ -63,7 +64,7 @@ class FeatListQueue:
 
 
 class ScoringFunction:
-    """ A customizable scoring function to score the common pharmacophores.
+    """ A customizable function to score the common pharmacophores.
     """
 
     def __init__(
@@ -78,32 +79,30 @@ class ScoringFunction:
         self.rmsd_cutoff = rmsd_cutoff
         self.cos_cutoff = cos_cutoff
 
-    def point_score(self, reference, other):
+    def point_score(self, rmsd):
         """ Compute the point score function that is defined by
-            1 - RMSD / RMSD_cutoff
+            1 - RMSD / RMSD_cutoff.
+
+            Where RMSD is the value of the root mean square deviation of the
+            alignment between two pharmacophores.
 
             Parameters
             ----------
-            reference : QuantityLike
-                Coordinates of reference feature list for alignment.
-            other : QuantityLike
-                Coordinates of another feature list.
+            rmsd : float
+                RMSD of alignment
 
             Returns
             -------
             float
         """
-        rmsd = np.sqrt(
-            np.power(reference - other, 2).mean()
-        )
         return puw.get_value(1 - rmsd / self.rmsd_cutoff)
 
     def vector_score(self):
         # TODO: Implement me!
         return 0
 
-    def __call__(self, reference, other):
-        return self.point_weight * self.point_score(reference, other)\
+    def __call__(self, rmsd):
+        return self.point_weight * self.point_score(rmsd) \
             + self.vector_weight * self.vector_score()
 
 
@@ -228,7 +227,7 @@ class FeatureList:
 
         for ii in range(len(variant)):
             var_left = variant[ii]
-            start = int(n_pairs - (n_feats - var_left)*(n_feats - var_left - 1) / 2)
+            start = int(n_pairs - (n_feats - var_left) * (n_feats - var_left - 1) / 2)
             for jj in range(ii + 1, len(variant)):
                 shift = variant[jj] - var_left - 1
                 distances[cnt] = self.distances[conf][start + shift]
@@ -322,6 +321,8 @@ class CommonPharmacophoreFinder:
             self.scoring_fn = ScoringFunction()
         else:
             self.scoring_fn = ScoringFunction(**scoring_fn_params)
+
+        self.align = kwargs.get("align", "distances")
 
     def find_common_pharmacophores(self, chemical_features, n_points,
                                    min_actives=None, max_pharmacophores=None):
@@ -460,6 +461,7 @@ class CommonPharmacophoreFinder:
 
         for ref in box:
             total_score = 0
+            n_other = 0
             exclude = False
             for other in box:
                 # Score reference only with respect to feature lists of other molecules
@@ -474,10 +476,20 @@ class CommonPharmacophoreFinder:
                 try:
                     align_score = scores[(idx_1, idx_2)]
                 except KeyError:
-                    ref_flist, other_flist = feature_lists[ref.mol_id[0]], feature_lists[other.mol_id[0]]
-                    conf_ref, conf_other = ref.mol_id[1], other.mol_id[1]
-                    align_score = self.scoring_fn(ref_flist.coords[conf_ref][ref.feat_ind],
-                                                  other_flist.coords[conf_other][other.feat_ind])
+
+                    # TODO: self.align should be removed once we have an alignment algorithm
+                    if self.align == "coords":
+                        ref_flist, other_flist = feature_lists[ref.mol_id[0]], feature_lists[other.mol_id[0]]
+                        conf_ref, conf_other = ref.mol_id[1], other.mol_id[1]
+                        align_rmsd = align_pharmacophores(ref_flist.coords[conf_ref][ref.feat_ind],
+                                                          other_flist.coords[conf_other][other.feat_ind])
+                        align_score = self.scoring_fn(align_rmsd)
+                    elif self.align == "distances":
+                        align_rmsd = align_pharmacophores(ref.distances, other.distances)
+                        align_score = 1 - align_rmsd / puw.get_value(self.scoring_fn.rmsd_cutoff)
+                    else:
+                        raise ValueError(f"Incorrect alignment parameter {self.align}")
+
                     scores[(idx_1, idx_2)] = align_score
 
                 if align_score < 0:
@@ -485,9 +497,16 @@ class CommonPharmacophoreFinder:
                     exclude = True
                     break
 
+                n_other += 1
                 total_score += align_score
 
-            if not exclude and total_score > best_score:
+            if exclude:
+                continue
+
+            # Get average score
+            total_score /= n_other
+
+            if total_score > best_score:
                 best_score = total_score
                 best_ref = ref
 
