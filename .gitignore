@@ -118,6 +118,7 @@ devtools/playground/*
 !devtools/playground/README.md
 
 docs/_autosummary/
+docs/contents/examples/ligand-based/trombin_manual.ipynb
 
 # Other
 .DS_store
