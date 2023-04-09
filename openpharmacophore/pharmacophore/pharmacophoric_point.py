@@ -1,9 +1,8 @@
 # OpenPharmacophore
-from openpharmacophore.point.input_arguments import validate_input_array_like, validate_input_quantity
-from openpharmacophore.point.exceptions import InvalidFeatureError
-from openpharmacophore.constants import PALETTE
+from openpharmacophore.pharmacophore.input_arguments import validate_input_array_like, validate_input_quantity
+from openpharmacophore.pharmacophore.exceptions import InvalidFeatureError
+from openpharmacophore.constants import PALETTE, FEAT_TO_CHAR, CHAR_TO_FEAT
 # Third Party
-from matplotlib.colors import to_rgb
 import numpy as np
 import pyunitwizard as puw
 
@@ -50,37 +49,10 @@ class PharmacophoricPoint:
             they were extracted.
     
     """
-    # TODO : move this dict to another file
-    feature_to_char = {
-        "hb acceptor": "A",
-        "hb donor": "D",
-        "aromatic ring": "R",
-        "hydrophobicity": "H",
-        "positive charge": "P",
-        "negative charge": "N",
-        "excluded volume": "E",
-        "included volume": "I",
-    }
-
-    char_to_feature = {
-        char: name for name, char in feature_to_char.items()
-    }
-
-    palette = {
-        'positive charge': '#3498DB',  # Blue
-        'negative charge': '#884EA0',  # Purple
-        'hb acceptor': '#B03A2E',  # Red
-        'hb donor': '#17A589',  # Green
-        'included volume': '#707B7C',  # Gray
-        'excluded volume': '#283747',  # Black
-        'hydrophobicity': '#F5B041',  # Orange
-        'aromatic ring': '#F1C40F',  # Yellow
-    }
-
     def __init__(self, feat_type, center, radius, direction=None, atom_indices=None):
 
         try:
-            self._feat_name = PharmacophoricPoint.feature_to_char[feat_type]
+            self._feat_name = FEAT_TO_CHAR[feat_type]
         except KeyError:
             raise InvalidFeatureError(feat_type)
 
@@ -134,7 +106,7 @@ class PharmacophoricPoint:
 
     @property
     def feature_name(self):
-        return self.char_to_feature[self._feat_name]
+        return CHAR_TO_FEAT[self._feat_name]
 
     @property
     def short_name(self):
@@ -152,58 +124,10 @@ class PharmacophoricPoint:
         if direction is not None:
             validate_input_array_like(direction, shape=(3,), name="direction")
 
-    def add_to_ngl_view(self, view, color_palette=None, opacity=0.5):
-        """ Add the pharmacophoric point to an NGLview.
-
-        Parameters
-        ----------
-        view : NGLView.widget
-            View object where the point representations is added.
-
-        color_palette : dict, default=None
-            Color palette to show the point representation.
-
-        opacity : float
-            The level of opacity. Must be a number between 0 and 1.
-
-        Notes
-        -----
-        This method does not return a new visualization but modifies the input object.
-
-        """
-        if color_palette:
-            color = color_palette[self.feature_name]
-        else:
-            color = PharmacophoricPoint.palette[self.feature_name]
-
-        color = to_rgb(color)
-        radius = puw.get_value(self._radius, to_unit='angstroms')
-        center = puw.get_value(self._center, to_unit='angstroms').tolist()
-
-        n_components = len(view._ngl_component_ids)
-
-        view.shape.add_sphere(center, color, radius, self.feature_name)
-        view.update_representation(component=n_components, repr_index=0, opacity=opacity)
-
-        if self.has_direction:
-            arrow_radius = 0.2
-            end_arrow = puw.get_value(self._center + self._radius * self._direction*2.0,
-                                      to_unit='angstroms').tolist()
-
-            view.shape.add_arrow(center, end_arrow, color, arrow_radius)
-            view.update_representation(component=n_components + 1, repr_index=0, opacity=0.9)
-
     @staticmethod
     def get_valid_features():
         """ Get a list of all valid chemical features for a PharmacophoricPoint object"""
         return list(PALETTE.keys())
-
-    def is_equal(self, other):
-        """ Compare equality of two pharmacophoric points based on atoms indices.
-        """
-        if self._feat_name == other.short_name and self._atom_indices == other.atom_indices:
-            return True
-        return False
 
     def __eq__(self, other):
         """ Compare equality of two pharmacophoric points based on their 3D coordinates,
@@ -238,26 +162,3 @@ class PharmacophoricPoint:
             return (f"{self.__class__.__name__}("
                     f"feat_type={self.feature_name}; "
                     f"center=({x}, {y}, {z}); radius={radius})")
-
-
-def distance_between_pharmacophoric_points(p1: PharmacophoricPoint, p2: PharmacophoricPoint):
-    """ Compute the distance in angstroms between two pharmacophoric points.
-    
-        Parameters
-        ----------
-        p1 : openpharmacophore.pharmacophoric_point
-            A pharmacophoric point
-
-        p2 : openpharmacophore.pharmacophoric_point
-            A pharmacophoric point
-        
-        Returns
-        -------
-        float
-            The distance between the pharmacophoric points
-    """
-
-    p1_center = puw.get_value(p1.center, "angstroms")
-    p2_center = puw.get_value(p2.center, "angstroms")
-
-    return np.linalg.norm(p1_center - p2_center)

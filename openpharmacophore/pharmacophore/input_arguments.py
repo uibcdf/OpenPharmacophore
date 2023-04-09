@@ -1,4 +1,4 @@
-from openpharmacophore.point.exceptions import IncorrectShapeError, NotArrayLikeError, \
+from openpharmacophore.pharmacophore.exceptions import IncorrectShapeError, NotArrayLikeError, \
     NotAQuantityError, WrongDimensionalityError
 import numpy as np
 import pyunitwizard as puw

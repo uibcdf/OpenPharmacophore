@@ -9,6 +9,8 @@ from openpharmacophore import constants
 
 class Viewer:
     """ Class to visualize molecular systems and pharmacophores.
+
+        Wrapper around nglview NGLWidget
     """
 
     def __init__(self):
