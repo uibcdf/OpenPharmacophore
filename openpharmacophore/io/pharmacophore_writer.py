@@ -1,10 +1,9 @@
 from collections import namedtuple
 import datetime
+import json
 import xml.etree.ElementTree as ET
 import pyunitwizard as puw
 import numpy as np
-
-from openpharmacophore import PharmacophoricPoint
 
 
 # MOL2 Files
@@ -43,13 +42,13 @@ def _mol2_pharmacophores(pharmacophores):
 
         Parameters
         ----------
-        pharmacophores : list[list[PharmacophoricPoint]]
+        pharmacophores : list[list[Pharmacophore]]
             Nested list of pharmacophoric points were each entry represents a pharmacophore
 
         Returns
         -------
-        doc : list[list[str]]
-            List where each sublist contains a pharmacophore represented as a mol2 string.
+        doc : list[str]
+            List with the contents of a mol2 file.
     """
     pharmagist_element_name = {
         "aromatic ring": "AR ",
@@ -104,6 +103,23 @@ def _mol2_pharmacophores(pharmacophores):
 
     return doc
 
+
+def save_mol2(pharmacophores, file_name):
+    """ Save several pharmacophores to a mol2 file.
+
+        Parameters
+        ----------
+        pharmacophores : list[Pharmacophore]
+            A list of pharmacophores
+
+        file_name : str
+            Name of the file that will be created.
+
+    """
+    contents = _mol2_pharmacophores(pharmacophores)
+    with open(file_name, "w") as fp:
+        fp.writelines(contents)
+
 # PH4 (MOE) Files
 
 
@@ -112,7 +128,7 @@ def _ph4_pharmacophore(pharmacophoric_points):
 
         Parameters
         ----------
-        pharmacophoric_points : list[PharmacophoricPoint]
+        pharmacophoric_points : Pharmacophore
             List with the pharmacophoric points.
 
 
@@ -166,20 +182,37 @@ def _ph4_pharmacophore(pharmacophoric_points):
 
     return ph4_str
 
+
+def save_ph4(pharmacophore, file_name):
+    """ Save several pharmacophores to a mol2 file.
+
+        Parameters
+        ----------
+        pharmacophore : Pharmacophore
+            A pharmacophore.
+
+        file_name : str
+            Name of the file that will be created.
+
+    """
+    contents = _ph4_pharmacophore(pharmacophore)
+    with open(file_name, "w") as fp:
+        fp.write(contents)
+
 # JSON files
 
 
-def _json_pharmacophore(pharmacophoric_points):
+def _json_pharmacophore(pharmacophore):
     """ Returns a dictionary with the necessary data to construct a json pharmacophore file.
 
         Parameters
         ----------
-        pharmacophoric_points : Pharmacophore
+        pharmacophore : Pharmacophore
             Pharmacophoric points that will be used to construct the dictionary
 
         Returns
         -------
-        pharmacophore_dict : dict
+        pharmacophore_dict : dict[str, Any]
             Dictionary with the necessary info to construct a .json pharmer file.
     """
     pharmer_element_name = {
@@ -193,7 +226,7 @@ def _json_pharmacophore(pharmacophoric_points):
         "negative charge": "NegativeIon",
     }
     points = []
-    for element in pharmacophoric_points:
+    for element in pharmacophore:
         point_dict = {}
         temp_center = puw.get_value(element.center, to_unit='angstroms')
         point_dict["name"] = pharmer_element_name[element.feature_name]
@@ -223,10 +256,15 @@ def _json_pharmacophore(pharmacophoric_points):
     return {"points": points}
 
 
+def save_json(pharmacophore, file_name):
+    contents = _json_pharmacophore(pharmacophore)
+    with open(file_name, "w") as fp:
+        json.dump(contents, fp)
+
 # PML (LigandScout) Files
 
-def _set_coords_and_radius(tree_element, coords, radius,
-                          feat_id):
+
+def _set_coords_and_radius(tree_element, coords, radius, feat_id):
     """ Set the coords and radius of a tree element corresponding
         to a volume, plane or point tag.
     """
@@ -244,12 +282,12 @@ def _set_coords_and_radius(tree_element, coords, radius,
     position.set("tolerance", radius)
 
 
-def _ligandscout_xml_tree(pharmacophoric_points):
+def _ligandscout_xml_tree(pharmacophore):
     """ Returns a xml element tree necessary to create a ligandscout pharmacophore file.
 
         Parameters
         ----------
-        pharmacophoric_points : openpharmacophore.Pharmacophore
+        pharmacophore : openpharmacophore.Pharmacophore
             The pharmacophore that will be saved to a file.
 
         Returns
@@ -274,7 +312,7 @@ def _ligandscout_xml_tree(pharmacophoric_points):
     document.set("name", "pharmacophore.pml")
     document.set("pharmacophoreType", "LIGAND_SCOUT")
 
-    for ii, element in enumerate(pharmacophoric_points):
+    for ii, element in enumerate(pharmacophore):
         try:
             feat_name = feature_mapper[element.feature_name].name
         except KeyError:  # skip features not supported by ligandscout
@@ -351,3 +389,10 @@ def _ligandscout_xml_tree(pharmacophoric_points):
     tree._setroot(document)
 
     return tree
+
+
+def save_pml(pharmacophore, file_name):
+    xml_tree = _ligandscout_xml_tree(pharmacophore)
+    xml_string = ET.tostring(xml_tree)
+    with open(file_name, "wb") as fp:
+        fp.write(xml_string)

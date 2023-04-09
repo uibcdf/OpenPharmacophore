@@ -2,12 +2,9 @@ from rdkit import Chem
 
 from openpharmacophore import Ligand, Protein
 from openpharmacophore import mol_files
+from openpharmacophore.io.exceptions import InvalidFileFormatError
 from openpharmacophore.molecular_systems import create_topology
 import openpharmacophore.constants as config
-
-
-class InvalidFileFormatError(ValueError):
-    pass
 
 
 def protein_from_file(traj_file, topology_file):
@@ -58,14 +55,14 @@ def load(file_name, topology_file=None):
 
         if topology_file is not None and topology_file not in config.TOP_FORMATS:
             file_format = topology_file.split(".")[-1]
-            raise InvalidFileFormatError(f"File format {file_format} is not supported")
+            raise InvalidFileFormatError(file_format)
 
         return protein_from_file(file_name, topology_file)
 
     elif file_format in config.MOL_FORMATS:
         return load_ligands_from_file(file_name, file_format)
     else:
-        raise InvalidFileFormatError(f"File format {file_format} is not supported")
+        raise InvalidFileFormatError(file_format)
 
 
 class InvalidFormError(ValueError):
