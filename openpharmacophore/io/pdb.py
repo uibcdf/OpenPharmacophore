@@ -139,6 +139,10 @@ def write_pdb_block(topology, coords, conformer=0):
 
         conformer : int, optional
             Index of the conformer
+
+        Returns
+        -------
+        pdb_block : str
     """
     with PDBFileWriter(file=io.StringIO()) as pdb:
         pdb.write(puw.get_value(coords[conformer], "angstroms"),
@@ -153,7 +157,7 @@ def write_pdb_block(topology, coords, conformer=0):
 
 
 def write_pdb(file_name, topology, coords):
-    """ Write a pdb block for a molecule.
+    """ Write a pdb file for a molecule.
 
             Parameters
             ----------

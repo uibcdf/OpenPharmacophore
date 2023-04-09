@@ -4,4 +4,5 @@
    :maxdepth: 1
    
    ligand_preparation.ipynb
+   thrombin.ipynb
 ```

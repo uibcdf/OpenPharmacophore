@@ -76,13 +76,13 @@ def load_json_pharmacophore(pharmacophore_file, load_mol_sys=False):
     if load_mol_sys:
         try:
             if pharmacophore["ligand"]:
-                ligand = Chem.rdmolfiles.MolFromPDBBlock(pharmacophore["ligand"])
+                ligand = Chem.MolFromPDBBlock(pharmacophore["ligand"])
         except KeyError:
             pass
 
         try:
             if pharmacophore["receptor"]:
-                molecular_system = Chem.rdmolfiles.MolFromPDBBlock(pharmacophore["receptor"])
+                molecular_system = Chem.MolFromPDBBlock(pharmacophore["receptor"])
         except KeyError:
             pass
 

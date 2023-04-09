@@ -66,7 +66,6 @@ class Viewer:
             struct : int, optional
                 Structure, frame or conformer index.
         """
-        # TODO: rename frame to struct or conformer
         if isinstance(component, Protein):
             text_struct = nv.TextStructure(
                 write_pdb_block(component.topology, component.coords, conformer=0),

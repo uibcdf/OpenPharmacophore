@@ -24,9 +24,12 @@ def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     assert "hb acceptor" in feat_names
 
     # We visualize the best scoring pharmacophore
+    top = pharmacophore[0]
     viewer = oph.Viewer()
-    viewer.add_components([pharmacophore, ligands])
-    view = viewer.show()
+    viewer.add_components([
+        top,
+        ligands[top.ref_mol]])
+    view = viewer.show(struct=top.ref_mol)
     # The visualization should contain a component for the ligand + 3 the pharmacophoric
     # points
     assert len(view._ngl_component_names) == 4
