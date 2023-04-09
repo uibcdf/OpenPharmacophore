@@ -1,7 +1,9 @@
 from rdkit import Chem
 
 
-def load_mol2_ligands(file_name):
+# MOL2 files
+
+def mol2(file_name):
     """ Load molecules from a mol2 file.
 
         Parameters
@@ -32,19 +34,19 @@ def load_mol2_ligands(file_name):
     return molecules
 
 
-def mol2_iterator(file_name):
+def iter_mol2(file_name):
     """ A molecule generator for mol2 files.
 
-            Parameters
-            ----------
-            file_name : str
-                A file object
+        Parameters
+        ----------
+        file_name : str
+            A file object
 
-            Yields
-            ------
-            mol : rdkit.Mol
-                A molecule.
-        """
+        Yields
+        ------
+        mol : rdkit.Mol
+            A molecule.
+    """
     with open(file_name) as file_object:
         while True:
 
@@ -71,3 +73,31 @@ def mol2_iterator(file_name):
                 mol2_block += line
 
             yield Chem.MolFromMol2Block(mol2_block)
+
+
+# SDF files
+
+def sdf(file_path):
+    """ Load an sdf file with molecules that may contain multiple conformers.
+
+        Parameters
+        ----------
+        file_path : str
+
+        Returns
+        -------
+        list : [rdkit.Chem.Mol]
+    """
+    supp = Chem.SDMolSupplier(file_path, removeHs=False)
+    molecules = {}
+
+    for mol in supp:
+        name = mol.GetProp("_Name")
+        try:
+            molecules[name].AddConformer(mol.GetConformer(), assignId=True)
+        except KeyError:
+            molecules[name] = mol
+
+    return list(molecules.values())
+
+

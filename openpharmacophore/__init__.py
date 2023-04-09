@@ -23,6 +23,7 @@ from .pharmacophore.pharmacophore import Pharmacophore
 from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
 from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
 from .visualization import Viewer, draw_ligands, draw_ligands_chem_feats
+from .io import mol_files, pharmacophore_reader, pharmacophore_writer
 from .load.load import load, load_ligands
 
 

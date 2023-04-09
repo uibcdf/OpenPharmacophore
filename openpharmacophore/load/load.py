@@ -1,7 +1,7 @@
 from rdkit import Chem
 
 from openpharmacophore import Ligand, Protein
-from openpharmacophore.io import load_mol2_ligands, load_sdf
+from openpharmacophore import mol_files
 from openpharmacophore.molecular_systems import create_topology
 import openpharmacophore.constants as config
 
@@ -27,9 +27,9 @@ def load_ligands_from_file(file_path, file_format):
     if file_format == "smi":
         return [Ligand(mol) for mol in Chem.SmilesMolSupplier(file_path)]
     if file_format == "sdf":
-        return [Ligand(mol) for mol in load_sdf(file_path)]
+        return [Ligand(mol) for mol in mol_files.sdf(file_path)]
     if file_format == "mol2":
-        return [Ligand(mol) for mol in load_mol2_ligands(file_path)]
+        return [Ligand(mol) for mol in mol_files.mol2(file_path)]
     if file_format == "xyz":
         return [Ligand(Chem.MolFromXYZFile(file_path))]
     if file_format == "mol":
