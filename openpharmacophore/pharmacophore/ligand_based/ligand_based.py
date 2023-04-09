@@ -14,6 +14,10 @@ class LigandBasedPharmacophore:
         self._ligands = ligands
         self._pharmacophores = []  # type: list[Pharmacophore]
 
+    @property
+    def pharmacophores(self):
+        return self._pharmacophores
+
     def extract(self, n_points, min_actives=None, max_pharmacophores=None, *args, **kwargs):
         """ Finds and scores common pharmacophores from a set of ligands.
 

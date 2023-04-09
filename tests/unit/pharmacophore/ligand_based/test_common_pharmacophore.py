@@ -134,7 +134,7 @@ class TestCommonPharmacophoreFinder:
             [4., ],
             [6., ],
         ])
-        expected_coords = puw.quantity([coords_1, coords_2], "angstroms")
+        expected_coords = np.stack((coords_1, coords_2))
 
         f_list = feat_lists[0]
         assert f_list.variant == "DR"
@@ -228,7 +228,7 @@ class TestCommonPharmacophoreFinder:
         ]
 
         top = cp_finder._box_top_representative(surviving_box, scores, feature_lists)
-        assert top == surviving_box[1]
+        assert top == surviving_box[0]
         assert top.score == 0.6506998281828833
         assert scores == {
             (1, 2): 0.6506998281828833,
@@ -427,3 +427,16 @@ class TestFeatListQueue:
 
         assert queue.peek_left().score == 0.5
         assert queue.peek_right().score == 0.9
+
+    def test_cannot_add_repeated_elements(self):
+        queue = cp.FeatListQueue(size=2)
+        sublist1 = cp.KSubList(np.array([1, 1, 1]), (0, 0), [0, 2, 3], score=0.5)
+        sublist2 = cp.KSubList(np.array([2, 2, 2]), (1, 0), [0, 2, 3], score=0.7)
+
+        queue.push(sublist1)
+        queue.push(sublist2)
+        queue.push(sublist2)
+
+        assert queue.pop() == sublist1
+        assert queue.pop() == sublist2
+        assert queue.empty()

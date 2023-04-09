@@ -14,9 +14,10 @@ from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 
 
 class FeatQueueWrapper:
-
+    """ Wrapper object for a KSublist si it can be stored in a FeatListQueue
+    """
     def __init__(self, sublist):
-        self.sublist = sublist
+        self.sublist = sublist  # type: KSubList
 
     def __lt__(self, other):
         return self.sublist.score < other.sublist.score
@@ -31,35 +32,75 @@ class FeatListQueue:
 
     def __init__(self, size):
         self.size = size
-        self._heap = []
+        self._heap = []  # type: list[FeatQueueWrapper]
+        self._unique = set()  # type: set[int]
 
     def reverse_items(self):
+        """ Returns all sublist in the queue in descending order of
+            score.
+        """
         return reversed([it.sublist for it in self._heap])
 
     def push(self, sublist):
-        """ Push a sublist to the queue. If the capacity is exceeded the
-            sublist with the smallest score is removed and the new sublist inserted.
+        """ Push a sublist to the queue.
+
+            If the capacity is exceeded the sublist with the smallest score is
+            removed and the new sublist inserted. If the sublist to insert has a
+            lower score than the smallest element it will not be inserted.
+
+            Only unique sublists are inserted.
+
+            Parameters
+            ----------
+            sublist : KSubList
         """
+        if sublist.id in self._unique:
+            return
+
         if self.size is not None and len(self._heap) >= self.size:
             if sublist.score < self.peek_left().score:
                 return
             self.pop()
+
         heapq.heappush(self._heap, FeatQueueWrapper(sublist))
+        self._unique.add(sublist.id)
 
     def pop(self):
         """ Get the sublists with the smallest score.
+
+            Returns
+            -------
+            KSubList
         """
-        return heapq.heappop(self._heap).sublist
+        sublist = heapq.heappop(self._heap).sublist
+        self._unique.remove(sublist.id)
+        return sublist
 
     def peek_left(self):
-        """ Returns the smallest element. """
+        """ Returns the smallest element.
+
+            Returns
+            -------
+            KSubList
+        """
         return self._heap[0].sublist
 
     def peek_right(self):
-        """ Returns the greatest element. """
+        """ Returns the greatest element.
+
+            Returns
+            -------
+            KSubList
+        """
         return self._heap[-1].sublist
 
     def empty(self):
+        """ Check if the queue is empty
+
+            Returns
+            -------
+            bool
+        """
         return len(self._heap) == 0
 
 
@@ -460,16 +501,21 @@ class CommonPharmacophoreFinder:
         best_ref = None
 
         for ref in box:
-            total_score = 0
-            n_other = 0
+            # Store the scores of the best alignments of the reference against feature lists
+            # of other molecules
+            best_partner = [float("-inf")] * len(feature_lists)
+
             exclude = False
-            for other in box:
+            for partner in box:
                 # Score reference only with respect to feature lists of other molecules
-                if ref.mol_id[0] == other.mol_id[0]:
+                ref_mol = ref.mol_id[0]
+                partner_mol = partner.mol_id[0]
+
+                if ref_mol == partner_mol:
                     continue
 
                 idx_1 = ref.id
-                idx_2 = other.id
+                idx_2 = partner.id
                 if idx_2 < idx_1:
                     idx_1, idx_2 = idx_2, idx_1
 
@@ -479,13 +525,13 @@ class CommonPharmacophoreFinder:
 
                     # TODO: self.align should be removed once we have an alignment algorithm
                     if self.align == "coords":
-                        ref_flist, other_flist = feature_lists[ref.mol_id[0]], feature_lists[other.mol_id[0]]
-                        conf_ref, conf_other = ref.mol_id[1], other.mol_id[1]
+                        ref_flist, partner_flist = feature_lists[ref_mol], feature_lists[partner_mol]
+                        conf_ref, conf_partner = ref.mol_id[1], partner.mol_id[1]
                         align_rmsd = align_pharmacophores(ref_flist.coords[conf_ref][ref.feat_ind],
-                                                          other_flist.coords[conf_other][other.feat_ind])
+                                                          partner_flist.coords[conf_partner][partner.feat_ind])
                         align_score = self.scoring_fn(align_rmsd)
                     elif self.align == "distances":
-                        align_rmsd = align_pharmacophores(ref.distances, other.distances)
+                        align_rmsd = align_pharmacophores(ref.distances, partner.distances)
                         align_score = 1 - align_rmsd / puw.get_value(self.scoring_fn.rmsd_cutoff)
                     else:
                         raise ValueError(f"Incorrect alignment parameter {self.align}")
@@ -497,15 +543,13 @@ class CommonPharmacophoreFinder:
                     exclude = True
                     break
 
-                n_other += 1
-                total_score += align_score
+                best_partner[partner_mol] = max(align_score, best_partner[partner_mol])
 
             if exclude:
                 continue
 
             # Get average score
-            total_score /= n_other
-
+            total_score = sum(s for s in best_partner if s > 0) / len([s for s in best_partner if s > 0])
             if total_score > best_score:
                 best_score = total_score
                 best_ref = ref
