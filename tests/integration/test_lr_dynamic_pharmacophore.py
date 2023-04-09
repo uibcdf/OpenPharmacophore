@@ -39,5 +39,5 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     # Finally we visualize the pharmacophores.
     viewer = oph.Viewer()
     viewer.add_components([protein, ligand, pharmacophore])
-    viewer.show(frame=0)
-    viewer.show(frame=1)
+    viewer.show(struct=0)
+    viewer.show(struct=1)

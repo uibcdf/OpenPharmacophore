@@ -55,7 +55,7 @@ class Viewer:
         for comp in components:
             self._components.append(comp)
 
-    def load_component(self, component, frame):
+    def load_component(self, component, struct):
         """ Load a component to the viewer, such as a Protein, Ligand or
             BindingSite so, it can be visualized.
 
@@ -63,7 +63,8 @@ class Viewer:
             ----------
             component : Any
 
-            frame : int, optional
+            struct : int, optional
+                Structure, frame or conformer index.
         """
         # TODO: rename frame to struct or conformer
         if isinstance(component, Protein):
@@ -73,17 +74,17 @@ class Viewer:
             self._widget.add_component(text_struct)
             self._has_protein = True
         elif isinstance(component, ComplexBindingSite):
-            self._add_molecule(component.to_rdkit(), frame)
+            self._add_molecule(component.to_rdkit(), struct)
             self._has_protein = True
         elif isinstance(component, Ligand):
-            self._add_molecule(component.to_rdkit(), frame)
+            self._add_molecule(component.to_rdkit(), struct)
             self._has_ligand = True
         elif isinstance(component, ChemFeatContainer):
             self.add_chem_feats(component)
         elif isinstance(component, Pharmacophore):
             self.add_pharmacophore(component)
         elif isinstance(component, (LigandReceptorPharmacophore, LigandBasedPharmacophore)):
-            self.add_pharmacophore(component[frame])
+            self.add_pharmacophore(component[struct])
         else:
             raise NotImplementedError
 
@@ -179,14 +180,14 @@ class Viewer:
         if self.n_components > 0:
             self._widget = nv.NGLWidget()
 
-    def show(self, frame=0):
+    def show(self, struct=0):
         """ Shows the visualization.
 
             Parameters
             ----------
-            frame : int, optional
-                Frame or conformer number to show if there are any proteins,
-                ligands or pharmacophores with multiple frames.
+            struct : int, optional
+                Frame, structure or conformer index to show if there are any proteins,
+                ligands or pharmacophores with multiple structures.
 
             Returns
             -------
@@ -194,7 +195,7 @@ class Viewer:
         """
         self._restore_widget()
         for comp in self._components:
-            self.load_component(comp, frame)
+            self.load_component(comp, struct)
         self._update_opacity()
         return self._widget
 
