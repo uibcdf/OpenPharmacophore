@@ -1,4 +1,5 @@
 from collections import namedtuple
+from copy import deepcopy
 import datetime
 import json
 import xml.etree.ElementTree as ET
@@ -37,7 +38,27 @@ def _pad_coordinate_with_zeros(coord):
     return coord_str.ljust(total_characters, "0")
 
 
-def _mol2_pharmacophores(pharmacophores):
+def _get_props_dict(pharmacophore):
+    """
+        Parameters
+        ----------
+        pharmacophore: Pharmacophore
+
+        Returns
+        -------
+        dict[str, str]
+    """
+    props = deepcopy(pharmacophore.props)
+    if pharmacophore.score is not None:
+        props["score"] = str(pharmacophore.score)
+    if pharmacophore.ref_mol is not None:
+        props["ref_mol"] = str(pharmacophore.ref_mol)
+    if pharmacophore.ref_struct is not None:
+        props["ref_struct"] = str(pharmacophore.ref_struct)
+    return props
+
+
+def _mol2_pharmacophores(pharmacophores, save_props):
     """ Get necessary info to create a mol2 file to store pharmacophores.
 
         Parameters
@@ -45,9 +66,12 @@ def _mol2_pharmacophores(pharmacophores):
         pharmacophores : list[Pharmacophore]
             Nested list of pharmacophoric points were each entry represents a pharmacophore
 
+        save_props : bool
+            Whether to save the properties stored in the pharmacophore.
+
         Returns
         -------
-        doc : list[str]
+        lines : list[str]
             List with the contents of a mol2 file.
     """
     pharmagist_element_name = {
@@ -68,10 +92,9 @@ def _mol2_pharmacophores(pharmacophores):
         "negative charge": "CHG",
     }
 
-    doc = []  # list to store all pharmacophores
+    lines = []
     for pharmacophore in pharmacophores:
-        lines = ["@<TRIPOS>MOLECULE\n", "@<TRIPOS>ATOM\n"]  # list to store all lines for a single pharmacophore
-        line = ""
+        lines.extend(["@<TRIPOS>PHARMACOPHORE\n", "@<TRIPOS>POINTS\n"])
         index = 0
         for element in pharmacophore:
             try:
@@ -79,32 +102,37 @@ def _mol2_pharmacophores(pharmacophores):
             except KeyError:
                 continue
             element_inx = str(index + 1)
-            line += element_inx.rjust(7)
+            line = element_inx.rjust(7)
             line += " " + feat_name
-            # Get point coordinates
+
             center = np.around(puw.get_value(element.center, to_unit="angstroms"), 4)
-            # Pad coordinates with zeros to the right. Number of zeros depends on sign
             x = _pad_coordinate_with_zeros(center[0]).rjust(16)
             y = _pad_coordinate_with_zeros(center[1]).rjust(10)
             z = _pad_coordinate_with_zeros(center[2]).rjust(10)
+
             line += x + y + z + " "
             line += pharmagist_element_specs[element.feature_name].rjust(5)
             line += str(index).rjust(5)
             line += pharmagist_element_specs[element.feature_name].rjust(6)
             line += "0.0000\n".rjust(12)
             lines.append(line)
-            line = ""
 
             index += 1
 
-        lines.append("@<TRIPOS>BOND\n")
-        for line in lines:
-            doc.append(line)
+        if save_props:
+            props = _get_props_dict(pharmacophore)
+            if len(props) > 0:
+                lines.append("@<TRIPOS>PROPERTIES\n")
+                for prop_name, value in props.items():
+                    line = prop_name.rjust(len(prop_name) + 7) + " "
+                    value = str(value)
+                    line += (value + '\n').rjust(20 - len(prop_name))
+                    lines.append(line)
 
-    return doc
+    return lines
 
 
-def save_mol2(pharmacophores, file_name):
+def save_mol2(pharmacophores, file_name, save_props=True):
     """ Save several pharmacophores to a mol2 file.
 
         Parameters
@@ -115,8 +143,11 @@ def save_mol2(pharmacophores, file_name):
         file_name : str
             Name of the file that will be created.
 
+        save_props : bool
+            Whether to save the properties stored in the pharmacophore.
+
     """
-    contents = _mol2_pharmacophores(pharmacophores)
+    contents = _mol2_pharmacophores(pharmacophores, save_props)
     with open(file_name, "w") as fp:
         fp.writelines(contents)
 
@@ -184,7 +215,7 @@ def _ph4_pharmacophore(pharmacophoric_points):
 
 
 def save_ph4(pharmacophore, file_name):
-    """ Save several pharmacophores to a mol2 file.
+    """ Save a pharmacophore to a ph4 (MOE) file.
 
         Parameters
         ----------
@@ -257,6 +288,17 @@ def _json_pharmacophore(pharmacophore):
 
 
 def save_json(pharmacophore, file_name):
+    """ Save a pharmacophore to a JSON file.
+
+        Parameters
+        ----------
+        pharmacophore : Pharmacophore
+            A pharmacophore.
+
+        file_name : str
+            Name of the file that will be created.
+
+        """
     contents = _json_pharmacophore(pharmacophore)
     with open(file_name, "w") as fp:
         json.dump(contents, fp)
@@ -392,6 +434,17 @@ def _ligandscout_xml_tree(pharmacophore):
 
 
 def save_pml(pharmacophore, file_name):
+    """ Save a pharmacophore to a pml (Ligand Scout) file.
+
+        Parameters
+        ----------
+        pharmacophore : Pharmacophore
+            A pharmacophore.
+
+        file_name : str
+            Name of the file that will be created.
+
+        """
     xml_tree = _ligandscout_xml_tree(pharmacophore)
     xml_string = ET.tostring(xml_tree)
     with open(file_name, "wb") as fp:

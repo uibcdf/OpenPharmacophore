@@ -23,30 +23,42 @@ class TestWriteMol2:
     ):
         # Test for two element pharmacophore
         ph_1 = two_element_pharmacophore
-        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_1])
-        expected_output_1 = ['@<TRIPOS>MOLECULE\n',
-                             '@<TRIPOS>ATOM\n',
-                             '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
-                             '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
-                             '@<TRIPOS>BOND\n']
+        ph_1.score = 0.8452
+        ph_1.ref_mol = 2
+        ph_1.ref_struct = 4
+        ph_1.props = {"min_actives": 5}
+
+        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_1], save_props=True)
+        expected_output_1 = [
+            '@<TRIPOS>PHARMACOPHORE\n',
+            '@<TRIPOS>POINTS\n',
+            '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
+            '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
+            '@<TRIPOS>PROPERTIES\n',
+            '       min_actives        5\n',
+            '       score         0.8452\n',
+            '       ref_mol            2\n',
+            '       ref_struct         4\n'
+        ]
         assert mol2_list == expected_output_1
 
         # Test for five element pharmacophore
         ph_2 = five_element_pharmacophore
-        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_2])
-        expected_output_2 = ['@<TRIPOS>MOLECULE\n',
-                             '@<TRIPOS>ATOM\n',
-                             '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',
-                             '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
-                             '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     0.0000\n',
-                             '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      0.0000\n',
-                             '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      0.0000\n',
-                             '@<TRIPOS>BOND\n']
+        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_2], save_props=True)
+        expected_output_2 = [
+            '@<TRIPOS>PHARMACOPHORE\n',
+            '@<TRIPOS>POINTS\n',
+            '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',
+            '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
+            '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     0.0000\n',
+            '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      0.0000\n',
+            '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      0.0000\n',
+        ]
         assert mol2_list == expected_output_2
 
         # Test for multiple pharmacophores
         expected_output_3 = expected_output_1 + expected_output_2
-        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_1, ph_2])
+        mol2_list = pharmacophore_writer._mol2_pharmacophores([ph_1, ph_2], save_props=True)
         assert mol2_list == expected_output_3
 
 
