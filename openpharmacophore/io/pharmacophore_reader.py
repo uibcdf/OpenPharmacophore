@@ -2,16 +2,15 @@ import json
 import re
 import xml.etree.ElementTree as ET
 import pyunitwizard as puw
-from rdkit import Chem
 
-from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
 
 
 # MOL2 Files
 
 
 def read_mol2(file_name):
-    """ Loads pharmacophores from a pharmagist mol2 file.
+    """ Loads pharmacophores from a mol2 file.
 
         Parameters
         ----------
@@ -20,12 +19,11 @@ def read_mol2(file_name):
 
         Returns
         -------
-        pharmacophores : list[list[PharmacophoricPoint]]
-            A list of ligand based pharmacophores.
+        pharmacophores : list[Pharmacophore]
+            A list of pharmacophores.
 
     """
-    # dictionary to map pharmagist feature names to openpharmacophore pharmacophoric_points
-    pharmagist_element_name = {
+    feature_names = {
         "AR": "aromatic ring",
         "HYD": "hydrophobicity",
         "ACC": "hb acceptor",
@@ -34,29 +32,46 @@ def read_mol2(file_name):
         "ANI": "negative charge",
     }
 
-    # This list will store a list with the pharmacophoric points of each pharmacophore
     pharmacophores = []
     pattern = r"[A-Z]{2,3} "
+    reading_props = False
     with open(file_name, "r") as f:
+        pharma = Pharmacophore()
         for line in f.readlines():
             match = re.search(pattern, line)
-            if "@<TRIPOS>ATOM" in line:
-                points = []
-            if match:
-                point_line = [p for p in line.split(" ") if p != ""]
-                feat_type = pharmagist_element_name[point_line[1]]
-                center = [float(coord) for coord in point_line[2: 5]]  # convert coordinates to float
+            if "@<TRIPOS>PHARMACOPHORE" in line:
+                reading_props = False
+                if len(pharma) > 0:
+                    pharmacophores.append(pharma)
+                pharma = Pharmacophore()
+            elif match:
+                point_line = line.split()
+                feat_type = feature_names[point_line[1]]
+                center = [float(coord) for coord in point_line[2: 5]]
                 center = puw.quantity(center, "angstroms")
-                element = PharmacophoricPoint(
+                radius = puw.quantity(float(point_line[-1]), "angstroms")
+                point = PharmacophoricPoint(
                     feat_type=feat_type,
                     center=center,
-                    radius=puw.quantity(1.0, "angstroms"))
-                points.append(element)
-            if "@<TRIPOS>BOND" in line:
-                pharmacophores.append(points)
-    pharmacophores = [ph for ph in pharmacophores if len(ph) > 0]  # filter empty lists
+                    radius=radius)
+                pharma.add(point)
+            elif "@<TRIPOS>PROPERTIES" in line:
+                reading_props = True
+            elif reading_props:
+                prop_name, value = line.split()
+                if prop_name == "score":
+                    pharma.score = float(value)
+                elif prop_name == "ref_mol":
+                    pharma.ref_mol = int(value)
+                elif prop_name == "ref_struct":
+                    pharma.ref_struct = int(value)
+                else:
+                    pharma.props[prop_name] = value
 
-    return pharmacophores
+    # Append the last pharmacophore
+    if len(pharma) > 0:
+        pharmacophores.append(pharma)
+    return [ph for ph in pharmacophores if len(ph) > 0]
 
 
 # PH4 Files
@@ -71,8 +86,8 @@ def read_ph4(file_name: str):
 
         Returns
         -------
-        points : list[PharmacophoricPoint]
-            A list of pharmacophoric points.
+        points : Pharmacophore
+            A pharmacophore.
     """
     moe_to_oph = {
         "Cat": "positive charge",
@@ -161,7 +176,7 @@ def read_ph4(file_name: str):
                 points.append(excluded_sphere)
                 count = 1
 
-    return points
+    return Pharmacophore(points)
 
 
 # JSON Files
@@ -189,26 +204,13 @@ def read_json(pharmacophore_file, load_mol_sys=False):
 
         Returns
         -------
-        points : list[PharmacophoricPoint]
-            A list of pharmacophoric points.
-
-        molecular_system : rdkit.Mol
-            The molecular system associated with the pharmacophore. If there is no molecular system or
-            if load_mol_sys is set to false, None is returned.
-
-        ligand : rdkit.Mol
-            The ligand associated to the pharmacophore in case there is one.
-             If there is no ligand None is returned.
+        points : Pharmacophore
+            A pharmacophore.
     """
     points = []
-    molecular_system = None
-    ligand = None
 
-    if pharmacophore_file.endswith('.json'):
-        with open(pharmacophore_file, "r") as fff:
-            pharmacophore = json.load(fff)
-    else:
-        raise NotImplementedError
+    with open(pharmacophore_file, "r") as fff:
+        pharmacophore = json.load(fff)
 
     feature_name = {
         "Aromatic": "aromatic ring",
@@ -235,20 +237,7 @@ def read_json(pharmacophore_file, load_mol_sys=False):
 
         points.append(element)
 
-    if load_mol_sys:
-        try:
-            if pharmacophore["ligand"]:
-                ligand = Chem.MolFromPDBBlock(pharmacophore["ligand"])
-        except KeyError:
-            pass
-
-        try:
-            if pharmacophore["receptor"]:
-                molecular_system = Chem.MolFromPDBBlock(pharmacophore["receptor"])
-        except KeyError:
-            pass
-
-    return points, molecular_system, ligand
+    return Pharmacophore(points)
 
 
 # PML (LigandScout) Files
@@ -330,8 +319,8 @@ def read_ligandscout(file_name):
 
         Returns
         -------
-        points : list[PharmacophoricPoint]
-            A list of pharmacophoric pharmacophoric_points.
+        points : Pharmacophore
+            A pharmacophore.
 
     """
     tree = ET.parse(file_name)
@@ -351,4 +340,4 @@ def read_ligandscout(file_name):
 
         points.append(point)
 
-    return points
+    return Pharmacophore(points)

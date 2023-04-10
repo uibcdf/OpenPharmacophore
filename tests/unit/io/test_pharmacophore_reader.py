@@ -5,32 +5,47 @@ import pyunitwizard as puw
 
 class TestReadMol2:
 
-    def test_read_mol2(
-            self,
-            mol2_pharmacophore_path_elastase,
-            mol2_pharmacophore_path_streptadivin
-    ):
-        pharmacophores_ = pharmacophore_reader.read_mol2(mol2_pharmacophore_path_streptadivin)
-        # TODO: we can test with a smaller file
-        assert len(pharmacophores_) == 6
-        assert len(pharmacophores_[0]) == 9
-        assert len(pharmacophores_[1]) == 10
-        assert len(pharmacophores_[2]) == 16
-        assert len(pharmacophores_[3]) == 11
-        assert len(pharmacophores_[4]) == 13
-        assert len(pharmacophores_[5]) == 13
+    def test_read_mol2(self, mol2_pharmacophore_path):
+        pharmacophores = pharmacophore_reader.read_mol2(mol2_pharmacophore_path)
+        assert len(pharmacophores) == 2
 
-        pharmacophores_ = pharmacophore_reader.read_mol2(mol2_pharmacophore_path_elastase)
+        pharma_1 = pharmacophores[0]
+        expected_feats = ["hydrophobicity", "positive charge", "aromatic ring"]
+        expected_centers = [
+            np.array([5.3180, 0.5997, 0.6328]),
+            np.array([7.9404, -0.6298, 0.7958]),
+            np.array([-1.5243, -0.3433, -1.1795]),
+        ]
+        expected_radius = [1.0, 1.5, 1.0]
 
-        assert len(pharmacophores_) == 8
-        assert len(pharmacophores_[0]) == 4
-        assert len(pharmacophores_[1]) == 21
-        assert len(pharmacophores_[2]) == 16
-        assert len(pharmacophores_[3]) == 18
-        assert len(pharmacophores_[4]) == 10
-        assert len(pharmacophores_[5]) == 12
-        assert len(pharmacophores_[6]) == 11
-        assert len(pharmacophores_[7]) == 14
+        assert [p.feature_name for p in pharma_1] == expected_feats
+        for ii in range(len(pharma_1)):
+            assert np.allclose(puw.get_value(pharma_1[ii].center), expected_centers[ii])
+            assert np.allclose(puw.get_value(pharma_1[ii].radius), expected_radius[ii])
+
+        assert pharma_1.score == 0.8452
+        assert pharma_1.ref_mol == 1
+        assert pharma_1.ref_struct == 2
+        assert pharma_1.props["min_actives"] == "4"
+
+        pharma_2 = pharmacophores[1]
+        expected_feats = ["hb acceptor", "hydrophobicity", "positive charge"]
+        expected_centers = [
+            np.array([-0.4548, 0.0480, 0.2469]),
+            np.array([-4.7914, -1.2623, 1.4397]),
+            np.array([-7.1862, -2.5267, 0.5723]),
+        ]
+        expected_radius = [1.0, 2.0, 1.45]
+
+        assert [p.feature_name for p in pharma_2] == expected_feats
+        for ii in range(len(pharma_2)):
+            assert np.allclose(puw.get_value(pharma_2[ii].center), expected_centers[ii])
+            assert np.allclose(puw.get_value(pharma_2[ii].radius), expected_radius[ii])
+
+        assert pharma_2.score is None
+        assert pharma_2.ref_mol is None
+        assert pharma_2.ref_struct is None
+        assert len(pharma_2.props) == 0
 
 
 class TestReadPH4:
@@ -124,47 +139,44 @@ class TestReadPH4:
 class TestReadJSON:
 
     def test_read_json(self, json_pharmacophore_path):
-        points, molecular_system, ligand = pharmacophore_reader.read_json(
-            json_pharmacophore_path, load_mol_sys=False)
+        pharmacophore = pharmacophore_reader.read_json(json_pharmacophore_path)
 
-        assert len(points) == 5
-        assert molecular_system is None
-        assert ligand is None
+        assert len(pharmacophore) == 5
 
-        assert points[0].feature_name == "hb acceptor"
-        assert points[0].has_direction
-        assert puw.get_value(points[0].radius, "angstroms") == 1.0
-        assert np.allclose(puw.get_value(points[0].center, "angstroms"),
+        assert pharmacophore[0].feature_name == "hb acceptor"
+        assert pharmacophore[0].has_direction
+        assert puw.get_value(pharmacophore[0].radius, "angstroms") == 1.0
+        assert np.allclose(puw.get_value(pharmacophore[0].center, "angstroms"),
                            np.array([21.352, -14.531, 19.625]))
-        assert np.allclose(points[0].direction,
+        assert np.allclose(pharmacophore[0].direction,
                            np.array([-0.6405836470264256, 0.7029084735090229, -0.3091476492414897]))
 
-        assert points[1].feature_name == "hb acceptor"
-        assert points[1].has_direction
-        assert puw.get_value(points[1].radius, "angstroms") == 1.0
-        assert np.allclose(puw.get_value(points[1].center, "angstroms"),
+        assert pharmacophore[1].feature_name == "hb acceptor"
+        assert pharmacophore[1].has_direction
+        assert puw.get_value(pharmacophore[1].radius, "angstroms") == 1.0
+        assert np.allclose(puw.get_value(pharmacophore[1].center, "angstroms"),
                            np.array([19.355, -18.32, 23.987]))
-        assert np.allclose(points[1].direction,
+        assert np.allclose(pharmacophore[1].direction,
                            np.array([0.6859059711903811, 0.09092493673854565, 0.721987295292979]))
 
-        assert points[2].feature_name == "hb donor"
-        assert points[2].has_direction
-        assert puw.get_value(points[2].radius, "angstroms") == 1.0
-        assert np.allclose(puw.get_value(points[2].center, "angstroms"),
+        assert pharmacophore[2].feature_name == "hb donor"
+        assert pharmacophore[2].has_direction
+        assert puw.get_value(pharmacophore[2].radius, "angstroms") == 1.0
+        assert np.allclose(puw.get_value(pharmacophore[2].center, "angstroms"),
                            np.array([20.977, -16.951, 18.746]))
-        assert np.allclose(points[2].direction,
+        assert np.allclose(pharmacophore[2].direction,
                            np.array([0.71662539652105, -0.5202950182802607, -0.46447942367105033]))
 
-        assert points[3].feature_name == "negative charge"
-        assert not points[3].has_direction
-        assert puw.get_value(points[3].radius, "angstroms") == 1.5
-        assert np.allclose(puw.get_value(points[3].center, "angstroms"),
+        assert pharmacophore[3].feature_name == "negative charge"
+        assert not pharmacophore[3].has_direction
+        assert puw.get_value(pharmacophore[3].radius, "angstroms") == 1.5
+        assert np.allclose(puw.get_value(pharmacophore[3].center, "angstroms"),
                            np.array([21.66899, -15.077667, 20.608334]))
 
-        assert points[4].feature_name == "negative charge"
-        assert not points[4].has_direction
-        assert puw.get_value(points[4].radius, "angstroms") == 2.0
-        assert np.allclose(puw.get_value(points[4].center, "angstroms"),
+        assert pharmacophore[4].feature_name == "negative charge"
+        assert not pharmacophore[4].has_direction
+        assert puw.get_value(pharmacophore[4].radius, "angstroms") == 2.0
+        assert np.allclose(puw.get_value(pharmacophore[4].center, "angstroms"),
                            np.array([19.985, -19.404402, 22.8422]))
 
 

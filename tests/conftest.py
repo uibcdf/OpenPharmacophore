@@ -33,28 +33,13 @@ def moe_pharmacophore_path():
 
 
 @pytest.fixture
-def mol2_pharmacophore_path_elastase():
-    return str(pharmacophores_path / "mol2/elastase.mol2")
-
-
-@pytest.fixture
-def mol2_pharmacophore_path_streptadivin():
-    return str(pharmacophores_path / "mol2/streptadivin.mol2")
+def mol2_pharmacophore_path():
+    return str(pharmacophores_path / "mol2/pharmacophore.mol2")
 
 
 @pytest.fixture
 def ligands_mol2():
     return str(ligands_path / "ace.mol2")
-
-
-@pytest.fixture()
-def ligands_smi():
-    return str(ligands_path / "clique_detection.smi")
-
-
-@pytest.fixture
-def ligands_sdf():
-    return str(ligands_path / "sdf_example.sdf")
 
 
 @pytest.fixture

@@ -30,6 +30,7 @@ class Pharmacophore:
         self.score = score
         self.ref_mol = ref_mol
         self.ref_struct = ref_struct
+        self.props = {}
 
     def add(self, point):
         """ Add a pharmacophoric point.

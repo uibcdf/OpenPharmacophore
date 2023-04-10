@@ -1,0 +1,15 @@
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 HYD          5.3180    0.5997    0.6328   HYD    0   HYD     1.0000
+      2 CAT          7.9404   -0.6298    0.7958   CHG    1   CHG     1.5000
+      3 AR          -1.5243   -0.3433   -1.1795   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+      score          0.8452
+      ref_mol        1
+      ref_struct     2
+      min_actives    4
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -0.4548    0.0480    0.2469   HB     0   HB      1.0000
+      2 HYD         -4.7914   -1.2623    1.4397   HYD    1   HYD     2.0000
+      3 CAT         -7.1862   -2.5267    0.5723   CHG    2   CHG     1.4500

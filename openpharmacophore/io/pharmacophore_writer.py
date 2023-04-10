@@ -42,7 +42,7 @@ def _mol2_pharmacophores(pharmacophores):
 
         Parameters
         ----------
-        pharmacophores : list[list[Pharmacophore]]
+        pharmacophores : list[Pharmacophore]
             Nested list of pharmacophoric points were each entry represents a pharmacophore
 
         Returns
