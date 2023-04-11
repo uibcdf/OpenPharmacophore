@@ -77,7 +77,7 @@ def read_mol2(file_name):
 # PH4 Files
 
 def read_ph4(file_name: str):
-    """ Loads a list of pharmacophoric points from a MOE ph4 file.
+    """ Loads a pharmacophore from a MOE ph4 file.
 
         Parameters
         ----------
@@ -310,7 +310,7 @@ def _pharmacophoric_point_from_vector_or_plane(element):
 
 
 def read_ligandscout(file_name):
-    """ Reads a ligandscout pharmacophore (pml) file and returns a list of pharmacophoric points.
+    """ Reads a ligandscout pharmacophore (pml) file.
 
         Parameters
         ----------
