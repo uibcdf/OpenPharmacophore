@@ -94,8 +94,8 @@ def test_viewer_components_have_multiple_conformers(
 
     viewer = get_viewer()
     viewer.add_components([protein, ligand])
-    viewer.show(frame=0)
+    viewer.show(struct=0)
     assert viewer.n_components == 2
 
-    viewer.show(frame=1)
+    viewer.show(struct=1)
     assert viewer.n_components == 2

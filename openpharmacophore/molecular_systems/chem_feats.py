@@ -89,6 +89,21 @@ SMARTS_PROTEIN = {
 
 @dataclass(frozen=True)
 class ChemFeat:
+    """ Class to store chemical features.
+
+        Attributes
+        ----------
+        coords: QuantityLike
+            3D position of the chemical feature.
+
+        type: str
+            Feature type
+
+        atom_indices: tuple[int], optional
+            The indices of the atoms that comprise the chemical feature
+             in the molecule.
+
+    """
     coords: QuantityLike
     type: str
     atom_indices: Optional[Tuple[int]] = None
@@ -107,6 +122,8 @@ class HBDonor(ChemFeat):
 
 
 class ChemFeatContainer:
+    """ A container that stores chemical features by type.
+    """
 
     def __init__(self, feats=None):
         self.aromatic = []
@@ -150,8 +167,6 @@ class ChemFeatContainer:
         return len(self._get_feat_list(feat_type)) > 0
 
     def _get_feat_list(self, feat_type):
-        if feat_type == "aromatic ring":
-            return self.aromatic
         if feat_type == "hb acceptor":
             return self.acceptor
         if feat_type == "hb donor":
@@ -162,6 +177,8 @@ class ChemFeatContainer:
             return self.positive
         if feat_type == "negative charge":
             return self.negative
+        if feat_type == "aromatic ring":
+            return self.aromatic
         raise ValueError(feat_type)
 
     def __len__(self):
@@ -169,12 +186,12 @@ class ChemFeatContainer:
 
     def __iter__(self):
         # Iterate all features
-        yield from self.aromatic
         yield from self.acceptor
         yield from self.donor
         yield from self.hydrophobic
         yield from self.positive
         yield from self.negative
+        yield from self.aromatic
 
 
 def feature_indices(feat_def, mol):

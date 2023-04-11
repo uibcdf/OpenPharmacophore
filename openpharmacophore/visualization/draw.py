@@ -6,7 +6,7 @@ from rdkit.Chem.Draw.rdMolDraw2D import MolDraw2DSVG
 from openpharmacophore.constants import PALETTE
 
 
-def draw_ligands(ligands, n_per_row, pretty=True):
+def draw_ligands(ligands, n_per_row, pretty=True, legends=None):
     """ Draw multiple ligands
 
         Parameters
@@ -18,6 +18,10 @@ def draw_ligands(ligands, n_per_row, pretty=True):
 
         pretty : bool, default=True
             If true the ligands is drawn with no conformers.
+
+        legends : list[str], optional
+            A legend to add to each ligand. Must be of the same
+            length as ligands
     """
     if pretty:
         # Copy to avoid removing conformers from the original molecules
@@ -26,7 +30,7 @@ def draw_ligands(ligands, n_per_row, pretty=True):
             mol.RemoveAllConformers()
     else:
         mols = [lig.to_rdkit() for lig in ligands]
-    return MolsToGridImage(mols, molsPerRow=n_per_row)
+    return MolsToGridImage(mols, molsPerRow=n_per_row, legends=legends)
 
 
 def _atom_highlights(feat_ind):

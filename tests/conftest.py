@@ -4,7 +4,7 @@ import pyunitwizard as puw
 import numpy as np
 from pathlib import Path
 
-from openpharmacophore import PharmacophoricPoint
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
 from openpharmacophore.molecular_systems import Topology, Protein
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 
@@ -33,28 +33,13 @@ def moe_pharmacophore_path():
 
 
 @pytest.fixture
-def mol2_pharmacophore_path_elastase():
-    return str(pharmacophores_path / "mol2/elastase.mol2")
-
-
-@pytest.fixture
-def mol2_pharmacophore_path_streptadivin():
-    return str(pharmacophores_path / "mol2/streptadivin.mol2")
+def mol2_pharmacophore_path():
+    return str(pharmacophores_path / "mol2/pharmacophore.mol2")
 
 
 @pytest.fixture
 def ligands_mol2():
     return str(ligands_path / "ace.mol2")
-
-
-@pytest.fixture()
-def ligands_smi():
-    return str(ligands_path / "clique_detection.smi")
-
-
-@pytest.fixture
-def ligands_sdf():
-    return str(ligands_path / "sdf_example.sdf")
 
 
 @pytest.fixture
@@ -72,7 +57,7 @@ def two_element_pharmacophore():
         center=puw.quantity([1, 2, 2], "angstroms"),
         direction=[0, 1, 1],
         radius=radius)
-    return [ring, acceptor]
+    return Pharmacophore([ring, acceptor])
 
 
 @pytest.fixture
@@ -94,7 +79,7 @@ def three_element_pharmacophore():
         feat_type="excluded volume",
         center=puw.quantity([2, 1, 2], "angstroms"),
         radius=radius)
-    return [acceptor, excluded, ring]
+    return Pharmacophore([acceptor, excluded, ring])
 
 
 @pytest.fixture
@@ -129,8 +114,10 @@ def five_element_pharmacophore():
         center=puw.quantity([-1, 2, 2], "angstroms"),
         radius=radius,
     )
-    return [acceptor, hb_donor,
-            hydrophobicity, ring_1, ring_2]
+    return Pharmacophore([
+        acceptor, hb_donor,
+        hydrophobicity, ring_1, ring_2]
+    )
 
 
 @pytest.fixture

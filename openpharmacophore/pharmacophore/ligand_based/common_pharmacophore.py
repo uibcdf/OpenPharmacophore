@@ -1,313 +1,113 @@
-from openpharmacophore.utils.maths import points_distance
-from openpharmacophore import PharmacophoricPoint, Pharmacophore
+from collections import Counter, defaultdict, namedtuple
+from dataclasses import dataclass
+import heapq
+import itertools
+from typing import List, Optional, Tuple
 import numpy as np
 import pyunitwizard as puw
-import math
-import itertools
-from collections import defaultdict, Counter, namedtuple
 
-BIN_SIZE = 1.0  # In angstroms
-MAX_DIST = 15.0  # Maximum interpoint distance in angstroms
-MIN_DIST = 2.0  # In angstroms
-BINS = np.arange(0, MAX_DIST + BIN_SIZE, step=BIN_SIZE)
-
-# Scoring function values
-W_POINT = 1.0
-W_VECTOR = 1.0
-RMSD_CUTOFF = 1.2
-COS_CUTOFF = 0.5
+from openpharmacophore import PharmacophoricPoint, Pharmacophore
+from openpharmacophore import constants
+from openpharmacophore.pharmacophore.align import align_pharmacophores
+from openpharmacophore.utils.maths import points_distance, nearest_bins
+from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 
 
-class Ligand:
-    """ Class to store ligands used for RDP algorithm.
-
-        Parameters
-        ----------
-        mol : rdkit.Chem.Mol
+class FeatQueueWrapper:
+    """ Wrapper object for a KSublist si it can be stored in a FeatListQueue
     """
+    def __init__(self, sublist):
+        self.sublist = sublist  # type: KSubList
 
-    def __init__(self, mol, chem_feats):
-        self.mol = mol
-        self.feats = chem_feats
-        self.variant = ""
-        self.feat_count = {}
-        self.distances = None
-
-    @property
-    def num_confs(self):
-        return self.mol.GetNumConformers()
-
-    def _update_variant(self):
-        """ Updates the variant, feat_count and distances attributes.
-        """
-        for feat_type, indices in self.feats.items():
-            self.variant += feat_type * len(indices)
-
-        self.variant = "".join(sorted(self.variant, key=str.lower))
-        self.feat_count = Counter(self.variant)
-
-        self.distances = np.ones((
-            self.mol.GetNumConformers(), len(self.variant), len(self.variant),
-        ), dtype=float) * -1
-
-    def interpoint_distances(self, conf):
-        """ Calculate the distances between the pharmacophoric points of
-            a conformer.
-
-            The distances attribute is updated with the computed distances.
-
-            Parameters
-            ----------
-            conf : int
-                The index of the conformer
-        """
-        centroids = np.zeros((len(self.variant), 3))
-        ii = 0
-
-        feats = "".join(sorted(self.feat_count.keys(), key=str.lower))
-        for feat_type in feats:
-            for indices in self.feats[feat_type]:
-                centroids[ii] = feature_centroids(self.mol, conf, indices)
-                ii += 1
-
-        for ii in range(centroids.shape[0]):
-            for jj in range(ii + 1, centroids.shape[0]):
-                dist = points_distance(centroids[ii], centroids[jj])
-                self.distances[conf, ii, jj] = dist
-                self.distances[conf, jj, ii] = dist
-
-    def k_distances(self, k_var, conf):
-        """ Returns an array with the interpoint distances of the k-variant
-            of the specified conformer.
-
-            Parameters
-            ----------
-            k_var : tuple[int]
-                Indices of the k-variant
-
-            conf : int
-                Index of the conformer
-
-            Returns
-            -------
-            dist : np.ndarray
-                Array of rank 1 with the interpoint distances of the k-variant.
-
-        """
-        if self.distances[conf, 0, 1] == -1:
-            self.interpoint_distances(conf)
-
-        shape = (int(len(k_var) * (len(k_var) - 1) / 2),)
-        dist = np.zeros(shape)
-        ii = 0  # index in dist array
-        for jj in range(len(k_var)):
-            for kk in range(jj + 1, len(k_var)):
-                dist[ii] = self.distances[conf, k_var[jj], k_var[kk]]
-                ii += 1
-        return dist
-
-
-class FeatureList:
-    """ Class to store feature lists.
-
-        A feature lists represents the pharmacophoric points of a conformer
-        including its chemical features and the interpoint distances of its points.
-
-        Parameters
-        ----------
-        variant : str
-            A string with the chemical features of a conformer. For example,
-            a conformer with two hydrogen bond acceptors (A) and an aromatic
-            ring (R) would have variant 'AAR'.
-
-        var_ind : tuple[int]
-            The indices of the features in the conformer.
-
-        fl_id : tuple[int, int]
-            The id of this list. The first number is the molecule index and the second
-            the conformer index
-
-        distances : np.ndarray
-            An array of shape (n_pairs,) where n_pairs is the number of interpoint
-            distances given by n_points x (n_points - 1) / 2
-
-        index : int, optional
-            An index to use as an identifier for a list
-    """
-
-    def __init__(self, variant, var_ind,
-                 fl_id, distances, index=None, score=None):
-        self.id = fl_id
-        self.distances = distances
-        self.variant = variant
-        self.var_ind = var_ind
-        self.index = index
-        self.score = score
-
-    def to_pharmacophore(self, ligand):
-        """ Creates a pharmacophore object from this feature list.
-
-            Parameters
-            ----------
-            ligand : Ligand
-                The ligand associated with this feature list.
-
-            Returns
-            -------
-            pharma : Pharmacophore
-        """
-        pharmacophore = Pharmacophore()
-        for var_ind in self.var_ind:
-            feat_name = ligand.variant[var_ind]
-            feat_start_ind = ligand.variant.index(feat_name)
-            feat_ind = ligand.feats[feat_name][var_ind - feat_start_ind]
-            center = feature_centroids(ligand.mol, self.id[1], feat_ind)
-            pharmacophore.add(PharmacophoricPoint(
-                PharmacophoricPoint.char_to_feature[feat_name],
-                puw.quantity(center, "angstroms"),
-                puw.quantity(1.0, "angstroms"),
-            ))
-        pharmacophore.score = self.score
-        pharmacophore.ref_mol = self.id[0]
-        pharmacophore.ref_struct = self.id[1]
-
-        return pharmacophore
+    def __lt__(self, other):
+        return self.sublist.score < other.sublist.score
 
     def __eq__(self, other):
-        if isinstance(other, FeatureList):
-            if self.id == other.id and \
-                    self.var_ind == other.var_ind and \
-                    self.variant == other.variant:
-                return True
-        return False
+        return self.sublist.score == other.score
 
 
-class FLContainer:
-    """ A container of feature lists of the same variant.
+class FeatListQueue:
+    """ Class that functions as a min heap for k sublists.
     """
 
-    def __init__(self, n_mols, variant):
-        self.variant = variant
-        self.n_pairs = int(len(variant) * (len(variant) - 1) / 2)
-        # Each sublist "i" stores the feature list of the ith molecule
-        self._flists = [[] for _ in range(n_mols)]
-        self._num_flists = 0
-        self.mols = set()
-
-    def append(self, feat_list):
-        """ Append a new feature list to the container.
-
-            Parameters
-            ----------
-            feat_list : FeatureList
-                A feature list with the same variant as the container
-        """
-        if self.variant == feat_list.variant:
-            mol_ind = feat_list.id[0]
-            self._flists[mol_ind].append(feat_list)
-            self.mols.add(mol_ind)
-            self._num_flists += 1
-        else:
-            raise ValueError("Incorrect variant")
-
-    def append_multiple(self, f_lists):
-        """ Append multiple feat lists to the container.
-
-            Parameters
-            ----------
-            f_lists : list[FeatureList]
-        """
-        for fl in f_lists:
-            self.append(fl)
-
-    def __getitem__(self, item):
-        """ Returns
-            -------
-            list[FeatureList]
-        """
-        return self._flists[item]
-
-    def __iter__(self):
-        self._mol_ind = 0
-        self._fl_ind = 0
-        return self
-
-    def __next__(self):
-        if self._mol_ind < len(self._flists):
-            if self._fl_ind < len(self._flists[self._mol_ind]):
-                flist = self._flists[self._mol_ind][self._fl_ind]
-                self._fl_ind += 1
-            else:
-                self._mol_ind += 1
-                self._fl_ind = 0
-                return self.__next__()
-            return flist
-        else:
-            # del self._fl_ind
-            # del self._mol_ind
-            raise StopIteration
-
-    def __len__(self):
-        return self._num_flists
-
-
-class FLQueue:
-    """ A queue to store the highest scoring feature lists.
-
-        Parameters
-        ----------
-        size : int, optional
-            The capacity of the queue. If none its capacity will
-            be unlimited.
-    """
-
-    def __init__(self, size=None):
+    def __init__(self, size):
         self.size = size
-        self._items = []
-        self._min = float("inf")
-        self._min_idx = None
+        self._heap = []  # type: list[FeatQueueWrapper]
+        self._unique = set()  # type: set[int]
 
-    def append(self, feat_list):
-        """ Add a new feat list to the queue.
+    def reverse_items(self):
+        """ Returns all sublist in the queue in descending order of
+            score.
+        """
+        return reversed([it.sublist for it in self._heap])
 
-            It must be a unique feat list (not already in the queue). If
-            the queue is full it will only be appended if its score is greater
-            than the item with the lowest score.
+    def push(self, sublist):
+        """ Push a sublist to the queue.
+
+            If the capacity is exceeded the sublist with the smallest score is
+            removed and the new sublist inserted. If the sublist to insert has a
+            lower score than the smallest element it will not be inserted.
+
+            Only unique sublists are inserted.
 
             Parameters
             ----------
-            feat_list : FeatureList
+            sublist : KSubList
         """
-        if feat_list not in self._items:
-            if self.size is None:
-                self._items.append(feat_list)
-            elif len(self) < self.size:
-                self._items.append(feat_list)
-                # The new score is the minimum
-                if feat_list.score < self._min:
-                    self._min = feat_list.score
-                    self._min_idx = len(self) - 1
-            else:
-                # Remove the lowest scoring item
-                if feat_list.score > self._min:
-                    self._items.pop(self._min_idx)
-                    self._items.append(feat_list)
-                    # Find the new minimum
-                    self._min_idx = self._items.index(
-                        min(self._items, key=lambda x: x.score)
-                    )
-                    self._min = self._min_idx
+        if sublist.id in self._unique:
+            return
 
-    def __len__(self):
-        return len(self._items)
+        if self.size is not None and len(self._heap) >= self.size:
+            if sublist.score < self.peek_left().score:
+                return
+            self.pop()
 
-    def __getitem__(self, item):
-        return self._items[item]
+        heapq.heappush(self._heap, FeatQueueWrapper(sublist))
+        self._unique.add(sublist.id)
+
+    def pop(self):
+        """ Get the sublists with the smallest score.
+
+            Returns
+            -------
+            KSubList
+        """
+        sublist = heapq.heappop(self._heap).sublist
+        self._unique.remove(sublist.id)
+        return sublist
+
+    def peek_left(self):
+        """ Returns the smallest element.
+
+            Returns
+            -------
+            KSubList
+        """
+        return self._heap[0].sublist
+
+    def peek_right(self):
+        """ Returns the greatest element.
+
+            Returns
+            -------
+            KSubList
+        """
+        return self._heap[-1].sublist
+
+    def empty(self):
+        """ Check if the queue is empty
+
+            Returns
+            -------
+            bool
+        """
+        return len(self._heap) == 0
 
 
 class ScoringFunction:
-    """ A customizable scoring function to score the common pharmacophores.
+    """ A customizable function to score the common pharmacophores.
     """
+
     def __init__(
             self,
             point_weight=1.0,
@@ -320,375 +120,570 @@ class ScoringFunction:
         self.rmsd_cutoff = rmsd_cutoff
         self.cos_cutoff = cos_cutoff
 
+    def point_score(self, rmsd):
+        """ Compute the point score function that is defined by
+            1 - RMSD / RMSD_cutoff.
+
+            Where RMSD is the value of the root mean square deviation of the
+            alignment between two pharmacophores.
+
+            Parameters
+            ----------
+            rmsd : float
+                RMSD of alignment
+
+            Returns
+            -------
+            float
+        """
+        return puw.get_value(1 - rmsd / self.rmsd_cutoff)
+
+    def vector_score(self):
+        # TODO: Implement me!
+        return 0
+
+    def __call__(self, rmsd):
+        return self.point_weight * self.point_score(rmsd) \
+            + self.vector_weight * self.vector_score()
+
+
+class FeatureList:
+    """ Class to store feature lists.
+
+       A feature lists represents the pharmacophoric points of a ligand
+       including its chemical features and the interpoint distances of its points.
+
+       Attributes
+       ----------
+       variant : str
+           A string with the chemical features of the ligand. For example,
+           a conformer with two hydrogen bond acceptors (A) and an aromatic
+           ring (R) would have variant 'AAR'.
+
+       distances : np.ndarray
+           An array of shape (n_conformers, n_pairs) where n_pairs is the number of interpoint
+           distances given by n_points x (n_points - 1) / 2
+
+        coords : QuantityLike
+            A quantity with the coordinates of the chemical features.
+            Shape (n_conformers, n_feats, 3)
+   """
+
+    def __init__(self, variant, distances, coords):
+        self.variant = variant
+        self.distances = distances
+        self.coords = coords
+
+    @classmethod
+    def from_chem_feats(cls, chem_feats):
+        """ Create a feature list form a molecule chemical features.
+
+            Parameters
+            ----------
+            chem_feats : list[ChemFeatContainer]
+               List of chemical features.
+
+            Returns
+            -------
+            FeatureList
+        """
+        variant = ""
+        variant += "A" * len(chem_feats[0].acceptor)
+        variant += "D" * len(chem_feats[0].donor)
+        variant += "H" * len(chem_feats[0].hydrophobic)
+        variant += "N" * len(chem_feats[0].negative)
+        variant += "P" * len(chem_feats[0].positive)
+        variant += "R" * len(chem_feats[0].aromatic)
+
+        n_conformers = len(chem_feats)
+        n_feats = len(chem_feats[0])
+
+        coords = puw.quantity(np.zeros((n_conformers, n_feats, 3)), "angstroms")
+        for ii in range(len(chem_feats)):
+            for jj, feats in enumerate(chem_feats[ii]):
+                coords[ii][jj] = feats.coords
+
+        distances = FeatureList.distance_vector(puw.get_value(coords, "angstroms"))
+
+        return cls(variant, distances, coords)
+
+    def has_variant(self, variant):
+        """ Returns true if the feature list contains the given variant. """
+        counter_self = Counter(self.variant)
+        counter_other = Counter(variant)
+        for ftype, cnt in counter_other.items():
+            cnt_self = counter_self.get(ftype, 0)
+            if cnt > cnt_self:
+                return False
+        return True
+
+    @staticmethod
+    def distance_vector(coords):
+        """ Compute the vector of inter-site distances.
+
+            Parameters
+            ----------
+            coords : np.ndarray
+               An array with the chemical features positions. Shape
+               (n_conformers, n_feats, 3)
+
+            Returns
+            -------
+            np.array
+                An array of shape (n_feats * (n_feats - 1) / 2)
+        """
+        n_confs = coords.shape[0]
+        n_sites = coords.shape[1]
+        vec_len = int((n_sites * (n_sites - 1)) / 2)
+        distances = np.zeros((n_confs, vec_len))
+
+        for conf in range(n_confs):
+            ii = 0
+            for site_i in range(n_sites):
+                for site_j in range(site_i + 1, n_sites):
+                    distances[conf][ii] = points_distance(
+                        coords[conf][site_i], coords[conf][site_j]
+                    )
+                    ii += 1
+
+        return distances
+
+    def subvariant_distances(self, variant, conf):
+        """ Get the distance vector of a subvariant.
+
+            Parameters
+            ----------
+            variant : list[int]
+            conf : int
+
+            Returns
+            -------
+            distances : np.ndarray
+        """
+        distances = np.zeros(int(len(variant) * (len(variant) - 1) / 2))
+        cnt = 0
+
+        n_pairs = self.distances.shape[-1]
+        n_feats = len(self.variant)
+
+        for ii in range(len(variant)):
+            var_left = variant[ii]
+            start = int(n_pairs - (n_feats - var_left) * (n_feats - var_left - 1) / 2)
+            for jj in range(ii + 1, len(variant)):
+                shift = variant[jj] - var_left - 1
+                distances[cnt] = self.distances[conf][start + shift]
+                cnt += 1
+
+        return distances
+
+    def k_sublists(self, k_variant):
+        """ Get a sublists of the given variant.
+
+            Parameters
+            ----------
+            k_variant : KVariant
+            mol: int
+
+            Returns
+            -------
+            sublists: list[KSubList]
+        """
+        n_confs = self.distances.shape[0]
+        sublists = [None] * n_confs
+        for ii in range(n_confs):
+            variant_ind = list(k_variant.var_ind)
+            sublists[ii] = KSubList(
+                self.subvariant_distances(variant_ind, ii), (k_variant.mol, ii), variant_ind
+            )
+        return sublists
+
+    def __len__(self):
+        return self.coords.shape[0]
+
+
+@dataclass(frozen=False)
+class KSubList:
+    """ Class to store sub sets of a feature lists with k points.
+
+        Does not store chem feats coordinates.
+    """
+    ID = 1
+
+    distances: np.ndarray
+    mol_id: Tuple[int, int]
+    feat_ind: List[int]
+    score: Optional[float] = None
+
+    def __post_init__(self):
+        self.id = KSubList.ID
+        KSubList.ID += 1
+
+    def __eq__(self, other):
+        if other.mol_id != self.mol_id:
+            return False
+        if other.feat_ind != self.feat_ind:
+            return False
+        return np.all(self.distances == other.distances)
+
+
+KVariant = namedtuple("KVariant", ["var_ind", "mol"])
+
+
+class SurvivingBox:
+
+    def __init__(self):
+        self.sublists = []  # type: list[KSubList]
+        self.ligands = set()  # type: set[int]
+        self.id = []  # type: list[int]
+
+    def __eq__(self, other):
+        return self.id == other.id
+
 
 class CommonPharmacophoreFinder:
     """ Class to search for common pharmacophores in a set of ligands.
 
         Parameters
         ----------
-        n_points : int
-           Extracted pharmacophores will have this number of pharmacophoric
-           points.
-
-       min_actives : int, optional
-           Number of ligands that must match a common pharmacophore.
-
-       max_pharmacophores : int, optional
-           Maximum number of pharmacophores to return. If set to null
-           all found pharmacophores will be returned.
-
         scoring_fn_params : dict[str, float], optional
             The parameters of the scoring function.
     """
 
-    def __init__(
-        self, n_points, min_actives=None, max_pharmacophores=None,
-        scoring_fn_params=None, **kwargs
-    ):
-        self.n_points = n_points
-        self.min_actives = min_actives
-
+    def __init__(self, scoring_fn_params=None, **kwargs):
         self.min_dist = kwargs.get("min_dist", puw.quantity(2.0, "angstroms"))
         self.max_dist = kwargs.get("max_dist", puw.quantity(15.0, "angstroms"))
         self.bin_size = kwargs.get("bin_size", puw.quantity(1.0, "angstroms"))
-        self.bins = np.arange(
-            0, puw.get_value(self.max_dist + self.bin_size), step=puw.get_value(self.bin_size)
-        )
 
-        self.queue = FLQueue(max_pharmacophores)
+        self.min_dist = puw.get_value(self.min_dist)
+        self.max_dist = puw.get_value(self.max_dist)
+        self.bin_size = puw.get_value(self.bin_size)
+
         if scoring_fn_params is None:
             self.scoring_fn = ScoringFunction()
         else:
             self.scoring_fn = ScoringFunction(**scoring_fn_params)
 
+        self.align = kwargs.get("align", "distances")
 
-def nearest_bins(num, bin_size):
-    """ Return the index of the nearest bins of the given number
-        in the bins array.
+    def find_common_pharmacophores(self, chemical_features, n_points,
+                                   min_actives=None, max_pharmacophores=None):
+        """ Find common pharmacophores.
 
-        Parameters
-        ----------
-        num : float
-        bin_size : float
+            Parameters
+            ----------
+            chemical_features : list[list[ChemFeatContainer]]
+                A nested list where each entry represents the chemical features
+                of a ligand and its conformers (as sublist)
 
-        Returns
-        -------
-        tuple[int, int]
-    """
-    if num % 1 <= 0.5:
-        low_bin = math.floor(num - bin_size)
-    else:
-        low_bin = math.ceil(num - bin_size)
-    return low_bin, low_bin + 1
+            n_points : int
+               Extracted pharmacophores will have this number of pharmacophoric
+               points.
 
+            min_actives : int, optional
+               Number of ligands that must match a common pharmacophore.
 
-def recursive_partitioning(container, dim, n_pairs, boxes, min_actives, n_ligs):
-    """ Obtain common pharmacophores by recursive distance partitioning.
-
-        Parameters
-        ----------
-        container : FLContainer
-            A container of feature lists of the same variant.
-        dim : int
-            The dimension of the distances array which will be used for
-            partitioning.
-        n_pairs : int
-            Number of interpoint distance pairs.
-        boxes : list[FLContainer]
-            A list where surviving boxes will be stored.
-        min_actives : int
-            Minimum number of actives that a surviving box must contain
-        n_ligs : int
-            Total number of ligands.
-
-    """
-    bins = [
-        FLContainer(n_ligs, container.variant) for _ in range(BINS.shape[0] - 1)
-    ]
-
-    for flist in container:
-        # Assign each distance to the two closest bins
-        low_bin, upp_bin = nearest_bins(flist.distances[dim], BIN_SIZE)
-        if low_bin >= len(bins) or upp_bin >= (len(bins)):
-            continue
-        bins[low_bin].append(flist)
-        bins[upp_bin].append(flist)
-
-    for container in bins:
-        if len(container.mols) >= min_actives:
-            if dim < n_pairs - 1:
-                recursive_partitioning(
-                    container, dim + 1, n_pairs, boxes, min_actives, n_ligs
-                )
-            else:
-                boxes.append(container)
+            max_pharmacophores : int, optional
+               Maximum number of pharmacophores to return. If set to null
+               all found pharmacophores will be returned.
 
 
-def pharmacophore_partitioning(container, min_actives, n_ligs):
-    """ Partition pharmacophores by their interpoint distances to find common
-        pharmacophores.
+            Returns
+            -------
+            list[Pharmacophore]
+                List with the common pharmacophores.
 
-        Parameters
-        ----------
-        container : FLContainer
-        min_actives : int
+        """
+        KSubList.ID = 1
 
-        Returns
-        -------
-        box : list[FLContainer]
-    """
-    box = []
-    recursive_partitioning(container, 0, container.n_pairs, box, min_actives, n_ligs)
-    return box
+        n_ligands = len(chemical_features)
+        if min_actives is None:
+            min_actives = n_ligands
 
+        feature_lists = self._get_feat_lists(chemical_features)
+        common_variants = self._common_k_point_variants(feature_lists, n_points, min_actives)
+        sub_lists = self._variant_sublists(feature_lists, common_variants)
 
-K_VARIANT = namedtuple("K_VARIANT", ["name", "indices", "mol"])
+        scores = {}
+        queue = FeatListQueue(size=max_pharmacophores)
+        for variant in sub_lists.keys():
+            surviving_boxes = self._recursive_partitioning(sub_lists[variant], min_actives)
+            for box in surviving_boxes:
+                if len(box) > 0:
+                    top_representative = self._box_top_representative(box, scores, feature_lists)
+                    if top_representative is not None:
+                        queue.push(top_representative)
 
+        return self._get_pharmacophores(queue, feature_lists)
 
-def common_k_point_variants(ligands, n_points, min_actives):
-    """ Find the common k-point feature lists, that is, the lists with variants
-        consisting of k pharmacophoric points that are common to at least the
-        specified number of actives.
+    def _recursive_partitioning_util(self, sublists, min_actives, dim, n_dims, boxes):
+        """ Helper function for _recursive_partitioning
 
-        Parameters
-        ----------
-        ligands : list[Ligand]
-            A list with the ligands.
+            Parameters
+            ----------
+            sublists : list[KSubList]
+                Sublists of the same variant
 
-        n_points : int
-            Number of pharmacophoric points
+            min_actives : int
+                Minimum number of actives that a surviving box must contain
 
-        min_actives : int
-            Number of actives that the variant must be present in to be
-            considered common
+            dim : int
+                The dimension of the distances array which will be used for
+                partitioning.
 
-        Returns
-        -------
-        list[K_VARIANT]
-            A list with all the common k-point variants sorted by variant name.
+            n_dims : int
+                Total number of dimensions in the distances array.
 
-    """
-    count = defaultdict(int)
-    all_vars = defaultdict(list)
+            boxes : list[SurvivingBox]
+                Stores the surviving sublists
+        """
+        bins = defaultdict(SurvivingBox)
 
-    for ii in range(len(ligands)):
-        # Keep track of the variants in this ligand
-        mol_variant = {}
-        for k_var_indices in itertools.combinations(
-                range(len(ligands[ii].variant)), n_points):
-            var = ""
-            for jj in k_var_indices:
-                var += ligands[ii].variant[jj]
-
-            try:
-                mol_variant[var] += 1
-            except KeyError:
-                count[var] += 1
-                mol_variant[var] = 1
-
-            variant = K_VARIANT(var, k_var_indices, ii)
-            all_vars[var].append(variant)
-
-    common = []
-    for var_name, k_vars in all_vars.items():
-        if count[var_name] >= min_actives:
-            for k_var in k_vars:
-                common.append(k_var)
-
-    return common
-
-
-def common_k_point_feature_lists(ligands, k_variants):
-    """ Returns a feature list container for each of the k-point variants.
-
-        Parameters
-        ----------
-        ligands : list[Ligand]
-            The ligands
-
-        k_variants : list[K_VARIANTS]
-            A list sorted by variant name
-
-        Returns
-        -------
-        containers : list[FLContainer]
-            List with a container for each variant
-    """
-    all_containers = []
-    if len(k_variants) == 0:
-        return all_containers
-
-    prev = k_variants[0].name
-    container = FLContainer(len(ligands), prev)
-    distances = None
-    fl_index = 0
-
-    for k_var in k_variants:
-        lig = ligands[k_var.mol]
-
-        if k_var.name != prev:
-            all_containers.append(container)
-            container = FLContainer(len(ligands), k_var.name)
-            prev = k_var.name
-
-        for ii in range(lig.num_confs):
-            fl_id = (k_var.mol, ii)
-            distances = lig.k_distances(k_var.indices, ii)
-            if np.any(distances < MIN_DIST):
+        for sublist_ in sublists:
+            low_bin, upp_bin = nearest_bins(sublist_.distances[dim], self.bin_size)
+            if low_bin >= self.max_dist or upp_bin >= self.max_dist:
                 continue
 
-            feat_list = FeatureList(k_var.name, k_var.indices, fl_id, distances)
-            feat_list.index = fl_index
-            fl_index += 1
-            container.append(feat_list)
+            bins[low_bin].sublists.append(sublist_)
+            bins[upp_bin].sublists.append(sublist_)
 
-    if distances is not None and not np.any(distances < MIN_DIST):
-        all_containers.append(container)
-    return all_containers
+            bins[low_bin].ligands.add(sublist_.mol_id[0])
+            bins[upp_bin].ligands.add(sublist_.mol_id[0])
 
+        for box in bins.values():
+            if len(box.ligands) >= min_actives:
+                if dim < n_dims - 1:
+                    self._recursive_partitioning_util(box.sublists, min_actives, dim + 1, n_dims, boxes)
+                else:
+                    if box not in boxes:
+                        boxes.append(box)
 
-def compute_point_score(reference, non_ref):
-    """ Compute the point score function that is defined by
-        1 - RMSD / RMSD_cutoff
+    def _recursive_partitioning(self, sublists, min_actives):
+        """ Partition feature lists by their inter-site distances and group
+            them into "surviving boxes", which are lists of feature lists that
+            have similar inter-site distances.
 
-        Parameters
-        ----------
-        reference : FeatureList
-        non_ref : FeatureList
+           Parameters
+           ----------
+           sublists : list[KSubList]
+                Sublists of the same variant
 
-        Returns
-        -------
-        float
-    """
-    rmsd = np.sqrt(
-        np.power(reference.distances - non_ref.distances, 2).mean()
-    )
-    return 1 - rmsd / RMSD_CUTOFF
+           min_actives : int
+                Minimum number of actives that a surviving box must contain
 
+           Returns
+           -------
+           boxes : list[list[KSubList]]
+        """
+        boxes = []  # type: list[SurvivingBox]
+        if sublists:
+            n_dims = sublists[0].distances.shape[0]
+            self._recursive_partitioning_util(sublists, min_actives, 0, n_dims, boxes)
+        return [b.sublists for b in boxes]
 
-def surviving_box_top_representative(surviving_box, point_scores, n_ligs):
-    """ Obtain the top ranked representative feature list from a surviving box.
+    def _box_top_representative(self, box, scores, feature_lists):
+        """ Obtain the top ranked representative feature sublist from a surviving box.
 
-        Parameters
-        ----------
-        surviving_box : FLContainer
-            A surviving box
+            Parameters
+            ----------
+            box : list[KSublist]
+                A surviving box
 
-        point_scores : dict[tuple, float]
-            Values of point scores between feature lists. Avoid repeated
-            computations.
+            scores : dict[tuple, float]
+                Values of point scores between feature lists.
 
-        n_ligs : int
-            Number of ligands.
+            Returns
+            -------
+            KSubList
+                The best ranked feature sublist in the box with its score. Can be null if the
+                alignments of the feature list are above the rmsd threshold.
+        """
+        best_score = float("-inf")
+        best_ref = None
 
-        Returns
-        -------
-        FeatureList
-            The best ranked feature list in the box with its score. Can be null if the
-            alignments of the feature list are above the rmsd threshold.
+        for ref in box:
+            # Store the scores of the best alignments of the reference against feature lists
+            # of other molecules
+            best_partner = [float("-inf")] * len(feature_lists)
 
-    """
-    # Store the best score and reference for each molecule
-    best_score = [float("-inf")] * n_ligs
-    best_ref = [None] * n_ligs
-    for reference in surviving_box:
-        ref_mol = reference.id[0]
-        avg_score = 0
-        score = 0
-        # Score reference only with respect to feature lists of other molecules
-        for ii in surviving_box.mols:
-            if ii == ref_mol:
-                continue
-            for non_ref in surviving_box[ii]:
-                idx_1 = reference.index
-                idx_2 = non_ref.index
+            exclude = False
+            for partner in box:
+                # Score reference only with respect to feature lists of other molecules
+                ref_mol = ref.mol_id[0]
+                partner_mol = partner.mol_id[0]
+
+                if ref_mol == partner_mol:
+                    continue
+
+                idx_1 = ref.id
+                idx_2 = partner.id
                 if idx_2 < idx_1:
                     idx_1, idx_2 = idx_2, idx_1
 
                 try:
-                    score = point_scores[(idx_1, idx_2)]
+                    align_score = scores[(idx_1, idx_2)]
                 except KeyError:
-                    score = compute_point_score(reference, non_ref)
-                    point_scores[(idx_1, idx_2)] = score
 
-                if score > 0:
-                    avg_score += score
-                else:
+                    # TODO: self.align should be removed once we have an alignment algorithm
+                    if self.align == "coords":
+                        ref_flist, partner_flist = feature_lists[ref_mol], feature_lists[partner_mol]
+                        conf_ref, conf_partner = ref.mol_id[1], partner.mol_id[1]
+                        align_rmsd = align_pharmacophores(ref_flist.coords[conf_ref][ref.feat_ind],
+                                                          partner_flist.coords[conf_partner][partner.feat_ind])
+                        align_score = self.scoring_fn(align_rmsd)
+                    elif self.align == "distances":
+                        align_rmsd = align_pharmacophores(ref.distances, partner.distances)
+                        align_score = 1 - align_rmsd / puw.get_value(self.scoring_fn.rmsd_cutoff)
+                    else:
+                        raise ValueError(f"Incorrect alignment parameter {self.align}")
+
+                    scores[(idx_1, idx_2)] = align_score
+
+                if align_score < 0:
+                    # Exclude this reference as a potential hypothesis
+                    exclude = True
                     break
 
-        if score < 0:
-            best_score[ref_mol] = float("-inf")
-            best_ref[ref_mol] = None
-            continue
+                best_partner[partner_mol] = max(align_score, best_partner[partner_mol])
 
-        n_non_ref_fl = len(surviving_box) - len(surviving_box[ref_mol])
-        avg_score /= n_non_ref_fl
-        if avg_score > best_score[ref_mol]:
-            best_score[ref_mol] = avg_score
-            best_ref[ref_mol] = reference
+            if exclude:
+                continue
 
-    if all([r is None for r in best_ref]):
-        return None
+            # Get average score
+            total_score = sum(s for s in best_partner if s > 0) / len([s for s in best_partner if s > 0])
+            if total_score > best_score:
+                best_score = total_score
+                best_ref = ref
 
-    # Choose the best among all molecules
-    max_ind = best_score.index(max(best_score))
-    if best_ref[max_ind] is not None:
-        best_ref[max_ind].score = best_score[max_ind]
-    return best_ref[max_ind]
+        if best_ref is None:
+            return
+        best_ref.score = best_score
+        return best_ref
 
+    @staticmethod
+    def _get_pharmacophores(queue, feature_lists):
+        """ Extract sublists from the queue and transform them to
+            pharmacophores.
 
-def vector_score(id_1, id_2):
-    # TODO: complete me!
-    return 0
+            Parameters
+            ----------
+            queue : FeatListQueue
+            feature_lists : list[FeatureList]
 
+            Returns
+            -------
+            list[Pharmacophore]
+        """
+        pharmas = []
+        radius = puw.quantity(1.0, "angstroms")
+        for sublist in queue.reverse_items():
+            ref_mol = sublist.mol_id[0]
+            ref_conf = sublist.mol_id[1]
 
-def find_common_pharmacophores(mols, chem_feats, n_points,
-                               min_actives, max_pharmacophores
-                               ):
-    """ Find common pharmacophores in a set of ligands and assigns a score to each one.
+            flist = feature_lists[ref_mol]
+            coords = flist.coords[ref_conf]
 
-        Parameters
-        ----------
-        mols : list[rdkit.Chem.Mol]
-            List of molecules with conformers.
+            points = []
+            for ii in sublist.feat_ind:
+                feat_name = constants.CHAR_TO_FEAT[flist.variant[ii]]
+                points.append(PharmacophoricPoint(feat_name, coords[ii], radius))
 
-        chem_feats : list[dict]
-            List with the chemical features of each molecule
+            pharmas.append(Pharmacophore(points, score=sublist.score, ref_mol=ref_mol, ref_struct=ref_conf))
 
-        n_points : int
-            Number of pharmacophoric points the common pharmacophores will have.
+        return pharmas
 
-        min_actives : int
-            Number of ligands that the common pharmacophores are present in.
+    @staticmethod
+    def _get_feat_lists(chem_feats):
+        """ Get the feat lists of all ligands
 
-        max_pharmacophores : int
-            Maximum number of pharmacophores to return.
+            Returns
+            -------
+            feat_lists : list[FeatureList]
+                List where each entry represents the feature lists of
+                a ligand
+        """
+        feat_lists = []
+        for cfts in chem_feats:
+            feat_lists.append(FeatureList.from_chem_feats(cfts))
 
-        Returns
-        -------
-        pharmacophores : list[PharmacophoricPoint]
-        scores : list[int]
+        return feat_lists
 
-    """
-    ligands = []
-    for ii in range(len(mols)):
-        lig = Ligand(mols[ii], chem_feats[ii])
-        lig._update_variant()
-        ligands.append(lig)
+    @staticmethod
+    def _common_k_point_variants(feat_lists, n_points, min_actives):
+        """ Find the common k-point variants, that is, the variants
+            consisting of k features that are common to at least the
+            specified number of actives.
 
-    k_variants = common_k_point_variants(ligands, n_points, min_actives)
-    boxes = common_k_point_feature_lists(ligands, k_variants)
+            Parameters
+            ----------
+            feat_lists : list[FeatureList]
+                A feature list for each of the ligands
 
-    top_queue = FLQueue(size=max_pharmacophores)
-    scores = {}
-    for box in boxes:
-        surviving_boxes = pharmacophore_partitioning(box, min_actives, len(ligands))
-        for suv_box in surviving_boxes:
-            top_representative = surviving_box_top_representative(suv_box, scores, len(ligands))
-            if top_representative is not None:
-                # Check for uniqueness, score and max_pharmacophores
-                top_queue.append(top_representative)
+            n_points : int
 
-    pharmacophores = [t.to_pharmacophore(ligands[t.id[0]]) for t in top_queue]
-    pharmacophores.sort(key=lambda p: p.score, reverse=True)
-    return pharmacophores
+            min_actives: int
+
+            Returns
+            -------
+            k_variants : dict[str, list[KVariant]]
+
+        """
+        variant_count = {}
+        k_variants = defaultdict(list)
+
+        for ii, flist in enumerate(feat_lists):
+            # Keep track of the variants in this ligand
+            lig_variants = set()
+            for k_var_ind in itertools.combinations(
+                    range(len(flist.variant)), n_points):
+                k_var = ""
+                for jj in k_var_ind:
+                    k_var += flist.variant[jj]
+
+                if k_var not in lig_variants:
+                    lig_variants.add(k_var)
+                    variant_count[k_var] = variant_count.get(k_var, 0) + 1
+
+                k_variants[k_var].append(KVariant(k_var_ind, ii))
+
+        for k_var, count in variant_count.items():
+            if count < min_actives:
+                k_variants.pop(k_var)
+
+        return k_variants
+
+    @staticmethod
+    def _variant_sublists(feat_lists, common_variants):
+        """ Group the feature lists by variant type.
+
+            Returns a dictionary of feature lists grouped by variant
+
+            Parameters
+            ----------
+            feat_lists : list[FeatureList]
+                Feature lists of all ligands
+
+            common_variants : dict[str, list[KVariant]]
+                The common variants
+
+            Returns
+            -------
+            variants : dict[str, list[KSubList]]
+        """
+        var_sublists = defaultdict(list)
+        for var, var_list in common_variants.items():
+            for k_var in var_list:
+                flist = feat_lists[k_var.mol]
+                var_sublists[var].extend(flist.k_sublists(k_var))
+
+        return var_sublists
+
+    def __call__(self, chemical_features, n_points, min_actives=None, max_pharmacophores=None):
+        """ Find common pharmacophores.
+
+            Shortcut for calling CommonPharmacophoreFinder.find_common_pharmacophores
+
+            Parameters
+            ----------
+            chemical_features : list[list[ChemFeatContainer]]
+        """
+        return self.find_common_pharmacophores(chemical_features, n_points, min_actives, max_pharmacophores)

@@ -1,5 +1,5 @@
 from openpharmacophore import Ligand, Pharmacophore
-from openpharmacophore.pharmacophore.ligand_based.common_pharmacophore import CommonPharmacophoreFinder
+import openpharmacophore.pharmacophore.ligand_based.common_pharmacophore as cp
 
 
 class LigandBasedPharmacophore:
@@ -13,6 +13,10 @@ class LigandBasedPharmacophore:
     def __init__(self, ligands):
         self._ligands = ligands
         self._pharmacophores = []  # type: list[Pharmacophore]
+
+    @property
+    def pharmacophores(self):
+        return self._pharmacophores
 
     def extract(self, n_points, min_actives=None, max_pharmacophores=None, *args, **kwargs):
         """ Finds and scores common pharmacophores from a set of ligands.
@@ -33,15 +37,30 @@ class LigandBasedPharmacophore:
         if min_actives is None:
             min_actives = len(self._ligands)
 
+        chem_feats = self._get_chem_feats(self._ligands)
+        extractor = cp.CommonPharmacophoreFinder(*args, **kwargs)
+        self._pharmacophores = extractor(chem_feats, n_points, min_actives, max_pharmacophores)
+
+    @staticmethod
+    def _get_chem_feats(ligands):
+        """ Get the chemical feature of all ligands in the pharmacophore.
+
+            Parameters
+            ----------
+            list[Ligand]
+
+            Returns
+            -------
+            list[ChemFeatContainer]
+        """
         chem_feats = []
-        for lig in self._ligands:
+        for ii, lig in enumerate(ligands):
             ligand_feats = []
             for conf in range(lig.n_conformers):
-                ligand_feats.append(lig.get_chem_feats(conf, indices=True))
+                chem_f = lig.get_chem_feats(conf, indices=False)
+                ligand_feats.append(chem_f)
             chem_feats.append(ligand_feats)
-
-        extractor = CommonPharmacophoreFinder(n_points, min_actives, max_pharmacophores, *args, **kwargs)
-        return extractor(chem_feats)
+        return chem_feats
 
     def __len__(self):
         return len(self._pharmacophores)

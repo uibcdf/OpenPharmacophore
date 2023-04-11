@@ -1,6 +1,6 @@
-from openpharmacophore.point.input_arguments import validate_input_quantity, validate_input_array_like
-from openpharmacophore.point.exceptions import WrongDimensionalityError, NotArrayLikeError, IncorrectShapeError, \
-    NotAQuantityError
+from openpharmacophore.pharmacophore.input_arguments import validate_input_quantity, validate_input_array_like
+from openpharmacophore.pharmacophore.exceptions import WrongDimensionalityError, \
+    NotArrayLikeError, IncorrectShapeError, NotAQuantityError
 import numpy as np
 import pyunitwizard as puw
 import pytest

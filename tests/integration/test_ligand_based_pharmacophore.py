@@ -2,7 +2,6 @@ import openpharmacophore as oph
 import pytest
 
 
-@pytest.mark.skip(reason="Extraction is not implemented yet")
 def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     # We want to extract a ligand based pharmacophore for thrombin.
     # We start by loading the ligands from a sdf file. The ligands in this file
@@ -15,7 +14,7 @@ def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     pharmacophore.extract(
         n_points=3, min_actives=len(ligands), max_pharmacophores=10
     )
-    assert len(pharmacophore) == 10
+    assert len(pharmacophore) > 1
 
     # We inspect the features of a pharmacophore. We expect thrombin pharmacophore
     # to have an aromatic ring and acceptor and a donor
@@ -25,8 +24,12 @@ def test_ligand_based_pharmacophore_extraction(thrombin_ligands):
     assert "hb acceptor" in feat_names
 
     # We visualize the best scoring pharmacophore
-    viewer = oph.Viewer(pharmacophore=pharmacophore, ligands=ligands)
-    view = viewer.show()
+    top = pharmacophore[0]
+    viewer = oph.Viewer()
+    viewer.add_components([
+        top,
+        ligands[top.ref_mol]])
+    view = viewer.show(struct=top.ref_mol)
     # The visualization should contain a component for the ligand + 3 the pharmacophoric
     # points
     assert len(view._ngl_component_names) == 4

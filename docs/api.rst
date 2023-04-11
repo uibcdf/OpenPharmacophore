@@ -13,7 +13,6 @@ Molecular Systems
    openpharmacophore.Ligand
    openpharmacophore.ComplexBindingSite
 
-
 Pharmacophores
 ---------------
 .. autosummary::
@@ -34,15 +33,41 @@ Visualization
    :recursive:
 
     openpharmacophore.Viewer
+
+.. autosummary::
+   :toctree: _autosummary
+   :template: base.rst
+   :recursive:
+
     openpharmacophore.draw_ligands
     openpharmacophore.draw_ligands_chem_feats
 
+File IO
+-------
+.. autosummary::
+   :toctree: _autosummary
+   :template: base.rst
+   :recursive:
+
+    openpharmacophore.io.pharmacophore_reader.read_mol2
+    openpharmacophore.io.pharmacophore_reader.read_ph4
+    openpharmacophore.io.pharmacophore_reader.read_json
+    openpharmacophore.io.pharmacophore_reader.read_ligandscout
+
+    openpharmacophore.io.pharmacophore_writer.save_mol2
+    openpharmacophore.io.pharmacophore_writer.save_ph4
+    openpharmacophore.io.pharmacophore_writer.save_json
+    openpharmacophore.io.pharmacophore_writer.save_pml
+
+    openpharmacophore.io.mol_files.mol2
+    openpharmacophore.io.mol_files.iter_mol2
+    openpharmacophore.io.mol_files.sdf
 
 Others
 --------
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
+   :template: base.rst
    :recursive:
 
     openpharmacophore.load

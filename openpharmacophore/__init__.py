@@ -18,12 +18,13 @@ puw.configure.set_standard_units(['angstroms', 'ps', 'K', 'mole', 'amu', 'e',
 # Add imports here
 from .molecular_systems import Ligand, Protein, smiles_from_pdb_id
 from .molecular_systems import ComplexBindingSite, BindingSite
-from .point.pharmacophoric_point import PharmacophoricPoint, distance_between_pharmacophoric_points
+from .pharmacophore.pharmacophoric_point import PharmacophoricPoint
 from .pharmacophore.pharmacophore import Pharmacophore
 from .pharmacophore.ligand_based.ligand_based import LigandBasedPharmacophore
 from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmacophore
 from .visualization import Viewer, draw_ligands, draw_ligands_chem_feats
-from .load.load import load, load_ligands
+from .io import mol_files, pharmacophore_reader, pharmacophore_writer
+from .load import load, load_ligands
 
 
 versions = get_versions()
