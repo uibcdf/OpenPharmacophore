@@ -1,0 +1,814 @@
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 HYD          5.3180    0.5997    0.6328   HYD    0   HYD     1.0000
+      2 CAT          7.9404   -0.6298    0.7958   CHG    1   CHG     1.0000
+      3 AR          -1.5243   -0.3433   -1.1795   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9339687380750084
+       ref_mol            0
+       ref_struct       155
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -0.4548    0.0480    0.2469   HB     0   HB      1.0000
+      2 HYD         -4.7914   -1.2623    1.4397   HYD    1   HYD     1.0000
+      3 CAT         -7.1862   -2.5267    0.5723   CHG    2   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9553702148781534
+       ref_mol            3
+       ref_struct        76
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.5325   -1.3719   -0.7958   HB     0   HB      1.0000
+      2 HYD          0.7322   -2.5304    2.5019   HYD    1   HYD     1.0000
+      3 AR           4.2096    2.5679   -1.1570   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9562529801070003
+       ref_mol            1
+       ref_struct        64
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.3564   -1.8730   -0.2275   HB     0   HB      1.0000
+      2 DON         -0.2666    4.2492    2.2736   HB     1   HB      1.0000
+      3 HYD         -1.7447    2.9713   -0.6826   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9190758548658591
+       ref_mol            6
+       ref_struct       133
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.1078    0.9373   -1.8425   HB     0   HB      1.0000
+      2 CAT         -6.9608    0.5291    3.2317   CHG    1   CHG     1.0000
+      3 AR           1.7106    0.2174   -2.1455   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9303208293810549
+       ref_mol            3
+       ref_struct        34
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -2.4042    5.9296    1.8749   HB     0   HB      1.0000
+      2 HYD         -1.2216    3.4794   -1.2084   HYD    1   HYD     1.0000
+      3 AR           3.1742   -1.8061   -0.0540   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9184906498918667
+       ref_mol            6
+       ref_struct       178
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.2062    0.4410   -1.1121   HB     0   HB      1.0000
+      2 DON         -3.1175    0.2792    0.2693   HB     1   HB      1.0000
+      3 AR           7.5605    0.5955    0.9322   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9456172103803375
+       ref_mol            3
+       ref_struct        50
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -0.4332   -0.5970   -1.5580   HB     0   HB      1.0000
+      2 AR          -2.8213   -2.3692    0.1345   AR     1   AR      1.0000
+      3 AR          -3.8478    2.5294    0.8003   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.9084639966579836
+       ref_mol            2
+       ref_struct        57
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON          4.3588    2.1519    0.3814   HB     0   HB      1.0000
+      2 HYD          2.3645    0.4342   -1.1190   HYD    1   HYD     1.0000
+      3 HYD         -0.5142   -4.6987   -0.1064   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.8906346424530285
+       ref_mol            2
+       ref_struct        75
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 HYD         -4.3325   -1.4313    1.4573   HYD    0   HYD     1.0000
+      2 HYD         -1.1606    2.4192   -2.6390   HYD    1   HYD     1.0000
+      3 CAT         -4.2677   -4.1372    0.5238   CHG    2   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.8780153796759415
+       ref_mol            3
+       ref_struct        40
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -2.4042    5.9296    1.8749   HB     0   HB      1.0000
+      2 HYD         -1.2216    3.4794   -1.2084   HYD    1   HYD     1.0000
+      3 AR           3.1742   -1.8061   -0.0540   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9184906498918667
+       ref_mol            6
+       ref_struct       178
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.2062    0.4410   -1.1121   HB     0   HB      1.0000
+      2 DON         -3.1175    0.2792    0.2693   HB     1   HB      1.0000
+      3 AR           7.5605    0.5955    0.9322   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9456172103803375
+       ref_mol            3
+       ref_struct        50
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.5325   -1.3719   -0.7958   HB     0   HB      1.0000
+      2 HYD          0.7322   -2.5304    2.5019   HYD    1   HYD     1.0000
+      3 AR           4.2096    2.5679   -1.1570   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9562529801070003
+       ref_mol            1
+       ref_struct        64
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.3564   -1.8730   -0.2275   HB     0   HB      1.0000
+      2 DON         -0.2666    4.2492    2.2736   HB     1   HB      1.0000
+      3 HYD         -1.7447    2.9713   -0.6826   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9190758548658591
+       ref_mol            6
+       ref_struct       133
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.1078    0.9373   -1.8425   HB     0   HB      1.0000
+      2 CAT         -6.9608    0.5291    3.2317   CHG    1   CHG     1.0000
+      3 AR           1.7106    0.2174   -2.1455   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9303208293810549
+       ref_mol            3
+       ref_struct        34
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON          2.5743   -1.3653   -1.2876   HB     0   HB      1.0000
+      2 DON          6.7340    1.6635    3.1194   HB     1   HB      1.0000
+      3 AR          -6.0126    0.1147   -0.6532   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.8907348977575723
+       ref_mol            0
+       ref_struct       161
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.9535    0.0710    0.8995   HB     0   HB      1.0000
+      2 ACC          1.8613   -1.6862   -1.9840   HB     1   HB      1.0000
+      3 AR           4.9020   -0.4931    0.2380   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.9350341154495976
+       ref_mol            4
+       ref_struct       152
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -4.1421    5.5969    0.3007   HB     0   HB      1.0000
+      2 DON          1.4515    1.5143    1.1161   HB     1   HB      1.0000
+      3 DON         -1.9810    5.8652    1.2064   HB     2   HB      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.8456844218986825
+       ref_mol            4
+       ref_struct        87
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON          4.3588    2.1519    0.3814   HB     0   HB      1.0000
+      2 HYD          2.3645    0.4342   -1.1190   HYD    1   HYD     1.0000
+      3 HYD         -0.5142   -4.6987   -0.1064   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.8906346424530285
+       ref_mol            2
+       ref_struct        75
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.1574   -0.4807    2.3964   HB     0   HB      1.0000
+      2 ACC         -2.2163   -1.4680    1.8858   HB     1   HB      1.0000
+      3 HYD          4.5496    1.5160    0.1052   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.8427839022115468
+       ref_mol            0
+       ref_struct        29
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -1.7381   -2.6615   -0.1276   HB     0   HB      1.0000
+      2 DON         -3.7793    3.3842   -1.7931   HB     1   HB      1.0000
+      3 AR           5.0670    1.5169   -1.7576   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.7790620671442058
+       ref_mol            1
+       ref_struct        30
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.1574   -0.4807    2.3964   HB     0   HB      1.0000
+      2 ACC         -2.2163   -1.4680    1.8858   HB     1   HB      1.0000
+      3 HYD          4.5496    1.5160    0.1052   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.8427839022115468
+       ref_mol            0
+       ref_struct        29
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.5325   -1.3719   -0.7958   HB     0   HB      1.0000
+      2 HYD          0.7322   -2.5304    2.5019   HYD    1   HYD     1.0000
+      3 AR           4.2096    2.5679   -1.1570   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.9562529801070003
+       ref_mol            1
+       ref_struct        64
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.2062    0.4410   -1.1121   HB     0   HB      1.0000
+      2 DON         -3.1175    0.2792    0.2693   HB     1   HB      1.0000
+      3 AR           7.5605    0.5955    0.9322   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.9456172103803375
+       ref_mol            3
+       ref_struct        50
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.9535    0.0710    0.8995   HB     0   HB      1.0000
+      2 ACC          1.8613   -1.6862   -1.9840   HB     1   HB      1.0000
+      3 AR           4.9020   -0.4931    0.2380   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.9350341154495976
+       ref_mol            4
+       ref_struct       152
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -0.5439   -3.2810   -0.4970   HB     0   HB      1.0000
+      2 CAT          2.1553    4.5154   -1.1860   CHG    1   CHG     1.0000
+      3 AR           2.9056   -1.3764   -0.2782   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.7640075388024778
+       ref_mol            6
+       ref_struct       106
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.2706   -1.9287    2.4212   HB     0   HB      1.0000
+      2 ACC         -2.2120   -2.0037    1.6055   HB     1   HB      1.0000
+      3 DON          6.9601    3.6579    0.8069   HB     2   HB      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.7985620603910007
+       ref_mol            0
+       ref_struct        28
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -3.0725    1.6753    0.8295   HB     0   HB      1.0000
+      2 DON          1.0162    7.4588   -0.1054   HB     1   HB      1.0000
+      3 HYD          0.6916    3.0927   -0.0174   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.8434188021448643
+       ref_mol            6
+       ref_struct        74
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON          1.3152   -0.2588    0.5047   HB     0   HB      1.0000
+      2 DON          6.4047    3.0161   -2.2547   HB     1   HB      1.0000
+      3 HYD          2.4846   -4.1192   -1.6986   HYD    2   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.7554528540360337
+       ref_mol            0
+       ref_struct        53
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -2.2454    6.1477    1.1414   HB     0   HB      1.0000
+      2 CAT         -3.1660    5.9712    0.4336   CHG    1   CHG     1.0000
+      3 AR           7.1439    1.1834   -0.8320   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.7082287409079846
+       ref_mol            4
+       ref_struct        25
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.3575   -2.6771   -0.6766   HB     0   HB      1.0000
+      2 DON          1.1489    4.1273   -1.0233   HB     1   HB      1.0000
+      3 AR           2.4322   -1.6329   -0.2940   AR     2   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        7
+       score 0.8059840458170494
+       ref_mol            6
+       ref_struct        15
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -8.5595    0.7793   -0.9118   HB     0   HB      1.0000
+      2 HYD         -6.0746    0.7813    0.4744   HYD    1   HYD     1.0000
+      3 CAT         -8.5595    0.7793   -0.9118   CHG    2   CHG     1.0000
+      4 AR           1.1426   -0.4831    0.0387   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7623767295114856
+       ref_mol            3
+       ref_struct        71
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.9149    2.5831    1.2977   HB     0   HB      1.0000
+      2 HYD         -4.8020   -1.0208    1.5914   HYD    1   HYD     1.0000
+      3 CAT         -7.5604   -1.7666    1.5863   CHG    2   CHG     1.0000
+      4 AR           1.0438    1.6213   -1.8970   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.8690290211610141
+       ref_mol            3
+       ref_struct         4
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.4641   -1.1141   -0.7166   HB     0   HB      1.0000
+      2 DON         -7.6990    3.3211    0.9395   HB     1   HB      1.0000
+      3 HYD         -5.5998    1.4326    1.3342   HYD    2   HYD     1.0000
+      4 CAT         -7.6990    3.3211    0.9395   CHG    3   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7864643650867759
+       ref_mol            3
+       ref_struct       132
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.6135   -1.1008   -0.3175   HB     0   HB      1.0000
+      2 DON         -8.2622    3.0985    0.4932   HB     1   HB      1.0000
+      3 CAT         -8.2622    3.0985    0.4932   CHG    2   CHG     1.0000
+      4 AR           0.9554   -0.7693   -1.0452   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7683613946709842
+       ref_mol            3
+       ref_struct       126
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.1100    1.8348    0.1313   HB     0   HB      1.0000
+      2 DON         -2.6062    1.6820    1.2919   HB     1   HB      1.0000
+      3 HYD         -0.3487    0.3107   -1.9956   HYD    2   HYD     1.0000
+      4 AR           6.4050   -1.0088   -1.3538   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.8523679441405203
+       ref_mol            3
+       ref_struct       122
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -7.8616   -0.7671    1.9313   HB     0   HB      1.0000
+      2 HYD         -5.0178   -0.6470    1.6681   HYD    1   HYD     1.0000
+      3 HYD         -1.5909    2.1380   -2.5013   HYD    2   HYD     1.0000
+      4 CAT         -7.8616   -0.7671    1.9313   CHG    3   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7510704844270771
+       ref_mol            3
+       ref_struct         7
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          3.1426    3.7543   -1.6689   HB     0   HB      1.0000
+      2 DON         -2.9468    5.5145   -0.1325   HB     1   HB      1.0000
+      3 DON          1.4507    1.7760   -1.1924   HB     2   HB      1.0000
+      4 CAT         -2.4423    5.4430    0.9267   CHG    3   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7431596882111586
+       ref_mol            4
+       ref_struct       102
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.7080   -0.5609   -2.0988   HB     0   HB      1.0000
+      2 ACC         -1.4029    0.9780   -0.5483   HB     1   HB      1.0000
+      3 DON          8.1631    1.5775    1.2498   HB     2   HB      1.0000
+      4 CAT          7.9397    0.4630    1.5338   CHG    3   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7486446173970549
+       ref_mol            0
+       ref_struct       156
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.6080    1.9639    1.5689   HB     0   HB      1.0000
+      2 DON         -3.2226   -4.3585    0.6057   HB     1   HB      1.0000
+      3 HYD         -3.1461   -1.6662    0.9301   HYD    2   HYD     1.0000
+      4 HYD         -0.9489    3.7839   -2.3445   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7122878635004821
+       ref_mol            3
+       ref_struct        80
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.6513    0.7331   -0.4683   HB     0   HB      1.0000
+      2 ACC         -1.4634   -1.0084    3.0410   HB     1   HB      1.0000
+      3 DON          6.3323    1.9555   -0.2996   HB     2   HB      1.0000
+      4 HYD          2.8875   -0.0358   -0.3037   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7110786438838842
+       ref_mol            2
+       ref_struct        55
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.1555   -0.5377   -2.1531   HB     0   HB      1.0000
+      2 DON         -5.3488    1.9375   -2.3008   HB     1   HB      1.0000
+      3 HYD          1.5146   -1.5648    2.4111   HYD    2   HYD     1.0000
+      4 CAT         -5.3488    1.9375   -2.3008   CHG    3   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6962570004977527
+       ref_mol            1
+       ref_struct         7
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.5287   -0.8279   -1.0244   HB     0   HB      1.0000
+      2 ACC         -1.0140   -0.7767    2.3946   HB     1   HB      1.0000
+      3 DON         -5.4798    2.7270   -2.1422   HB     2   HB      1.0000
+      4 HYD         -4.2674    0.7276   -0.7591   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.7469454385316139
+       ref_mol            1
+       ref_struct        92
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.6135   -1.1008   -0.3175   HB     0   HB      1.0000
+      2 DON         -8.2622    3.0985    0.4932   HB     1   HB      1.0000
+      3 CAT         -8.2622    3.0985    0.4932   CHG    2   CHG     1.0000
+      4 AR           0.9554   -0.7693   -1.0452   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.7683613946709842
+       ref_mol            3
+       ref_struct       126
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.2793    0.6534   -1.3720   HB     0   HB      1.0000
+      2 ACC         -3.7097   -1.2862    0.8419   HB     1   HB      1.0000
+      3 DON          5.7221    2.0496   -0.2797   HB     2   HB      1.0000
+      4 AR          -4.2308    2.2265    0.7290   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6704416486731235
+       ref_mol            2
+       ref_struct        48
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.1100    1.8348    0.1313   HB     0   HB      1.0000
+      2 DON         -2.6062    1.6820    1.2919   HB     1   HB      1.0000
+      3 HYD         -0.3487    0.3107   -1.9956   HYD    2   HYD     1.0000
+      4 AR           6.4050   -1.0088   -1.3538   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.8523679441405203
+       ref_mol            3
+       ref_struct       122
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -2.5404    0.2399    1.0759   HB     0   HB      1.0000
+      2 DON         -9.1664    0.4392    0.9556   HB     1   HB      1.0000
+      3 HYD         -6.3755   -0.1511    1.1646   HYD    2   HYD     1.0000
+      4 HYD         -0.7856    1.9616   -2.6243   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6638134884132947
+       ref_mol            3
+       ref_struct        18
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.6080    1.9639    1.5689   HB     0   HB      1.0000
+      2 DON         -3.2226   -4.3585    0.6057   HB     1   HB      1.0000
+      3 HYD         -3.1461   -1.6662    0.9301   HYD    2   HYD     1.0000
+      4 HYD         -0.9489    3.7839   -2.3445   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.7122878635004821
+       ref_mol            3
+       ref_struct        80
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.2414   -1.3172    1.7898   HB     0   HB      1.0000
+      2 ACC         -0.6172   -3.2689   -0.5854   HB     1   HB      1.0000
+      3 CAT         -1.3770    6.5452   -0.0833   CHG    2   CHG     1.0000
+      4 AR           3.1603   -2.1343   -0.6850   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6461530565377336
+       ref_mol            6
+       ref_struct       220
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          3.8296   -1.4775   -0.6206   HB     0   HB      1.0000
+      2 ACC          0.5725   -2.1076   -1.2632   HB     1   HB      1.0000
+      3 ACC         -2.2997   -2.6558    0.9263   HB     2   HB      1.0000
+      4 DON         -5.0258    3.0717   -1.6397   HB     3   HB      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6373655458545808
+       ref_mol            1
+       ref_struct       143
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON          2.5773   -0.1265   -0.7595   HB     0   HB      1.0000
+      2 DON          8.0783    0.2867    2.8601   HB     1   HB      1.0000
+      3 CAT          8.6288    0.8996    1.9567   CHG    2   CHG     1.0000
+      4 AR          -4.3078    2.6608    1.6778   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.6373309087051343
+       ref_mol            0
+       ref_struct       171
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -5.4855   -1.0958   -0.2028   HB     0   HB      1.0000
+      2 ACC         -2.2628    0.5476    0.3177   HB     1   HB      1.0000
+      3 HYD         -1.6259   -3.9467    0.7892   HYD    2   HYD     1.0000
+      4 AR          -5.1937    2.7776    0.5062   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.6892615554277033
+       ref_mol            2
+       ref_struct       156
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.2663   -0.0145   -0.7473   HB     0   HB      1.0000
+      2 ACC         -2.2205   -2.7037    0.4991   HB     1   HB      1.0000
+      3 DON         -1.5861   -0.7533    1.6217   HB     2   HB      1.0000
+      4 HYD         -4.1261    1.2390   -0.5531   HYD    3   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.6433397362048646
+       ref_mol            1
+       ref_struct        44
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.2090    0.4834    1.6463   HB     0   HB      1.0000
+      2 DON          2.1701   -0.2919    0.5761   HB     1   HB      1.0000
+      3 DON          7.6423    2.7706   -1.6407   HB     2   HB      1.0000
+      4 AR          -5.7688   -1.0074   -1.0196   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.6543693513270677
+       ref_mol            0
+       ref_struct       109
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.1252   -2.4881   -2.0159   HB     0   HB      1.0000
+      2 DON          1.6483    4.9880    0.6213   HB     1   HB      1.0000
+      3 CAT          1.6483    4.9880    0.6213   CHG    2   CHG     1.0000
+      4 AR           3.2782   -0.1018   -2.0433   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.6398070002629523
+       ref_mol            6
+       ref_struct       284
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -4.6872    1.6693    1.2447   HB     0   HB      1.0000
+      2 ACC         -4.5426   -1.5969   -0.5089   HB     1   HB      1.0000
+      3 DON          2.0583   -0.0329   -0.0749   HB     2   HB      1.0000
+      4 AR          -7.8950    0.0462   -0.3936   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.6243063964710754
+       ref_mol            2
+       ref_struct       123
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.8472   -3.9967    0.1173   HB     0   HB      1.0000
+      2 DON          2.1213    2.7610    2.1773   HB     1   HB      1.0000
+      3 HYD          3.4724    0.0817    0.2763   HYD    2   HYD     1.0000
+      4 AR          -0.6167   -0.7159   -1.4689   AR     3   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        6
+       score 0.4709323408125569
+       ref_mol            0
+       ref_struct        34
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.4811    0.0456   -1.2019   HB     0   HB      1.0000
+      2 DON          8.7679    0.4000   -1.0254   HB     1   HB      1.0000
+      3 HYD          5.9125    1.1106    0.0742   HYD    2   HYD     1.0000
+      4 HYD          1.3247   -4.2855    1.4717   HYD    3   HYD     1.0000
+      5 CAT          8.7371    0.2254    0.1279   CHG    4   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5816378212876603
+       ref_mol            0
+       ref_struct        63
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -1.9149    2.5831    1.2977   HB     0   HB      1.0000
+      2 DON         -7.5604   -1.7666    1.5863   HB     1   HB      1.0000
+      3 HYD         -4.8020   -1.0208    1.5914   HYD    2   HYD     1.0000
+      4 CAT         -7.5604   -1.7666    1.5863   CHG    3   CHG     1.0000
+      5 AR           1.0438    1.6213   -1.8970   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7756168355733549
+       ref_mol            3
+       ref_struct         4
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -7.9022    1.2046    3.2229   HB     0   HB      1.0000
+      2 ACC          1.4736    0.4302    0.3254   HB     1   HB      1.0000
+      3 ACC         -2.3661   -0.4822   -1.2913   HB     2   HB      1.0000
+      4 DON         -1.8651    0.1093    0.9181   HB     3   HB      1.0000
+      5 HYD         -1.1954    1.7836   -3.1719   HYD    4   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.7163654939098997
+       ref_mol            3
+       ref_struct        86
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.9535    0.0710    0.8995   HB     0   HB      1.0000
+      2 ACC          1.8613   -1.6862   -1.9840   HB     1   HB      1.0000
+      3 DON         -3.1531    6.6500    0.8945   HB     2   HB      1.0000
+      4 CAT         -3.8136    5.9998    0.0907   CHG    3   CHG     1.0000
+      5 AR           4.9020   -0.4931    0.2380   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5991639413348723
+       ref_mol            4
+       ref_struct       152
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.5092   -3.1977    1.5081   HB     0   HB      1.0000
+      2 DON          1.2866    3.2920   -3.0093   HB     1   HB      1.0000
+      3 DON         -0.0028    5.0693   -2.1440   HB     2   HB      1.0000
+      4 CAT          0.1033    3.7272   -2.5546   CHG    3   CHG     1.0000
+      5 AR           3.7062   -0.1917    0.0343   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.635573193727461
+       ref_mol            6
+       ref_struct       174
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.8568   -1.4456   -1.2068   HB     0   HB      1.0000
+      2 ACC         -0.8900   -3.8715    0.6872   HB     1   HB      1.0000
+      3 DON         -5.0584    3.1050   -1.4011   HB     2   HB      1.0000
+      4 HYD         -4.0097    0.6096   -0.5202   HYD    3   HYD     1.0000
+      5 CAT         -5.0584    3.1050   -1.4011   CHG    4   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5809157820569598
+       ref_mol            1
+       ref_struct        16
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.0279    1.1274    1.2804   HB     0   HB      1.0000
+      2 ACC          0.3420    1.0900    1.9369   HB     1   HB      1.0000
+      3 ACC         -2.3367    3.2667    0.9382   HB     2   HB      1.0000
+      4 DON         -2.3412    1.8936   -0.9569   HB     3   HB      1.0000
+      5 AR           5.3329   -1.7351   -1.0999   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.6227075950522579
+       ref_mol            3
+       ref_struct        58
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -3.5942    0.6211    0.6162   HB     0   HB      1.0000
+      2 ACC         -0.4760   -0.3256   -0.3437   HB     1   HB      1.0000
+      3 ACC          1.3200   -3.5583    0.2909   HB     2   HB      1.0000
+      4 DON          2.2129   -1.8700    1.6432   HB     3   HB      1.0000
+      5 DON          6.0119    2.6771   -0.5886   HB     4   HB      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5871730024184133
+       ref_mol            2
+       ref_struct       139
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          2.2772    1.0369   -3.7639   HB     0   HB      1.0000
+      2 DON         -2.3359    0.7960    1.2757   HB     1   HB      1.0000
+      3 DON         -7.7150   -0.3918    3.4464   HB     2   HB      1.0000
+      4 HYD         -5.6242   -0.5463    1.4961   HYD    3   HYD     1.0000
+      5 HYD         -1.2883    2.4864   -2.3967   HYD    4   HYD     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5799011320436855
+       ref_mol            3
+       ref_struct        28
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 DON         -1.1637    0.6102   -0.4072   HB     0   HB      1.0000
+      2 DON         -6.6787   -2.1864   -1.3721   HB     1   HB      1.0000
+      3 HYD         -4.4657   -0.4355   -1.0295   HYD    2   HYD     1.0000
+      4 HYD          0.3987   -1.3627    2.9031   HYD    3   HYD     1.0000
+      5 AR           5.5976    0.0241   -2.1907   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5719755232503875
+       ref_mol            1
+       ref_struct       125
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.2414   -1.3172    1.7898   HB     0   HB      1.0000
+      2 ACC         -0.6172   -3.2689   -0.5854   HB     1   HB      1.0000
+      3 DON         -1.3770    6.5452   -0.0833   HB     2   HB      1.0000
+      4 CAT         -1.3770    6.5452   -0.0833   CHG    3   CHG     1.0000
+      5 AR           3.1603   -2.1343   -0.6850   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.5951880342141034
+       ref_mol            6
+       ref_struct       220
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          0.7824   -2.4158    0.1459   HB     0   HB      1.0000
+      2 ACC         -0.3911   -2.1115   -1.9753   HB     1   HB      1.0000
+      3 DON         -3.5026    4.4634    0.7014   HB     2   HB      1.0000
+      4 HYD         -0.4985    2.9646    0.3056   HYD    3   HYD     1.0000
+      5 AR           3.4866   -2.0941   -2.7112   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.5415675259676822
+       ref_mol            6
+       ref_struct       117
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -0.4596   -0.4686    1.4145   HB     0   HB      1.0000
+      2 DON          2.5961   -1.5308   -1.1497   HB     1   HB      1.0000
+      3 DON          8.0814    0.3915    0.3596   HB     2   HB      1.0000
+      4 CAT          8.0077    1.5505    0.7440   CHG    3   CHG     1.0000
+      5 AR          -5.1878    0.3408   -1.7403   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.5926321538489021
+       ref_mol            0
+       ref_struct       130
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.6420   -0.6117    2.9051   HB     0   HB      1.0000
+      2 DON         -2.0352    6.0941   -0.0913   HB     1   HB      1.0000
+      3 HYD         -1.7679   -4.7504    0.1626   HYD    2   HYD     1.0000
+      4 CAT         -1.9471    5.8017    1.0447   CHG    3   CHG     1.0000
+      5 AR           4.9808   -0.2635    0.9279   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.45491120422821263
+       ref_mol            4
+       ref_struct       173
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -4.8779    0.4435    1.5725   HB     0   HB      1.0000
+      2 DON          1.6951   -1.3173    1.7227   HB     1   HB      1.0000
+      3 HYD          4.0937   -0.2582    0.5961   HYD    2   HYD     1.0000
+      4 HYD         -1.9433   -3.7418    0.8220   HYD    3   HYD     1.0000
+      5 AR          -6.9377    1.2965   -1.6919   AR     4   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.4829511859711061
+       ref_mol            2
+       ref_struct        80
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC         -2.4549   -2.6838    2.2518   HB     0   HB      1.0000
+      2 ACC         -0.3860   -0.7205    2.4759   HB     1   HB      1.0000
+      3 DON         -3.6034    6.1746   -0.5951   HB     2   HB      1.0000
+      4 HYD         -4.1725   -4.5125   -1.2793   HYD    3   HYD     1.0000
+      5 CAT         -2.5388    6.0027   -0.1237   CHG    4   CHG     1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        5
+       score 0.4023183073747779
+       ref_mol            4
+       ref_struct       158
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          4.4512   -1.5081    0.1597   HB     0   HB      1.0000
+      2 DON         -1.9587   -0.9772   -0.6547   HB     1   HB      1.0000
+      3 DON         -7.9284    1.3247    0.3400   HB     2   HB      1.0000
+      4 HYD         -5.4174    0.4570   -0.2272   HYD    3   HYD     1.0000
+      5 HYD          0.9051   -1.3435    2.5365   HYD    4   HYD     1.0000
+      6 AR           6.2355    1.9838   -1.1592   AR     5   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.5977562810363856
+       ref_mol            1
+       ref_struct       100
+@<TRIPOS>PHARMACOPHORE
+@<TRIPOS>POINTS
+      1 ACC          1.4234   -0.3834   -0.1883   HB     0   HB      1.0000
+      2 DON         -6.3044   -2.1987    4.1319   HB     1   HB      1.0000
+      3 HYD         -4.6922   -0.8593    2.4210   HYD    2   HYD     1.0000
+      4 HYD          0.1820    3.5330   -2.2681   HYD    3   HYD     1.0000
+      5 CAT         -6.3044   -2.1987    4.1319   CHG    4   CHG     1.0000
+      6 AR           4.3926   -1.8486    1.7686   AR     5   AR      1.0000
+@<TRIPOS>PROPERTIES
+       min_actives        4
+       score 0.38034555289653865
+       ref_mol            3
+       ref_struct        98

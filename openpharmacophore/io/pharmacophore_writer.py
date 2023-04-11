@@ -26,11 +26,10 @@ def _pad_coordinate_with_zeros(coord):
     # if the number is negative
     total_characters = 6
     coord_float = float(coord)
+    coord_str = str(coord)
 
-    if coord_float.is_integer():
+    if "." not in coord_str:
         coord_str = str(coord) + "."
-    else:
-        coord_str = str(coord)
 
     if coord_float < 0:
         # If the coordinate is negative the sign will add a character
@@ -106,17 +105,21 @@ def _mol2_pharmacophores(pharmacophores, save_props):
             line += " " + feat_name
 
             center = np.around(puw.get_value(element.center, to_unit="angstroms"), 4)
+            radius = np.around(puw.get_value(element.radius, to_unit="angstroms"), 4)
+
             x = _pad_coordinate_with_zeros(center[0]).rjust(16)
             y = _pad_coordinate_with_zeros(center[1]).rjust(10)
             z = _pad_coordinate_with_zeros(center[2]).rjust(10)
+            radius_str = (_pad_coordinate_with_zeros(radius) + '\n').rjust(12)
 
             line += x + y + z + " "
             line += pharmagist_element_specs[element.feature_name].rjust(5)
             line += str(index).rjust(5)
             line += pharmagist_element_specs[element.feature_name].rjust(6)
-            line += "0.0000\n".rjust(12)
-            lines.append(line)
+            # line += "0.0000\n".rjust(12)
+            line += radius_str
 
+            lines.append(line)
             index += 1
 
         if save_props:
@@ -150,6 +153,7 @@ def save_mol2(pharmacophores, file_name, save_props=True):
     contents = _mol2_pharmacophores(pharmacophores, save_props)
     with open(file_name, "w") as fp:
         fp.writelines(contents)
+
 
 # PH4 (MOE) Files
 
@@ -230,6 +234,7 @@ def save_ph4(pharmacophore, file_name):
     with open(file_name, "w") as fp:
         fp.write(contents)
 
+
 # JSON files
 
 
@@ -302,6 +307,7 @@ def save_json(pharmacophore, file_name):
     contents = _json_pharmacophore(pharmacophore)
     with open(file_name, "w") as fp:
         json.dump(contents, fp)
+
 
 # PML (LigandScout) Files
 
@@ -401,7 +407,7 @@ def _ligandscout_xml_tree(pharmacophore):
             point = ET.SubElement(document, "point")
             point.set("name", feat_name)
             _set_coords_and_radius(point, (x, y, z),
-                                  radius, feat_id)
+                                   radius, feat_id)
         elif feat_name == "AR":
             # TODO: ligandscout expects aromatic rings to have direction.
             #  what should we do if an aromatic point doesn't have direction
@@ -414,7 +420,7 @@ def _ligandscout_xml_tree(pharmacophore):
             plane = ET.SubElement(document, "plane")
             plane.set("name", feat_name)
             _set_coords_and_radius(plane, (x, y, z),
-                                  radius, feat_id)
+                                   radius, feat_id)
             # Add normal tag
             normal = ET.SubElement(plane, "normal")
             normal.set("x3", dir_x)
@@ -426,7 +432,7 @@ def _ligandscout_xml_tree(pharmacophore):
             # Set volume attributes
             volume.set("type", "exclusion")
             _set_coords_and_radius(volume, (x, y, z),
-                                  radius, feat_id)
+                                   radius, feat_id)
 
     tree._setroot(document)
 

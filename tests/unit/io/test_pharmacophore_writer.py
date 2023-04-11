@@ -16,6 +16,10 @@ class TestWriteMol2:
         assert pharmacophore_writer._pad_coordinate_with_zeros(-2.5) == "-2.5000"
         assert pharmacophore_writer._pad_coordinate_with_zeros(-0.25) == "-0.2500"
 
+    def test_pad_number_with_zeros_integer(self):
+        assert pharmacophore_writer._pad_coordinate_with_zeros(1) == "1.0000"
+        assert pharmacophore_writer._pad_coordinate_with_zeros(1.0) == "1.0000"
+
     def test_mol2_pharmacophores(
             self,
             two_element_pharmacophore,
@@ -32,8 +36,8 @@ class TestWriteMol2:
         expected_output_1 = [
             '@<TRIPOS>PHARMACOPHORE\n',
             '@<TRIPOS>POINTS\n',
-            '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      0.0000\n',
-            '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
+            '      1 AR           1.0000    0.0000    0.0000   AR     0   AR      1.0000\n',
+            '      2 ACC          1.0000    2.0000    2.0000   HB     1   HB      1.0000\n',
             '@<TRIPOS>PROPERTIES\n',
             '       min_actives        5\n',
             '       score         0.8452\n',
@@ -48,11 +52,11 @@ class TestWriteMol2:
         expected_output_2 = [
             '@<TRIPOS>PHARMACOPHORE\n',
             '@<TRIPOS>POINTS\n',
-            '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      0.0000\n',
-            '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      0.0000\n',
-            '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     0.0000\n',
-            '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      0.0000\n',
-            '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      0.0000\n',
+            '      1 ACC          1.0000    2.0000    2.0000   HB     0   HB      1.0000\n',
+            '      2 DON          1.0000    2.0000    2.0000   HB     1   HB      1.0000\n',
+            '      3 HYD         -1.0000    2.0000    2.0000   HYD    2   HYD     1.0000\n',
+            '      4 AR           1.0000    0.0000    0.0000   AR     3   AR      1.0000\n',
+            '      5 AR           0.0000    1.0000    2.0000   AR     4   AR      1.0000\n',
         ]
         assert mol2_list == expected_output_2
 
