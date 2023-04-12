@@ -1,4 +1,3 @@
-import pytest
 import pyunitwizard as puw
 import numpy as np
 from copy import deepcopy
@@ -6,7 +5,6 @@ from copy import deepcopy
 from openpharmacophore.molecular_systems import Protein, Topology
 
 
-@pytest.fixture
 def protein_with_ligand(topology_with_ligand):
     topology = topology_with_ligand
     coords = puw.quantity(
@@ -16,8 +14,8 @@ def protein_with_ligand(topology_with_ligand):
     return Protein(topology, coords)
 
 
-def test_remove_ligand(protein_with_ligand):
-    protein = deepcopy(protein_with_ligand)
+def test_remove_ligand(topology_with_ligand):
+    protein = protein_with_ligand(topology_with_ligand)
     n_atoms = protein.n_atoms
 
     protein.remove_ligand("EST:B")
@@ -111,3 +109,36 @@ def test_add_hydrogens_to_protein():
 
     assert protein.has_hydrogens
     assert protein.n_atoms == 10
+
+
+def test_extract_chain(topology_2_chains):
+    coords = np.arange(1, topology_2_chains.n_atoms * 3 + 1).reshape((1, -1, 3))
+    coords = puw.quantity(coords, "angstroms")
+
+    prot = Protein(topology_2_chains, coords)
+    prot.extract_chain("A")
+
+    assert prot.n_atoms == 6
+    assert prot.n_chains == 1
+
+    expected_coords = coords[:, 0:6, :]
+    assert np.all(prot.coords == expected_coords)
+
+
+def test_remove_all_ligands(topology_with_ligand):
+    prot = protein_with_ligand(topology_with_ligand)
+    prot.remove_all_ligands()
+
+    assert not prot.has_ligands()
+    assert len(prot.ligand_ids()) == 0
+    assert prot.n_atoms == 12
+    assert prot.n_chains == 3
+
+
+def test_remove_solvent_and_ions(topology_with_ligand):
+    prot = protein_with_ligand(topology_with_ligand)
+    prot.remove_solvent_and_ions()
+
+    assert prot.n_atoms == 12
+    assert prot.n_chains == 3
+    assert not prot.has_solvent_or_ions()

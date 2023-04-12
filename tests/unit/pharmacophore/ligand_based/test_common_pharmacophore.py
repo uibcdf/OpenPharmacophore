@@ -13,7 +13,7 @@ class TestCommonPharmacophoreFinder:
     def test_init_common_pharmacophore_finder(self):
         scoring_fn_params = {
             "point_weight": 1.0,
-            "rmsd_cutoff": puw.quantity(1.2, "angstroms"),
+            "rmsd_cutoff": 1.2,
             "vector_weight": 1.0,
             "cos_cutoff": 0.5
         }
@@ -37,7 +37,7 @@ class TestCommonPharmacophoreFinder:
 
         assert finder.scoring_fn.point_weight == 1.0
         assert finder.scoring_fn.vector_weight == 1.0
-        assert finder.scoring_fn.rmsd_cutoff == puw.quantity(1.2, "angstroms")
+        assert finder.scoring_fn.rmsd_cutoff == 1.2
         assert finder.scoring_fn.cos_cutoff == 0.5
 
     def test_find_common_pharmacophores(self):
@@ -99,7 +99,7 @@ class TestCommonPharmacophoreFinder:
             ],
                 ref_struct=0,
                 ref_mol=0,
-                score=0.6506998281828833
+                score=0.6420484870797379
             ),
         ]
 
@@ -229,11 +229,14 @@ class TestCommonPharmacophoreFinder:
 
         top = cp_finder._box_top_representative(surviving_box, scores, feature_lists)
         assert top == surviving_box[0]
-        assert top.score == 0.6506998281828833
-        assert scores == {
-            (1, 2): 0.6506998281828833,
-            (1, 3): 0.14632288133597426,
-        }
+        assert np.allclose(top.score, 0.6420484870797379)
+
+        assert len(scores) == 2
+        assert np.allclose(scores[(1, 2)][0], 0.6420484870797379)
+        assert np.allclose(scores[(1, 3)][0], 0.1858750854381156)
+
+        assert scores[(1, 2)][1].shape == (4, 4)
+        assert scores[(1, 3)][1].shape == (4, 4)
 
     def test_get_pharmacophores(self):
         queue = cp.FeatListQueue(size=2)
@@ -369,20 +372,20 @@ class TestSurvivingBox:
 class TestScoringFunction:
 
     def test_point_score(self):
-        ref_coords = puw.quantity(np.array([
+        ref_coords = np.array([
             [4., 3., 0.],
             [4., 0., 0.],
             [0., 0., 0.]
-        ]), "angstroms")
-        coords = puw.quantity(np.array([
+        ])
+        coords = np.array([
             [6.3333333333, 2.98142397, 0.],
             [6., 0., 0.],
             [0., 0., 0.],
-        ]), "angstroms")
+        ])
 
         scoring_fn = cp.ScoringFunction()
-        score = scoring_fn.point_score(align_pharmacophores(ref_coords, coords))
-        assert score == 0.14632288133597426
+        score = scoring_fn.point_score(align_pharmacophores(ref_coords, coords)[0])
+        assert score == 0.1858750854381156
 
 
 class TestFeatListQueue:

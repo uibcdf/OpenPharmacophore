@@ -1,5 +1,4 @@
 import openpharmacophore as oph
-import pytest
 
 
 def test_ligand_based_pharmacophore_extraction(thrombin_ligands):

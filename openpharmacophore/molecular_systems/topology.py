@@ -417,6 +417,14 @@ class Topology:
                 return True
         return False
 
+    def has_solvent_or_ions(self):
+        """ Returns true if the topology contains solvent or ions.
+        """
+        for atom in self.top.atoms:
+            if atom.residue.name in SOLVENT_AND_IONS:
+                return True
+        return False
+
 
 def create_topology(traj_file, topology_file=None):
     """ Create a topology object.

@@ -4,7 +4,7 @@ from rdkit import Chem
 
 from typing import List
 
-from openpharmacophore.molecular_systems.topology import Topology
+from openpharmacophore.molecular_systems.topology import Topology, CHAIN_NAMES, SOLVENT_AND_IONS
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 from openpharmacophore.utils.maths import delete
 from openpharmacophore.molecular_systems import convert
@@ -37,16 +37,8 @@ class Protein:
         return self._topology.n_residues
 
     @property
-    def has_hydrogens(self) -> bool:
-        return self._topology.has_hydrogens()
-
-    @property
-    def has_ligands(self) -> bool:
-        return self._topology.has_ligands()
-
-    @property
-    def ligand_ids(self) -> List[str]:
-        return self._topology.ligand_ids()
+    def n_chains(self) -> int:
+        return self.topology.n_chains
 
     @property
     def topology(self) -> Topology:
@@ -55,6 +47,18 @@ class Protein:
     @property
     def coords(self) -> np.ndarray:
         return self._coords
+
+    def has_hydrogens(self) -> bool:
+        return self._topology.has_hydrogens()
+
+    def has_ligands(self) -> bool:
+        return self._topology.has_ligands()
+
+    def ligand_ids(self) -> List[str]:
+        return self._topology.ligand_ids()
+
+    def has_solvent_or_ions(self) -> bool:
+        return self._topology.has_solvent_or_ions()
 
     def get_ligand(self, ligand_id, remove_hyd=False):
         """ Extract a ligand assuming there is one.
@@ -94,6 +98,12 @@ class Protein:
         lig_indices = self._topology.get_residue_indices(lig_name, chain)
         self._topology.remove_atoms(lig_indices, inplace=True)
         self._coords = delete(self._coords, lig_indices, axis=1)
+
+    def remove_all_ligands(self):
+        """ Remove all ligands from this protein.
+        """
+        for lig in self.ligand_ids():
+            self.remove_ligand(lig)
 
     def add_hydrogens(self):
         """ Add hydrogens to the protein.
@@ -168,10 +178,49 @@ class Protein:
 
     def concatenate(self, topology, coords):
         """ Concatenate new residues to this protein.
+
+            Parameters
+            ----------
+            topology : Topology
+
+            coords : QuantityLike
+
         """
         self._topology = self._topology.join(topology)
         self._coords = np.concatenate((self._coords, coords), axis=1)
         self._validate_coords(self._topology, self._coords)
+
+    def extract_chain(self, chain_id):
+        """ Extract the chain with given id from the topology.
+
+            Parameters
+            ----------
+            chain_id : str or int
+                Id of the chain
+        """
+        if isinstance(chain_id, str):
+            chain_id = CHAIN_NAMES.index(chain_id)
+
+        atoms = []
+        for at in self.topology.iter_atoms():
+            if at.residue.chain.index == chain_id:
+                atoms.append(at.index)
+
+        self._topology = self._topology.subset(atoms)
+        self._coords = self.coords[:, atoms, :]
+        self._validate_coords(self.topology, self.coords)
+
+    def remove_solvent_and_ions(self):
+        """ Remove the solvent and ions from this protein.
+        """
+        atoms = []
+        for at in self.topology.iter_atoms():
+            if at.residue.name not in SOLVENT_AND_IONS:
+                atoms.append(at.index)
+
+        self._topology = self._topology.subset(atoms)
+        self._coords = self.coords[:, atoms, :]
+        self._validate_coords(self.topology, self.coords)
 
     @staticmethod
     def _validate_coords(topology, coords):
