@@ -1,3 +1,5 @@
+import numpy as np
+import pyunitwizard as puw
 
 
 class Pharmacophore:
@@ -51,6 +53,18 @@ class Pharmacophore:
         """
         self._points.pop(index)
 
+    def to_matrix(self):
+        """ Returns a matrix with the coordinates of the
+            pharmacophoric points.
+        """
+        matrix = np.zeros((len(self), 3))
+        for ii in range(len(self)):
+            center = puw.get_value(self[ii].center, "angstroms")
+            for jj in range(center.shape[0]):
+                matrix[ii][jj] = center[jj]
+
+        return puw.quantity(matrix, "angstroms")
+
     def __eq__(self, other):
         if not self._check_eq(self.score, other.score):
             return False
@@ -65,7 +79,6 @@ class Pharmacophore:
                     return False
         else:
             return False
-
         return True
 
     @staticmethod
