@@ -102,8 +102,13 @@ class Protein:
     def remove_all_ligands(self):
         """ Remove all ligands from this protein.
         """
-        for lig in self.ligand_ids():
-            self.remove_ligand(lig)
+        lig_indices = []
+        for lig_id in self.ligand_ids():
+            lig_name, chain = lig_id.split(":")
+            lig_indices.extend(self._topology.get_residue_indices(lig_name, chain))
+
+        self._topology.remove_atoms(lig_indices, inplace=True)
+        self._coords = delete(self._coords, lig_indices, axis=1)
 
     def add_hydrogens(self):
         """ Add hydrogens to the protein.

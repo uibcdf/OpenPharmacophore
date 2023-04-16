@@ -7,9 +7,9 @@ class MolDB:
     """
 
     _mol_file_iterators = {
-        "smi": mol_files.iter_smi,
-        "sdf": mol_files.iter_sdf,
-        "mol2": mol_files.iter_mol2,
+        "smi": mol_files._iter_smi,
+        "sdf": mol_files._iter_sdf,
+        "mol2": mol_files._iter_mol2,
     }
 
     def __init__(self):
