@@ -399,6 +399,7 @@ class CommonPharmacophoreFinder:
 
         feature_lists = self._get_feat_lists(chemical_features)
         common_variants = self._common_k_point_variants(feature_lists, n_points, min_actives)
+        # TODO: eliminate variants with overlaping features
         sub_lists = self._variant_sublists(feature_lists, common_variants)
 
         scores = {}

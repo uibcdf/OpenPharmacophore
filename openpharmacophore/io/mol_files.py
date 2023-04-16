@@ -101,3 +101,11 @@ def sdf(file_path):
     return list(molecules.values())
 
 
+def iter_sdf(file_):
+    raise NotImplementedError
+
+
+# SMI files
+
+def iter_smi(file_):
+    raise NotImplementedError

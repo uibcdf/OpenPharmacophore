@@ -12,6 +12,7 @@ class Viewer:
 
         Wrapper around nglview NGLWidget
     """
+    # TODO: method to convert to HTML
 
     def __init__(self):
         self._widget = nv.NGLWidget()
