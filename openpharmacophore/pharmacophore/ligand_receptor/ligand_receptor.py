@@ -40,6 +40,10 @@ class LigandReceptorPharmacophore:
         self._bsite = binding_site
         self._ligand = ligand
 
+    @property
+    def pharmacophores(self):
+        return self._pharmacophores
+
     def _hydrophobic_pharmacophoric_points(self, ligand_feats, receptor_feats):
         """ Get hydrophobic pharmacophoric points.
 

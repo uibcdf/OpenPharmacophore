@@ -66,24 +66,23 @@ class Pharmacophore:
         return puw.quantity(matrix, "angstroms")
 
     def __eq__(self, other):
-        if not self._check_eq(self.score, other.score):
-            return False
-        if not self._check_eq(self.ref_mol, other.ref_mol):
-            return False
-        if not self._check_eq(self.ref_struct, other.ref_struct):
-            return False
+        if isinstance(other, Pharmacophore):
 
-        if len(self) == len(other):
-            for ii in range(len(self)):
-                if self[ii] != other[ii]:
-                    return False
-        else:
-            return False
-        return True
+            if not self.score == other.score:
+                return False
+            if not self.ref_mol == other.ref_mol:
+                return False
+            if not self.ref_struct == other.ref_struct:
+                return False
 
-    @staticmethod
-    def _check_eq(item1, item2):
-        return (item1 is not None and item2 is not None) and item1 == item2
+            if len(self) == len(other):
+                for ii in range(len(self)):
+                    if self[ii] != other[ii]:
+                        return False
+            else:
+                return False
+            return True
+        return False
 
     def __len__(self):
         return len(self._points)
