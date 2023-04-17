@@ -1,71 +1,56 @@
 from io import StringIO
 from rdkit import Chem
-from openpharmacophore import MolDB
+from openpharmacophore import mol_db
 
 
-def test_iterate_smiles_list():
-    smiles = [
-        "CN=C=O",
-        "COc1cc(C=O)ccc1O",
-    ]
-    mol_db = MolDB()
-    mol_db.from_smiles(smiles)
+class TestInMemoryDB:
 
-    molecules = []
-    for mol in mol_db:
-        molecules.append(mol)
+    def test_iterate_smiles_list(self):
+        smiles = [
+            "CN=C=O",
+            "COc1cc(C=O)ccc1O",
+        ]
+        db = mol_db.InMemoryMolDB()
+        db.from_smiles(smiles)
 
-    assert len(molecules) == 2
-    assert molecules[0].n_atoms == 4
-    assert molecules[1].n_atoms == 11
+        molecules = []
+        for mol in db:
+            molecules.append(mol)
 
+        assert len(molecules) == 2
+        assert molecules[0].n_atoms == 4
+        assert molecules[1].n_atoms == 11
 
-def test_iterate_file():
-    file_ = StringIO("CN=C=O\nCOc1cc(C=O)ccc1O")
-    mol_db = MolDB()
-    mol_db._from_file(file_, extension="smi")
+    def test_iterate_rdkit_mol(self):
+        rdkit_mols = [
+            Chem.MolFromSmiles("CN=C=O"),
+            Chem.MolFromSmiles("COc1cc(C=O)ccc1O"),
+        ]
 
-    molecules = []
-    for mol in mol_db:
-        molecules.append(mol)
+        db = mol_db.InMemoryMolDB()
+        db.from_rdkit(rdkit_mols)
 
-    assert len(molecules) == 2
-    assert molecules[0].n_atoms == 4
-    assert molecules[1].n_atoms == 11
+        molecules = []
+        for mol in db:
+            molecules.append(mol)
 
-
-def test_iterate_file_list():
-    files = [
-        StringIO("CN=C=O\nCOc1cc(C=O)ccc1O"),
-        StringIO("CN1CCC[C@H]1c2cccnc2")
-    ]
-
-    mol_db = MolDB()
-    mol_db._from_file_list(files)
-
-    molecules = []
-    for mol in mol_db:
-        molecules.append(mol)
-
-    assert len(molecules) == 3
-    assert molecules[0].n_atoms == 4
-    assert molecules[1].n_atoms == 11
-    assert molecules[2].n_atoms == 12
+        assert len(molecules) == 2
+        assert molecules[0].n_atoms == 4
+        assert molecules[1].n_atoms == 11
 
 
-def test_iterate_rdkit_mol():
-    rdkit_mols = [
-        Chem.MolFromSmiles("CN=C=O"),
-        Chem.MolFromSmiles("COc1cc(C=O)ccc1O"),
-    ]
+class TestMolDB:
 
-    mol_db = MolDB()
-    mol_db.from_rdkit(rdkit_mols)
+    def test_iterate_file_list(self):
+        db = mol_db.MolDB()
+        db._from_file(StringIO("CN=C=O\nCOc1cc(C=O)ccc1O"), "smi")
+        db._from_file(StringIO("CN1CCC[C@H]1c2cccnc2"), "smi")
 
-    molecules = []
-    for mol in mol_db:
-        molecules.append(mol)
+        molecules = []
+        for mol in db:
+            molecules.append(mol)
 
-    assert len(molecules) == 2
-    assert molecules[0].n_atoms == 4
-    assert molecules[1].n_atoms == 11
+        assert len(molecules) == 3
+        assert molecules[0].n_atoms == 4
+        assert molecules[1].n_atoms == 11
+        assert molecules[2].n_atoms == 12

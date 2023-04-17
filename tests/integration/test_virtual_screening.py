@@ -1,5 +1,6 @@
 import pyunitwizard as puw
 import openpharmacophore as oph
+from openpharmacophore import mol_db
 
 
 def test_virtual_screening_with_a_pharmacophore():
@@ -35,13 +36,13 @@ def test_virtual_screening_with_a_pharmacophore():
         r"CC(C)c1c(n(c(n1)COC(=O)N)Cc2ccncc2)Sc3cc(cc(c3)Cl)Cl,1EP4,S11",
         r"CC(C)OC(=O)N1c2cc(ccc2NC(=S)[C@@H]1CSC)OC,1BQM,HBY",
     ]
-    mol_db = oph.MolDB()
-    mol_db.from_smiles(smiles)
+    db = mol_db.InMemoryMolDB()
+    db.from_smiles(smiles)
 
     # We can now create a virtual screening object to which will pass our pharmacophore
     # and our molecule db
     screener = oph.VirtualScreening([pharmacophore])
-    screener.screen(mol_db)
+    screener.screen(db)
 
     assert screener.matches[0] > 0
     assert screener.fails[0] > 0
