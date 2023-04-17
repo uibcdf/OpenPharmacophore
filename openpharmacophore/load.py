@@ -24,7 +24,7 @@ def load_ligands_from_file(file_path, file_format):
     if file_format == "smi":
         return [Ligand(mol) for mol in Chem.SmilesMolSupplier(file_path)]
     if file_format == "sdf":
-        return [Ligand(mol) for mol in mol_files.sdf(file_path)]
+        return [Ligand(mol) for mol in mol_files.read_sdf(file_path)]
     if file_format == "mol2":
         return [Ligand(mol) for mol in mol_files.mol2(file_path)]
     if file_format == "xyz":
