@@ -67,7 +67,6 @@ class Pharmacophore:
 
     def __eq__(self, other):
         if isinstance(other, Pharmacophore):
-
             if not self.score == other.score:
                 return False
             if not self.ref_mol == other.ref_mol:

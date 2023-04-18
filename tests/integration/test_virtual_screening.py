@@ -32,9 +32,9 @@ def test_virtual_screening_with_a_pharmacophore():
         r"[H]/N=C(/c1ccc(cc1)C[C@H](C(=O)N2CCCCC2)NC(=O)CNS(=O)(=O)c3ccc4ccccc4c3)\N",
         r"[H]/N=C(\c1ccc2c(c1)cc([nH]2)C(=O)N3CCC(CC3)Cc4ccccc4)/N",
         r"CCC1CCN(CC1)C(=O)[C@H](CCCNC(=[NH2+])N)NS(=O)(=O)c2cccc3c2cccc3N(C)C",
-        r"C[C@H]1CN2c3c(cc(cc3NC2=S)Cl)CN1CC=C(C)C,1TVR,TB9",
-        r"CC(C)c1c(n(c(n1)COC(=O)N)Cc2ccncc2)Sc3cc(cc(c3)Cl)Cl,1EP4,S11",
-        r"CC(C)OC(=O)N1c2cc(ccc2NC(=S)[C@@H]1CSC)OC,1BQM,HBY",
+        r"C[C@H]1CN2c3c(cc(cc3NC2=S)Cl)CN1CC=C(C)C",
+        r"CC(C)c1c(n(c(n1)COC(=O)N)Cc2ccncc2)Sc3cc(cc(c3)Cl)Cl",
+        r"CC(C)OC(=O)N1c2cc(ccc2NC(=S)[C@@H]1CSC)OC",
     ]
     db = mol_db.InMemoryMolDB()
     db.from_smiles(smiles)
@@ -46,5 +46,5 @@ def test_virtual_screening_with_a_pharmacophore():
 
     assert len(screener.matches[0]) > 0
     assert screener.fails[0] > 0
-    assert all(mol.has_conformer for mol in screener.matches[0])
+    assert all(match.ligand.has_conformers for match in screener.matches[0])
     

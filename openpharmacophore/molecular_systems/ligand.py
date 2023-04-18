@@ -245,6 +245,9 @@ class Ligand:
         """
         return self._mol
 
+    def get_feat_indices(self, feat_def=SMARTS_LIGAND, types=None):
+        return get_indices(self._mol, feat_def=SMARTS_LIGAND, types=types)
+
     def get_chem_feats(self, conf_ind, types=None, indices=False):
         """ Find chemical features in this ligand.
 
