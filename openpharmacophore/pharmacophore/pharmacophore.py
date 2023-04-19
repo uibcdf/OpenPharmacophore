@@ -1,3 +1,5 @@
+import numpy as np
+import pyunitwizard as puw
 
 
 class Pharmacophore:
@@ -51,26 +53,35 @@ class Pharmacophore:
         """
         self._points.pop(index)
 
+    def to_matrix(self):
+        """ Returns a matrix with the coordinates of the
+            pharmacophoric points.
+        """
+        matrix = np.zeros((len(self), 3))
+        for ii in range(len(self)):
+            center = puw.get_value(self[ii].center, "angstroms")
+            for jj in range(center.shape[0]):
+                matrix[ii][jj] = center[jj]
+
+        return puw.quantity(matrix, "angstroms")
+
     def __eq__(self, other):
-        if not self._check_eq(self.score, other.score):
-            return False
-        if not self._check_eq(self.ref_mol, other.ref_mol):
-            return False
-        if not self._check_eq(self.ref_struct, other.ref_struct):
-            return False
+        if isinstance(other, Pharmacophore):
+            if not self.score == other.score:
+                return False
+            if not self.ref_mol == other.ref_mol:
+                return False
+            if not self.ref_struct == other.ref_struct:
+                return False
 
-        if len(self) == len(other):
-            for ii in range(len(self)):
-                if self[ii] != other[ii]:
-                    return False
-        else:
-            return False
-
-        return True
-
-    @staticmethod
-    def _check_eq(item1, item2):
-        return (item1 is not None and item2 is not None) and item1 == item2
+            if len(self) == len(other):
+                for ii in range(len(self)):
+                    if self[ii] != other[ii]:
+                        return False
+            else:
+                return False
+            return True
+        return False
 
     def __len__(self):
         return len(self._points)

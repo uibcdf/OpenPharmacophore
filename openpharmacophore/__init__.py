@@ -25,6 +25,8 @@ from .pharmacophore.ligand_receptor.ligand_receptor import LigandReceptorPharmac
 from .visualization import Viewer, draw_ligands, draw_ligands_chem_feats
 from .io import mol_files, pharmacophore_reader, pharmacophore_writer
 from .load import load, load_ligands
+from .screening import mol_db
+from .screening.screening import VirtualScreening
 
 
 versions = get_versions()

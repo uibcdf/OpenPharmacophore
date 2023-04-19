@@ -112,7 +112,7 @@ class ScoringFunction:
             self,
             point_weight=1.0,
             vector_weight=1.0,
-            rmsd_cutoff=puw.quantity(1.2, "angstroms"),
+            rmsd_cutoff=1.2,  # in angstroms
             cos_cutoff=0.5
     ):
         self.point_weight = point_weight
@@ -136,10 +136,10 @@ class ScoringFunction:
             -------
             float
         """
-        return puw.get_value(1 - rmsd / self.rmsd_cutoff)
+        return 1 - rmsd / self.rmsd_cutoff
 
     def vector_score(self):
-        # TODO: Implement me!
+        #  TODO: Implement me!
         return 0
 
     def __call__(self, rmsd):
@@ -363,8 +363,6 @@ class CommonPharmacophoreFinder:
         else:
             self.scoring_fn = ScoringFunction(**scoring_fn_params)
 
-        self.align = kwargs.get("align", "distances")
-
     def find_common_pharmacophores(self, chemical_features, n_points,
                                    min_actives=None, max_pharmacophores=None):
         """ Find common pharmacophores.
@@ -401,6 +399,7 @@ class CommonPharmacophoreFinder:
 
         feature_lists = self._get_feat_lists(chemical_features)
         common_variants = self._common_k_point_variants(feature_lists, n_points, min_actives)
+        # TODO: eliminate variants with overlaping features
         sub_lists = self._variant_sublists(feature_lists, common_variants)
 
         scores = {}
@@ -488,7 +487,7 @@ class CommonPharmacophoreFinder:
             box : list[KSublist]
                 A surviving box
 
-            scores : dict[tuple, float]
+            scores : dict[tuple, tuple]
                 Values of point scores between feature lists.
 
             Returns
@@ -520,23 +519,19 @@ class CommonPharmacophoreFinder:
                     idx_1, idx_2 = idx_2, idx_1
 
                 try:
-                    align_score = scores[(idx_1, idx_2)]
+                    align_score = scores[(idx_1, idx_2)][0]
                 except KeyError:
 
-                    # TODO: self.align should be removed once we have an alignment algorithm
-                    if self.align == "coords":
-                        ref_flist, partner_flist = feature_lists[ref_mol], feature_lists[partner_mol]
-                        conf_ref, conf_partner = ref.mol_id[1], partner.mol_id[1]
-                        align_rmsd = align_pharmacophores(ref_flist.coords[conf_ref][ref.feat_ind],
-                                                          partner_flist.coords[conf_partner][partner.feat_ind])
-                        align_score = self.scoring_fn(align_rmsd)
-                    elif self.align == "distances":
-                        align_rmsd = align_pharmacophores(ref.distances, partner.distances)
-                        align_score = 1 - align_rmsd / puw.get_value(self.scoring_fn.rmsd_cutoff)
-                    else:
-                        raise ValueError(f"Incorrect alignment parameter {self.align}")
+                    ref_flist, partner_flist = feature_lists[ref_mol], feature_lists[partner_mol]
+                    conf_ref, conf_partner = ref.mol_id[1], partner.mol_id[1]
 
-                    scores[(idx_1, idx_2)] = align_score
+                    align_rmsd, transform = align_pharmacophores(
+                        puw.get_value(ref_flist.coords[conf_ref][ref.feat_ind], "angstroms"),
+                        puw.get_value(partner_flist.coords[conf_partner][partner.feat_ind], "angstroms"))
+
+                    align_score = self.scoring_fn(align_rmsd)
+
+                    scores[(idx_1, idx_2)] = (align_score, transform)
 
                 if align_score < 0:
                     # Exclude this reference as a potential hypothesis

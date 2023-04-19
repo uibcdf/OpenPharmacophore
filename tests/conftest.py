@@ -9,7 +9,6 @@ from openpharmacophore.molecular_systems import Topology, Protein
 from openpharmacophore.molecular_systems.ligand import ligand_from_topology
 
 
-# TODO: our unit tests will run faster if we do not use files
 data_path = Path(__file__).parent / "data"
 pharmacophores_path = data_path / "pharmacophores"
 ligands_path = data_path / "ligands"
@@ -35,11 +34,6 @@ def moe_pharmacophore_path():
 @pytest.fixture
 def mol2_pharmacophore_path():
     return str(pharmacophores_path / "mol2/pharmacophore.mol2")
-
-
-@pytest.fixture
-def ligands_mol2():
-    return str(ligands_path / "ace.mol2")
 
 
 @pytest.fixture

@@ -6,10 +6,10 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
     # that consists of three frames
     protein = oph.load(traj_er_alpha)
     # We know that the file contains a single ligand
-    lig_ids = protein.ligand_ids
+    lig_ids = protein.ligand_ids()
     assert len(lig_ids) == 1
     # The receptor already contains hydrogens
-    assert protein.has_hydrogens
+    assert protein.has_hydrogens()
 
     ligand = protein.get_ligand(lig_ids[0], remove_hyd=False)
     # Ligand already contains hydrogens
@@ -22,7 +22,7 @@ def test_dynamic_ligand_receptor_pharmacophore(traj_er_alpha):
 
     # Now we can remove the ligand from the protein
     protein.remove_ligand(lig_ids[0])
-    assert not protein.has_ligands
+    assert not protein.has_ligands()
 
     # We need to extract the binding site from the protein, so we can get
     # pharmacophoric features

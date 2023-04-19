@@ -4,7 +4,7 @@ from rdkit.Chem import ChemicalFeatures
 from rdkit.Chem.Pharm3D import Pharmacophore as rdkitPharmacophore
 
 
-def rdkit_pharmacophore(pharmacophoric_points):
+def pharmacophore_to_rdkit(pharmacophoric_points):
     """ Transform a list of pharmacophoric points to a rdkit pharmacophore.
 
         Returns

@@ -1,3 +1,5 @@
+import numpy as np
+
 from openpharmacophore.pharmacophore.pharmacophore import Pharmacophore
 from openpharmacophore import PharmacophoricPoint
 import pyunitwizard as puw
@@ -53,3 +55,13 @@ def test_remove_point_from_pharmacophore():
     pharma.remove(0)
     assert len(pharma) == 1
     assert pharma[0].feature_name == "aromatic ring"
+
+
+def test_to_matrix(three_element_pharmacophore):
+    matrix = three_element_pharmacophore.to_matrix()
+    expected = puw.quantity([
+        [1., 2., 2.],
+        [2., 1., 2.],
+        [1., 0., 0.]
+    ], "angstroms")
+    assert np.all(matrix == expected)
