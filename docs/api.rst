@@ -59,9 +59,22 @@ File IO
     openpharmacophore.io.pharmacophore_writer.save_json
     openpharmacophore.io.pharmacophore_writer.save_pml
 
-    openpharmacophore.io.mol_files.mol2
-    openpharmacophore.io.mol_files.iter_mol2
-    openpharmacophore.io.mol_files.sdf
+    openpharmacophore.io.mol_files.read_mol2
+    openpharmacophore.io.mol_files.mol2_supplier
+    openpharmacophore.io.mol_files.read_sdf
+
+
+Virtual Screening
+-----------------
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :recursive:
+
+    openpharmacophore.VirtualScreening
+    openpharmacophore.screening.mol_db.InMemoryMolDB
+    openpharmacophore.screening.mol_db.MolDB
+
 
 Others
 --------

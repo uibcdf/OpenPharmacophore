@@ -27,13 +27,14 @@ conda -c uibcdf openpharmacophore
 ### Dynamic pharmacophores
   - [Obtaining a ligand-receptor pharmacophore model from a MD trajectory](contents/examples/dynamic-pharmacophore/er_alpha_md.ipynb)
 
+### Virtual Screening
+
+- [Virtual screening with pharmacohore model](contents/examples/virtual-screening/screening.ipynb)
+
 ### Receptor based pharmacophores
 
 - Coming soon...
 
-### Virtual Screening
-
-- Coming soon...
 
 ### Others
 
