@@ -75,8 +75,9 @@ class MolDB:
     def __init__(self):
         self._files = []
         self._extensions = []
+        self._kwargs = {}
 
-    def from_file(self, file_name):
+    def from_file(self, file_name, **kwargs):
         """ Adds molecules from a file.
 
             Parameters
@@ -90,8 +91,9 @@ class MolDB:
                 f"{file_extension} is not a supported file format"
             )
         self._from_file(open(file_name), file_extension)
+        self._kwargs = kwargs
 
-    def from_file_list(self, files):
+    def from_file_list(self, files, **kwargs):
         """ Adds molecules from a list of files.
 
             Parameters
@@ -100,7 +102,7 @@ class MolDB:
                 Name or path of the file.
         """
         for filename in files:
-            self.from_file(filename)
+            self.from_file(filename, **kwargs)
 
     def _from_file(self, file_, extension):
         self._files.append(file_)
@@ -110,5 +112,7 @@ class MolDB:
         for ii in range(len(self._files)):
             file_ = self._files[ii]
             extension = self._extensions[ii]
-            yield from LigandGenerator(MolDB._mol_file_iterators[extension](file_))
+            yield from LigandGenerator(
+                MolDB._mol_file_iterators[extension](file_, **self._kwargs)
+            )
             file_.close()

@@ -43,8 +43,9 @@ class TestMolDB:
 
     def test_iterate_file_list(self):
         db = mol_db.MolDB()
-        db._from_file(StringIO("CN=C=O\nCOc1cc(C=O)ccc1O"), "smi")
-        db._from_file(StringIO("CN1CCC[C@H]1c2cccnc2"), "smi")
+        db._kwargs = {"header": True}
+        db._from_file(StringIO("Header\nCN=C=O\nCOc1cc(C=O)ccc1O"), "smi")
+        db._from_file(StringIO("Header\nCN1CCC[C@H]1c2cccnc2"), "smi")
 
         molecules = []
         for mol in db:
