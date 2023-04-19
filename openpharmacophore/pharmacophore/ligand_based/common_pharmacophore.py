@@ -139,7 +139,7 @@ class ScoringFunction:
         return 1 - rmsd / self.rmsd_cutoff
 
     def vector_score(self):
-        # TODO: Implement me!
+        #  TODO: Implement me!
         return 0
 
     def __call__(self, rmsd):

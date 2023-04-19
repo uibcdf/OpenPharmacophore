@@ -10,6 +10,7 @@ class LigandBasedPharmacophore:
         ligands : list[Ligand]
 
     """
+    # TODO: add exclusion volumes to ligand based model
     def __init__(self, ligands):
         self._ligands = ligands
         self._pharmacophores = []  # type: list[Pharmacophore]
@@ -37,6 +38,7 @@ class LigandBasedPharmacophore:
         if min_actives is None:
             min_actives = len(self._ligands)
 
+        # TODO: use chemical features directionality
         chem_feats = self._get_chem_feats(self._ligands)
         extractor = cp.CommonPharmacophoreFinder(*args, **kwargs)
         self._pharmacophores = extractor(chem_feats, n_points, min_actives, max_pharmacophores)

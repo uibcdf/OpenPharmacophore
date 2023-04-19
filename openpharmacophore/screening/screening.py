@@ -64,6 +64,7 @@ class VirtualScreening:
             db : InMemoryMolDB or MolDB
                 The database with the molecules.
         """
+        # TODO: add progress bar
         for ii, pharma in enumerate(self._pharmacophores):
             pharma = pharmacophore_to_rdkit(pharma)
             for lig in db:

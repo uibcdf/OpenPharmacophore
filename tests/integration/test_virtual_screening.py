@@ -44,6 +44,7 @@ def test_virtual_screening_with_a_pharmacophore():
     screener = oph.VirtualScreening([pharmacophore])
     screener.screen(db)
 
+    # We expect the pharmacophore to match som e of the molecules in our db
     assert len(screener.matches[0]) > 0
     assert screener.fails[0] > 0
     assert all(match.ligand.has_conformers for match in screener.matches[0])
