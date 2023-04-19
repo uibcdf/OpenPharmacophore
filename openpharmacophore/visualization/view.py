@@ -1,5 +1,8 @@
+import os
 import nglview as nv
+from IPython.display import IFrame
 import pyunitwizard as puw
+
 from openpharmacophore import Protein, ComplexBindingSite, Ligand, Pharmacophore
 from openpharmacophore.molecular_systems.chem_feats import ChemFeatContainer
 from openpharmacophore.io.pdb import write_pdb_block
@@ -200,6 +203,23 @@ class Viewer:
             self.load_component(comp, struct)
         self._update_opacity()
         return self._widget
+
+    def _show_html(self, src):
+        """ View as html. Useful for documentation notebooks.
+
+            Parameters
+            ----------
+            struct : int, optional
+                Frame, structure or conformer index to show if there are any proteins,
+                ligands or pharmacophores with multiple structures.
+
+            Returns
+            -------
+            IFrame
+        """
+        if not os.path.isfile(src):
+            nv.write_html(src, [self._widget])
+        return IFrame(src=src, width="100%", height="320vh")
 
     def _update_opacity(self):
         """ Add opacity to chemical features and pharmacophoric points. """
