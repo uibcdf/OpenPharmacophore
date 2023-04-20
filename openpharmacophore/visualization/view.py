@@ -209,9 +209,8 @@ class Viewer:
 
             Parameters
             ----------
-            struct : int, optional
-                Frame, structure or conformer index to show if there are any proteins,
-                ligands or pharmacophores with multiple structures.
+            src : str
+                Path to the html file.
 
             Returns
             -------
