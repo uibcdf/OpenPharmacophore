@@ -32,3 +32,11 @@ dependencies:
 - nbconvert-core=6.5.0
 - nbconvert-pandoc=6.5.0
 - nbformat=5.4.0
+# Ipython and widgets for documentation notebooks. Avoid
+# error when importing nglview
+- ipython=7.33.0
+- ipython_genutils=0.2.0
+- ipywidgets=7.7.0
+- jupyterlab_widgets=1.1.0
+- widgetsnbextension=3.6.0
+
