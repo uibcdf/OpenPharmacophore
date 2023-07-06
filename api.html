@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Documentation &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="openpharmacophore.Protein" href="_autosummary/openpharmacophore.Protein.html" />
+    <link rel="prev" title="Hydrophobic interactions" href="contents/examples/other/pl-interactions/hydrophobic_interactions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contents/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contents/examples/ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contents/examples/ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contents/examples/dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contents/examples/virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contents/examples/other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contents/examples/other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/examples/other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this heading"></a></h1>
+<section id="molecular-systems">
+<h2>Molecular Systems<a class="headerlink" href="#molecular-systems" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.Protein.html#openpharmacophore.Protein" title="openpharmacophore.Protein"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.Protein</span></code></a>(topology, coords)</p></td>
+<td><p>Represents a protein and optionally its different structures if it comes from a MD trajectory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.Ligand.html#openpharmacophore.Ligand" title="openpharmacophore.Ligand"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.Ligand</span></code></a>(mol)</p></td>
+<td><p>Represents a ligand.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite" title="openpharmacophore.ComplexBindingSite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.ComplexBindingSite</span></code></a>(...)</p></td>
+<td><p>Class to extract and find chemical features in the binding site of a protein-ligand complex.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pharmacophores">
+<h2>Pharmacophores<a class="headerlink" href="#pharmacophores" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.PharmacophoricPoint.html#openpharmacophore.PharmacophoricPoint" title="openpharmacophore.PharmacophoricPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.PharmacophoricPoint</span></code></a>(...[, ...])</p></td>
+<td><p>Class to store pharmacophoric points of any feature type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.Pharmacophore.html#openpharmacophore.Pharmacophore" title="openpharmacophore.Pharmacophore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.Pharmacophore</span></code></a>([points, ...])</p></td>
+<td><p>A PharmacophoricPoint container.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.LigandBasedPharmacophore.html#openpharmacophore.LigandBasedPharmacophore" title="openpharmacophore.LigandBasedPharmacophore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.LigandBasedPharmacophore</span></code></a>(ligands)</p></td>
+<td><p>Class to store and extract pharmacophores from a set of ligands.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.LigandReceptorPharmacophore.html#openpharmacophore.LigandReceptorPharmacophore" title="openpharmacophore.LigandReceptorPharmacophore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.LigandReceptorPharmacophore</span></code></a>(...)</p></td>
+<td><p>Class to store, and extract pharmacophores from protein-ligand complexes.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.Viewer.html#openpharmacophore.Viewer" title="openpharmacophore.Viewer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.Viewer</span></code></a>()</p></td>
+<td><p>Class to visualize molecular systems and pharmacophores.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.draw_ligands.html#openpharmacophore.draw_ligands" title="openpharmacophore.draw_ligands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.draw_ligands</span></code></a>(ligands, ...)</p></td>
+<td><p>Draw multiple ligands</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.draw_ligands_chem_feats.html#openpharmacophore.draw_ligands_chem_feats" title="openpharmacophore.draw_ligands_chem_feats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.draw_ligands_chem_feats</span></code></a>(...)</p></td>
+<td><p>Draw the ligands with their chemical features highlighted.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="file-io">
+<h2>File IO<a class="headerlink" href="#file-io" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html#openpharmacophore.io.pharmacophore_reader.read_mol2" title="openpharmacophore.io.pharmacophore_reader.read_mol2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_reader.read_mol2</span></code></a>(...)</p></td>
+<td><p>Loads pharmacophores from a mol2 file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html#openpharmacophore.io.pharmacophore_reader.read_ph4" title="openpharmacophore.io.pharmacophore_reader.read_ph4"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_reader.read_ph4</span></code></a>(...)</p></td>
+<td><p>Loads a pharmacophore from a MOE ph4 file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html#openpharmacophore.io.pharmacophore_reader.read_json" title="openpharmacophore.io.pharmacophore_reader.read_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_reader.read_json</span></code></a>(...)</p></td>
+<td><p>Loads a pharmacophore from a json file</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html#openpharmacophore.io.pharmacophore_reader.read_ligandscout" title="openpharmacophore.io.pharmacophore_reader.read_ligandscout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_reader.read_ligandscout</span></code></a>(...)</p></td>
+<td><p>Reads a ligandscout pharmacophore (pml) file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html#openpharmacophore.io.pharmacophore_writer.save_mol2" title="openpharmacophore.io.pharmacophore_writer.save_mol2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_writer.save_mol2</span></code></a>(...)</p></td>
+<td><p>Save several pharmacophores to a mol2 file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html#openpharmacophore.io.pharmacophore_writer.save_ph4" title="openpharmacophore.io.pharmacophore_writer.save_ph4"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_writer.save_ph4</span></code></a>(...)</p></td>
+<td><p>Save a pharmacophore to a ph4 (MOE) file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html#openpharmacophore.io.pharmacophore_writer.save_json" title="openpharmacophore.io.pharmacophore_writer.save_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_writer.save_json</span></code></a>(...)</p></td>
+<td><p>Save a pharmacophore to a JSON file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html#openpharmacophore.io.pharmacophore_writer.save_pml" title="openpharmacophore.io.pharmacophore_writer.save_pml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.pharmacophore_writer.save_pml</span></code></a>(...)</p></td>
+<td><p>Save a pharmacophore to a pml (Ligand Scout) file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.read_mol2.html#openpharmacophore.io.mol_files.read_mol2" title="openpharmacophore.io.mol_files.read_mol2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.mol_files.read_mol2</span></code></a>(...)</p></td>
+<td><p>Load molecules from a mol2 file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html#openpharmacophore.io.mol_files.mol2_supplier" title="openpharmacophore.io.mol_files.mol2_supplier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.mol_files.mol2_supplier</span></code></a>(...)</p></td>
+<td><p>A molecule generator for mol2 files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.io.mol_files.read_sdf.html#openpharmacophore.io.mol_files.read_sdf" title="openpharmacophore.io.mol_files.read_sdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.io.mol_files.read_sdf</span></code></a>(...)</p></td>
+<td><p>Load an sdf file with molecules that may contain multiple conformers.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="virtual-screening">
+<h2>Virtual Screening<a class="headerlink" href="#virtual-screening" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.VirtualScreening.html#openpharmacophore.VirtualScreening" title="openpharmacophore.VirtualScreening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.VirtualScreening</span></code></a>(...)</p></td>
+<td><p>Class to perform virtual screening with pharmacophores.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html#openpharmacophore.screening.mol_db.InMemoryMolDB" title="openpharmacophore.screening.mol_db.InMemoryMolDB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.screening.mol_db.InMemoryMolDB</span></code></a>()</p></td>
+<td><p>A repository of molecules that are stored in memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.screening.mol_db.MolDB.html#openpharmacophore.screening.mol_db.MolDB" title="openpharmacophore.screening.mol_db.MolDB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.screening.mol_db.MolDB</span></code></a>()</p></td>
+<td><p>A repository of molecules that are stored in files or file like objects.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="others">
+<h2>Others<a class="headerlink" href="#others" title="Permalink to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.load.html#openpharmacophore.load" title="openpharmacophore.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.load</span></code></a>(file_name[, ...])</p></td>
+<td><p>Load ligands, protein, protein-ligand complexes, or MD trajectories from a file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.load_ligands.html#openpharmacophore.load_ligands" title="openpharmacophore.load_ligands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.load_ligands</span></code></a>(ligands, form)</p></td>
+<td><p>Load ligands from a list of SMILES, SMARTS, Inchi, Mol2 block or PDB block.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/openpharmacophore.smiles_from_pdb_id.html#openpharmacophore.smiles_from_pdb_id" title="openpharmacophore.smiles_from_pdb_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openpharmacophore.smiles_from_pdb_id</span></code></a>(pdb_id)</p></td>
+<td><p>Obtain a smiles from a ligand pdb id.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contents/examples/other/pl-interactions/hydrophobic_interactions.html" class="btn btn-neutral float-left" title="Hydrophobic interactions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="_autosummary/openpharmacophore.Protein.html" class="btn btn-neutral float-right" title="openpharmacophore.Protein" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+﻿openpharmacophore.VirtualScreening
+==================================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: VirtualScreening
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~VirtualScreening.add_pharmacophores
+      ~VirtualScreening.screen
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~VirtualScreening.fails
+      ~VirtualScreening.feature_factory
+      ~VirtualScreening.matches
+      ~VirtualScreening.n_pharmacophores
+      ~VirtualScreening.pharmacophores
+   
+   

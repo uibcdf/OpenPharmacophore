@@ -1,0 +1,31 @@
+﻿openpharmacophore.LigandBasedPharmacophore
+==========================================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: LigandBasedPharmacophore
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~LigandBasedPharmacophore.extract
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LigandBasedPharmacophore.pharmacophores
+   
+   

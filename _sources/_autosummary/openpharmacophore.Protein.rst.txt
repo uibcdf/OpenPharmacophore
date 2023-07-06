@@ -1,0 +1,47 @@
+﻿openpharmacophore.Protein
+=========================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: Protein
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Protein.add_hydrogens
+      ~Protein.atoms_at_distance
+      ~Protein.concatenate
+      ~Protein.extract_chain
+      ~Protein.get_ligand
+      ~Protein.has_hydrogens
+      ~Protein.has_ligands
+      ~Protein.has_solvent_or_ions
+      ~Protein.ligand_ids
+      ~Protein.remove_all_ligands
+      ~Protein.remove_ligand
+      ~Protein.remove_solvent_and_ions
+      ~Protein.slice
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Protein.coords
+      ~Protein.n_atoms
+      ~Protein.n_chains
+      ~Protein.n_residues
+      ~Protein.topology
+   
+   

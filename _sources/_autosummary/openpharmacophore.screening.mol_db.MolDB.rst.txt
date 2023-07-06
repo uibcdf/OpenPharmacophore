@@ -1,0 +1,26 @@
+﻿openpharmacophore.screening.mol\_db.MolDB
+=========================================
+
+.. currentmodule:: openpharmacophore.screening.mol_db
+
+.. autoclass:: MolDB
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MolDB.from_file
+      ~MolDB.from_file_list
+   
+   
+
+   
+   
+   

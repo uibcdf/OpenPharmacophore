@@ -1,0 +1,6 @@
+﻿openpharmacophore.draw\_ligands\_chem\_feats
+============================================
+
+.. currentmodule:: openpharmacophore
+
+.. autofunction:: draw_ligands_chem_feats

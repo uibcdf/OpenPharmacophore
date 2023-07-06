@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Screening with a pharmacophore &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script type="application/vnd.jupyter.widget-state+json">{"state": {"46185109d92042af8ba19932b844402d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "36f6697dac394d89abe1ca47064211b8": {"model_name": "ColormakerRegistryModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_dom_classes": [], "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "ColormakerRegistryModel", "_msg_ar": [], "_msg_q": [], "_ready": false, "_view_count": null, "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "ColormakerRegistryView", "layout": "IPY_MODEL_46185109d92042af8ba19932b844402d"}}, "5b5a16974c8b450abbd43ce67bdb979d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0f35bda0e1db4484a4c5a1462bb7b3ce": {"model_name": "NGLModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_camera_orientation": [], "_camera_str": "orthographic", "_dom_classes": [], "_gui_theme": null, "_ibtn_fullscreen": "IPY_MODEL_1fa61159aded4735be039bcb04612b53", "_igui": null, "_iplayer": "IPY_MODEL_e8a80023ab294cb987c93987df07f376", "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "NGLModel", "_ngl_color_dict": {}, "_ngl_coordinate_resource": {}, "_ngl_full_stage_parameters": {}, "_ngl_msg_archive": [{"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [2.35, 1.94, -0.68], [0.6901960784313725, 0.22745098039215686, 0.1803921568627451], 1.0, "hb acceptor"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [1.57, -2.53, 2.15], [0.9607843137254902, 0.6901960784313725, 0.2549019607843137], 1.0, "hydrophobicity"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [6.19, 1.34, -1.36], [0.9450980392156862, 0.7686274509803922, 0.058823529411764705], 1.0, "aromatic ring"]]], "kwargs": {}, "fire_embed": true}, {"component_index": 0, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 1, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 2, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}], "_ngl_original_stage_parameters": {}, "_ngl_repr_dict": {}, "_ngl_serialize": false, "_ngl_version": "", "_ngl_view_id": [], "_player_dict": {}, "_scene_position": {}, "_scene_rotation": {}, "_synced_model_ids": [], "_synced_repr_model_ids": [], "_view_count": null, "_view_height": "", "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "NGLView", "_view_width": "", "background": "white", "frame": 0, "gui_style": null, "layout": "IPY_MODEL_5b5a16974c8b450abbd43ce67bdb979d", "max_frame": 0, "n_components": 0, "picked": {}}}, "ccb58a710d97439793f5761969c133ea": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b9cc2e99943944359df5eaa726b93a6f": {"model_name": "ImageModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ImageModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ImageView", "format": "png", "height": "", "layout": "IPY_MODEL_ccb58a710d97439793f5761969c133ea", "width": "900.0"}, "buffers": [{"data": "", "encoding": "base64", "path": ["value"]}]}, "fac4b03aa8564612ab327f57ea91dc0e": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4a8e0287036b4c79b91e9304f9a17c15": {"model_name": "DescriptionStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "6f4e63b49a9a47e58fd9474a6b615e02": {"model_name": "PlayModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "PlayModel", "_playing": false, "_repeat": false, "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "PlayView", "description": "", "description_tooltip": null, "disabled": false, "interval": 100, "layout": "IPY_MODEL_fac4b03aa8564612ab327f57ea91dc0e", "max": 0, "min": 0, "show_repeat": true, "step": 1, "style": "IPY_MODEL_4a8e0287036b4c79b91e9304f9a17c15", "value": 0}}, "0ba1babdd5ef4807bb22c65d42b13cb6": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "9db26172222d4d6d93357cbaaf62c79f": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "SliderStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": "", "handle_color": null}}, "309e9a28d551432caf4a7d73a924d92c": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "IntSliderModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "IntSliderView", "continuous_update": true, "description": "", "description_tooltip": null, "disabled": false, "layout": "IPY_MODEL_0ba1babdd5ef4807bb22c65d42b13cb6", "max": 0, "min": 0, "orientation": "horizontal", "readout": true, "readout_format": "d", "step": 1, "style": "IPY_MODEL_9db26172222d4d6d93357cbaaf62c79f", "value": 0}}, "dfe5068790e54d76b7b3a7ff93fd43e6": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "e8a80023ab294cb987c93987df07f376": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_6f4e63b49a9a47e58fd9474a6b615e02", "IPY_MODEL_309e9a28d551432caf4a7d73a924d92c"], "layout": "IPY_MODEL_dfe5068790e54d76b7b3a7ff93fd43e6"}}, "d113e4f1dead4a79b73c515088e8bef3": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6f4e63b49a9a47e58fd9474a6b615e02", "value"], "target": ["IPY_MODEL_309e9a28d551432caf4a7d73a924d92c", "value"]}}, "5a24c33967e647a89fb1774ae0b1d029": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6f4e63b49a9a47e58fd9474a6b615e02", "value"], "target": ["IPY_MODEL_0f35bda0e1db4484a4c5a1462bb7b3ce", "frame"]}}, "476ea303da174d62ba93a870d15459a6": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6f4e63b49a9a47e58fd9474a6b615e02", "max"], "target": ["IPY_MODEL_0f35bda0e1db4484a4c5a1462bb7b3ce", "max_frame"]}}, "3802277baaf9468c9cd67aaac514e1d5": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_309e9a28d551432caf4a7d73a924d92c", "max"], "target": ["IPY_MODEL_0f35bda0e1db4484a4c5a1462bb7b3ce", "max_frame"]}}, "fd041abf8f364ab4b06d0d9195afb71f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "34px"}}, "ff1d18e4ac1b489d984ec03d29b9b96b": {"model_name": "ButtonStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "button_color": null, "font_weight": ""}}, "1fa61159aded4735be039bcb04612b53": {"model_name": "ButtonModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ButtonView", "button_style": "", "description": "", "disabled": false, "icon": "compress", "layout": "IPY_MODEL_fd041abf8f364ab4b06d0d9195afb71f", "style": "IPY_MODEL_ff1d18e4ac1b489d984ec03d29b9b96b", "tooltip": ""}}, "6d2319e0c794456884b251347ad13933": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c9aeb69342844141a2638f5a012fbc02": {"model_name": "NGLModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_camera_orientation": [], "_camera_str": "orthographic", "_dom_classes": [], "_gui_theme": null, "_ibtn_fullscreen": "IPY_MODEL_0dd6513975994762baf16a6e1b1f8cf5", "_igui": null, "_iplayer": "IPY_MODEL_0977f1e2f94d48f787284fac21b2858b", "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "NGLModel", "_ngl_color_dict": {}, "_ngl_coordinate_resource": {}, "_ngl_full_stage_parameters": {}, "_ngl_msg_archive": [{"target": "Stage", "type": "call_method", "methodName": "loadFile", "reconstruc_color_scheme": false, "args": [{"type": "blob", "data": "COMPND    IH2\nHETATM    1  H1  UNL     1       0.999  -4.827   4.959  1.00  0.00           H  \nHETATM    2  N1  UNL     1       1.470  -3.897   5.105  1.00  0.00           N  \nHETATM    3  C1  UNL     1       1.733  -3.124   4.094  1.00  0.00           C  \nHETATM    4  C2  UNL     1       1.074  -3.366   2.773  1.00  0.00           C  \nHETATM    5  C3  UNL     1       0.038  -2.302   2.529  1.00  0.00           C  \nHETATM    6  C4  UNL     1       0.659  -0.976   2.177  1.00  0.00           C  \nHETATM    7  C5  UNL     1       1.496  -1.165   0.927  1.00  0.00           C  \nHETATM    8  C6  UNL     1       2.610  -2.136   1.210  1.00  0.00           C  \nHETATM    9  C7  UNL     1       2.081  -3.469   1.662  1.00  0.00           C  \nHETATM   10  C8  UNL     1       2.092   0.181   0.587  1.00  0.00           C  \nHETATM   11  N2  UNL     1       2.940   0.110  -0.582  1.00  0.00           N  \nHETATM   12  C9  UNL     1       3.001   1.277  -1.407  1.00  0.00           C  \nHETATM   13  O1  UNL     1       2.598   2.406  -1.020  1.00  0.00           O  \nHETATM   14  C10 UNL     1       4.015   1.264  -2.493  1.00  0.00           C  \nHETATM   15  C11 UNL     1       3.963  -0.047  -3.175  1.00  0.00           C  \nHETATM   16  C12 UNL     1       5.048  -0.476  -3.790  1.00  0.00           C  \nHETATM   17  C13 UNL     1       6.391   0.130  -3.657  1.00  0.00           C  \nHETATM   18  N3  UNL     1       6.445   1.091  -2.585  1.00  0.00           N  \nHETATM   19  N4  UNL     1       5.346   1.446  -1.921  1.00  0.00           N  \nHETATM   20  C14 UNL     1       5.812   1.934  -0.747  1.00  0.00           C  \nHETATM   21  O2  UNL     1       5.038   2.284   0.194  1.00  0.00           O  \nHETATM   22  N5  UNL     1       7.105   2.315  -0.893  1.00  0.00           N  \nHETATM   23  C15 UNL     1       7.483   1.761  -2.070  1.00  0.00           C  \nHETATM   24  O3  UNL     1       8.550   1.981  -2.719  1.00  0.00           O  \nHETATM   25  C16 UNL     1       7.828   3.336  -0.140  1.00  0.00           C  \nHETATM   26  C17 UNL     1       8.362   4.387  -1.071  1.00  0.00           C  \nHETATM   27  C18 UNL     1       7.832   5.747  -0.742  1.00  0.00           C  \nHETATM   28  C19 UNL     1       7.806   6.158   0.573  1.00  0.00           C  \nHETATM   29  C20 UNL     1       7.488   7.467   0.912  1.00  0.00           C  \nHETATM   30  C21 UNL     1       7.605   8.408  -0.103  1.00  0.00           C  \nHETATM   31  C22 UNL     1       7.368   7.968  -1.399  1.00  0.00           C  \nHETATM   32  C23 UNL     1       7.368   6.614  -1.710  1.00  0.00           C  \nHETATM   33  C24 UNL     1       9.835   4.486  -1.063  1.00  0.00           C  \nHETATM   34  C25 UNL     1      10.392   5.596  -1.686  1.00  0.00           C  \nHETATM   35  C26 UNL     1      11.647   5.552  -2.280  1.00  0.00           C  \nHETATM   36  C27 UNL     1      12.338   4.346  -2.308  1.00  0.00           C  \nHETATM   37  C28 UNL     1      11.945   3.415  -1.355  1.00  0.00           C  \nHETATM   38  C29 UNL     1      10.686   3.455  -0.767  1.00  0.00           C  \nHETATM   39  C30 UNL     1       4.901  -1.616  -4.744  1.00  0.00           C  \nHETATM   40  N6  UNL     1       2.916  -2.324   4.186  1.00  0.00           N  \nHETATM   41  H2  UNL     1       0.531  -4.344   2.817  1.00  0.00           H  \nHETATM   42  H3  UNL     1      -0.523  -2.165   3.467  1.00  0.00           H  \nHETATM   43  H4  UNL     1      -0.628  -2.673   1.718  1.00  0.00           H  \nHETATM   44  H5  UNL     1       1.302  -0.659   3.012  1.00  0.00           H  \nHETATM   45  H6  UNL     1      -0.148  -0.258   1.962  1.00  0.00           H  \nHETATM   46  H7  UNL     1       0.864  -1.489   0.087  1.00  0.00           H  \nHETATM   47  H8  UNL     1       3.320  -1.678   1.915  1.00  0.00           H  \nHETATM   48  H9  UNL     1       3.161  -2.314   0.254  1.00  0.00           H  \nHETATM   49  H10 UNL     1       2.939  -4.054   2.043  1.00  0.00           H  \nHETATM   50  H11 UNL     1       1.670  -4.016   0.800  1.00  0.00           H  \nHETATM   51  H12 UNL     1       2.689   0.593   1.415  1.00  0.00           H  \nHETATM   52  H13 UNL     1       1.232   0.863   0.372  1.00  0.00           H  \nHETATM   53  H14 UNL     1       3.780  -0.524  -0.547  1.00  0.00           H  \nHETATM   54  H15 UNL     1       3.853   2.115  -3.199  1.00  0.00           H  \nHETATM   55  H16 UNL     1       3.206  -0.785  -2.938  1.00  0.00           H  \nHETATM   56  H17 UNL     1       6.754   0.618  -4.573  1.00  0.00           H  \nHETATM   57  H18 UNL     1       7.109  -0.684  -3.408  1.00  0.00           H  \nHETATM   58  H19 UNL     1       7.074   3.840   0.516  1.00  0.00           H  \nHETATM   59  H20 UNL     1       8.581   2.909   0.537  1.00  0.00           H  \nHETATM   60  H21 UNL     1       8.017   4.181  -2.115  1.00  0.00           H  \nHETATM   61  H22 UNL     1       7.948   5.481   1.409  1.00  0.00           H  \nHETATM   62  H23 UNL     1       7.635   7.848   1.924  1.00  0.00           H  \nHETATM   63  H24 UNL     1       7.659   9.463   0.131  1.00  0.00           H  \nHETATM   64  H25 UNL     1       7.546   8.715  -2.175  1.00  0.00           H  \nHETATM   65  H26 UNL     1       7.478   6.338  -2.745  1.00  0.00           H  \nHETATM   66  H27 UNL     1       9.845   6.519  -1.816  1.00  0.00           H  \nHETATM   67  H28 UNL     1      12.009   6.323  -2.947  1.00  0.00           H  \nHETATM   68  H29 UNL     1      13.220   4.199  -2.933  1.00  0.00           H  \nHETATM   69  H30 UNL     1      12.638   2.607  -1.132  1.00  0.00           H  \nHETATM   70  H31 UNL     1      10.260   2.477  -0.536  1.00  0.00           H  \nHETATM   71  H32 UNL     1       5.008  -2.570  -4.188  1.00  0.00           H  \nHETATM   72  H33 UNL     1       5.706  -1.578  -5.520  1.00  0.00           H  \nHETATM   73  H34 UNL     1       3.932  -1.570  -5.294  1.00  0.00           H  \nHETATM   74  H35 UNL     1       3.822  -2.845   4.076  1.00  0.00           H  \nHETATM   75  H36 UNL     1       2.919  -1.464   4.792  1.00  0.00           H  \nCONECT    1    2\nCONECT    2    3    3\nCONECT    3    4   40\nCONECT    4    5    9   41\nCONECT    5    6   42   43\nCONECT    6    7   44   45\nCONECT    7    8   10   46\nCONECT    8    9   47   48\nCONECT    9   49   50\nCONECT   10   11   51   52\nCONECT   11   12   53\nCONECT   12   13   13   14\nCONECT   14   15   19   54\nCONECT   15   16   16   55\nCONECT   16   17   39\nCONECT   17   18   56   57\nCONECT   18   19   23\nCONECT   19   20\nCONECT   20   21   21   22\nCONECT   22   23   25\nCONECT   23   24   24\nCONECT   25   26   58   59\nCONECT   26   27   33   60\nCONECT   27   28   28   32\nCONECT   28   29   61\nCONECT   29   30   30   62\nCONECT   30   31   63\nCONECT   31   32   32   64\nCONECT   32   65\nCONECT   33   34   34   38\nCONECT   34   35   66\nCONECT   35   36   36   67\nCONECT   36   37   68\nCONECT   37   38   38   69\nCONECT   38   70\nCONECT   39   71   72   73\nCONECT   40   74   75\nEND\n", "binary": false}], "kwargs": {"defaultRepresentation": true, "ext": "pdb"}}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [2.35, 1.94, -0.68], [0.6901960784313725, 0.22745098039215686, 0.1803921568627451], 1.0, "hb acceptor"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [1.57, -2.53, 2.15], [0.9607843137254902, 0.6901960784313725, 0.2549019607843137], 1.0, "hydrophobicity"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [6.19, 1.34, -1.36], [0.9450980392156862, 0.7686274509803922, 0.058823529411764705], 1.0, "aromatic ring"]]], "kwargs": {}, "fire_embed": true}, {"component_index": 1, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 2, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 3, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}], "_ngl_original_stage_parameters": {}, "_ngl_repr_dict": {}, "_ngl_serialize": false, "_ngl_version": "", "_ngl_view_id": [], "_player_dict": {}, "_scene_position": {}, "_scene_rotation": {}, "_synced_model_ids": [], "_synced_repr_model_ids": [], "_view_count": null, "_view_height": "", "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "NGLView", "_view_width": "", "background": "white", "frame": 0, "gui_style": null, "layout": "IPY_MODEL_6d2319e0c794456884b251347ad13933", "max_frame": 0, "n_components": 0, "picked": {}}}, "a3702dd881f3429bb521e9723362f785": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "14732494cca74c08be7bf2410394c3f5": {"model_name": "ImageModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ImageModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ImageView", "format": "png", "height": "", "layout": "IPY_MODEL_a3702dd881f3429bb521e9723362f785", "width": "900.0"}, "buffers": [{"data": "", "encoding": "base64", "path": ["value"]}]}, "21744430e154427eb97714d66e3574e6": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "badeb5ca448f4c099bac76bdc596724e": {"model_name": "DescriptionStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "93d74bd6b38e410a9cb50aa286826b4e": {"model_name": "PlayModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "PlayModel", "_playing": false, "_repeat": false, "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "PlayView", "description": "", "description_tooltip": null, "disabled": false, "interval": 100, "layout": "IPY_MODEL_21744430e154427eb97714d66e3574e6", "max": 0, "min": 0, "show_repeat": true, "step": 1, "style": "IPY_MODEL_badeb5ca448f4c099bac76bdc596724e", "value": 0}}, "625dcea5240b4c11b89139b27b8d8b98": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "49f680e102b944e5995772df1be788fa": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "SliderStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": "", "handle_color": null}}, "fa6c2a6e1426419b8b5ff55b95d7c5d1": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "IntSliderModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "IntSliderView", "continuous_update": true, "description": "", "description_tooltip": null, "disabled": false, "layout": "IPY_MODEL_625dcea5240b4c11b89139b27b8d8b98", "max": 0, "min": 0, "orientation": "horizontal", "readout": true, "readout_format": "d", "step": 1, "style": "IPY_MODEL_49f680e102b944e5995772df1be788fa", "value": 0}}, "701c041ff51b4277820e6e6f17fd85d6": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0977f1e2f94d48f787284fac21b2858b": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_93d74bd6b38e410a9cb50aa286826b4e", "IPY_MODEL_fa6c2a6e1426419b8b5ff55b95d7c5d1"], "layout": "IPY_MODEL_701c041ff51b4277820e6e6f17fd85d6"}}, "6bf0e382c954430188a676ecf1e9559a": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_93d74bd6b38e410a9cb50aa286826b4e", "value"], "target": ["IPY_MODEL_fa6c2a6e1426419b8b5ff55b95d7c5d1", "value"]}}, "45cc563ffcbb40639ff65a960aa1092e": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_93d74bd6b38e410a9cb50aa286826b4e", "value"], "target": ["IPY_MODEL_c9aeb69342844141a2638f5a012fbc02", "frame"]}}, "e600f3d2edc74f60a8852fcc6efce297": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_93d74bd6b38e410a9cb50aa286826b4e", "max"], "target": ["IPY_MODEL_c9aeb69342844141a2638f5a012fbc02", "max_frame"]}}, "17f190824d69449582c36e9bb29692bd": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_fa6c2a6e1426419b8b5ff55b95d7c5d1", "max"], "target": ["IPY_MODEL_c9aeb69342844141a2638f5a012fbc02", "max_frame"]}}, "641558f8ba824b86b3456cbd15c1199d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "34px"}}, "195b849d15204267befd4d04bfa4daaf": {"model_name": "ButtonStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "button_color": null, "font_weight": ""}}, "0dd6513975994762baf16a6e1b1f8cf5": {"model_name": "ButtonModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ButtonView", "button_style": "", "description": "", "disabled": false, "icon": "compress", "layout": "IPY_MODEL_641558f8ba824b86b3456cbd15c1199d", "style": "IPY_MODEL_195b849d15204267befd4d04bfa4daaf", "tooltip": ""}}}, "version_major": 2, "version_minor": 0}</script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script crossorigin="anonymous" data-jupyter-widgets-cdn="https://cdn.jsdelivr.net/npm/" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Others" href="../other/index.html" />
+    <link rel="prev" title="Virtual Screening" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Virtual Screening</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Virtual Screening</a></li>
+      <li class="breadcrumb-item active">Virtual Screening with a pharmacophore</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="virtual-screening-with-a-pharmacophore">
+<h1>Virtual Screening with a pharmacophore<a class="headerlink" href="#virtual-screening-with-a-pharmacophore" title="Permalink to this heading"></a></h1>
+<div class="cell tag_remove-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyunitwizard</span> <span class="k">as</span> <span class="nn">puw</span>
+<span class="kn">import</span> <span class="nn">openpharmacophore</span> <span class="k">as</span> <span class="nn">oph</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore</span> <span class="kn">import</span> <span class="n">mol_db</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We want to screen a database of molecules with a pharmacophore to find potential matches.
+We start by defining our pharmacophore model</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pharmacophore</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">Pharmacophore</span><span class="p">([</span>
+    <span class="n">oph</span><span class="o">.</span><span class="n">PharmacophoricPoint</span><span class="p">(</span>
+        <span class="n">feat_type</span><span class="o">=</span><span class="s2">&quot;hb acceptor&quot;</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">([</span><span class="mf">2.35</span><span class="p">,</span> <span class="mf">1.94</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.68</span><span class="p">],</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">oph</span><span class="o">.</span><span class="n">PharmacophoricPoint</span><span class="p">(</span>
+        <span class="n">feat_type</span><span class="o">=</span><span class="s2">&quot;hydrophobicity&quot;</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">([</span><span class="mf">1.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.53</span><span class="p">,</span> <span class="mf">2.15</span><span class="p">],</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">oph</span><span class="o">.</span><span class="n">PharmacophoricPoint</span><span class="p">(</span>
+        <span class="n">feat_type</span><span class="o">=</span><span class="s2">&quot;aromatic ring&quot;</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">([</span><span class="mf">6.19</span><span class="p">,</span> <span class="mf">1.34</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.36</span><span class="p">],</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We will create a database of molecules loading them from different files</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">file1</span> <span class="o">=</span> <span class="s2">&quot;../data/screening/ligands_1.smi&quot;</span>
+<span class="n">file2</span> <span class="o">=</span> <span class="s2">&quot;../data/screening/ligands_2.smi&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="w"> </span>cat<span class="w"> </span><span class="o">{</span>file1<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smiles Name
+[H]/N=C(\C1CCC(CC1)CNC(=O)[C@@H]2C=C(CN3N2C(=O)N(C3=O)CC(c4ccccc4)c5ccccc5)C)/N IH2
+CN[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)NCC3CCC(CC3)N MIN
+c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NC4CCC(CC4)c5cnc([nH]5)N 00R
+c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O)C(=O)NCC4CCC(CC4)N 00P
+[H]/N=C(/c1ccc(cc1)C[C@H](C(=O)N2CCCCC2)NC(=O)CNS(=O)(=O)c3ccc4ccccc4c3)\N MID
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="w"> </span>cat<span class="w"> </span><span class="o">{</span>file2<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smiles Name
+[H]/N=C(\c1ccc2c(c1)cc([nH]2)C(=O)N3CCC(CC3)Cc4ccccc4)/N BPP
+CCC1CCN(CC1)C(=O)[C@H](CCCNC(=[NH2+])N)NS(=O)(=O)c2cccc3c2cccc3N(C)C 0ZI
+C[C@H]1CN2c3c(cc(cc3NC2=S)Cl)CN1CC=C(C)C TB9
+CC(C)c1c(n(c(n1)COC(=O)N)Cc2ccncc2)Sc3cc(cc(c3)Cl)Cl S11
+CC(C)OC(=O)N1c2cc(ccc2NC(=S)[C@@H]1CSC)OC HBY
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">mol_db</span><span class="o">.</span><span class="n">MolDB</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">from_file_list</span><span class="p">([</span><span class="n">file1</span><span class="p">,</span> <span class="n">file2</span><span class="p">],</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now create a virtual screening object to which will pass our pharmacophore
+and our molecule db</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">screener</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">VirtualScreening</span><span class="p">([</span><span class="n">pharmacophore</span><span class="p">])</span>
+<span class="n">screener</span><span class="o">.</span><span class="n">screen</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">screener</span><span class="o">.</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> molecule matched the pharmacophore&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">screener</span><span class="o">.</span><span class="n">fails</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> molecule failed to match the pharmacophore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4 molecule matched the pharmacophore
+6 molecule failed to match the pharmacophore
+</pre></div>
+</div>
+</div>
+</div>
+<p>We inspect the molecules that matched the pharmachore along with their alignment scores (RMSD)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ligands</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">ligand</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">screener</span><span class="o">.</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="n">legends</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">ligand</span><span class="o">.</span><span class="n">to_rdkit</span><span class="p">()</span><span class="o">.</span><span class="n">GetProp</span><span class="p">(</span><span class="s2">&quot;_Name&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">screener</span><span class="o">.</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">rmsd</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">screener</span><span class="o">.</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RMSDs&quot;</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span>
+<span class="n">oph</span><span class="o">.</span><span class="n">draw_ligands</span><span class="p">(</span>
+    <span class="n">ligands</span><span class="o">=</span><span class="n">ligands</span><span class="p">,</span> 
+    <span class="n">n_per_row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">legends</span><span class="o">=</span><span class="n">legends</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>RMSDs [0.8177257515854292, 0.8517769586370709, 0.7687604258063847, 0.9831765173894478]
+</pre></div>
+</div>
+<img alt="../../../_images/9585ceda605a355d0a77eae961ae3b5949df3ac1b687712d1a65e455c23180d2.png" src="../../../_images/9585ceda605a355d0a77eae961ae3b5949df3ac1b687712d1a65e455c23180d2.png" />
+</div>
+</div>
+<p>We visualize the aligned ligands and the pharmacophore</p>
+<div class="cell tag_remove-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">viewer</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">Viewer</span><span class="p">()</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">add_components</span><span class="p">([</span><span class="n">ligands</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">pharmacophore</span><span class="p">])</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<img src="../../../_static/screening.png"></section>
+
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Virtual Screening" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../other/index.html" class="btn btn-neutral float-right" title="Others" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

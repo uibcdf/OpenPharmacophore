@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.pharmacophore\_writer.save\_pml
+====================================================
+
+.. currentmodule:: openpharmacophore.io.pharmacophore_writer
+
+.. autofunction:: save_pml

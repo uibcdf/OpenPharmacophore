@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openpharmacophore.molecular_systems.binding_site &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contents/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openpharmacophore.molecular_systems.binding_site</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openpharmacophore.molecular_systems.binding_site</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyunitwizard</span> <span class="k">as</span> <span class="nn">puw</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">openpharmacophore.molecular_systems.chem_feats</span> <span class="k">as</span> <span class="nn">cf</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore.molecular_systems.convert</span> <span class="kn">import</span> <span class="n">topology_to_mol</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore.utils</span> <span class="kn">import</span> <span class="n">maths</span>
+
+
+<span class="k">class</span> <span class="nc">AbstractBindingSite</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_residues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_chem_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cf</span><span class="o">.</span><span class="n">ChemFeatContainer</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">to_rdkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="n">BS_DIST_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.85</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ComplexBindingSite"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite">[docs]</a><span class="k">class</span> <span class="nc">ComplexBindingSite</span><span class="p">(</span><span class="n">AbstractBindingSite</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to extract and find chemical features in the binding</span>
+<span class="sd">        site of a protein-ligand complex.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        protein : openpharmacophore.Protein</span>
+
+<span class="sd">        ligand : openpharmacophore.Ligand</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein</span><span class="p">,</span> <span class="n">ligand</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span> <span class="o">=</span> <span class="n">protein</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span> <span class="o">=</span> <span class="n">ligand</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bsite_mol</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: rdkit.Chem.Mol</span>
+
+<div class="viewcode-block" id="ComplexBindingSite.get_atoms"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite.get_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get the indices of the atoms in the binding site. This will include the ligand</span>
+<span class="sd">            atoms as well.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frame : int</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            np.ndarray</span>
+<span class="sd">                Array with the atom indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conformer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span><span class="o">.</span><span class="n">get_conformer</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">lig_centroid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ligand_centroid</span><span class="p">(</span><span class="n">conformer</span><span class="p">)</span>
+        <span class="n">max_extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ligand_max_extent</span><span class="p">(</span><span class="n">conformer</span><span class="p">,</span> <span class="n">lig_centroid</span><span class="p">)</span>
+        <span class="n">bs_cutoff</span> <span class="o">=</span> <span class="n">max_extent</span> <span class="o">+</span> <span class="n">BS_DIST_MAX</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span><span class="o">.</span><span class="n">atoms_at_distance</span><span class="p">(</span>
+            <span class="n">frame</span><span class="p">,</span> <span class="n">lig_centroid</span><span class="p">,</span> <span class="n">max_dist</span><span class="o">=</span><span class="n">bs_cutoff</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ComplexBindingSite.get_residues"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite.get_residues">[docs]</a>    <span class="k">def</span> <span class="nf">get_residues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get the indices of the residues in the protein that correspond</span>
+<span class="sd">            to the binding site.</span>
+
+<span class="sd">            The binding site is defined as the sphere with centroid at the ligand</span>
+<span class="sd">            centroid with a radius of ligand maximum extent plus a cutoff distance.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frame : int</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            list[int]</span>
+<span class="sd">                Indices of the residues that encompass the binding site</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_atoms</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">atoms_residue_index</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_binding_site</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create a Protein object representing the binding site</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frame : int</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            openPharmacophore.Protein</span>
+<span class="sd">                The binding site</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">residues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_residues</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">residues_atoms</span><span class="p">(</span><span class="n">residues</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ComplexBindingSite.get_chem_feats"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite.get_chem_feats">[docs]</a>    <span class="k">def</span> <span class="nf">get_chem_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get the chemical features of the binding site at the specified frame.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frame : int</span>
+
+<span class="sd">            types : set[str], optional</span>
+<span class="sd">                Types of features to search for. If none all feat types</span>
+<span class="sd">                will be used.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            ChemFeatContainer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">b_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_binding_site</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bsite_mol</span> <span class="o">=</span> <span class="n">topology_to_mol</span><span class="p">(</span>
+            <span class="n">b_site</span><span class="o">.</span><span class="n">topology</span><span class="p">,</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">b_site</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">),</span> <span class="n">remove_hyd</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">get_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bsite_mol</span><span class="p">,</span> <span class="n">feat_def</span><span class="o">=</span><span class="n">cf</span><span class="o">.</span><span class="n">SMARTS_PROTEIN</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">)</span>
+        <span class="c1"># Donors and aromatics need to be processed differently because they require extra data</span>
+        <span class="n">donors</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;hb donor&quot;</span><span class="p">)</span>
+        <span class="n">aromatics</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;aromatic ring&quot;</span><span class="p">)</span>
+
+        <span class="n">container</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">mol_chem_feats</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">b_site</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">container</span><span class="o">.</span><span class="n">add_feats</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">donor_chem_feats</span><span class="p">(</span><span class="n">donors</span><span class="p">,</span> <span class="n">b_site</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bsite_mol</span><span class="p">))</span>
+        <span class="n">container</span><span class="o">.</span><span class="n">add_feats</span><span class="p">(</span><span class="n">cf</span><span class="o">.</span><span class="n">aromatic_chem_feats</span><span class="p">(</span><span class="n">aromatics</span><span class="p">,</span> <span class="n">b_site</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">container</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_ligand_centroid</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get the centroid of the ligand.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ---------</span>
+<span class="sd">            coords : puw.Quantity</span>
+<span class="sd">                Shape (n_atoms, 3)</span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            puw.Quantity</span>
+<span class="sd">                Shape (3, 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_ligand_max_extent</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">centroid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Computes the maximum distance from the ligand centroid</span>
+<span class="sd">            to any of its atoms.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            coords : puw.Quantity</span>
+<span class="sd">                Shape (n_atoms, 3)</span>
+
+<span class="sd">            centroid : puw.Quantity</span>
+<span class="sd">                Shape (3, 3)</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            puw.Quantity</span>
+<span class="sd">                A scalar</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">maths</span><span class="o">.</span><span class="n">maximum_distance</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ligand_has_hyd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lig_res_ind</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns true of the ligand has hydrogens.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">lig_res_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_protein</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">residue_has_hyd</span><span class="p">(</span><span class="n">lig_res_ind</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ComplexBindingSite.to_rdkit"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html#openpharmacophore.ComplexBindingSite.to_rdkit">[docs]</a>    <span class="k">def</span> <span class="nf">to_rdkit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Returns the binding site as an rdkit molecule.</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            rdkit.Chem.Mol</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bsite_mol</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">BindingSite</span><span class="p">(</span><span class="n">AbstractBindingSite</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to extract and find chemical features in the binding</span>
+<span class="sd">        site of a protein.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

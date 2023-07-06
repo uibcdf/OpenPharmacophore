@@ -1,0 +1,26 @@
+﻿openpharmacophore.screening.mol\_db.InMemoryMolDB
+=================================================
+
+.. currentmodule:: openpharmacophore.screening.mol_db
+
+.. autoclass:: InMemoryMolDB
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~InMemoryMolDB.from_rdkit
+      ~InMemoryMolDB.from_smiles
+   
+   
+
+   
+   
+   

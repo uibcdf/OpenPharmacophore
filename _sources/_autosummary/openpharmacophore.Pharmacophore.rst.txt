@@ -1,0 +1,27 @@
+﻿openpharmacophore.Pharmacophore
+===============================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: Pharmacophore
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Pharmacophore.add
+      ~Pharmacophore.remove
+      ~Pharmacophore.to_matrix
+   
+   
+
+   
+   
+   

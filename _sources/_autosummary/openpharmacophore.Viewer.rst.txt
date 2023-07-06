@@ -1,0 +1,41 @@
+﻿openpharmacophore.Viewer
+========================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: Viewer
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Viewer.add_chem_feats
+      ~Viewer.add_components
+      ~Viewer.add_pharmacophore
+      ~Viewer.load_component
+      ~Viewer.set_protein_style
+      ~Viewer.show
+      ~Viewer.to_nglview
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Viewer.has_chem_feats
+      ~Viewer.has_ligand
+      ~Viewer.has_pharmacophore
+      ~Viewer.has_protein
+      ~Viewer.n_components
+   
+   

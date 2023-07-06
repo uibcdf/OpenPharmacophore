@@ -1,0 +1,6 @@
+﻿openpharmacophore.load\_ligands
+===============================
+
+.. currentmodule:: openpharmacophore
+
+.. autofunction:: load_ligands

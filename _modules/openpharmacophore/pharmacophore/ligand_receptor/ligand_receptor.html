@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contents/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contents/examples/ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contents/examples/dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contents/examples/virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contents/examples/other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../contents/examples/other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openpharmacophore.pharmacophore.ligand_receptor.ligand_receptor</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">openpharmacophore</span> <span class="kn">import</span> <span class="n">PharmacophoricPoint</span><span class="p">,</span> <span class="n">Pharmacophore</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore.molecular_systems</span> <span class="kn">import</span> <span class="n">ComplexBindingSite</span><span class="p">,</span> <span class="n">Ligand</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore.utils</span> <span class="kn">import</span> <span class="n">maths</span>
+<span class="kn">from</span> <span class="nn">openpharmacophore.constants</span> <span class="kn">import</span> <span class="n">FEAT_TYPES</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyunitwizard</span> <span class="k">as</span> <span class="nn">puw</span>
+
+
+<div class="viewcode-block" id="LigandReceptorPharmacophore"><a class="viewcode-back" href="../../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html#openpharmacophore.LigandReceptorPharmacophore">[docs]</a><span class="k">class</span> <span class="nc">LigandReceptorPharmacophore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class to store, and extract pharmacophores from protein-ligand complexes.</span>
+
+<span class="sd">        The pharmacophores can be extracted from a PDB structure or from a molecular</span>
+<span class="sd">        dynamics trajectory.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binding_site : ComplexBindingSite</span>
+<span class="sd">            Binding site from which the pharmacophore will be extracted</span>
+
+<span class="sd">        ligand : Ligand</span>
+<span class="sd">            The ligand in the binding site.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Values from ligandscout and plip</span>
+    <span class="n">HYD_DIST_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+    <span class="n">HYD_MERGE_DIST</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>  <span class="c1"># value from pharmer</span>
+
+    <span class="n">CHARGE_DIST_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.56</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+
+    <span class="n">PISTACK_DIST_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+    <span class="n">PISTACK_OFFSET_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.20</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+    <span class="n">PISTACK_ANG_DEV</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># degrees</span>
+
+    <span class="n">HBOND_DIST_MAX</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="s2">&quot;nanometers&quot;</span><span class="p">)</span>
+    <span class="n">HBOND_ANG_MIN</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="s2">&quot;degree&quot;</span><span class="p">)</span>  <span class="c1"># degrees</span>
+
+    <span class="c1"># TODO: add exclusion volumes with the aid of receptor</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binding_site</span><span class="p">,</span> <span class="n">ligand</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pharmacophores</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Pharmacophore]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bsite</span> <span class="o">=</span> <span class="n">binding_site</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span> <span class="o">=</span> <span class="n">ligand</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pharmacophores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pharmacophores</span>
+
+    <span class="k">def</span> <span class="nf">_hydrophobic_pharmacophoric_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ligand_feats</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Get hydrophobic pharmacophoric points.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            ligand_feats : ChemFeatContainer</span>
+<span class="sd">            receptor_feats : ChemFeatContainer</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            list [PharmacophoricPoint]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hyd_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points_from_distance_rule</span><span class="p">(</span>
+            <span class="n">ligand_feats</span><span class="o">.</span><span class="n">hydrophobic</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="o">.</span><span class="n">hydrophobic</span><span class="p">,</span> <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HYD_DIST_MAX</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_hydrophobic_points</span><span class="p">(</span><span class="n">hyd_points</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="LigandReceptorPharmacophore.extract"><a class="viewcode-back" href="../../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html#openpharmacophore.LigandReceptorPharmacophore.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feat_types</span><span class="o">=</span><span class="n">FEAT_TYPES</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract one or multiple pharmaophores at different frames</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frames : Iterable[int], optional</span>
+<span class="sd">                Iterable with the frames for which pharmacophores will be extracted.</span>
+
+<span class="sd">            feat_types : set[str], optional</span>
+<span class="sd">                Only pharmacophoric points with this feature types will be extracted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">frames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frames</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">fr</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extract_single_frame</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">feat_types</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_extract_single_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">feat_types</span><span class="o">=</span><span class="n">FEAT_TYPES</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Extract a pharmacophore at a given frame.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            frame : int</span>
+<span class="sd">                The frame of the trajectory for which the pharmacophore will be</span>
+<span class="sd">                extracted.</span>
+
+<span class="sd">            feat_types : set[str], optional</span>
+<span class="sd">                Only pharmacophoric points with this feature types will be extracted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ligand_feats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span><span class="o">.</span><span class="n">get_chem_feats_with_directionality</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="n">receptor_feats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bsite</span><span class="o">.</span><span class="n">get_chem_feats</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s2">&quot;positive charge&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points_from_distance_rule</span><span class="p">(</span>
+                <span class="n">ligand_feats</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="o">.</span><span class="n">negative</span><span class="p">,</span> <span class="s2">&quot;positive charge&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHARGE_DIST_MAX</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;negative charge&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points_from_distance_rule</span><span class="p">(</span>
+                <span class="n">ligand_feats</span><span class="o">.</span><span class="n">negative</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span> <span class="s2">&quot;negative charge&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHARGE_DIST_MAX</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;aromatic ring&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aromatic_pharmacophoric_points</span><span class="p">(</span><span class="n">ligand_feats</span><span class="o">.</span><span class="n">aromatic</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="o">.</span><span class="n">aromatic</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;hb donor&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hbond_pharmacophoric_points</span><span class="p">(</span>
+                <span class="n">ligand_feats</span><span class="o">.</span><span class="n">donor</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="o">.</span><span class="n">acceptor</span><span class="p">,</span> <span class="n">donors_in_ligand</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;hb acceptor&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hbond_pharmacophoric_points</span><span class="p">(</span>
+                <span class="n">receptor_feats</span><span class="o">.</span><span class="n">donor</span><span class="p">,</span> <span class="n">ligand_feats</span><span class="o">.</span><span class="n">acceptor</span><span class="p">,</span> <span class="n">donors_in_ligand</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;hydrophobicity&quot;</span> <span class="ow">in</span> <span class="n">feat_types</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hydrophobic_pharmacophoric_points</span><span class="p">(</span><span class="n">ligand_feats</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="p">)</span>
+
+        <span class="n">pharma</span> <span class="o">=</span> <span class="n">Pharmacophore</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">ref_struct</span><span class="o">=</span><span class="n">frame</span><span class="p">,</span> <span class="n">ref_mol</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pharmacophores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pharma</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_hbond_angle</span><span class="p">(</span><span class="n">don_acc_dist</span><span class="p">,</span> <span class="n">don_hyd_dist</span><span class="p">,</span> <span class="n">acc_hyd_dist</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;  Compute hydrogen bonding angle.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            don_acc_dist : QuantityLike</span>
+<span class="sd">                Distance from donor to acceptor</span>
+
+<span class="sd">            don_hyd_dist : QuantityLike</span>
+<span class="sd">                Distance from donor to hydrogen</span>
+
+<span class="sd">            acc_hyd_dist : QuantityLike</span>
+<span class="sd">               Distance from acceptor to hydrogen</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            QuantityLike</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate angle using law of cosines</span>
+        <span class="n">cos</span> <span class="o">=</span> <span class="p">(</span><span class="n">don_hyd_dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">acc_hyd_dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">don_acc_dist</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">don_hyd_dist</span> <span class="o">*</span> <span class="n">acc_hyd_dist</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_hbond_pharmacophoric_points</span><span class="p">(</span><span class="n">donors</span><span class="p">,</span> <span class="n">acceptors</span><span class="p">,</span> <span class="n">donors_in_ligand</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Compute hydrogen bonds pharmacophoric points centroids and</span>
+<span class="sd">            directions vectors.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            donors : list[HBDonor]</span>
+<span class="sd">                List with hydrogen bond donors.</span>
+
+<span class="sd">            acceptors : list[ChemFeat]</span>
+<span class="sd">                List with hydrogen bond acceptors.</span>
+
+<span class="sd">            donors_in_ligand : bool</span>
+<span class="sd">                Whether the donors are part of the ligand or of the receptor</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            points : list[PharmacophoricPoint]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">don</span> <span class="ow">in</span> <span class="n">donors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acceptors</span><span class="p">:</span>
+                <span class="c1"># Distance between H-Acceptor</span>
+                <span class="n">acc_hyd_dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">don</span><span class="o">.</span><span class="n">hyd</span><span class="p">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">acc_hyd_dist</span> <span class="o">&lt;</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">HBOND_DIST_MAX</span><span class="p">:</span>
+                    <span class="n">don_acc_dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">don</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                    <span class="n">don_hyd_dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">don</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">don</span><span class="o">.</span><span class="n">hyd</span><span class="p">)</span>
+                    <span class="n">angle</span> <span class="o">=</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">_hbond_angle</span><span class="p">(</span>
+                        <span class="n">don_acc_dist</span><span class="p">,</span> <span class="n">don_hyd_dist</span><span class="p">,</span> <span class="n">acc_hyd_dist</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">angle</span> <span class="o">&gt;</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">HBOND_ANG_MIN</span><span class="p">:</span>
+                        <span class="n">direction</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="n">don</span><span class="o">.</span><span class="n">hyd</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">donors_in_ligand</span><span class="p">:</span>
+                            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">PharmacophoricPoint</span><span class="p">(</span>
+                                    <span class="s2">&quot;hb donor&quot;</span><span class="p">,</span> <span class="n">don</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">direction</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+                            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">PharmacophoricPoint</span><span class="p">(</span>
+                                    <span class="s2">&quot;hb acceptor&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
+                            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">points</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_aromatic_angle_exceeds_deviation</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+        <span class="n">ang_dev</span> <span class="o">=</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">PISTACK_ANG_DEV</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="n">ang_dev</span> <span class="ow">or</span> <span class="mi">90</span> <span class="o">-</span> <span class="n">ang_dev</span> <span class="o">&lt;=</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="mi">90</span> <span class="o">+</span> <span class="n">ang_dev</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_aromatic_pharmacophoric_points</span><span class="p">(</span><span class="n">ligand_feats</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Compute aromatic pharmacophoric points from</span>
+<span class="sd">            protein-ligand interactions.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            -----------</span>
+<span class="sd">            ligand_feats : list[ChemFeat]</span>
+<span class="sd">                Aromatic chemical features of the ligand</span>
+
+<span class="sd">            receptor_feats : list[ChemFeat]</span>
+<span class="sd">                Aromatic chemical features of the receptor</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            points : list[PharmacophoricPoint]</span>
+<span class="sd">                List of aromatic pharmacophoric points</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate pistack interactions and create pharmacophoric points</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ligand_feats</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">receptor_feats</span><span class="p">)):</span>
+                <span class="n">lig_center</span> <span class="o">=</span> <span class="n">ligand_feats</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+                <span class="n">rec_center</span> <span class="o">=</span> <span class="n">receptor_feats</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">rec_center</span><span class="p">,</span> <span class="n">lig_center</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">PISTACK_DIST_MAX</span><span class="p">:</span>
+                    <span class="c1"># Calculate deviation from ideal angle by taking the angle between the normals</span>
+                    <span class="c1"># defined by the planes of each ring</span>
+                    <span class="n">lig_normal</span> <span class="o">=</span> <span class="n">ligand_feats</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span>
+                    <span class="n">rec_normal</span> <span class="o">=</span> <span class="n">receptor_feats</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span>
+
+                    <span class="n">angle</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">angle_between_normals</span><span class="p">(</span><span class="n">lig_normal</span><span class="p">,</span> <span class="n">rec_normal</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="mi">360</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Angle is </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">_aromatic_angle_exceeds_deviation</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+
+                        <span class="c1"># Project ring centers into the other plane and calculate offset</span>
+                        <span class="n">rec_proj</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">point_projection</span><span class="p">(</span>
+                            <span class="n">lig_normal</span><span class="p">,</span> <span class="n">lig_center</span><span class="p">,</span> <span class="n">rec_center</span>
+                        <span class="p">)</span>
+                        <span class="n">lig_proj</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">point_projection</span><span class="p">(</span>
+                            <span class="n">rec_normal</span><span class="p">,</span> <span class="n">rec_center</span><span class="p">,</span> <span class="n">lig_center</span>
+                        <span class="p">)</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">lig_proj</span><span class="p">,</span> <span class="n">rec_center</span><span class="p">),</span>
+                                     <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">rec_proj</span><span class="p">,</span> <span class="n">lig_center</span><span class="p">))</span>
+
+                        <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;=</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">PISTACK_OFFSET_MAX</span><span class="p">:</span>
+                            <span class="n">direction</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">rec_center</span> <span class="o">-</span> <span class="n">lig_center</span><span class="p">)</span>
+                            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PharmacophoricPoint</span><span class="p">(</span>
+                                <span class="s2">&quot;aromatic ring&quot;</span><span class="p">,</span> <span class="n">lig_center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">direction</span>
+                            <span class="p">))</span>
+        <span class="k">return</span> <span class="n">points</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_merge_hydrophobic_points</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Merge group of hydrophobic points close to each other.</span>
+
+<span class="sd">            Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            points : list[PharmacophoricPoint]</span>
+<span class="sd">            radius : puw.Quantity</span>
+
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            list[PharmacophoricPoint]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create a graph of the hydrophobic features, were each node represents</span>
+        <span class="c1"># a feature and an edge is added between two nodes only if their distance</span>
+        <span class="c1"># is &lt; HYD_MERGE_DIST.</span>
+        <span class="n">hyd_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="n">hyd_graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)):</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;=</span> <span class="n">LigandReceptorPharmacophore</span><span class="o">.</span><span class="n">HYD_MERGE_DIST</span><span class="p">:</span>
+                    <span class="n">hyd_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">jj</span><span class="p">)</span>
+
+        <span class="c1"># Find each maximum clique and group all nodes within a clique</span>
+        <span class="n">cliques_iter</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">find_cliques</span><span class="p">(</span><span class="n">hyd_graph</span><span class="p">)</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">clique</span> <span class="ow">in</span> <span class="n">cliques_iter</span><span class="p">:</span>
+            <span class="n">clique_centers</span> <span class="o">=</span> <span class="p">[</span><span class="n">points</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">center</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">clique</span><span class="p">]</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">clique_centers</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">pharma_point</span> <span class="o">=</span> <span class="n">PharmacophoricPoint</span><span class="p">(</span><span class="s2">&quot;hydrophobicity&quot;</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+            <span class="n">merged</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pharma_point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merged</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_points_from_distance_rule</span><span class="p">(</span>
+            <span class="n">ligand_feats</span><span class="p">,</span> <span class="n">receptor_feats</span><span class="p">,</span> <span class="n">feat_type</span><span class="p">,</span> <span class="n">max_dist</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Given a set of ligand and receptor chem feats, creates pharmacophoric</span>
+<span class="sd">            points if the ligand and receptor feats are below the maximum distance.</span>
+
+<span class="sd">            This method can be used to obtain hydrophobic, positive charge and</span>
+<span class="sd">            negative charge pharmacophoric points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ligand_feats : list[ChemFeat]</span>
+<span class="sd">            Chemical features of the ligand</span>
+
+<span class="sd">        receptor_feats : list[ChemFeat]</span>
+<span class="sd">            Chemical features of the receptor</span>
+
+<span class="sd">        feat_type : str</span>
+<span class="sd">            Name of the feature type of the pharmacophoric points.</span>
+
+<span class="sd">        max_dist : QuantityLike</span>
+<span class="sd">            Maximum distance between a receptor and a ligand feature.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        points : list[PharmacophoricPoint]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">quantity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lig_feat</span> <span class="ow">in</span> <span class="n">ligand_feats</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rec_feat</span> <span class="ow">in</span> <span class="n">receptor_feats</span><span class="p">:</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">maths</span><span class="o">.</span><span class="n">points_distance</span><span class="p">(</span><span class="n">lig_feat</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">rec_feat</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">max_dist</span><span class="p">:</span>
+                    <span class="n">pharma_point</span> <span class="o">=</span> <span class="n">PharmacophoricPoint</span><span class="p">(</span><span class="n">feat_type</span><span class="p">,</span> <span class="n">lig_feat</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pharma_point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">points</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pharmacophores</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Returns</span>
+<span class="sd">            -------</span>
+<span class="sd">            Pharmacophore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pharmacophores</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

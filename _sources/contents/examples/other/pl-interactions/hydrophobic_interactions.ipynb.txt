@@ -1,0 +1,310 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "8bf9d0c6-a64a-4b98-9290-5f1b6039ea7f",
+   "metadata": {},
+   "source": [
+    "# Hydrophobic interactions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "c45b0ee5-0eae-49b4-b914-a1657b783a92",
+   "metadata": {
+    "tags": [
+     "remove-output"
+    ]
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "dada292504dc4db08b4e86bda65605d3",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": []
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "import openpharmacophore as oph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "9e1df942-188c-4f47-b7b4-ab1e33e64758",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pdb_path = \"../../data/1m7w_A_chain.pdb\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "6c65c18d-a735-4bec-89fd-7a424088eedd",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Has hydrogens: False\n",
+      "Has ligand: True\n"
+     ]
+    }
+   ],
+   "source": [
+    "protein = oph.load(pdb_path)\n",
+    "print(f\"Has hydrogens: {protein.has_hydrogens()}\")\n",
+    "print(f\"Has ligand: {protein.has_ligands()}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "fb2bcbf5-37a9-4278-8ecb-5f7095cf5f62",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['DAO:B']\n"
+     ]
+    }
+   ],
+   "source": [
+    "lig_ids = protein.ligand_ids()\n",
+    "print(lig_ids)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "ea04e6f0-25a6-49c6-bdaf-2173c315040a",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'CCCCCCCCCCCC(=O)O'"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "smiles = oph.smiles_from_pdb_id(lig_ids[0])\n",
+    "smiles"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "e9e9eab2-4312-4506-9024-48a63751e51c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "[13:46:14] WARNING: More than one matching pattern found - picking one\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<rdkit.Chem.rdchem.Mol at 0x7f5bedc6cb20>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "ligand = protein.get_ligand(lig_ids[0])\n",
+    "ligand.fix_bond_order(smiles=smiles)\n",
+    "\n",
+    "ligand.draw()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "9b677ec6-d96c-4b13-aec0-1e70a16c327e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Has ligand: <bound method Protein.has_ligands of <openpharmacophore.molecular_systems.protein.Protein object at 0x7f5bedcdb950>>\n"
+     ]
+    }
+   ],
+   "source": [
+    "protein.remove_ligand(lig_ids[0])\n",
+    "print(f\"Has ligand: {protein.has_ligands}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "5d40af8b-ebab-4f84-8879-fc5605109e24",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bsite = oph.ComplexBindingSite(protein, ligand)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "70de4d2f-9021-42ad-804e-385b57f4893c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pharmacophore = oph.LigandReceptorPharmacophore(bsite, ligand)\n",
+    "pharmacophore.extract(feat_types=[\"hydrophobicity\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "bacec299-86f8-498e-b96b-035f9e52929c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Number of pharmacophoric points 5\n",
+      "PharmacophoricPoint(feat_type=hydrophobicity; center=(64.61, 33.63, 10.33); radius=1.0)\n",
+      "PharmacophoricPoint(feat_type=hydrophobicity; center=(64.0, 33.95, 8.65); radius=1.0)\n",
+      "PharmacophoricPoint(feat_type=hydrophobicity; center=(62.71, 27.31, 13.27); radius=1.0)\n",
+      "PharmacophoricPoint(feat_type=hydrophobicity; center=(64.26, 29.96, 13.92); radius=1.0)\n",
+      "PharmacophoricPoint(feat_type=hydrophobicity; center=(65.22, 31.7, 13.23); radius=1.0)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f\"Number of pharmacophoric points {len(pharmacophore[0])}\")\n",
+    "for p in pharmacophore[0]:\n",
+    "    print(p)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "fa0f0671-bd86-4e11-87a2-e7a6bb857054",
+   "metadata": {
+    "tags": [
+     "remove-output"
+    ]
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "8f5a14706f8446f79612ba90ed1a5b81",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "NGLWidget()"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "viewer = oph.Viewer()\n",
+    "viewer.add_components([bsite, ligand, pharmacophore[0]])\n",
+    "view = viewer.show()\n",
+    "viewer.set_protein_style(\"ball+stick\")\n",
+    "view"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "211a1570-9bd0-4a83-ac80-64fd32058069",
+   "metadata": {},
+   "source": [
+    "<img src=\"../../../../_static/hydrophobic_interaction.png\" alt=\"pharmacophore\">\n",
+    "<div class=\"alert alert-info\">\n",
+    "    <strong>Note:</strong>\n",
+    "    <p>viewer.show() displays an interactive widget. For simplicity an image is presented in the documentation.</p>\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "ffab9064-d5b9-45c2-967b-97aa83a243e7",
+   "metadata": {
+    "tags": [
+     "remove-cell"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "# Save view image so it can be viewed in the documentation\n",
+    " \n",
+    "import time\n",
+    "import threading\n",
+    "\n",
+    "save = False\n",
+    "\n",
+    "def save_image(view):\n",
+    "    im = view.render_image()\n",
+    "    while not im.value:\n",
+    "        time.sleep(0.1)\n",
+    "    save_path = \"../../../../_static/hydrophobic_interaction.png\"\n",
+    "    with open(save_path, \"wb\") as fp:\n",
+    "        fp.write(im.value)    \n",
+    "\n",
+    "def generate_image():\n",
+    "    thread = threading.Thread(target=save_image, args=(viewer.to_nglview(),), daemon=True)\n",
+    "    thread.start()\n",
+    "    \n",
+    "\n",
+    "if save:\n",
+    "    generate_image()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

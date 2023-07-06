@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.pharmacophore\_writer.save\_mol2
+=====================================================
+
+.. currentmodule:: openpharmacophore.io.pharmacophore_writer
+
+.. autofunction:: save_mol2

@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thrombin ligands for pharmacophore extraction &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script type="application/vnd.jupyter.widget-state+json">{"state": {"671910ba71134b41a7a01aadeb2d5e9f": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a95a1769a8c9438f977578395faeebf6": {"model_name": "ColormakerRegistryModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_dom_classes": [], "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "ColormakerRegistryModel", "_msg_ar": [], "_msg_q": [], "_ready": false, "_view_count": null, "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "ColormakerRegistryView", "layout": "IPY_MODEL_671910ba71134b41a7a01aadeb2d5e9f"}}, "528a71bf1f094f5b9be52897097e167a": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4aeec5bb6314489cabf67d04fa4666e9": {"model_name": "NGLModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_camera_orientation": [], "_camera_str": "orthographic", "_dom_classes": [], "_gui_theme": null, "_ibtn_fullscreen": "IPY_MODEL_1e00466391e545c684d7298b83cad21d", "_igui": null, "_iplayer": "IPY_MODEL_63a27621edfa4567b12c4bcc5163dbcd", "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "NGLModel", "_ngl_color_dict": {}, "_ngl_coordinate_resource": {}, "_ngl_full_stage_parameters": {}, "_ngl_msg_archive": [{"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [2.3476, 1.9421, -0.6762], [0.6901960784313725, 0.22745098039215686, 0.1803921568627451], 1.0, "hb acceptor"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [1.5661, -2.5341, 2.155], [0.9607843137254902, 0.6901960784313725, 0.2549019607843137], 1.0, "hydrophobicity"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [6.1932, 1.3405, -1.3614], [0.9450980392156862, 0.7686274509803922, 0.058823529411764705], 1.0, "aromatic ring"]]], "kwargs": {}, "fire_embed": true}, {"target": "Stage", "type": "call_method", "methodName": "loadFile", "reconstruc_color_scheme": false, "args": [{"type": "blob", "data": "COMPND    1TOM\nHETATM    1  C1  UNL     1       1.663   2.628   0.423  1.00  0.00           C  \nHETATM    2  N1  UNL     1       2.348   1.942  -0.676  1.00  0.00           N  \nHETATM    3  C2  UNL     1       2.688   0.550  -0.325  1.00  0.00           C  \nHETATM    4  C3  UNL     1       3.629  -0.042  -1.387  1.00  0.00           C  \nHETATM    5  C4  UNL     1       4.962   0.661  -1.390  1.00  0.00           C  \nHETATM    6  C5  UNL     1       5.203   1.729  -2.270  1.00  0.00           C  \nHETATM    7  C6  UNL     1       6.429   2.400  -2.243  1.00  0.00           C  \nHETATM    8  C7  UNL     1       7.420   2.014  -1.335  1.00  0.00           C  \nHETATM    9  C8  UNL     1       7.185   0.956  -0.454  1.00  0.00           C  \nHETATM   10  C9  UNL     1       5.960   0.283  -0.476  1.00  0.00           C  \nHETATM   11  C10 UNL     1       1.452  -0.324  -0.208  1.00  0.00           C  \nHETATM   12  O1  UNL     1       0.540  -0.213  -1.072  1.00  0.00           O  \nHETATM   13  N2  UNL     1       1.325  -1.319   0.828  1.00  0.00           N  \nHETATM   14  C11 UNL     1       2.339  -1.599   1.834  1.00  0.00           C  \nHETATM   15  C12 UNL     1       1.764  -2.707   2.708  1.00  0.00           C  \nHETATM   16  C13 UNL     1       0.596  -3.296   1.922  1.00  0.00           C  \nHETATM   17  C14 UNL     1       0.182  -2.216   0.923  1.00  0.00           C  \nHETATM   18  C15 UNL     1      -1.033  -1.463   1.399  1.00  0.00           C  \nHETATM   19  O2  UNL     1      -0.926  -0.636   2.347  1.00  0.00           O  \nHETATM   20  N3  UNL     1      -2.310  -1.707   0.795  1.00  0.00           N  \nHETATM   21  C16 UNL     1      -3.476  -0.864   1.051  1.00  0.00           C  \nHETATM   22  C17 UNL     1      -3.314   0.528   0.395  1.00  0.00           C  \nHETATM   23  C18 UNL     1      -3.127   0.453  -1.137  1.00  0.00           C  \nHETATM   24  C19 UNL     1      -4.425   0.084  -1.869  1.00  0.00           C  \nHETATM   25  C20 UNL     1      -5.565   1.054  -1.510  1.00  0.00           C  \nHETATM   26  C21 UNL     1      -5.781   1.095   0.013  1.00  0.00           C  \nHETATM   27  C22 UNL     1      -4.486   1.466   0.751  1.00  0.00           C  \nHETATM   28  N4  UNL     1      -6.799   0.634  -2.176  1.00  0.00           N  \nHETATM   29  H1  UNL     1       2.041   2.249   1.384  1.00  0.00           H  \nHETATM   30  H2  UNL     1       1.853   3.710   0.356  1.00  0.00           H  \nHETATM   31  H3  UNL     1       0.581   2.441   0.356  1.00  0.00           H  \nHETATM   32  H4  UNL     1       1.731   1.937  -1.501  1.00  0.00           H  \nHETATM   33  H5  UNL     1       3.187   0.569   0.655  1.00  0.00           H  \nHETATM   34  H6  UNL     1       3.787  -1.109  -1.172  1.00  0.00           H  \nHETATM   35  H7  UNL     1       3.164   0.090  -2.376  1.00  0.00           H  \nHETATM   36  H8  UNL     1       4.425   2.039  -2.983  1.00  0.00           H  \nHETATM   37  H9  UNL     1       6.615   3.234  -2.936  1.00  0.00           H  \nHETATM   38  H10 UNL     1       8.384   2.543  -1.315  1.00  0.00           H  \nHETATM   39  H11 UNL     1       7.966   0.651   0.259  1.00  0.00           H  \nHETATM   40  H12 UNL     1       5.776  -0.545   0.224  1.00  0.00           H  \nHETATM   41  H13 UNL     1       3.271  -1.933   1.355  1.00  0.00           H  \nHETATM   42  H14 UNL     1       2.580  -0.703   2.425  1.00  0.00           H  \nHETATM   43  H15 UNL     1       2.525  -3.478   2.898  1.00  0.00           H  \nHETATM   44  H16 UNL     1       1.439  -2.323   3.687  1.00  0.00           H  \nHETATM   45  H17 UNL     1       0.911  -4.208   1.393  1.00  0.00           H  \nHETATM   46  H18 UNL     1      -0.237  -3.579   2.583  1.00  0.00           H  \nHETATM   47  H19 UNL     1      -0.087  -2.656  -0.048  1.00  0.00           H  \nHETATM   48  H20 UNL     1      -2.410  -2.508   0.155  1.00  0.00           H  \nHETATM   49  H21 UNL     1      -4.371  -1.353   0.638  1.00  0.00           H  \nHETATM   50  H22 UNL     1      -3.576  -0.727   2.138  1.00  0.00           H  \nHETATM   51  H23 UNL     1      -2.389   0.951   0.814  1.00  0.00           H  \nHETATM   52  H24 UNL     1      -2.784   1.433  -1.499  1.00  0.00           H  \nHETATM   53  H25 UNL     1      -2.390  -0.336  -1.345  1.00  0.00           H  \nHETATM   54  H26 UNL     1      -4.248   0.124  -2.953  1.00  0.00           H  \nHETATM   55  H27 UNL     1      -4.722  -0.929  -1.559  1.00  0.00           H  \nHETATM   56  H28 UNL     1      -5.290   2.062  -1.853  1.00  0.00           H  \nHETATM   57  H29 UNL     1      -6.553   1.842   0.246  1.00  0.00           H  \nHETATM   58  H30 UNL     1      -6.095   0.094   0.346  1.00  0.00           H  \nHETATM   59  H31 UNL     1      -4.208   2.496   0.480  1.00  0.00           H  \nHETATM   60  H32 UNL     1      -4.676   1.370   1.830  1.00  0.00           H  \nHETATM   61  H33 UNL     1      -7.506   0.393  -1.468  1.00  0.00           H  \nHETATM   62  H34 UNL     1      -7.150   1.403  -2.765  1.00  0.00           H  \nCONECT    1    2   29   30   31\nCONECT    2    3   32\nCONECT    3    4   11   33\nCONECT    4    5   34   35\nCONECT    5    6    6   10\nCONECT    6    7   36\nCONECT    7    8    8   37\nCONECT    8    9   38\nCONECT    9   10   10   39\nCONECT   10   40\nCONECT   11   12   12   13\nCONECT   13   14   17\nCONECT   14   15   41   42\nCONECT   15   16   43   44\nCONECT   16   17   45   46\nCONECT   17   18   47\nCONECT   18   19   19   20\nCONECT   20   21   48\nCONECT   21   22   49   50\nCONECT   22   23   27   51\nCONECT   23   24   52   53\nCONECT   24   25   54   55\nCONECT   25   26   28   56\nCONECT   26   27   57   58\nCONECT   27   59   60\nCONECT   28   61   62\nEND\n", "binary": false}], "kwargs": {"defaultRepresentation": true, "ext": "pdb"}}, {"component_index": 0, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 1, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 2, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}], "_ngl_original_stage_parameters": {}, "_ngl_repr_dict": {}, "_ngl_serialize": false, "_ngl_version": "", "_ngl_view_id": [], "_player_dict": {}, "_scene_position": {}, "_scene_rotation": {}, "_synced_model_ids": [], "_synced_repr_model_ids": [], "_view_count": null, "_view_height": "", "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "NGLView", "_view_width": "", "background": "white", "frame": 0, "gui_style": null, "layout": "IPY_MODEL_528a71bf1f094f5b9be52897097e167a", "max_frame": 0, "n_components": 0, "picked": {}}}, "a0d952f45c5f40ea8b465b717c2cc203": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "588c1b5c67b34060bd8ebd2ab8b7a1ef": {"model_name": "ImageModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ImageModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ImageView", "format": "png", "height": "", "layout": "IPY_MODEL_a0d952f45c5f40ea8b465b717c2cc203", "width": "900.0"}, "buffers": [{"data": "", "encoding": "base64", "path": ["value"]}]}, "ed272dc5c5e3461f8e5bb7ecf2c2d1c3": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "550a046015434c28a8233075501fa552": {"model_name": "DescriptionStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "9c7aa98a43f84dc68f3abafb907bfd25": {"model_name": "PlayModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "PlayModel", "_playing": false, "_repeat": false, "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "PlayView", "description": "", "description_tooltip": null, "disabled": false, "interval": 100, "layout": "IPY_MODEL_ed272dc5c5e3461f8e5bb7ecf2c2d1c3", "max": 0, "min": 0, "show_repeat": true, "step": 1, "style": "IPY_MODEL_550a046015434c28a8233075501fa552", "value": 0}}, "cabe319ae91c4e5b9a3a1e042762b08b": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "743311f6808a46f5877a0b3217b86219": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "SliderStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": "", "handle_color": null}}, "4bf751b987bc436ba1cf84b47428f9a8": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "IntSliderModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "IntSliderView", "continuous_update": true, "description": "", "description_tooltip": null, "disabled": false, "layout": "IPY_MODEL_cabe319ae91c4e5b9a3a1e042762b08b", "max": 0, "min": 0, "orientation": "horizontal", "readout": true, "readout_format": "d", "step": 1, "style": "IPY_MODEL_743311f6808a46f5877a0b3217b86219", "value": 0}}, "643069d8ab9e481babbf8edc79eb6ede": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "63a27621edfa4567b12c4bcc5163dbcd": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_9c7aa98a43f84dc68f3abafb907bfd25", "IPY_MODEL_4bf751b987bc436ba1cf84b47428f9a8"], "layout": "IPY_MODEL_643069d8ab9e481babbf8edc79eb6ede"}}, "a5ab0eb069f14ed78be3a5d851704258": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_9c7aa98a43f84dc68f3abafb907bfd25", "value"], "target": ["IPY_MODEL_4bf751b987bc436ba1cf84b47428f9a8", "value"]}}, "5ed41767367e4305933e45df13b94757": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_9c7aa98a43f84dc68f3abafb907bfd25", "value"], "target": ["IPY_MODEL_4aeec5bb6314489cabf67d04fa4666e9", "frame"]}}, "8a41ca8528034ceda6503821f8c98d55": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_9c7aa98a43f84dc68f3abafb907bfd25", "max"], "target": ["IPY_MODEL_4aeec5bb6314489cabf67d04fa4666e9", "max_frame"]}}, "3fe874c955874be1965c23b17b4a97cf": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_4bf751b987bc436ba1cf84b47428f9a8", "max"], "target": ["IPY_MODEL_4aeec5bb6314489cabf67d04fa4666e9", "max_frame"]}}, "6f2d63b205db440d95c13a2d9161d69c": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "34px"}}, "f9fdac78218a4291897226b5f4019815": {"model_name": "ButtonStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "button_color": null, "font_weight": ""}}, "1e00466391e545c684d7298b83cad21d": {"model_name": "ButtonModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ButtonView", "button_style": "", "description": "", "disabled": false, "icon": "compress", "layout": "IPY_MODEL_6f2d63b205db440d95c13a2d9161d69c", "style": "IPY_MODEL_f9fdac78218a4291897226b5f4019815", "tooltip": ""}}, "8f61be2b678f4e59870750f182d96b44": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "6bb69d05c91446d4bb6aa4e626028fb4": {"model_name": "NGLModel", "model_module": "nglview-js-widgets", "model_module_version": "3.0.1", "state": {"_camera_orientation": [], "_camera_str": "orthographic", "_dom_classes": [], "_gui_theme": null, "_ibtn_fullscreen": "IPY_MODEL_aee210d2748f46559dbc5596c04fd6e7", "_igui": null, "_iplayer": "IPY_MODEL_d990dd7dde274983b06531ffeed3293c", "_model_module": "nglview-js-widgets", "_model_module_version": "3.0.1", "_model_name": "NGLModel", "_ngl_color_dict": {}, "_ngl_coordinate_resource": {}, "_ngl_full_stage_parameters": {}, "_ngl_msg_archive": [{"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [-5.8259, -3.3156, 1.9282], [0.09019607843137255, 0.6470588235294118, 0.5372549019607843], 1.0, "hb donor"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [-3.7084, -1.7117, 1.3645], [0.9607843137254902, 0.6901960784313725, 0.2549019607843137], 1.0, "hydrophobicity"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [-1.4349, 2.0988, -2.786], [0.9607843137254902, 0.6901960784313725, 0.2549019607843137], 1.0, "hydrophobicity"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [-5.8259, -3.3156, 1.9282], [0.20392156862745098, 0.596078431372549, 0.8588235294117647], 1.0, "positive charge"]]], "kwargs": {}, "fire_embed": true}, {"target": "Widget", "type": "call_method", "methodName": "addShape", "reconstruc_color_scheme": false, "args": ["shape", [["sphere", [4.9518, -2.6635, 1.3351], [0.9450980392156862, 0.7686274509803922, 0.058823529411764705], 1.0, "aromatic ring"]]], "kwargs": {}, "fire_embed": true}, {"target": "Stage", "type": "call_method", "methodName": "loadFile", "reconstruc_color_scheme": false, "args": [{"type": "blob", "data": "COMPND    1D91\nHETATM    1  C1  UNL     1       5.510  -3.886   1.723  1.00  0.00           C  \nHETATM    2  C2  UNL     1       4.522  -3.852   0.734  1.00  0.00           C  \nHETATM    3  C3  UNL     1       3.962  -2.631   0.347  1.00  0.00           C  \nHETATM    4  C4  UNL     1       4.388  -1.437   0.949  1.00  0.00           C  \nHETATM    5  C5  UNL     1       5.386  -1.476   1.935  1.00  0.00           C  \nHETATM    6  C6  UNL     1       5.943  -2.699   2.322  1.00  0.00           C  \nHETATM    7  S1  UNL     1       3.686   0.096   0.446  1.00  0.00           S  \nHETATM    8  O1  UNL     1       3.937   1.143   1.495  1.00  0.00           O  \nHETATM    9  O2  UNL     1       2.203  -0.079   0.279  1.00  0.00           O  \nHETATM   10  C7  UNL     1       4.431   0.593  -1.103  1.00  0.00           C  \nHETATM   11  C8  UNL     1       4.059   2.026  -1.501  1.00  0.00           C  \nHETATM   12  N1  UNL     1       2.623   2.156  -1.748  1.00  0.00           N  \nHETATM   13  C9  UNL     1       1.898   1.654  -2.773  1.00  0.00           C  \nHETATM   14  O3  UNL     1       2.387   1.013  -3.741  1.00  0.00           O  \nHETATM   15  N2  UNL     1       0.583   1.901  -2.615  1.00  0.00           N  \nHETATM   16  C10 UNL     1      -0.528   1.428  -3.437  1.00  0.00           C  \nHETATM   17  C11 UNL     1      -1.815   2.104  -3.042  1.00  0.00           C  \nHETATM   18  C12 UNL     1      -1.962   2.764  -1.879  1.00  0.00           C  \nHETATM   19  C13 UNL     1      -0.845   2.903  -0.872  1.00  0.00           C  \nHETATM   20  N3  UNL     1       0.443   2.555  -1.474  1.00  0.00           N  \nHETATM   21  C14 UNL     1       1.678   2.708  -0.953  1.00  0.00           C  \nHETATM   22  O4  UNL     1       1.917   3.263   0.154  1.00  0.00           O  \nHETATM   23  C15 UNL     1      -1.122   2.019   0.311  1.00  0.00           C  \nHETATM   24  O5  UNL     1      -1.496   2.540   1.397  1.00  0.00           O  \nHETATM   25  N4  UNL     1      -0.980   0.594   0.205  1.00  0.00           N  \nHETATM   26  C16 UNL     1      -1.298  -0.314   1.305  1.00  0.00           C  \nHETATM   27  C17 UNL     1      -2.824  -0.465   1.474  1.00  0.00           C  \nHETATM   28  C18 UNL     1      -3.481  -0.945   0.151  1.00  0.00           C  \nHETATM   29  C19 UNL     1      -4.804  -1.672   0.410  1.00  0.00           C  \nHETATM   30  C20 UNL     1      -4.583  -2.959   1.240  1.00  0.00           C  \nHETATM   31  C21 UNL     1      -3.398  -2.840   2.237  1.00  0.00           C  \nHETATM   32  C22 UNL     1      -3.160  -1.390   2.676  1.00  0.00           C  \nHETATM   33  N5  UNL     1      -5.826  -3.316   1.928  1.00  0.00           N  \nHETATM   34  H1  UNL     1       5.948  -4.848   2.030  1.00  0.00           H  \nHETATM   35  H2  UNL     1       4.184  -4.786   0.262  1.00  0.00           H  \nHETATM   36  H3  UNL     1       3.187  -2.605  -0.433  1.00  0.00           H  \nHETATM   37  H4  UNL     1       5.731  -0.543   2.405  1.00  0.00           H  \nHETATM   38  H5  UNL     1       6.721  -2.727   3.098  1.00  0.00           H  \nHETATM   39  H6  UNL     1       5.525   0.527  -1.006  1.00  0.00           H  \nHETATM   40  H7  UNL     1       4.054  -0.080  -1.887  1.00  0.00           H  \nHETATM   41  H8  UNL     1       4.346   2.709  -0.688  1.00  0.00           H  \nHETATM   42  H9  UNL     1       4.594   2.278  -2.429  1.00  0.00           H  \nHETATM   43  H10 UNL     1      -0.314   1.650  -4.493  1.00  0.00           H  \nHETATM   44  H11 UNL     1      -0.639   0.344  -3.288  1.00  0.00           H  \nHETATM   45  H12 UNL     1      -2.671   2.055  -3.732  1.00  0.00           H  \nHETATM   46  H13 UNL     1      -2.936   3.223  -1.652  1.00  0.00           H  \nHETATM   47  H14 UNL     1      -0.794   3.951  -0.540  1.00  0.00           H  \nHETATM   48  H15 UNL     1      -0.641   0.196  -0.683  1.00  0.00           H  \nHETATM   49  H16 UNL     1      -0.860  -1.301   1.095  1.00  0.00           H  \nHETATM   50  H17 UNL     1      -0.883   0.103   2.235  1.00  0.00           H  \nHETATM   51  H18 UNL     1      -3.253   0.521   1.703  1.00  0.00           H  \nHETATM   52  H19 UNL     1      -3.674  -0.071  -0.489  1.00  0.00           H  \nHETATM   53  H20 UNL     1      -2.792  -1.647  -0.341  1.00  0.00           H  \nHETATM   54  H21 UNL     1      -5.480  -1.001   0.960  1.00  0.00           H  \nHETATM   55  H22 UNL     1      -5.241  -1.954  -0.560  1.00  0.00           H  \nHETATM   56  H23 UNL     1      -4.307  -3.763   0.542  1.00  0.00           H  \nHETATM   57  H24 UNL     1      -3.620  -3.448   3.127  1.00  0.00           H  \nHETATM   58  H25 UNL     1      -2.489  -3.196   1.730  1.00  0.00           H  \nHETATM   59  H26 UNL     1      -4.068  -1.014   3.170  1.00  0.00           H  \nHETATM   60  H27 UNL     1      -2.300  -1.380   3.362  1.00  0.00           H  \nHETATM   61  H28 UNL     1      -5.678  -3.273   2.947  1.00  0.00           H  \nHETATM   62  H29 UNL     1      -6.569  -2.654   1.661  1.00  0.00           H  \nCONECT    1    2    2    6   34\nCONECT    2    3   35\nCONECT    3    4    4   36\nCONECT    4    5    7\nCONECT    5    6    6   37\nCONECT    6   38\nCONECT    7    8    8    9    9\nCONECT    7   10\nCONECT   10   11   39   40\nCONECT   11   12   41   42\nCONECT   12   13   21\nCONECT   13   14   14   15\nCONECT   15   16   20\nCONECT   16   17   43   44\nCONECT   17   18   18   45\nCONECT   18   19   46\nCONECT   19   20   23   47\nCONECT   20   21\nCONECT   21   22   22\nCONECT   23   24   24   25\nCONECT   25   26   48\nCONECT   26   27   49   50\nCONECT   27   28   32   51\nCONECT   28   29   52   53\nCONECT   29   30   54   55\nCONECT   30   31   33   56\nCONECT   31   32   57   58\nCONECT   32   59   60\nCONECT   33   61   62\nEND\n", "binary": false}], "kwargs": {"defaultRepresentation": true, "ext": "pdb"}}, {"component_index": 0, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 1, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 2, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 3, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}, {"component_index": 4, "repr_index": 0, "target": "Representation", "type": "call_method", "methodName": "setParameters", "reconstruc_color_scheme": false, "args": [], "kwargs": {"opacity": 0.6}}, {"target": "Widget", "type": "call_method", "methodName": "request_repr_dict", "reconstruc_color_scheme": false, "args": [], "kwargs": {}}], "_ngl_original_stage_parameters": {}, "_ngl_repr_dict": {}, "_ngl_serialize": false, "_ngl_version": "", "_ngl_view_id": [], "_player_dict": {}, "_scene_position": {}, "_scene_rotation": {}, "_synced_model_ids": [], "_synced_repr_model_ids": [], "_view_count": null, "_view_height": "", "_view_module": "nglview-js-widgets", "_view_module_version": "3.0.1", "_view_name": "NGLView", "_view_width": "", "background": "white", "frame": 0, "gui_style": null, "layout": "IPY_MODEL_8f61be2b678f4e59870750f182d96b44", "max_frame": 0, "n_components": 0, "picked": {}}}, "021b40d7854a491493c07bf9cfe130c0": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "65e3b7f784c34399be82c2fc7c596ca6": {"model_name": "ImageModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ImageModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ImageView", "format": "png", "height": "", "layout": "IPY_MODEL_021b40d7854a491493c07bf9cfe130c0", "width": "900.0"}, "buffers": [{"data": "", "encoding": "base64", "path": ["value"]}]}, "7cab72e6face41ee8296b61a4c815366": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3dc45e72d00141c790a92bff0c96f202": {"model_name": "DescriptionStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "DescriptionStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": ""}}, "6c979fdd2a6d47e385a80377d76cd6bc": {"model_name": "PlayModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "PlayModel", "_playing": false, "_repeat": false, "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "PlayView", "description": "", "description_tooltip": null, "disabled": false, "interval": 100, "layout": "IPY_MODEL_7cab72e6face41ee8296b61a4c815366", "max": 0, "min": 0, "show_repeat": true, "step": 1, "style": "IPY_MODEL_3dc45e72d00141c790a92bff0c96f202", "value": 0}}, "78df5cc096be41d8a8343615be4c4ff4": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c7a511a4b0e642388f34a2c8cd62daf2": {"model_name": "SliderStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "SliderStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "description_width": "", "handle_color": null}}, "b9cf7d2186b04715a2b095a6cd48af61": {"model_name": "IntSliderModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "IntSliderModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "IntSliderView", "continuous_update": true, "description": "", "description_tooltip": null, "disabled": false, "layout": "IPY_MODEL_78df5cc096be41d8a8343615be4c4ff4", "max": 0, "min": 0, "orientation": "horizontal", "readout": true, "readout_format": "d", "step": 1, "style": "IPY_MODEL_c7a511a4b0e642388f34a2c8cd62daf2", "value": 0}}, "d3c85682e5eb427f810ad18fb145c8a4": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d990dd7dde274983b06531ffeed3293c": {"model_name": "HBoxModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_6c979fdd2a6d47e385a80377d76cd6bc", "IPY_MODEL_b9cf7d2186b04715a2b095a6cd48af61"], "layout": "IPY_MODEL_d3c85682e5eb427f810ad18fb145c8a4"}}, "33c5699558b64e26ba11ff95e1406cec": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6c979fdd2a6d47e385a80377d76cd6bc", "value"], "target": ["IPY_MODEL_b9cf7d2186b04715a2b095a6cd48af61", "value"]}}, "d5cc17180a2249be8f3013a118c3d2f7": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6c979fdd2a6d47e385a80377d76cd6bc", "value"], "target": ["IPY_MODEL_6bb69d05c91446d4bb6aa4e626028fb4", "frame"]}}, "faf6ee181b2a45479ffb6c87d2deb578": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_6c979fdd2a6d47e385a80377d76cd6bc", "max"], "target": ["IPY_MODEL_6bb69d05c91446d4bb6aa4e626028fb4", "max_frame"]}}, "1934f3444a6f45d2a2b7a6957213066b": {"model_name": "LinkModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "LinkModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": null, "source": ["IPY_MODEL_b9cf7d2186b04715a2b095a6cd48af61", "max"], "target": ["IPY_MODEL_6bb69d05c91446d4bb6aa4e626028fb4", "max_frame"]}}, "f6fcad4ed0db49838bdaf479ee99c109": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "34px"}}, "157efdc487c64351a0fdce69add4daa5": {"model_name": "ButtonStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "button_color": null, "font_weight": ""}}, "aee210d2748f46559dbc5596c04fd6e7": {"model_name": "ButtonModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ButtonModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ButtonView", "button_style": "", "description": "", "disabled": false, "icon": "compress", "layout": "IPY_MODEL_f6fcad4ed0db49838bdaf479ee99c109", "style": "IPY_MODEL_157efdc487c64351a0fdce69add4daa5", "tooltip": ""}}}, "version_major": 2, "version_minor": 0}</script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script crossorigin="anonymous" data-jupyter-widgets-cdn="https://cdn.jsdelivr.net/npm/" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Dynamic pharmacophore" href="../dynamic-pharmacophore/index.html" />
+    <link rel="prev" title="Ligand preparation for pharmacophore extraction" href="ligand_preparation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Ligand-based pharmacophore</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Ligand-based pharmacophore</a></li>
+      <li class="breadcrumb-item active">Thrombin ligands for pharmacophore extraction</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="thrombin-ligands-for-pharmacophore-extraction">
+<h1>Thrombin ligands for pharmacophore extraction<a class="headerlink" href="#thrombin-ligands-for-pharmacophore-extraction" title="Permalink to this heading"></a></h1>
+<div class="cell tag_remove-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">SVG</span>
+
+<span class="kn">import</span> <span class="nn">openpharmacophore</span> <span class="k">as</span> <span class="nn">oph</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We want to get ligand based pharmacophores for thrombin.</p>
+<p>We’ll start by loading a set pf thrombin ligands and generating conformers for each. Then we will
+store the conformers on a file to avoid needing to generate new conformers each time the notebooks is ran.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lig_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../data/thrombin.csv&quot;</span><span class="p">)</span>
+<span class="n">lig_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Smiles</th>
+      <th>PDBID</th>
+      <th>LigID</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>[H]/N=C(\C1CCC(CC1)CNC(=O)[C@@H]2C=C(CN3N2C(=O...</td>
+      <td>1C4V</td>
+      <td>IH2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CN[C@H](Cc1ccccc1)C(=O)N2CCC[C@H]2C(=O)NCC3CCC...</td>
+      <td>1TOM</td>
+      <td>MIN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O...</td>
+      <td>1D6W</td>
+      <td>00R</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>c1ccc(cc1)S(=O)(=O)CCN2C(=O)N3CC=C[C@H](N3C2=O...</td>
+      <td>1D91</td>
+      <td>00P</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>[H]/N=C(/c1ccc(cc1)C[C@H](C(=O)N2CCCCC2)NC(=O)...</td>
+      <td>1DWD</td>
+      <td>MID</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>[H]/N=C(\c1ccc2c(c1)cc([nH]2)C(=O)N3CCC(CC3)Cc...</td>
+      <td>1D4P</td>
+      <td>BPP</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>CCC1CCN(CC1)C(=O)[C@H](CCCNC(=[NH2+])N)NS(=O)(...</td>
+      <td>1FPC</td>
+      <td>0ZI</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_ligands</span><span class="p">():</span>
+    <span class="n">smiles</span> <span class="o">=</span> <span class="n">lig_df</span><span class="p">[</span><span class="s2">&quot;Smiles&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">oph</span><span class="o">.</span><span class="n">load_ligands</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s2">&quot;smi&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">conf_file</span> <span class="o">=</span> <span class="s2">&quot;../data/thrombin_ligands.sdf&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">conf_file</span><span class="p">):</span>
+    <span class="n">ligands</span> <span class="o">=</span> <span class="n">load_ligands</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">ligands</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">conf_file</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of conformers &quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">n_conformers</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">])</span>
+<span class="n">oph</span><span class="o">.</span><span class="n">draw_ligands</span><span class="p">(</span><span class="n">ligands</span><span class="p">,</span> <span class="n">n_per_row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">legends</span><span class="o">=</span><span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">to_rdkit</span><span class="p">()</span><span class="o">.</span><span class="n">GetProp</span><span class="p">(</span><span class="s2">&quot;_Name&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Number of conformers  [176, 174, 166, 147, 176, 40, 286]
+</pre></div>
+</div>
+<img alt="../../../_images/29ccaa505762d3993d971950a1ea630092949471d7cf62eb3412ed9f73ca4873.png" src="../../../_images/29ccaa505762d3993d971950a1ea630092949471d7cf62eb3412ed9f73ca4873.png" />
+</div>
+</div>
+<p>Now we generate conformers for each ligand. The argument n_confs is set to -1 so that the conformer generator
+creates and “ideal” number of conformers for each ligand.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">lig</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lig</span><span class="o">.</span><span class="n">has_conformers</span><span class="p">:</span>
+        <span class="n">lig</span><span class="o">.</span><span class="n">add_hydrogens</span><span class="p">()</span>
+        <span class="n">lig</span><span class="o">.</span><span class="n">generate_conformers</span><span class="p">(</span><span class="n">n_confs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">lig</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ligands</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ligand </span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">lig</span><span class="o">.</span><span class="n">n_conformers</span><span class="si">}</span><span class="s2"> conformers&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ligand 0 has 176 conformers
+Ligand 1 has 174 conformers
+Ligand 2 has 166 conformers
+Ligand 3 has 147 conformers
+Ligand 4 has 176 conformers
+Ligand 5 has 40 conformers
+Ligand 6 has 286 conformers
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save conformers to file</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">conf_file</span><span class="p">):</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">SDWriter</span><span class="p">(</span><span class="n">conf_file</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lig</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">:</span>
+        <span class="n">lig_rdkit</span> <span class="o">=</span> <span class="n">lig</span><span class="o">.</span><span class="n">to_rdkit</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">conf</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lig</span><span class="o">.</span><span class="n">n_conformers</span><span class="p">):</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">lig_rdkit</span><span class="p">,</span> <span class="n">confId</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="analyizing-chem-feats">
+<h2>Analyizing chem feats<a class="headerlink" href="#analyizing-chem-feats" title="Permalink to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">chem_feats_df</span><span class="p">():</span>
+    <span class="n">n_feats</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">lig</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">:</span>
+        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lig</span><span class="o">.</span><span class="n">to_rdkit</span><span class="p">()</span><span class="o">.</span><span class="n">GetProp</span><span class="p">(</span><span class="s2">&quot;_Name&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">feat_type</span><span class="p">,</span> <span class="n">ind_list</span> <span class="ow">in</span> <span class="n">lig</span><span class="o">.</span><span class="n">feat_ind</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">n_feats</span><span class="p">[</span><span class="n">feat_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_list</span><span class="p">))</span>
+    
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">n_feats</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ligand&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ligand&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">lig</span> <span class="ow">in</span> <span class="n">ligands</span><span class="p">:</span>
+    <span class="n">lig</span><span class="o">.</span><span class="n">get_chem_feats</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">chem_feats_df</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>aromatic ring</th>
+      <th>hydrophobicity</th>
+      <th>negative charge</th>
+      <th>positive charge</th>
+      <th>hb acceptor</th>
+      <th>hb donor</th>
+      <th>total</th>
+    </tr>
+    <tr>
+      <th>ligand</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1C4V</th>
+      <td>3</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>3</td>
+      <td>3</td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <th>1TOM</th>
+      <td>1</td>
+      <td>3</td>
+      <td>0</td>
+      <td>2</td>
+      <td>4</td>
+      <td>3</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>1D6W</th>
+      <td>3</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>6</td>
+      <td>3</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>1D91</th>
+      <td>2</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>6</td>
+      <td>2</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>1DWD</th>
+      <td>3</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>4</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>1D4P</th>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>1FPC</th>
+      <td>2</td>
+      <td>4</td>
+      <td>0</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4</td>
+      <td>15</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">drawing</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">draw_ligands_chem_feats</span><span class="p">(</span><span class="n">ligands</span><span class="p">,</span> <span class="n">lig_size</span><span class="o">=</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">280</span><span class="p">))</span>
+<span class="n">SVG</span><span class="p">(</span><span class="n">drawing</span><span class="o">.</span><span class="n">GetDrawingText</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../../_images/9da6f6a5ac8d916538f2c70c1d1bd8f774eaed8d0fd2763126ce416c73c5e9cc.svg" src="../../../_images/9da6f6a5ac8d916538f2c70c1d1bd8f774eaed8d0fd2763126ce416c73c5e9cc.svg" /></div>
+</div>
+</section>
+<section id="finding-common-pharmacophores">
+<h2>Finding common pharmacophores<a class="headerlink" href="#finding-common-pharmacophores" title="Permalink to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pharma_file</span> <span class="o">=</span> <span class="s2">&quot;../data/thrombin_pharmacophores.mol2&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_points</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">min_actives</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pharma_file</span><span class="p">):</span>
+
+    <span class="n">pharmacophores</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_points</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">min_actives</span><span class="p">)):</span>        
+            <span class="n">pnts</span> <span class="o">=</span> <span class="n">n_points</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="n">actives</span> <span class="o">=</span> <span class="n">min_actives</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+
+            <span class="n">pharma</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">LigandBasedPharmacophore</span><span class="p">(</span><span class="n">ligands</span><span class="p">)</span>
+            <span class="n">pharma</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span>
+                    <span class="n">n_points</span><span class="o">=</span><span class="n">pnts</span><span class="p">,</span> <span class="n">min_actives</span><span class="o">=</span><span class="n">actives</span><span class="p">,</span> <span class="n">max_pharmacophores</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Num points: </span><span class="si">{</span><span class="n">pnts</span><span class="si">}</span><span class="s2">. Min actives: </span><span class="si">{</span><span class="n">actives</span><span class="si">}</span><span class="s2">. Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pharma</span><span class="p">)</span><span class="si">}</span><span class="s2"> pharmacophores&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pharma</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pharma</span><span class="o">.</span><span class="n">pharmacophores</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;min_actives&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">actives</span>
+                <span class="n">pharmacophores</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pharma</span><span class="o">.</span><span class="n">pharmacophores</span><span class="p">)</span>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">pharmacophores</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">pharmacophore_reader</span><span class="o">.</span><span class="n">read_mol2</span><span class="p">(</span><span class="n">pharma_file</span><span class="p">)</span>
+    
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pharmacophores</span><span class="p">)</span><span class="si">}</span><span class="s2"> pharmacopohores&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Found 63 pharmacopohores
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.22133302688598633 seconds
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save pharmacophores to file</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pharma_file</span><span class="p">):</span>
+    <span class="n">oph</span><span class="o">.</span><span class="n">pharmacophore_writer</span><span class="o">.</span><span class="n">save_mol2</span><span class="p">(</span><span class="n">pharmacophores</span><span class="p">,</span> <span class="n">pharma_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pharmacophore_df</span><span class="p">():</span>
+    
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">pharma</span> <span class="ow">in</span> <span class="n">pharmacophores</span><span class="p">:</span> 
+        <span class="n">feat_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># Only add the top scoring pharmacophore</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">pharma</span><span class="p">:</span>
+            <span class="n">feat_str</span> <span class="o">+=</span> <span class="n">point</span><span class="o">.</span><span class="n">short_name</span>
+            
+        <span class="n">n_pnts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pharma</span><span class="p">)</span>
+        <span class="n">n_actives</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pharma</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;min_actives&quot;</span><span class="p">])</span>
+        <span class="n">rows</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n_pnts</span><span class="p">,</span> <span class="n">n_actives</span><span class="p">,</span> <span class="n">feat_str</span><span class="p">,</span> <span class="n">pharma</span><span class="o">.</span><span class="n">ref_mol</span><span class="p">,</span> <span class="n">pharma</span><span class="o">.</span><span class="n">score</span><span class="p">]</span>
+        <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+        <span class="n">rows</span><span class="p">,</span> 
+        <span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Number of points&quot;</span><span class="p">,</span> <span class="s2">&quot;Number of actives&quot;</span><span class="p">,</span> <span class="s2">&quot;Features&quot;</span><span class="p">,</span> <span class="s2">&quot;Reference ligand&quot;</span><span class="p">,</span> <span class="s2">&quot;Score&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pharmacophore_df</span><span class="p">()</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Number of points</th>
+      <th>Number of actives</th>
+      <th>Features</th>
+      <th>Reference ligand</th>
+      <th>Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>3</td>
+      <td>4</td>
+      <td>HPR</td>
+      <td>0</td>
+      <td>0.947654</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>3</td>
+      <td>4</td>
+      <td>ADR</td>
+      <td>2</td>
+      <td>0.957363</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>4</td>
+      <td>AHP</td>
+      <td>1</td>
+      <td>0.959299</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>4</td>
+      <td>ADH</td>
+      <td>3</td>
+      <td>0.948446</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3</td>
+      <td>4</td>
+      <td>AHR</td>
+      <td>1</td>
+      <td>0.969500</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>5</td>
+      <td>4</td>
+      <td>AADDP</td>
+      <td>0</td>
+      <td>0.301428</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>5</td>
+      <td>4</td>
+      <td>AADHP</td>
+      <td>6</td>
+      <td>0.248704</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>5</td>
+      <td>4</td>
+      <td>AAADP</td>
+      <td>4</td>
+      <td>0.202498</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>5</td>
+      <td>5</td>
+      <td>AADHR</td>
+      <td>6</td>
+      <td>0.241077</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>5</td>
+      <td>5</td>
+      <td>AADHP</td>
+      <td>4</td>
+      <td>0.139471</td>
+    </tr>
+  </tbody>
+</table>
+<p>63 rows × 5 columns</p>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">pnts</span> <span class="ow">in</span> <span class="n">n_points</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">actives</span> <span class="ow">in</span> <span class="n">min_actives</span><span class="p">:</span>        
+            <span class="n">filter_</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Number of points&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pnts</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Number of actives&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">actives</span><span class="p">)</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">filter_</span><span class="p">][</span><span class="s2">&quot;Score&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">scores</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">idxmax</span><span class="p">())</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+<span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Number of points&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Number of actives</th>
+      <th>Features</th>
+      <th>Reference ligand</th>
+      <th>Score</th>
+    </tr>
+    <tr>
+      <th>Number of points</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>AHR</td>
+      <td>1</td>
+      <td>0.969500</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5</td>
+      <td>AHR</td>
+      <td>1</td>
+      <td>0.969500</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>6</td>
+      <td>AHR</td>
+      <td>1</td>
+      <td>0.969500</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>ADHP</td>
+      <td>3</td>
+      <td>0.830411</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>ADPR</td>
+      <td>3</td>
+      <td>0.807592</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6</td>
+      <td>ADPR</td>
+      <td>3</td>
+      <td>0.671040</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>4</td>
+      <td>ADHPR</td>
+      <td>3</td>
+      <td>0.766332</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5</td>
+      <td>AADHR</td>
+      <td>6</td>
+      <td>0.241077</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the highest scoring pharmacophores and the one with most features</span>
+<span class="n">top_score</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pharmacophores</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+<span class="n">most_feats</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pharmacophores</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="visualizing-the-pharmacophores">
+<h2>Visualizing the pharmacophores<a class="headerlink" href="#visualizing-the-pharmacophores" title="Permalink to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer_1</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">Viewer</span><span class="p">()</span>
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">ligands</span><span class="p">[</span><span class="n">top_score</span><span class="o">.</span><span class="n">ref_mol</span><span class="p">]</span>
+<span class="n">viewer_1</span><span class="o">.</span><span class="n">add_components</span><span class="p">([</span><span class="n">top_score</span><span class="p">,</span> <span class="n">ligand</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Score: </span><span class="si">{</span><span class="n">top_score</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Num points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">top_score</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Score: 0.9695001830941523
+Num points: 3
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_remove-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer_1</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="n">top_score</span><span class="o">.</span><span class="n">ref_struct</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<img src="../../../_static/thrombin_1.png" alt="pharmacophore"><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer_2</span> <span class="o">=</span> <span class="n">oph</span><span class="o">.</span><span class="n">Viewer</span><span class="p">()</span>
+<span class="n">ligand</span> <span class="o">=</span> <span class="n">ligands</span><span class="p">[</span><span class="n">most_feats</span><span class="o">.</span><span class="n">ref_mol</span><span class="p">]</span>
+<span class="n">viewer_2</span><span class="o">.</span><span class="n">add_components</span><span class="p">([</span><span class="n">most_feats</span><span class="p">,</span> <span class="n">ligand</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Score: </span><span class="si">{</span><span class="n">most_feats</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Num points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">most_feats</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Score: 0.4623265470544659
+Num points: 5
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_remove-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer_2</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="n">most_feats</span><span class="o">.</span><span class="n">ref_struct</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<img src="../../../_static/thrombin_2.png" alt="pharmacophore"></section>
+</section>
+
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ligand_preparation.html" class="btn btn-neutral float-left" title="Ligand preparation for pharmacophore extraction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../dynamic-pharmacophore/index.html" class="btn btn-neutral float-right" title="Dynamic pharmacophore" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openpharmacophore.io.pharmacophore_writer &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contents/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contents/examples/other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../contents/examples/other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../contents/examples/other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#visualization">Visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.Viewer.html">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">openpharmacophore.io.pharmacophore_writer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <h1>Source code for openpharmacophore.io.pharmacophore_writer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="kn">import</span> <span class="nn">pyunitwizard</span> <span class="k">as</span> <span class="nn">puw</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1"># MOL2 Files</span>
+
+<span class="k">def</span> <span class="nf">_pad_coordinate_with_zeros</span><span class="p">(</span><span class="n">coord</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Pad a number with zeros to the right.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coord: float</span>
+<span class="sd">            A number</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            A string with the coordinate padded with zeros to the right</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># The final string will contain 6 characters in total including the point or 7</span>
+    <span class="c1"># if the number is negative</span>
+    <span class="n">total_characters</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">coord_float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+    <span class="n">coord_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coord_str</span><span class="p">:</span>
+        <span class="n">coord_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+
+    <span class="k">if</span> <span class="n">coord_float</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># If the coordinate is negative the sign will add a character</span>
+        <span class="n">total_characters</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">coord_str</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">total_characters</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_props_dict</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore: Pharmacophore</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, str]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">props</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">pharmacophore</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pharmacophore</span><span class="o">.</span><span class="n">score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">props</span><span class="p">[</span><span class="s2">&quot;score&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pharmacophore</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pharmacophore</span><span class="o">.</span><span class="n">ref_mol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">props</span><span class="p">[</span><span class="s2">&quot;ref_mol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pharmacophore</span><span class="o">.</span><span class="n">ref_mol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pharmacophore</span><span class="o">.</span><span class="n">ref_struct</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">props</span><span class="p">[</span><span class="s2">&quot;ref_struct&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pharmacophore</span><span class="o">.</span><span class="n">ref_struct</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">props</span>
+
+
+<span class="k">def</span> <span class="nf">_mol2_pharmacophores</span><span class="p">(</span><span class="n">pharmacophores</span><span class="p">,</span> <span class="n">save_props</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get necessary info to create a mol2 file to store pharmacophores.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophores : list[Pharmacophore]</span>
+<span class="sd">            Nested list of pharmacophoric points were each entry represents a pharmacophore</span>
+
+<span class="sd">        save_props : bool</span>
+<span class="sd">            Whether to save the properties stored in the pharmacophore.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lines : list[str]</span>
+<span class="sd">            List with the contents of a mol2 file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pharmagist_element_name</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;aromatic ring&quot;</span><span class="p">:</span> <span class="s2">&quot;AR &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">:</span> <span class="s2">&quot;HYD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb acceptor&quot;</span><span class="p">:</span> <span class="s2">&quot;ACC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb donor&quot;</span><span class="p">:</span> <span class="s2">&quot;DON&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;positive charge&quot;</span><span class="p">:</span> <span class="s2">&quot;CAT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;negative charge&quot;</span><span class="p">:</span> <span class="s2">&quot;ANI&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">pharmagist_element_specs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;aromatic ring&quot;</span><span class="p">:</span> <span class="s2">&quot;AR &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">:</span> <span class="s2">&quot;HYD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb acceptor&quot;</span><span class="p">:</span> <span class="s2">&quot;HB &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb donor&quot;</span><span class="p">:</span> <span class="s2">&quot;HB &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;positive charge&quot;</span><span class="p">:</span> <span class="s2">&quot;CHG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;negative charge&quot;</span><span class="p">:</span> <span class="s2">&quot;CHG&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pharmacophore</span> <span class="ow">in</span> <span class="n">pharmacophores</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;@&lt;TRIPOS&gt;PHARMACOPHORE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;@&lt;TRIPOS&gt;POINTS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">])</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">pharmacophore</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">feat_name</span> <span class="o">=</span> <span class="n">pharmagist_element_name</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">element_inx</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">element_inx</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">feat_name</span>
+
+            <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">_pad_coordinate_with_zeros</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">_pad_coordinate_with_zeros</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">_pad_coordinate_with_zeros</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">radius_str</span> <span class="o">=</span> <span class="p">(</span><span class="n">_pad_coordinate_with_zeros</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">pharmagist_element_specs</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">pharmagist_element_specs</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="c1"># line += &quot;0.0000\n&quot;.rjust(12)</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">radius_str</span>
+
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">save_props</span><span class="p">:</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="n">_get_props_dict</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">props</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;@&lt;TRIPOS&gt;PROPERTIES</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">prop_name</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">20</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop_name</span><span class="p">))</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lines</span>
+
+
+<div class="viewcode-block" id="save_mol2"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_mol2.html#openpharmacophore.io.pharmacophore_writer.save_mol2">[docs]</a><span class="k">def</span> <span class="nf">save_mol2</span><span class="p">(</span><span class="n">pharmacophores</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">save_props</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Save several pharmacophores to a mol2 file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophores : list[Pharmacophore]</span>
+<span class="sd">            A list of pharmacophores</span>
+
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the file that will be created.</span>
+
+<span class="sd">        save_props : bool</span>
+<span class="sd">            Whether to save the properties stored in the pharmacophore.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">contents</span> <span class="o">=</span> <span class="n">_mol2_pharmacophores</span><span class="p">(</span><span class="n">pharmacophores</span><span class="p">,</span> <span class="n">save_props</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span></div>
+
+
+<span class="c1"># PH4 (MOE) Files</span>
+
+
+<span class="k">def</span> <span class="nf">_ph4_pharmacophore</span><span class="p">(</span><span class="n">pharmacophoric_points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns a string with the necessary data to create a MOE ph4 file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophoric_points : Pharmacophore</span>
+<span class="sd">            List with the pharmacophoric points.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        ------</span>
+<span class="sd">        ph4_str : str</span>
+<span class="sd">            The pharmacophore string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">oph_to_moe</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;aromatic ring&quot;</span><span class="p">:</span> <span class="s2">&quot;Aro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">:</span> <span class="s2">&quot;Hyd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb acceptor&quot;</span><span class="p">:</span> <span class="s2">&quot;Acc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb donor&quot;</span><span class="p">:</span> <span class="s2">&quot;Don&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;positive charge&quot;</span><span class="p">:</span> <span class="s2">&quot;Cat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;negative charge&quot;</span><span class="p">:</span> <span class="s2">&quot;Ani&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">ph4_str</span> <span class="o">=</span> <span class="s2">&quot;#moe:ph4que&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">month</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">ph4_str</span> <span class="o">+=</span> <span class="s2">&quot;#pharmacophore 5 tag t value *</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">ph4_str</span> <span class="o">+=</span> <span class="s2">&quot;scheme t Unified matchsize i 0 title t s $</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">ph4_str</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;#feature </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pharmacophoric_points</span><span class="p">)</span><span class="si">}</span><span class="s2"> expr tt color ix x r y r z r r r ebits ix gbits ix</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="n">excluded_spheres</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">pharmacophoric_points</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">==</span> <span class="s2">&quot;excluded volume&quot;</span><span class="p">:</span>
+            <span class="n">excluded_spheres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">feat_name</span> <span class="o">=</span> <span class="n">oph_to_moe</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">radius_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">ph4_str</span> <span class="o">+=</span> <span class="n">feat_name</span> <span class="o">+</span> <span class="s2">&quot; df2f2 &quot;</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">coord</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+            <span class="n">ph4_str</span> <span class="o">+=</span> <span class="n">coord</span>
+        <span class="n">ph4_str</span> <span class="o">+=</span> <span class="n">radius_str</span> <span class="o">+</span> <span class="s2">&quot;0 300 &quot;</span>
+
+    <span class="k">if</span> <span class="n">excluded_spheres</span><span class="p">:</span>
+        <span class="n">ph4_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#volumesphere 90 x r y r z r r r</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">excluded</span> <span class="ow">in</span> <span class="n">excluded_spheres</span><span class="p">:</span>
+            <span class="n">center</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">excluded</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">excluded</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+            <span class="n">radius_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">radius</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">coord</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                <span class="n">ph4_str</span> <span class="o">+=</span> <span class="n">coord</span>
+            <span class="n">ph4_str</span> <span class="o">+=</span> <span class="n">radius_str</span>
+
+    <span class="n">ph4_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">#endpharmacophore&quot;</span>
+
+    <span class="k">return</span> <span class="n">ph4_str</span>
+
+
+<div class="viewcode-block" id="save_ph4"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_ph4.html#openpharmacophore.io.pharmacophore_writer.save_ph4">[docs]</a><span class="k">def</span> <span class="nf">save_ph4</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Save a pharmacophore to a ph4 (MOE) file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore : Pharmacophore</span>
+<span class="sd">            A pharmacophore.</span>
+
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the file that will be created.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">contents</span> <span class="o">=</span> <span class="n">_ph4_pharmacophore</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span></div>
+
+
+<span class="c1"># JSON files</span>
+
+
+<span class="k">def</span> <span class="nf">_json_pharmacophore</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns a dictionary with the necessary data to construct a json pharmacophore file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore : Pharmacophore</span>
+<span class="sd">            Pharmacophoric points that will be used to construct the dictionary</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pharmacophore_dict : dict[str, Any]</span>
+<span class="sd">            Dictionary with the necessary info to construct a .json pharmer file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pharmer_element_name</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;aromatic ring&quot;</span><span class="p">:</span> <span class="s2">&quot;Aromatic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">:</span> <span class="s2">&quot;Hydrophobic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb acceptor&quot;</span><span class="p">:</span> <span class="s2">&quot;HydrogenAcceptor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hb donor&quot;</span><span class="p">:</span> <span class="s2">&quot;HydrogenDonor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;included volume&quot;</span><span class="p">:</span> <span class="s2">&quot;InclusionSphere&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;excluded volume&quot;</span><span class="p">:</span> <span class="s2">&quot;ExclusionSphere&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;positive charge&quot;</span><span class="p">:</span> <span class="s2">&quot;PositiveIon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;negative charge&quot;</span><span class="p">:</span> <span class="s2">&quot;NegativeIon&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">pharmacophore</span><span class="p">:</span>
+        <span class="n">point_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_center</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s1">&#39;angstroms&#39;</span><span class="p">)</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pharmer_element_name</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">has_direction</span><span class="p">:</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;hasvec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;hasvec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;svector&quot;</span><span class="p">][</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_center</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s1">&#39;angstroms&#39;</span><span class="p">)</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;enabled&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;vector_on&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;minsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;maxsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">point_dict</span><span class="p">[</span><span class="s2">&quot;selected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point_dict</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="n">points</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="save_json"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_json.html#openpharmacophore.io.pharmacophore_writer.save_json">[docs]</a><span class="k">def</span> <span class="nf">save_json</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Save a pharmacophore to a JSON file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore : Pharmacophore</span>
+<span class="sd">            A pharmacophore.</span>
+
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the file that will be created.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">contents</span> <span class="o">=</span> <span class="n">_json_pharmacophore</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div>
+
+
+<span class="c1"># PML (LigandScout) Files</span>
+
+
+<span class="k">def</span> <span class="nf">_set_coords_and_radius</span><span class="p">(</span><span class="n">tree_element</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Set the coords and radius of a tree element corresponding</span>
+<span class="sd">        to a volume, plane or point tag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">coords</span>
+
+    <span class="n">tree_element</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;featureId&quot;</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">)</span>
+    <span class="n">tree_element</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;optional&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+    <span class="n">tree_element</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+    <span class="n">tree_element</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+    <span class="c1"># Add position tag</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">tree_element</span><span class="p">,</span> <span class="s2">&quot;position&quot;</span><span class="p">)</span>
+    <span class="n">position</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;x3&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">position</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;y3&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">position</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;z3&quot;</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">position</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_ligandscout_xml_tree</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns a xml element tree necessary to create a ligandscout pharmacophore file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore : openpharmacophore.Pharmacophore</span>
+<span class="sd">            The pharmacophore that will be saved to a file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tree : xml.etree.ElementTree</span>
+<span class="sd">            The element tree.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Feature</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">])</span>
+    <span class="n">feature_mapper</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;aromatic ring&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;AR&quot;</span><span class="p">,</span> <span class="s2">&quot;ai_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;hydrophobicity&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;hi_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;hb acceptor&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;HBA&quot;</span><span class="p">,</span> <span class="s2">&quot;ha_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;hb donor&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;HBD&quot;</span><span class="p">,</span> <span class="s2">&quot;hd_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;excluded volume&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;exclusion&quot;</span><span class="p">,</span> <span class="s2">&quot;ev_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;positive charge&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;PI&quot;</span><span class="p">,</span> <span class="s2">&quot;pi_&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;negative charge&quot;</span><span class="p">:</span> <span class="n">Feature</span><span class="p">(</span><span class="s2">&quot;NI&quot;</span><span class="p">,</span> <span class="s2">&quot;ni_&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="s2">&quot;tree&quot;</span><span class="p">)</span>
+    <span class="n">document</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;pharmacophore&quot;</span><span class="p">)</span>
+    <span class="n">document</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;pharmacophore.pml&quot;</span><span class="p">)</span>
+    <span class="n">document</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;pharmacophoreType&quot;</span><span class="p">,</span> <span class="s2">&quot;LIGAND_SCOUT&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">feat_name</span> <span class="o">=</span> <span class="n">feature_mapper</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># skip features not supported by ligandscout</span>
+            <span class="k">continue</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">radius_val</span> <span class="o">=</span> <span class="n">puw</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">to_unit</span><span class="o">=</span><span class="s2">&quot;angstroms&quot;</span><span class="p">)</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">radius_val</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">feat_id</span> <span class="o">=</span> <span class="n">feature_mapper</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">feature_name</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">is_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;PI&quot;</span> <span class="ow">or</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;NI&quot;</span> <span class="ow">or</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;H&quot;</span>
+                    <span class="ow">or</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;HBD&quot;</span> <span class="ow">or</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;HBA&quot;</span><span class="p">)</span>
+        <span class="n">is_vector</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">has_direction</span> <span class="ow">and</span> <span class="p">(</span><span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;HBD&quot;</span> <span class="ow">or</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;HBA&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_vector</span><span class="p">:</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="n">coords</span> <span class="o">-</span> <span class="n">element</span><span class="o">.</span><span class="n">direction</span>
+            <span class="n">dir_x</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dir_y</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dir_z</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">vector</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span><span class="p">)</span>
+            <span class="c1"># Set vector attributes</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;featureId&quot;</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;pointsToLigand&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;hasSyntheticProjectedPoint&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;optional&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+            <span class="n">vector</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+            <span class="c1"># Add origin tag</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="s2">&quot;origin&quot;</span><span class="p">)</span>
+            <span class="n">origin</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;x3&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">origin</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;y3&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">origin</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;z3&quot;</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="n">origin</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+            <span class="c1"># Add target tag</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="s2">&quot;target&quot;</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;x3&quot;</span><span class="p">,</span> <span class="n">dir_x</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;y3&quot;</span><span class="p">,</span> <span class="n">dir_y</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;z3&quot;</span><span class="p">,</span> <span class="n">dir_z</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_point</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="s2">&quot;point&quot;</span><span class="p">)</span>
+            <span class="n">point</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">)</span>
+            <span class="n">_set_coords_and_radius</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span>
+                                   <span class="n">radius</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;AR&quot;</span><span class="p">:</span>
+            <span class="c1"># TODO: ligandscout expects aromatic rings to have direction.</span>
+            <span class="c1">#  what should we do if an aromatic point doesn&#39;t have direction</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">element</span><span class="o">.</span><span class="n">has_direction</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">direction</span>
+            <span class="n">dir_x</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dir_y</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">dir_z</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">direction</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="s2">&quot;plane&quot;</span><span class="p">)</span>
+            <span class="n">plane</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">)</span>
+            <span class="n">_set_coords_and_radius</span><span class="p">(</span><span class="n">plane</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span>
+                                   <span class="n">radius</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">)</span>
+            <span class="c1"># Add normal tag</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">plane</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">)</span>
+            <span class="n">normal</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;x3&quot;</span><span class="p">,</span> <span class="n">dir_x</span><span class="p">)</span>
+            <span class="n">normal</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;y3&quot;</span><span class="p">,</span> <span class="n">dir_y</span><span class="p">)</span>
+            <span class="n">normal</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;z3&quot;</span><span class="p">,</span> <span class="n">dir_z</span><span class="p">)</span>
+            <span class="n">normal</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">feat_name</span> <span class="o">==</span> <span class="s2">&quot;exclusion&quot;</span><span class="p">:</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="s2">&quot;volume&quot;</span><span class="p">)</span>
+            <span class="c1"># Set volume attributes</span>
+            <span class="n">volume</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;exclusion&quot;</span><span class="p">)</span>
+            <span class="n">_set_coords_and_radius</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">),</span>
+                                   <span class="n">radius</span><span class="p">,</span> <span class="n">feat_id</span><span class="p">)</span>
+
+    <span class="n">tree</span><span class="o">.</span><span class="n">_setroot</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tree</span>
+
+
+<div class="viewcode-block" id="save_pml"><a class="viewcode-back" href="../../../_autosummary/openpharmacophore.io.pharmacophore_writer.save_pml.html#openpharmacophore.io.pharmacophore_writer.save_pml">[docs]</a><span class="k">def</span> <span class="nf">save_pml</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Save a pharmacophore to a pml (Ligand Scout) file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pharmacophore : Pharmacophore</span>
+<span class="sd">            A pharmacophore.</span>
+
+<span class="sd">        file_name : str</span>
+<span class="sd">            Name of the file that will be created.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">xml_tree</span> <span class="o">=</span> <span class="n">_ligandscout_xml_tree</span><span class="p">(</span><span class="n">pharmacophore</span><span class="p">)</span>
+    <span class="n">xml_string</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">xml_tree</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xml_string</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.pharmacophore\_reader.read\_ph4
+====================================================
+
+.. currentmodule:: openpharmacophore.io.pharmacophore_reader
+
+.. autofunction:: read_ph4

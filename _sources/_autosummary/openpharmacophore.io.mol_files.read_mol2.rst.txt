@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.mol\_files.read\_mol2
+==========================================
+
+.. currentmodule:: openpharmacophore.io.mol_files
+
+.. autofunction:: read_mol2

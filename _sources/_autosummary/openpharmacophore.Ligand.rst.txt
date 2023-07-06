@@ -1,0 +1,50 @@
+﻿openpharmacophore.Ligand
+========================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: Ligand
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Ligand.add_conformers
+      ~Ligand.add_hydrogens
+      ~Ligand.draw
+      ~Ligand.fix_bond_order
+      ~Ligand.from_string
+      ~Ligand.generate_conformers
+      ~Ligand.get_chem_feats
+      ~Ligand.get_chem_feats_with_directionality
+      ~Ligand.get_conformer
+      ~Ligand.get_feat_indices
+      ~Ligand.has_aromatic_bonds
+      ~Ligand.has_double_bonds
+      ~Ligand.to_rdkit
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Ligand.feat_ind
+      ~Ligand.has_conformers
+      ~Ligand.has_hydrogens
+      ~Ligand.lig_id
+      ~Ligand.n_atoms
+      ~Ligand.n_bonds
+      ~Ligand.n_conformers
+      ~Ligand.n_heavy_atoms
+   
+   

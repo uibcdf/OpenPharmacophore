@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.mol\_files.read\_sdf
+=========================================
+
+.. currentmodule:: openpharmacophore.io.mol_files
+
+.. autofunction:: read_sdf

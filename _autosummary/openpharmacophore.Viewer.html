@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openpharmacophore.Viewer &mdash; OpenPharmacophore 0+untagged.471.gea8c857 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="openpharmacophore.draw_ligands" href="openpharmacophore.draw_ligands.html" />
+    <link rel="prev" title="openpharmacophore.LigandReceptorPharmacophore" href="openpharmacophore.LigandReceptorPharmacophore.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OpenPharmacophore
+          </a>
+              <div class="version">
+                0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contents/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contents/examples/ligand-receptor/index.html">Ligand-receptor pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/ligand-receptor/er-alpha.html">Er-alpha</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/er-alpha.html#pharmacophore-of-the-protein-ligand-complex-of-estrogen-receptor-with-estradiol">Pharmacophore of the protein-ligand complex of estrogen receptor with estradiol.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/er-alpha.html#obtaining-the-pharmacophore">Obtaining the pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html">Human Rhinovirus Serotype</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#load-and-visualize-protein-ligand-complexes">Load and visualize protein-ligand complexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#extracting-ligands">Extracting ligands</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#preparing-proteins">Preparing proteins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#obtaining-binding-sites">Obtaining binding sites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#extracting-pharmacophores">Extracting pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-receptor/hrv.html#finding-a-common-pharmacophore">Finding a common pharmacophore</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../contents/examples/ligand-based/index.html">Ligand-based pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/ligand-based/ligand_preparation.html">Ligand preparation for pharmacophore extraction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/ligand-based/thrombin.html">Thrombin ligands for pharmacophore extraction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-based/thrombin.html#analyizing-chem-feats">Analyizing chem feats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-based/thrombin.html#finding-common-pharmacophores">Finding common pharmacophores</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/ligand-based/thrombin.html#visualizing-the-pharmacophores">Visualizing the pharmacophores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../contents/examples/dynamic-pharmacophore/index.html">Dynamic pharmacophore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/dynamic-pharmacophore/er_alpha_md.html">Protein-ligand complex pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../contents/examples/virtual-screening/index.html">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/virtual-screening/screening.html">Virtual Screening with a pharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../contents/examples/other/index.html">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/other/binding-site/complex_binding_site.html">Binding site of a protein-ligand complex</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/other/binding-site/complex_binding_site.html#pdb-3bbh">PDB 3BBH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../contents/examples/other/binding-site/complex_binding_site.html#pdb-1m7w">PDB 1M7W</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/other/pl-interactions/aromatic_interactions.html">Aromatic interactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/other/pl-interactions/hydrogen_bonding.html">Hydrogen bonding in protein-ligand complexes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contents/examples/other/pl-interactions/hydrophobic_interactions.html">Hydrophobic interactions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#molecular-systems">Molecular Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.Protein.html">openpharmacophore.Protein</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.Ligand.html">openpharmacophore.Ligand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.ComplexBindingSite.html">openpharmacophore.ComplexBindingSite</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#pharmacophores">Pharmacophores</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.PharmacophoricPoint.html">openpharmacophore.PharmacophoricPoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.Pharmacophore.html">openpharmacophore.Pharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.LigandBasedPharmacophore.html">openpharmacophore.LigandBasedPharmacophore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.LigandReceptorPharmacophore.html">openpharmacophore.LigandReceptorPharmacophore</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#visualization">Visualization</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">openpharmacophore.Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.draw_ligands.html">openpharmacophore.draw_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.draw_ligands_chem_feats.html">openpharmacophore.draw_ligands_chem_feats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#file-io">File IO</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_reader.read_mol2.html">openpharmacophore.io.pharmacophore_reader.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_reader.read_ph4.html">openpharmacophore.io.pharmacophore_reader.read_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_reader.read_json.html">openpharmacophore.io.pharmacophore_reader.read_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_reader.read_ligandscout.html">openpharmacophore.io.pharmacophore_reader.read_ligandscout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_writer.save_mol2.html">openpharmacophore.io.pharmacophore_writer.save_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_writer.save_ph4.html">openpharmacophore.io.pharmacophore_writer.save_ph4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_writer.save_json.html">openpharmacophore.io.pharmacophore_writer.save_json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.pharmacophore_writer.save_pml.html">openpharmacophore.io.pharmacophore_writer.save_pml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.mol_files.read_mol2.html">openpharmacophore.io.mol_files.read_mol2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.mol_files.mol2_supplier.html">openpharmacophore.io.mol_files.mol2_supplier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.io.mol_files.read_sdf.html">openpharmacophore.io.mol_files.read_sdf</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#virtual-screening">Virtual Screening</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.VirtualScreening.html">openpharmacophore.VirtualScreening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.screening.mol_db.InMemoryMolDB.html">openpharmacophore.screening.mol_db.InMemoryMolDB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.screening.mol_db.MolDB.html">openpharmacophore.screening.mol_db.MolDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#others">Others</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.load.html">openpharmacophore.load</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.load_ligands.html">openpharmacophore.load_ligands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openpharmacophore.smiles_from_pdb_id.html">openpharmacophore.smiles_from_pdb_id</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenPharmacophore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Documentation</a></li>
+      <li class="breadcrumb-item active">openpharmacophore.Viewer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+           <div itemprop="articleBody">
+             
+  <section id="openpharmacophore-viewer">
+<h1>openpharmacophore.Viewer<a class="headerlink" href="#openpharmacophore-viewer" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">openpharmacophore.</span></span><span class="sig-name descname"><span class="pre">Viewer</span></span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to visualize molecular systems and pharmacophores.</p>
+<p>Wrapper around nglview NGLWidget</p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.add_chem_feats" title="openpharmacophore.Viewer.add_chem_feats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_chem_feats</span></code></a></p></td>
+<td><p>Add chemical features to the viewer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.add_components" title="openpharmacophore.Viewer.add_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_components</span></code></a></p></td>
+<td><p>Add multiple components to the viewer, such as Proteins, Ligands and BindingSites.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.add_pharmacophore" title="openpharmacophore.Viewer.add_pharmacophore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_pharmacophore</span></code></a></p></td>
+<td><p>Add a pharmacophore to the viewer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.load_component" title="openpharmacophore.Viewer.load_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_component</span></code></a></p></td>
+<td><p>Load a component to the viewer, such as a Protein, Ligand or BindingSite so, it can be visualized.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.set_protein_style" title="openpharmacophore.Viewer.set_protein_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_protein_style</span></code></a></p></td>
+<td><p>Set the style of the protein.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.show" title="openpharmacophore.Viewer.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a></p></td>
+<td><p>Shows the visualization.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.to_nglview" title="openpharmacophore.Viewer.to_nglview"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_nglview</span></code></a></p></td>
+<td><p>Get an NGLView widget representing the view.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.has_chem_feats" title="openpharmacophore.Viewer.has_chem_feats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_chem_feats</span></code></a></p></td>
+<td><p>Returns true if the visualization contains chemical features.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.has_ligand" title="openpharmacophore.Viewer.has_ligand"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_ligand</span></code></a></p></td>
+<td><p>Returns true if the visualization contains a ligand.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.has_pharmacophore" title="openpharmacophore.Viewer.has_pharmacophore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_pharmacophore</span></code></a></p></td>
+<td><p>Returns true if the visualization contains a pharmacophore.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#openpharmacophore.Viewer.has_protein" title="openpharmacophore.Viewer.has_protein"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_protein</span></code></a></p></td>
+<td><p>Returns true if the visualization contains a protein.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.add_chem_feats">
+<span class="sig-name descname"><span class="pre">add_chem_feats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chem_feats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.add_chem_feats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.add_chem_feats" title="Permalink to this definition"></a></dt>
+<dd><p>Add chemical features to the viewer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chem_feats</strong> (<em>ChemFeatContainer</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.add_components">
+<span class="sig-name descname"><span class="pre">add_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.add_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.add_components" title="Permalink to this definition"></a></dt>
+<dd><p>Add multiple components to the viewer, such as Proteins, Ligands and
+BindingSites.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>components</strong> (<em>list[Any]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.add_pharmacophore">
+<span class="sig-name descname"><span class="pre">add_pharmacophore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pharmacophore</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.add_pharmacophore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.add_pharmacophore" title="Permalink to this definition"></a></dt>
+<dd><p>Add a pharmacophore to the viewer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pharmacophore</strong> (<em>Pharmacophore</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.has_chem_feats">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_chem_feats</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#openpharmacophore.Viewer.has_chem_feats" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true if the visualization contains chemical features.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.has_ligand">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_ligand</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#openpharmacophore.Viewer.has_ligand" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true if the visualization contains a ligand.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.has_pharmacophore">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_pharmacophore</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#openpharmacophore.Viewer.has_pharmacophore" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true if the visualization contains a pharmacophore.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.has_protein">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_protein</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#openpharmacophore.Viewer.has_protein" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true if the visualization contains a protein.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.load_component">
+<span class="sig-name descname"><span class="pre">load_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.load_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.load_component" title="Permalink to this definition"></a></dt>
+<dd><p>Load a component to the viewer, such as a Protein, Ligand or
+BindingSite so, it can be visualized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<em>Any</em>)</p></li>
+<li><p><strong>struct</strong> (<em>int, optional</em>) – Structure, frame or conformer index.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.set_protein_style">
+<span class="sig-name descname"><span class="pre">set_protein_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">style</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.set_protein_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.set_protein_style" title="Permalink to this definition"></a></dt>
+<dd><p>Set the style of the protein.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>style</strong> (<em>str</em>) – Name of the style</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.show" title="Permalink to this definition"></a></dt>
+<dd><p>Shows the visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>struct</strong> (<em>int, optional</em>) – Frame, structure or conformer index to show if there are any proteins,
+ligands or pharmacophores with multiple structures.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>nv.NGLWidget</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="openpharmacophore.Viewer.to_nglview">
+<span class="sig-name descname"><span class="pre">to_nglview</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/openpharmacophore/visualization/view.html#Viewer.to_nglview"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#openpharmacophore.Viewer.to_nglview" title="Permalink to this definition"></a></dt>
+<dd><p>Get an NGLView widget representing the view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nv.NGLWidget</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+    <a href="https://github.com/uibcdf/openpharmacophore">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="openpharmacophore.LigandReceptorPharmacophore.html" class="btn btn-neutral float-left" title="openpharmacophore.LigandReceptorPharmacophore" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="openpharmacophore.draw_ligands.html" class="btn btn-neutral float-right" title="openpharmacophore.draw_ligands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, UIBCDF Lab at the Mexico City Childrens Hospital Federico Gomez and authors. Project structure based on the Computational Molecular Science Python Cookiecutter version 1.5.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

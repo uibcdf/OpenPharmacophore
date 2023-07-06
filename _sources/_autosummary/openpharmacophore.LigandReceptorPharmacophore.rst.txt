@@ -1,0 +1,39 @@
+﻿openpharmacophore.LigandReceptorPharmacophore
+=============================================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: LigandReceptorPharmacophore
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~LigandReceptorPharmacophore.extract
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LigandReceptorPharmacophore.CHARGE_DIST_MAX
+      ~LigandReceptorPharmacophore.HBOND_ANG_MIN
+      ~LigandReceptorPharmacophore.HBOND_DIST_MAX
+      ~LigandReceptorPharmacophore.HYD_DIST_MAX
+      ~LigandReceptorPharmacophore.HYD_MERGE_DIST
+      ~LigandReceptorPharmacophore.PISTACK_ANG_DEV
+      ~LigandReceptorPharmacophore.PISTACK_DIST_MAX
+      ~LigandReceptorPharmacophore.PISTACK_OFFSET_MAX
+      ~LigandReceptorPharmacophore.pharmacophores
+   
+   

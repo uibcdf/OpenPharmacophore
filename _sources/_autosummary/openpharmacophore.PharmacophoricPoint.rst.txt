@@ -1,0 +1,37 @@
+﻿openpharmacophore.PharmacophoricPoint
+=====================================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: PharmacophoricPoint
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~PharmacophoricPoint.get_valid_features
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PharmacophoricPoint.atom_indices
+      ~PharmacophoricPoint.center
+      ~PharmacophoricPoint.direction
+      ~PharmacophoricPoint.feature_name
+      ~PharmacophoricPoint.has_direction
+      ~PharmacophoricPoint.radius
+      ~PharmacophoricPoint.short_name
+   
+   

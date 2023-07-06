@@ -1,0 +1,6 @@
+﻿openpharmacophore.smiles\_from\_pdb\_id
+=======================================
+
+.. currentmodule:: openpharmacophore
+
+.. autofunction:: smiles_from_pdb_id

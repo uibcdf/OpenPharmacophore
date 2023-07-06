@@ -1,0 +1,6 @@
+﻿openpharmacophore.io.mol\_files.mol2\_supplier
+==============================================
+
+.. currentmodule:: openpharmacophore.io.mol_files
+
+.. autofunction:: mol2_supplier

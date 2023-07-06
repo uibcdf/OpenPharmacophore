@@ -1,0 +1,28 @@
+﻿openpharmacophore.ComplexBindingSite
+====================================
+
+.. currentmodule:: openpharmacophore
+
+.. autoclass:: ComplexBindingSite
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ComplexBindingSite.get_atoms
+      ~ComplexBindingSite.get_chem_feats
+      ~ComplexBindingSite.get_residues
+      ~ComplexBindingSite.to_rdkit
+   
+   
+
+   
+   
+   
