@@ -376,6 +376,8 @@ def _load_pdb_id_mapper():
         mapper = pickle.load(fp)
     return mapper
 
+def smiles_from_ligand(pdb_id: str, mapper=None):
+    return smiles_from_pdb_id(pdbid, mapper)
 
 def smiles_from_pdb_id(pdb_id: str, mapper=None):
     """ Obtain a smiles from a ligand pdb id.

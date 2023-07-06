@@ -27,7 +27,7 @@ from .io import mol_files, pharmacophore_reader, pharmacophore_writer
 from .load import load, load_ligands
 from .screening import mol_db
 from .screening.screening import VirtualScreening
-
+from .get_pharmacophore import get_pharmacophore
 
 versions = get_versions()
 __version__ = versions['version']
